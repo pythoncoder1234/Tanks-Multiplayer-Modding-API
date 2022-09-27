@@ -25,6 +25,7 @@ public class ScreenTestModel extends Screen
         this.music = "menu_options.ogg";
         this.musicID = "menu";
         this.model = m;
+        this.screenHint = "Esc to exit";
 
         //animation = new PosedModelAnimation(Game.game.fileManager, "/models/mustard-test/walk.pma");
         //pose = new PosedModelPose(Game.game.fileManager, "/models/mustard-test/idlehands.pmp");

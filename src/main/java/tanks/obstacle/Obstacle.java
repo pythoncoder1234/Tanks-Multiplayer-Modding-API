@@ -68,7 +68,6 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public Face[] horizontalFaces;
 	public Face[] verticalFaces;
-	protected int counter = 0;
 
 	protected boolean[] validFaces = new boolean[2];
 

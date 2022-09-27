@@ -1051,7 +1051,14 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		Game.removeMovables.clear();
 
 		for (Obstacle o: Game.removeObstacles)
+		{
 			o.removed = true;
+
+			int x = (int) (o.posX / 50);
+			int y = (int) (o.posY / 50);
+			if (x < Game.currentSizeX && y < Game.currentSizeY)
+				Game.obstacleMap[x][y] = null;
+		}
 
 		Game.obstacles.removeAll(Game.removeObstacles);
 		Game.removeObstacles.clear();
@@ -1310,20 +1317,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					}
 				}
 
-				for (int i = 0; i < Game.obstacles.size(); i++)
+				Obstacle o = Game.obstacleMap[(int) (mouseObstacle.posX / 50)][(int) (mouseObstacle.posY / 50)];
+				if (o != null)
 				{
-					Obstacle m = Game.obstacles.get(i);
-					if (m.posX == mouseTank.posX && m.posY == mouseTank.posY)
-					{
-						skip = true;
-						this.actions.add(new Action.ActionObstacle(m, false));
-						Game.removeObstacles.add(m);
-
-						if (!batch)
-							Drawing.drawing.playVibration("click");
-
-						break;
-					}
+					Game.removeObstacles.add(o);
+					this.actions.add(new Action.ActionObstacle(o, false));
 				}
 
 				if (!batch && !Game.game.window.touchscreen && !skip && (currentPlaceable == Placeable.enemyTank || currentPlaceable == Placeable.playerTank) && validRight)
@@ -2004,7 +2002,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					{
 						if (Game.enable3d)
 						{
-							if (!(x < Game.currentSizeX && y < Game.currentSizeY && Game.game.solidGrid[x][y]))
+							if (!(x < Game.currentSizeX && y < Game.currentSizeY && Game.game.solidGrid[x][y] && Game.obstacleMap[x][y] != null))
 								Drawing.drawing.fillBox((x + 0.5) * Game.tile_size, (y + 0.5) * Game.tile_size, 15,
 										Game.tile_size, Game.tile_size, 1);
 							else
@@ -2618,7 +2616,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				if (add)
 					Game.removeObstacles.add(this.obstacle);
 				else
+				{
 					Game.obstacles.add(this.obstacle);
+					Game.obstacleMap[(int) (this.obstacle.posX / 50)][(int) (this.obstacle.posY / 50)] = this.obstacle;
+				}
 			}
 
 			@Override
@@ -2627,7 +2628,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				if (!add)
 					Game.removeObstacles.add(this.obstacle);
 				else
+				{
 					Game.obstacles.add(this.obstacle);
+					Game.obstacleMap[(int) (this.obstacle.posX / 50)][(int) (this.obstacle.posY / 50)] = this.obstacle;
+				}
 			}
 		}
 

@@ -41,15 +41,16 @@ public class Tanks
                 // Attempts to relaunch from the .jar file.
                 try
                 {
-                    String path = "\"" + new File(Tanks.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath() + "\"";
+                    String path = new File(Tanks.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
 
                     if (path.endsWith(".jar"))
                     {
                         String[] command = new String[]{"java", "-XstartOnFirstThread", "-jar", path, "mac", String.join(" ", args)};
-                        System.out.println("To debug the jar, run this command:");
-                        System.out.println(String.join(" ", command));
-
                         Runtime.getRuntime().exec(command);
+
+                        command[3] = "\"" + command[3] + "\"";
+                        System.out.println("To debug the jar, run this command:");
+                        System.out.println(String.join(" ", command) + "\n");
                         Runtime.getRuntime().exit(0);
                         return;
                     }

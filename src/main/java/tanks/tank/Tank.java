@@ -660,9 +660,8 @@ public abstract class Tank extends Movable implements ISolidObject
 		Drawing drawing = Drawing.drawing;
 		double[] teamColor = Team.getObjectColor(this.secondaryColorR, this.secondaryColorG, this.secondaryColorB, this);
 
-		for (int i = 0; i < this.attributes.size(); i++)
+		for (AttributeModifier a : this.attributes)
 		{
-			AttributeModifier a = this.attributes.get(i);
 			if (a.type.equals("glow"))
 			{
 				luminance = a.getValue(luminance);
@@ -704,9 +703,8 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		if (!forInterface)
 		{
-			for (int i = 0; i < this.attributes.size(); i++)
+			for (AttributeModifier a : this.attributes)
 			{
-				AttributeModifier a = this.attributes.get(i);
 				if (a.name.equals("healray"))
 				{
 					double mod = 1 + 0.4 * Math.min(1, this.health - this.baseHealth);
