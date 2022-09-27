@@ -125,6 +125,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 		
 		ByteBuf b2 = ctx.channel().alloc().buffer();
 		b2.writeInt(b.readableBytes());
+		MessageReader.upstreamBytes += b.readableBytes() + 4;
+		MessageReader.updateLastMessageTime();
 		b2.writeBytes(b);
 
 		if (flush)
@@ -200,9 +202,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 
 				latencySum = 0;
 				latencyCount = 0;
-			}
 
-			this.sendEvent(new EventPing());
+				this.sendEvent(new EventPing());
+			}
 		}
     }
 

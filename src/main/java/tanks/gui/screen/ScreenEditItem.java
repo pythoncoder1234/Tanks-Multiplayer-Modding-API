@@ -39,7 +39,6 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
             item.exportProperties();
             screen.refreshItems();
             Game.screen = (Screen) screen;
-            screen.removeItem(item);
         }
     }
     );

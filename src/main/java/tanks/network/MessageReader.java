@@ -9,9 +9,16 @@ import tanks.gui.screen.ScreenPartyLobby;
 
 import java.util.UUID;
 
-public class MessageReader 
+public class MessageReader
 {
 	public static final int max_event_size = 1048576;
+
+	public static int downstreamBytes;
+	public static int upstreamBytes;
+	public static long lastMessageTime;
+
+	public static int upstreamBytesPerSec;
+	public static int downstreamBytesPerSec;
 
 	public boolean useQueue = true;
 	public ByteBuf queue;
@@ -26,7 +33,7 @@ public class MessageReader
 	public synchronized boolean queueMessage(ServerHandler s, ByteBuf m, UUID clientID)
 	{
 		boolean reply = false;
-		
+
 		try
 		{
 			byte[] bytes = new byte[59];
@@ -42,6 +49,8 @@ public class MessageReader
 				if (!reading)
 				{
 					endpoint = queue.readInt();
+					downstreamBytes += endpoint + 4;
+					updateLastMessageTime();
 
 					if (endpoint > max_event_size)
 					{
@@ -62,16 +71,16 @@ public class MessageReader
 						return false;
 					}
 				}
-				
+
 				reading = true;
 
 				while (queue.readableBytes() >= endpoint)
 				{
 					reply = this.readMessage(s, queue, clientID) || reply;
 					queue.discardReadBytes();
-					
+
 					reading = false;
-					
+
 					if (queue.readableBytes() >= 4)
 					{
 						endpoint = queue.readInt();
@@ -147,7 +156,9 @@ public class MessageReader
 		e.read(m);
 
 		if (e instanceof PersonalEvent)
+		{
 			((PersonalEvent) e).clientID = clientID;
+		}
 
 		if (e instanceof EventPing)
 			return true;
@@ -164,5 +175,19 @@ public class MessageReader
 		}
 
 		return false;
+	}
+
+	public static void updateLastMessageTime()
+	{
+		long time = System.currentTimeMillis() / 1000;
+
+		if (lastMessageTime < time)
+		{
+			lastMessageTime = time;
+			upstreamBytesPerSec = upstreamBytes;
+			downstreamBytesPerSec = downstreamBytes;
+			upstreamBytes = 0;
+			downstreamBytes = 0;
+		}
 	}
 }

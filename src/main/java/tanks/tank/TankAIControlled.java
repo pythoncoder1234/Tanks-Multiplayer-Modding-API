@@ -223,6 +223,12 @@ public class TankAIControlled extends Tank
 		{
 			this.tank = t;
 			this.weight = weight;
+
+			if (ScreenPartyHost.isServer)
+			{
+				Tank.freeIDs.add(t.networkID);
+				Tank.idMap.remove(t.networkID);
+			}
 		}
 
 		public String toString()
@@ -1105,6 +1111,7 @@ public class TankAIControlled extends Tank
 					tiles[Math.min(Game.currentSizeX - 1, Math.max(0, (int) (m.posX / Game.tile_size)))][Math.min(Game.currentSizeY - 1, Math.max(0, (int) (m.posY / Game.tile_size)))].interesting = true;
 			}
 
+			// bfs is poggers
 			ArrayList<Tile> queue = new ArrayList<>();
 
 			Tile t = tiles[(int)(this.posX / Game.tile_size)][(int)(this.posY / Game.tile_size)];

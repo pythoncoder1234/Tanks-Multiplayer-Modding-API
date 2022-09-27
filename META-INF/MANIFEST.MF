@@ -1,0 +1,2 @@
+Main-Class: main.Tanks
+Manifest-Version: 1.0

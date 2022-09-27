@@ -14,6 +14,7 @@ import tanks.modapi.ModAPI;
 import tanks.modapi.menus.FixedMenu;
 import tanks.network.Client;
 import tanks.network.ClientHandler;
+import tanks.network.MessageReader;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
@@ -862,8 +863,8 @@ public class Panel
 		if (Game.framework == Game.Framework.libgdx)
 			boundary += 40;
 
-		Game.game.window.fontRenderer.drawString(boundary + 2, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, Game.version);
-		Game.game.window.fontRenderer.drawString(boundary + 2, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS);
+		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, Game.version);
+		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS);
 
 		Game.game.window.fontRenderer.drawString(boundary + 600, offset + (int) (Panel.windowHeight - 40 + 10), 0.6, 0.6, Game.screen.screenHint);
 
@@ -874,19 +875,33 @@ public class Panel
 		Game.game.window.fontRenderer.drawString(boundary + 150, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, Game.ModAPIVersion);
 		Game.game.window.fontRenderer.drawString(boundary + 150, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "Memory used: " + used / 1048576 + "/" + total / 1048576 + "MB");
 
+		double partyIpLen = 10;
 		if (ScreenPartyLobby.isClient && !Game.connectedToOnline)
 		{
-			String s = "Connected to " + (Game.lastParty.equals("") ? "localhost" : Game.lastParty) + " on port " + Game.port;
+			String s = "In party: " + (Game.lastParty.equals("") ? "localhost" : Game.lastParty) + ":" + Game.port;
 
 			if (!Game.showIP)
 				s = "Connected to party";
 
-			Game.game.window.fontRenderer.drawString(Panel.windowWidth - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - 10, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);
+			partyIpLen = Game.game.window.fontRenderer.getStringSizeX(0.4, s) + 10 + offset;
+			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);
+			partyIpLen += 50;
 
 			s = "Latency: " + ClientHandler.lastLatencyAverage + "ms";
 			double[] col = getLatencyColor(ClientHandler.lastLatencyAverage);
 			Drawing.drawing.setColor(col[0], col[1], col[2]);
-			Game.game.window.fontRenderer.drawString(Panel.windowWidth - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, s);
+			Game.game.window.fontRenderer.drawString(Panel.windowWidth - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - 10 - offset, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, s);
+		}
+
+		if (ScreenPartyLobby.isClient || ScreenPartyHost.isServer)
+		{
+			Drawing.drawing.setColor(255, 227, 186);
+
+			String s = "Upstream: " + MessageReader.upstreamBytesPerSec / 1024 + "KB/s";
+			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - offset, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);
+
+			s = "Downstream: " + MessageReader.downstreamBytesPerSec / 1024 + "KB/s";
+			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - offset, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, s);
 		}
 	}
 
