@@ -358,11 +358,17 @@ public class Level
 				if (obs.length >= 4)
 					meta = obs[3];
 
+				if (obs.length >= 5)
+					meta += "-" + obs[4];
+
 				for (double x = startX; x <= endX; x++)
 				{
 					for (double y = startY; y <= endY; y++)
 					{
 						Obstacle o = Game.registryObstacle.getEntry(name).getObstacle(x, y);
+
+						if (x == 13 && y == 18)
+							x = x;
 
 						if (meta != null)
 							o.setMetadata(meta);
@@ -700,7 +706,6 @@ public class Level
 		Game.tilesG = new double[Game.currentSizeX][Game.currentSizeY];
 		Game.tilesB = new double[Game.currentSizeX][Game.currentSizeY];
 		Game.tilesDepth = new double[Game.currentSizeX][Game.currentSizeY];
-		Game.tileDrawables = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
 		for (int i = 0; i < Game.currentSizeX; i++)
 		{

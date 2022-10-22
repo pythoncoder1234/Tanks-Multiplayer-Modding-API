@@ -13,6 +13,7 @@ public class BulletFlame extends Bullet implements IDrawableWithGlow
 
 	double life = 100;
 	double age = 0;
+	double baseDamage = 0;
 	public double sizeMul = 1;
 
 	public BulletFlame(double x, double y, int bounces, Tank t, ItemBullet ib)
@@ -39,12 +40,13 @@ public class BulletFlame extends Bullet implements IDrawableWithGlow
 		{
 			this.sizeMul = this.size / Bullet.bullet_size;
 			this.life *= this.sizeMul;
+			this.baseDamage = damage;
 		}
 
 		this.age += Panel.frameFrequency;
 		this.size = (int) (this.age / sizeMul + 10);
 		
-		this.damage = Math.max(0, 0.2 - this.age / sizeMul / 500.0) / 2;
+		this.damage = Math.max(0, 0.2 - this.age / sizeMul / 500.0) / 2 * this.baseDamage;
 		
 		super.update();
 		

@@ -1,6 +1,5 @@
 package tanks.gui.screen;
 
-import tanks.Colors;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
@@ -420,35 +419,40 @@ public class ScreenOptionsGraphics extends Screen
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Graphics options");
     }
 
-    public static String changePerspective()
+    public static void changePerspective(boolean up)
     {
-        viewNo = (viewNo + 1) % (Game.followingCamEnabled ? 4 : 2);
+        if (up)
+            viewNo = (viewNo + 1) % (Game.followingCamEnabled ? 4 : 2);
+        else {
+            viewNo--;
+            if (viewNo < 0)
+                viewNo += (Game.followingCamEnabled ? 4 : 2);
+        }
+
         switch (viewNo)
         {
             case 0:
                 Game.angledView = false;
                 Game.followingCam = false;
                 Game.firstPerson = false;
-                return Colors.blue + "bird's-eye";
+                return;
 
             case 1:
                 Game.angledView = true;
                 Game.followingCam = false;
                 Game.firstPerson = false;
-                return Colors.orange + "angled";
+                return;
 
             case 2:
                 Game.angledView = false;
                 Game.followingCam = true;
                 Game.firstPerson = false;
-                return Colors.red + "third person";
+                return;
 
             case 3:
                 Game.angledView = false;
                 Game.followingCam = true;
                 Game.firstPerson = true;
-                return "\u00a7255000000255FIRST PERSON!!";
         }
-        return "Something's wrong here";
     }
 }

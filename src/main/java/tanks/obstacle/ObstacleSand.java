@@ -45,7 +45,7 @@ public class ObstacleSand extends Obstacle
             this.stackColorG[i] = this.colorG;
         }
 
-        this.description = "A thick patch of sand---that slows tanks down";
+        this.description = "A thick patch of sand that slows tanks down";
     }
 
     @Override

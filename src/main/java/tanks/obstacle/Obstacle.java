@@ -19,6 +19,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	 * If set to true, AI tanks will treat this block as breakable and shoot at it if there are tanks behind it
 	 */
 	public boolean shouldShootThrough = false;
+	public boolean compressed = false;
 
 	public boolean isSurfaceTile = false;
 
@@ -36,6 +37,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	public boolean bouncy = false;
 	public boolean allowBounce = true;
 	public boolean replaceTiles = true;
+	public boolean isFullTile = true;
 
 	/**
 	 * If set to true, will draw as a VBO. Set to false for simpler rendering of more dynamic obstacles.
@@ -159,14 +161,14 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 			drawing.fillRect(this, this.posX, this.posY, draw_size, draw_size);
 	}
 
-	public void draw3dOutline()
+	public void draw3dOutline(double a)
 	{
-		draw3dOutline(this.colorR, this.colorG, this.colorB, this.colorA);
+		draw3dOutline(this.colorR, this.colorG, this.colorB, a);
 	}
 
 	public void draw3dOutline(double r, double g, double b)
 	{
-		draw3dOutline(r, g, b, 255);
+		draw3dOutline(r, g, b, 128);
 	}
 
 	public void draw3dOutline(double r, double g, double b, double a)
@@ -234,7 +236,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public void onObjectEntry(Movable m)
 	{
-
+		this.onObjectEntryLocal(m);
 	}
 
 	/** Only for visual effects which are to be handled by each client separately*/
@@ -260,6 +262,9 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 		if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 		{
+			if (Game.obstacleMap[x][y] != null && (Game.obstacleMap[x][y].startHeight != this.startHeight || Game.obstacleMap[x][y].stackHeight != this.stackHeight))
+				return false;
+
 			if (unbreakable)
 				return Game.game.unbreakableGrid[x][y];
 			else
@@ -312,8 +317,11 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 		int x = (int)(this.posX / Game.tile_size);
 		int y = (int)(this.posY / Game.tile_size);
 
-		if (x >= 0 && x < Game.tileDrawables.length && y >= 0 && y < Game.tileDrawables[0].length)
-			Game.tileDrawables[x][y] = this;
+		if (this.isSurfaceTile)
+			this.startHeight = -1;
+
+		if (x >= 0 && x < Game.obstacleMap.length && y >= 0 && y < Game.obstacleMap[0].length && (this.startHeight == 0 || Game.obstacleMap[x][y] == null))
+			Game.obstacleMap[x][y] = this;
 	}
 
 	public void setMetadata(String data)
@@ -359,8 +367,8 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public boolean[] getValidHorizontalFaces(boolean unbreakable)
 	{
-		this.validFaces[0] = !this.hasNeighbor(0, -1, unbreakable) || this.startHeight > 1;
-		this.validFaces[1] = !this.hasNeighbor(0, 1, unbreakable) || this.startHeight > 1;
+		this.validFaces[0] = !this.hasNeighbor(0, -1, unbreakable) && this.startHeight == 0;
+		this.validFaces[1] = !this.hasNeighbor(0, 1, unbreakable) && this.startHeight == 0;
 		return this.validFaces;
 	}
 

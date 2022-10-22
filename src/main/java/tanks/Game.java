@@ -95,14 +95,13 @@ public class Game
 	public static double[][] tilesG = new double[28][18];
 	public static double[][] tilesB = new double[28][18];
 
-	public static Obstacle[][] tileDrawables = new Obstacle[28][18];
 	public static Obstacle[][] obstacleMap = new Obstacle[28][18];
 
 	public static double[][] tilesDepth = new double[28][18];
 
 	//Remember to change the version in android's build.gradle and ios's robovm.properties
-	public static final String version = "Tanks v1.4.1b";
-	public static final String ModAPIVersion = "Mod API v1.1.1a";
+	public static final String version = "Tanks v1.4.1";
+	public static final String ModAPIVersion = "Mod API v1.1.1b";
 	public static final int network_protocol = 46;
 	public static boolean debug = false;
 	public static boolean traceAllRays = false;
@@ -367,7 +366,13 @@ public class Game
 	public static void registerObstacle(Class<? extends Obstacle> obstacle, String name)
 	{
 		if (Game.registryObstacle.getEntry(name).obstacle == ObstacleUnknown.class)
-			new RegistryObstacle.ObstacleEntry(Game.registryObstacle, obstacle, name);
+			new RegistryObstacle.ObstacleEntry(Game.registryObstacle, obstacle, name, false);
+	}
+
+	public static void registerObstacle(Class<? extends Obstacle> obstacle, String name, boolean hidden)
+	{
+		if (Game.registryObstacle.getEntry(name).obstacle == ObstacleUnknown.class)
+			new RegistryObstacle.ObstacleEntry(Game.registryObstacle, obstacle, name, hidden);
 	}
 
 	public static void registerTank(Class<? extends Tank> tank, String name, double weight)
@@ -443,6 +448,7 @@ public class Game
 		registerObstacle(ObstacleLight.class, "light");
 		registerObstacle(ObstacleShrubbery.class, "shrub");
 		registerObstacle(ObstacleMud.class, "mud");
+		registerObstacle(ObstaclePath.class, "path", true);
 		registerObstacle(ObstacleIce.class, "ice");
 		registerObstacle(ObstacleSnow.class, "snow");
 		registerObstacle(ObstacleSand.class, "sand");
@@ -929,7 +935,6 @@ public class Game
 		Game.tilesDepth = new double[28][18];
 		Game.game.heightGrid = new double[28][18];
 		Game.game.groundHeightGrid = new double[28][18];
-		Game.tileDrawables = new Obstacle[28][18];
 		Game.obstacleMap = new Obstacle[28][18];
 
 		double var = 0;
@@ -1110,6 +1115,8 @@ public class Game
 
 	public static void exitToTitle()
 	{
+		ScreenInterlevel.tutorial = false;
+
 		cleanUp();
 		Panel.panel.zoomTimer = 0;
 		screen = new ScreenTitle();
@@ -1119,7 +1126,8 @@ public class Game
 	public static void cleanUp()
 	{
 		resetTiles();
-
+		Game.currentGame = null;
+		ScreenInterlevel.fromModdedLevels = false;
 		silentCleanUp();
 	}
 
@@ -1144,6 +1152,8 @@ public class Game
 		Game.player.hotbar.enabledCoins = false;
 		Game.player.hotbar.itemBar = new ItemBar(Game.player);
 		Game.player.hotbar.enabledItemBar = false;
+
+		Game.obstacleMap = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
 		//if (Game.game.window != null)
 		//	Game.game.window.setShowCursor(false);

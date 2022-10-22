@@ -202,8 +202,8 @@ public abstract class Screen implements IBatchRenderableObject
 
 				if (Game.enable3d)
 				{
+					Obstacle current = Game.obstacleMap[i][j];
 					double z1 = 0;
-
 					byte o = 61;
 
 					if (Game.enable3dBg && Game.fancyTerrain && !(Drawing.drawing.scale <= 0.25 * Drawing.drawing.interfaceScale && !Game.game.window.shapeRenderer.supportsBatching))
@@ -226,15 +226,11 @@ public abstract class Screen implements IBatchRenderableObject
 					if (j < Game.currentSizeY - 1)
 						extra = Math.max(extra, -Game.game.heightGrid[i][j + 1]);
 
+					if (current != null && (current.startHeight == 0 || current.isSurfaceTile) && inBounds)
+						current.drawTile(Game.tilesR[i][j], Game.tilesG[i][j], Game.tilesB[i][j], z1, extra);
 
-					if (Game.tileDrawables[i][j] != null && inBounds)
-					{
-						Game.tileDrawables[i][j].drawTile(Game.tilesR[i][j], Game.tilesG[i][j], Game.tilesB[i][j], z1, extra);
-
-						if (!Game.game.window.drawingShadow)
-							Game.tileDrawables[i][j] = null;
-					}
-					else
+					if (current == null || (Obstacle.draw_size < Game.tile_size && !current.isSurfaceTile) ||
+							!current.isFullTile || current.startHeight > 0)
 					{
 						if (extra != 0)
 							o = 1;

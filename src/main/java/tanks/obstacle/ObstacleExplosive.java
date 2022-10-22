@@ -4,9 +4,8 @@ import tanks.Game;
 import tanks.Movable;
 import tanks.Panel;
 import tanks.bullet.Bullet;
-import tanks.event.EventLayMine;
+import tanks.bullet.BulletAir;
 import tanks.event.EventObstacleDestroy;
-import tanks.gui.Button;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
 import tanks.tank.*;
@@ -53,7 +52,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
         if (this.trigger != Game.dummyTank)
             return;
 
-        if (m instanceof Bullet || m instanceof Tank)
+        if ((m instanceof Bullet && !(m instanceof BulletAir)) || m instanceof Tank)
         {
             if (m instanceof Bullet)
             {
@@ -117,8 +116,8 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
     }
 
     @Override
-    public double getSeverity(double posX, double posY)
+    public double getSeverity(Tank t)
     {
-        return Math.sqrt(Math.pow(posX - this.posX, 2) + Math.pow(posY - this.posY, 2));
+        return Math.sqrt(Math.pow(t.posX - this.posX, 2) + Math.pow(t.posY - this.posY, 2));
     }
 }

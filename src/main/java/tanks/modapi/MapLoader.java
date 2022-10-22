@@ -29,6 +29,8 @@ public class MapLoader
     public int currentX;
     public int currentY;
 
+    public static final int[] dx = {1, -1, 0, 0};
+    public static final int[] dy = {0, 0, 1, -1};
     protected Tank targetTank;
     protected Player targetPlayer;
     protected static double redrawCounter = 0;
@@ -38,14 +40,17 @@ public class MapLoader
     {
         this.grid = new Section[levelStrings.length][levelStrings[0].length];
 
-        for (int y = 0; y < levelStrings.length; y++)
+        for (int x = 0; x < levelStrings.length; x++)
         {
-            for (int x = 0; x < levelStrings[0].length; x++)
+            for (int y = 0; y < levelStrings[0].length; y++)
             {
-                int totalX = x == 0 ? 0 : this.grid[y][x - 1].totalX;
-                int totalY = y == 0 ? 0 : this.grid[y - 1][x].totalY;
+                int totalX = y == 0 ? 0 : this.grid[x][y - 1].totalX;
+                int totalY = x == 0 ? 0 : this.grid[x - 1][y].totalY;
 
-                this.grid[y][x] = new Section(new Level(levelStrings[y][x]), totalX, totalY);
+                if (levelStrings[x][y] != null)
+                    this.grid[x][y] = new Section(new Level(levelStrings[x][y]), totalX, totalY);
+                else
+                    this.grid[x][y] = new Section(new Level("{28,18|||ally-true}"), totalX, totalY);
             }
         }
 
@@ -56,14 +61,14 @@ public class MapLoader
     {
         this.grid = new Section[grid.length][grid[0].length];
 
-        for (int y = 0; y < grid.length; y++)
+        for (int x = 0; x < grid.length; x++)
         {
-            for (int x = 0; x < grid[0].length; x++)
+            for (int y = 0; y < grid[0].length; y++)
             {
-                int totalX = x == 0 ? 0 : this.grid[y][x - 1].totalX;
-                int totalY = y == 0 ? 0 : this.grid[y - 1][x].totalY;
+                int totalX = y == 0 ? 0 : this.grid[x][y - 1].totalX;
+                int totalY = x == 0 ? 0 : this.grid[x - 1][y].totalY;
 
-                this.grid[y][x] = new Section(grid[y][x], totalX, totalY);
+                this.grid[x][y] = new Section(grid[x][y], totalX, totalY);
             }
         }
 
@@ -73,7 +78,7 @@ public class MapLoader
     public MapLoader(int sizeX, int sizeY, int spawnX, int spawnY)
     {
         this.isRemote = true;
-        this.grid = new Section[sizeY][sizeX];
+        this.grid = new Section[sizeX][sizeY];
         this.currentX = spawnX;
         this.currentY = spawnY;
     }
@@ -90,7 +95,7 @@ public class MapLoader
 
         if (!this.isRemote)
         {
-            this.current = this.grid[spawnY][spawnX];
+            this.current = this.grid[spawnX][spawnY];
             this.current.level.loadLevel();
             this.current.loaded = true;
         }
@@ -140,19 +145,25 @@ public class MapLoader
     {
         for (currentX = 0; currentX < this.grid[0].length; currentX++)
         {
-            this.current = this.grid[currentY][currentX];
+            this.current = this.grid[currentX][currentY];
 
             if (targetTank.posX <= this.current.totalX * Game.tile_size)
                 break;
         }
 
+        if (currentX == this.grid[0].length)
+            currentX--;
+
         for (currentY = 0; currentY < this.grid.length; currentY++)
         {
-            this.current = this.grid[currentY][currentX];
+            this.current = this.grid[currentX][currentY];
 
             if (targetTank.posY <= this.current.totalY * Game.tile_size)
                 break;
         }
+
+        if (currentY == this.grid.length)
+            currentY--;
 
         Level.currentLightIntensity = this.current.level.light;
         Level.currentShadowIntensity = this.current.level.shadow;
@@ -160,9 +171,6 @@ public class MapLoader
 
     private void handleCloseTiles(int x, int y)
     {
-        int[] dx = {1, -1, 0, 0};
-        int[] dy = {0, 0, 1, -1};
-
         for (int i = 0; i < 4; i++)
         {
             int newX = x + dx[i];
@@ -171,7 +179,7 @@ public class MapLoader
             if (!Game.lessThan(-1, newX, this.grid[0].length) || !Game.lessThan(-1, newY, this.grid[1].length))
                 continue;
 
-            Section tile = this.grid[newY][newX];
+            Section tile = this.grid[newX][newY];
 
             int offX = newX - currentX;
             int offY = newY - currentY;
@@ -182,13 +190,12 @@ public class MapLoader
             int distX = (int) Math.abs(targetTank.posX - compareX * 50);
             int distY = (int) Math.abs(targetTank.posY - compareY * 50);
 
-            if ((offX == 0 || distX <= loadDistance * 50) && (offY == 0 || distY <= loadDistance * 50) && !tile.loaded)
+            if (distX <= loadDistance * 50 && distY <= loadDistance * 50 && !tile.loaded)
             {
                 tile.load();
                 handleCloseTiles(newX, newY);
             }
-            if ((offX != 0 && distX >= loadDistance * 100 ||
-                    offY != 0 && distY >= loadDistance * 100) && tile.loaded)
+            if (distX >= loadDistance * 100 && distY >= loadDistance * 100 && tile.loaded)
             {
                 tile.unload();
             }
@@ -197,9 +204,6 @@ public class MapLoader
                 visited.add(tile);
                 handleCloseTiles(newX, newY);
             }
-
-            if (!tile.loaded && (distX >= loadDistance * 150 || distY >= loadDistance * 150))
-                tile.moveObjects();
         }
     }
 
@@ -271,10 +275,7 @@ public class MapLoader
             for (Obstacle o : Game.obstacles)
             {
                 if (Game.lessThan(startX, o.posX / 50 - 0.5, totalX) && Game.lessThan(startY, o.posY / 50 - 0.5, totalY))
-                {
                     obstacles.add(o);
-                    Game.obstacleMap[(int) (o.posX / 50)][(int) (o.posY / 50)] = null;
-                }
             }
 
             for (Movable m : Game.movables)
@@ -290,7 +291,7 @@ public class MapLoader
             for (int tileX = startX; tileX < totalX; tileX++)
             {
                 for (int tileY = startY; tileY < totalY; tileY++)
-                    Game.tileDrawables[tileX][tileY] = new ObstacleEmpty(tileX, tileY);
+                    Game.obstacleMap[tileX][tileY] = null;
             }
         }
 
@@ -305,20 +306,12 @@ public class MapLoader
             double[][] tilesG = Game.tilesG;
             double[][] tilesB = Game.tilesB;
             double[][] tilesDepth = Game.tilesDepth;
-            Obstacle[][] drawables = Game.tileDrawables;
-            Obstacle[][] obstacleMap = Game.obstacleMap;
+            Obstacle[][] map = Game.obstacleMap;
 
             Game.tilesR = new double[Game.currentSizeX][Game.currentSizeY];
             Game.tilesG = new double[Game.currentSizeX][Game.currentSizeY];
             Game.tilesB = new double[Game.currentSizeX][Game.currentSizeY];
             Game.tilesDepth = new double[Game.currentSizeX][Game.currentSizeY];
-            Game.tileDrawables = new Obstacle[Game.currentSizeX][Game.currentSizeY];
-
-            for (int i = 0; i < drawables.length; i++)
-                System.arraycopy(drawables[i], 0, Game.tileDrawables[i], 0, drawables[0].length);
-
-            for (int i = 0; i < drawables.length; i++)
-                System.arraycopy(obstacleMap[i], 0, Game.obstacleMap[i], 0, obstacleMap[0].length);
 
             for (int i = 0; i < Game.currentSizeX; i++)
             {
@@ -330,6 +323,7 @@ public class MapLoader
                         Game.tilesG[i][j] = tilesG[i][j];
                         Game.tilesB[i][j] = tilesB[i][j];
                         Game.tilesDepth[i][j] = tilesDepth[i][j];
+                        Game.obstacleMap[i][j] = map[i][j];
                     }
                     else
                     {
@@ -346,7 +340,6 @@ public class MapLoader
 
             Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
             Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-            Game.obstacleMap = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
             for (Obstacle o : Game.obstacles)
             {
@@ -358,7 +351,8 @@ public class MapLoader
                     if (o.bulletCollision)
                         Game.game.solidGrid[x][y] = true;
 
-                    Game.obstacleMap[x][y] = o;
+                    if (o.startHeight == 0)
+                        Game.obstacleMap[x][y] = o;
                 }
             }
 
@@ -568,34 +562,9 @@ public class MapLoader
                     movables.add(t);
                 }
             }
-            redrawCounter = 10;
+            redrawCounter = 50;
 
             return new ArrayList[] {obstacles, movables};
-        }
-    }
-
-    public static class ObstacleEmpty extends Obstacle
-    {
-        public ObstacleEmpty(double posX, double posY)
-        {
-            super("empty", posX, posY);
-            this.allowBounce = false;
-        }
-
-        @Override
-        public void draw()
-        {
-        }
-
-        @Override
-        public void drawTile(double r, double g, double b, double depth, double extra)
-        {
-        }
-
-        @Override
-        public boolean wasRedrawn()
-        {
-            return false;
         }
     }
 }

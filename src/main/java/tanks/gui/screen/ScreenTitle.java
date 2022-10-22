@@ -1,7 +1,9 @@
 package tanks.gui.screen;
 
 import basewindow.InputCodes;
-import tanks.*;
+import tanks.Drawing;
+import tanks.Game;
+import tanks.Movable;
 import tanks.gui.Button;
 import tanks.obstacle.Obstacle;
 import tanks.tank.TankPlayer;
@@ -62,7 +64,7 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 	}
 	);
 
-	Button takeControl = new Button(0, 0, Game.tile_size, Game.tile_size, "", new Runnable()
+	Button takeControl = new Button(0, 0, 50, 50, "", new Runnable()
 	{
 		@Override
 		public void run()
@@ -155,12 +157,15 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 		if (this.logo == null)
 		{
 			this.logo = new TankPlayer(Drawing.drawing.sizeX / 2, Drawing.drawing.sizeY / 2 - 250 * Drawing.drawing.interfaceScaleZoom, 0);
-			takeControl.posX = logo.posX;
-			takeControl.posY = logo.posY;
 			this.logo.size *= 1.5 * Drawing.drawing.interfaceScaleZoom * this.objHeight / 40;
 			this.logo.invulnerable = true;
 			this.logo.drawAge = 50;
 			this.logo.depthTest = false;
+
+			takeControl.posX = logo.posX;
+			takeControl.posY = logo.posY;
+			takeControl.sizeX = this.logo.size;
+			takeControl.sizeY = this.logo.size;
 
 			if (Drawing.drawing.interfaceScaleZoom > 1)
 			{

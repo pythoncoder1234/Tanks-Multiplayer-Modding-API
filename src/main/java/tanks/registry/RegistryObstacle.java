@@ -9,18 +9,22 @@ import java.util.ArrayList;
 public class RegistryObstacle 
 {
 	public ArrayList<ObstacleEntry> obstacleEntries = new ArrayList<>();
+	public ArrayList<ObstacleEntry> hiddenEntries = new ArrayList<>();
 
 	public static class ObstacleEntry
 	{
 		public final Class<? extends Obstacle> obstacle;
 		public final String name;
 
-		public ObstacleEntry(RegistryObstacle r, Class<? extends Obstacle> obstacle, String name)
+		public ObstacleEntry(RegistryObstacle r, Class<? extends Obstacle> obstacle, String name, boolean hidden)
 		{
 			this.obstacle = obstacle;
 			this.name = name;
 
-			r.obstacleEntries.add(this);
+			if (!hidden)
+				r.obstacleEntries.add(this);
+			else
+				r.hiddenEntries.add(this);
 		}
 
 		protected ObstacleEntry()
@@ -60,15 +64,17 @@ public class RegistryObstacle
 	}
 
 	public ObstacleEntry getEntry(String name)
-	{		
-		for (int i = 0; i < obstacleEntries.size(); i++)
+	{
+		for (ObstacleEntry r : obstacleEntries)
 		{
-			ObstacleEntry r = obstacleEntries.get(i);
-
 			if (r.name.equals(name))
-			{
 				return r;
-			}
+		}
+
+		for (ObstacleEntry r : hiddenEntries)
+		{
+			if (r.name.equals(name))
+				return r;
 		}
 
 		return ObstacleEntry.getUnknownEntry(name);

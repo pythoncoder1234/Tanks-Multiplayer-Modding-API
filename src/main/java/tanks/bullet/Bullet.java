@@ -234,6 +234,13 @@ public class Bullet extends Movable implements IDrawable
 				if (Game.currentLevel instanceof ModLevel)
 					((ModLevel) Game.currentLevel).onKill(this.tank, t);
 
+				if (Game.currentGame != null && Game.currentGame.enableKillMessages)
+				{
+					String message = Game.currentGame.generateKillMessage(t, this.tank, true);
+					ScreenPartyHost.chat.add(0, new ChatMessage(message));
+					Game.eventsOut.add(new EventChat(message));
+				}
+
 				if (Game.currentLevel instanceof ModLevel)
 				{
 					if (((ModLevel) Game.currentLevel).enableKillMessages && ScreenPartyHost.isServer)
@@ -263,8 +270,13 @@ public class Bullet extends Movable implements IDrawable
 
 				if (this.tank.equals(Game.playerTank))
 				{
-					if (Game.currentLevel instanceof ModLevel && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
-						Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
+					if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
+					{
+						if (Game.currentGame != null)
+							Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
+						else if (Game.currentLevel instanceof ModLevel)
+							Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
+					}
 					else
 						Game.player.hotbar.coins += t.coinValue;
 				}

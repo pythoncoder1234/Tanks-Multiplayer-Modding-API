@@ -11,7 +11,7 @@ public class EventCustomLevelEndConditionMet extends PersonalEvent
     public void execute()
     {
         if (this.clientID == null && Game.screen instanceof ScreenGame)
-            ((ScreenGame) Game.screen).remoteLevelEndConditionMet = true;
+            ((ScreenGame) Game.screen).rlecm = true;
     }
 
     @Override

@@ -219,7 +219,7 @@ public class Hotbar
 
 			for (Movable m : Game.movables)
 			{
-				if (m instanceof Tank && !Team.isAllied(Game.playerTank, m) && !m.destroy && ((Tank)m).mandatoryKill)
+				if (m instanceof Tank && !Team.isAllied(Game.playerTank, m) && !m.destroy && ((Tank) m).mandatoryKill)
 					count++;
 			}
 
@@ -239,9 +239,12 @@ public class Hotbar
 			Drawing.drawing.setColor(207, 16, 16, (100 - this.percentHidden) * 2.55);
 			Drawing.drawing.drawInterfaceModel(TankModels.tank.turretBase, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
 
-			Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.setInterfaceFontSize(24);
-			Drawing.drawing.drawInterfaceText(x - 17, y + 1, "" + count, true);
+			if (count > 0)
+			{
+				Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
+				Drawing.drawing.setInterfaceFontSize(24);
+				Drawing.drawing.drawInterfaceText(x - 17, y + 1, "" + count, true);
+			}
 		}
 
 		if (Game.currentLevel != null && Game.currentLevel.timed && Game.screen instanceof ScreenGame)

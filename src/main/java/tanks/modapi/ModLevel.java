@@ -15,7 +15,7 @@ public abstract class ModLevel extends Level
     public int playerKillCoins = 0;
 
     /**
-     * Forcibly disable the minimap. Useful for games like hide and seek.
+     * Forcibly disable the minimap. Useful for games like hide-and-seek.
      */
     public boolean forceDisableMinimap = false;
 

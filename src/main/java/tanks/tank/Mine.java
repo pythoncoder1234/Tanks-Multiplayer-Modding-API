@@ -211,7 +211,7 @@ public class Mine extends Movable implements IAvoidObject
     }
 
     @Override
-    public double getSeverity(double posX, double posY)
+    public double getSeverity(Tank t)
     {
         return this.timer;
     }

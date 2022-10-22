@@ -2,7 +2,6 @@ package tanks;
 
 import basewindow.BaseFile;
 import tanks.event.*;
-import tanks.gui.screen.ScreenCrusadeLevels;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.hotbar.ItemBar;
@@ -498,7 +497,7 @@ public class Crusade
 
 	public void quit()
 	{
-		boolean win = ScreenGame.finishedQuick && Panel.win;
+		boolean win = (ScreenGame.finishedQuick && Panel.win) || !(Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).playing);
 
 		if (!win)
 		{

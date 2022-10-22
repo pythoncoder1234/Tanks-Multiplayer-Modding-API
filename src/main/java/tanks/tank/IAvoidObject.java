@@ -4,5 +4,5 @@ public interface IAvoidObject
 {
     double getRadius();
 
-    double getSeverity(double posX, double posY);
+    double getSeverity(Tank t);
 }

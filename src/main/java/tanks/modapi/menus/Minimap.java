@@ -15,7 +15,6 @@ import java.util.ArrayList;
 
 public class Minimap extends FixedMenu
 {
-    public static float defaultZoom = 1.5f;
     public boolean draggable = false;
     public Level level = Game.currentLevel;
     public int posX = (int) (Panel.windowWidth - sizeX);
@@ -173,7 +172,7 @@ public class Minimap extends FixedMenu
                             else
                                 Drawing.drawing.setColor(255, 0, 0);
 
-                            ModAPI.fixedShapes.drawImage(x, y, 12, 10, "/images/vertical_arrow_white.png", Game.playerTank.angle - ModAPI.left, false);
+                            ModAPI.fixedShapes.drawImage(x, y, 12, 10, "/images/icons/vertical_arrow_white.png", Game.playerTank.angle - ModAPI.left, false);
                         }
 
                     }
@@ -200,7 +199,7 @@ public class Minimap extends FixedMenu
 
         Drawing.drawing.setColor(0, 255, 0);
         if (centered && !Game.playerTank.destroy)
-            ModAPI.fixedShapes.drawImage(posX + sizeX / 2.0, posY + sizeY / 2.0, 12, 10, "/images/vertical_arrow_white.png", Game.playerTank.angle - ModAPI.left, false);
+            ModAPI.fixedShapes.drawImage(posX + sizeX / 2.0, posY + sizeY / 2.0, 12, 10, "/images/icons/vertical_arrow_white.png", Game.playerTank.angle - ModAPI.left, false);
     }
 
     @Override

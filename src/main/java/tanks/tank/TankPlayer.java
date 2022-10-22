@@ -392,7 +392,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 
 	public void shoot()
 	{
-		if (Game.bulletLocked || this.destroy)
+		if (Game.bulletLocked || this.destroy || (Game.currentGame != null && !Game.currentGame.enableShooting))
 			return;
 
 		if (Game.player.hotbar.enabledItemBar)
@@ -406,7 +406,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 
 	public void layMine()
 	{
-		if (Game.bulletLocked || this.destroy)
+		if (Game.bulletLocked || this.destroy || (Game.currentGame != null && !Game.currentGame.enableLayingMines))
 			return;
 
 		if (Game.player.hotbar.enabledItemBar)

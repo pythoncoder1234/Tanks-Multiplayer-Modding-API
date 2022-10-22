@@ -149,7 +149,7 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
     );
 
     @SuppressWarnings("unchecked")
-    protected ArrayList<IDrawable>[] drawables = (ArrayList<IDrawable>[])(new ArrayList[10]);
+    protected ArrayList<IDrawable>[] drawables = (ArrayList<IDrawable>[]) (new ArrayList[10]);
 
     public ScreenCrusadeEditLevel(Crusade.CrusadeLevel level, int in, ScreenCrusadeEditor s2)
     {
@@ -254,12 +254,9 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
     public void update()
     {
         if (Game.enable3d)
-            for (int i = 0; i < Game.obstacles.size(); i++)
+            for (Obstacle o : Game.obstacles)
             {
-                Obstacle o = Game.obstacles.get(i);
-
-                if (o.replaceTiles)
-                    o.postOverride();
+                o.postOverride();
 
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);
@@ -320,16 +317,16 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
 
     public void drawLevel()
     {
-        for (Effect e: Game.tracks)
+        for (Effect e : Game.tracks)
             drawables[0].add(e);
 
-        for (Movable m: Game.movables)
+        for (Movable m : Game.movables)
             drawables[m.drawLevel].add(m);
 
-        for (Obstacle o: Game.obstacles)
+        for (Obstacle o : Game.obstacles)
             drawables[o.drawLevel].add(o);
 
-        for (Effect e: Game.effects)
+        for (Effect e : Game.effects)
             drawables[7].add(e);
 
         for (int i = 0; i < this.drawables.length; i++)
@@ -344,7 +341,7 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
                 Drawing.drawing.fillForcedBox(drawing.sizeX + Game.tile_size / 2, drawing.sizeY / 2, 0, Game.tile_size, drawing.sizeY, Obstacle.draw_size, (byte) 0);
             }
 
-            for (IDrawable d: this.drawables[i])
+            for (IDrawable d : this.drawables[i])
             {
                 d.draw();
 

@@ -57,9 +57,7 @@ public class ObstacleShrubbery extends Obstacle
 		this.height = Math.min(this.height + Panel.frameFrequency, 255);
 
 		if (ScreenGame.finishedQuick && !Game.game.window.shapeRenderer.supportsBatching)
-		{
 			this.height = Math.max(127, this.height - Panel.frameFrequency * 2);
-		}
 
 		this.finalHeight = this.baseGroundHeight + draw_size * (0.2 + this.heightMultiplier * (1 - (255 - this.height) / 128));
 	}
@@ -72,16 +70,14 @@ public class ObstacleShrubbery extends Obstacle
 		if (!Game.game.window.shapeRenderer.supportsBatching)
 		{
 			if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
-			{
 				this.height = 127;
-			}
 		}
 
 		if (Game.enable3d)
 		{
 			Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
 			Drawing.drawing.setShrubberyMode();
-			Drawing.drawing.fillBox(this, this.posX, this.posY, 0, draw_size, draw_size, this.finalHeight, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
+			Drawing.drawing.fillBox(this, this.posX, this.posY, this.startHeight * 50, draw_size, draw_size, this.finalHeight, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
 		}
 		else
 		{

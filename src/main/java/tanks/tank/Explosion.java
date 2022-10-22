@@ -121,8 +121,13 @@ public class Explosion extends Movable
 
                                 if (this.tank.equals(Game.playerTank))
                                 {
-                                    if (Game.currentLevel instanceof ModLevel && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
-                                        Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
+                                    if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
+                                    {
+                                        if (Game.currentGame != null)
+                                            Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
+                                        else if (Game.currentLevel instanceof ModLevel)
+                                            Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
+                                    }
                                     else
                                         Game.player.hotbar.coins += t.coinValue;
                                 }
@@ -130,11 +135,14 @@ public class Explosion extends Movable
                                 {
                                     if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
                                     {
-                                        if (Game.currentLevel instanceof ModLevel && ((ModLevel) Game.currentLevel).playerKillCoins > 0)
-                                            ((TankPlayerRemote) this.tank).player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
-                                        else
-                                            ((TankPlayerRemote) this.tank).player.hotbar.coins += t.coinValue;
+                                        if (Game.currentGame != null)
+                                            Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
+                                        else if (Game.currentLevel instanceof ModLevel)
+                                            Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
                                     }
+                                    else
+                                        Game.player.hotbar.coins += t.coinValue;
+
                                     Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
                                 }
                             }
@@ -162,7 +170,7 @@ public class Explosion extends Movable
         {
             for (Obstacle o: Game.obstacles)
             {
-                if (Math.pow(Math.abs(o.posX - this.posX), 2) + Math.pow(Math.abs(o.posY - this.posY), 2) < Math.pow(radius, 2) && o.destructible && !Game.removeObstacles.contains(o))
+                if (Math.pow(Math.abs(o.posX - this.posX), 2) + Math.pow(Math.abs(o.posY - this.posY) + o.startHeight * 50, 2) < Math.pow(radius, 2) && o.destructible && !Game.removeObstacles.contains(o))
                 {
                     o.onDestroy(this);
                     o.playDestroyAnimation(this.posX, this.posY, this.radius);

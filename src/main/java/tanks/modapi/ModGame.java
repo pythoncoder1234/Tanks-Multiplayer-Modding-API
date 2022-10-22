@@ -2,14 +2,10 @@ package tanks.modapi;
 
 import tanks.Game;
 import tanks.Level;
-import tanks.event.INetworkEvent;
 import tanks.modapi.events.EventCustomLevelEndCondition;
 import tanks.modapi.events.EventCustomLevelEndConditionMet;
 import tanks.modapi.events.EventDisableMinimap;
 import tanks.tank.Tank;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 
 public abstract class ModGame
 {
@@ -24,9 +20,8 @@ public abstract class ModGame
     public String name;
     public String description = null;
 
-    public boolean listeningForEvents = false;
-    public HashSet<Class<? extends INetworkEvent>> currentEventClasses = new HashSet<>();
-    public ArrayList<INetworkEvent> currentEvents = new ArrayList<>();
+    /** Set this variable to <code>true</code> to end the level if <code>customLevelEndCondition</code> is set to <code>true</code>. */
+    private boolean levelEnded = false;
 
     public ModGame()
     {
@@ -58,7 +53,7 @@ public abstract class ModGame
 
     public boolean levelEndCondition()
     {
-        return false;
+        return levelEnded;
     }
 
     public void onLevelEnd(boolean levelWon)

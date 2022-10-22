@@ -21,8 +21,6 @@ public class ObstacleBoostPanel extends Obstacle
         this.bulletCollision = false;
         this.checkForObjects = true;
         this.enableStacking = false;
-
-        this.isSurfaceTile = true;
         this.update = true;
 
         this.colorR = 255;
@@ -43,7 +41,10 @@ public class ObstacleBoostPanel extends Obstacle
         for (AttributeModifier am : m.attributes)
         {
             if (am.name.equals("boost_glow") && am.age < am.deteriorationAge)
+            {
                 effect = false;
+                break;
+            }
         }
 
         if (Game.playerTank != null && !Game.playerTank.destroy && effect && !(m instanceof Bullet && !((Bullet) m).playPopSound))

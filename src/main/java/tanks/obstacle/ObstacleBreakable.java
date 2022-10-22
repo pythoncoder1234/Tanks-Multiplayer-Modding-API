@@ -139,7 +139,7 @@ public class ObstacleBreakable extends Obstacle
                 else
                 {
                     o = (byte) (option | this.getOptionsByte((i + stackHeight % 1.0) * Game.tile_size + offset));
-                    drawing.fillBox(this, this.posX, this.posY, offset + (i - 1 + stackHeight % 1.0) * Game.tile_size + cutoff, draw_size, draw_size, draw_size - cutoff, o);
+                    drawing.fillBox(this, this.posX, this.posY, offset + (i - 1 + stackHeight % 1.0) * Game.tile_size + cutoff + this.startHeight * 50, draw_size, draw_size, draw_size - cutoff, o);
                 }
 
                 options[i] = o;

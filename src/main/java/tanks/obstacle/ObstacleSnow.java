@@ -122,14 +122,10 @@ public class ObstacleSnow extends Obstacle
                 this.visualDepth = Math.min(this.visualDepth + Panel.frameFrequency / 255, 1);
 
             if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
-            {
                 this.visualDepth = 0.5;
-            }
 
             if (ScreenGame.finishedQuick && Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !((ScreenGame) Game.screen).paused))
-            {
                 this.visualDepth = Math.max(0.5, this.visualDepth - Panel.frameFrequency / 127);
-            }
         }
 
         this.colorR = this.baseColorR * (this.depth + 4) / 5;
@@ -172,8 +168,7 @@ public class ObstacleSnow extends Obstacle
 
                 double frac = z / (this.depth * 0.8 * (Game.tile_size - base));
                 Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-                Drawing.drawing.setShrubberyMode();
-                Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul, Game.tile_size, Game.tile_size, z * this.visualDepth, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
+                Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul + this.startHeight * 50, Game.tile_size, Game.tile_size, z * this.visualDepth, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
             }
         }
     }

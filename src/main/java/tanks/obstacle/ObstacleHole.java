@@ -5,7 +5,7 @@ import tanks.Game;
 
 public class ObstacleHole extends Obstacle
 {
-	protected double size = 0.70;
+	protected final double size = 0.70;
 
 	public ObstacleHole(String name, double posX, double posY) 
 	{

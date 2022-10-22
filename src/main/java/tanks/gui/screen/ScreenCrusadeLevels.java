@@ -1,6 +1,9 @@
 package tanks.gui.screen;
 
-import basewindow.transformation.*;
+import basewindow.transformation.RotationAboutPoint;
+import basewindow.transformation.ScaleAboutPoint;
+import basewindow.transformation.Transformation;
+import basewindow.transformation.Translation;
 import tanks.*;
 import tanks.obstacle.Obstacle;
 import tanks.tank.TankAIControlled;
@@ -114,8 +117,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         if (Game.enable3d)
             for (Obstacle o: Game.obstacles)
             {
-                if (o.replaceTiles)
-                    o.postOverride();
+                o.postOverride();
 
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);

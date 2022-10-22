@@ -40,7 +40,7 @@ public class TankNPC extends TankDummy
 
     public boolean overrideDisplayState = false;
     public boolean isChatting = false;
-    public boolean closeEnough = false;
+    public boolean playerNear = false;
 
     public String currentLine = "";
     public boolean draw = false;
@@ -99,6 +99,7 @@ public class TankNPC extends TankDummy
         this.secondaryColorB = Turret.calculateSecondaryColor(this.colorB);
 
         this.invulnerable = true;
+        this.targetable = false;
         this.mandatoryKill = false;
 
         icon.colorR = r;
@@ -168,7 +169,7 @@ public class TankNPC extends TankDummy
     {
         super.draw();
 
-        if (this.messages != null && !overrideDisplayState && closeEnough)
+        if (this.messages != null && !overrideDisplayState && playerNear)
         {
             Drawing.drawing.setColor(255, 255, 255);
             Drawing.drawing.drawImage("talk.png", this.posX, this.posY - 50, 64, 64);
@@ -181,14 +182,14 @@ public class TankNPC extends TankDummy
         super.update();
 
         this.eventCooldown -= Panel.frameFrequency;
-        closeEnough = ModAPI.withinRange((this.posX - 25) / 50, (this.posY - 25) / 50, 3).contains(Game.playerTank);
+        playerNear = ModAPI.withinRange((this.posX - 25) / 50, (this.posY - 25) / 50, 3).contains(Game.playerTank);
 
-        if (((ScreenGame) Game.screen).npcShopScreen && !closeEnough)
+        if (((ScreenGame) Game.screen).npcShopScreen && !playerNear)
             ((ScreenGame) Game.screen).npcShopScreen = false;
 
         if (!overrideDisplayState)
         {
-            if (closeEnough && select.isValid())
+            if (playerNear && select.isValid())
             {
                 select.invalidate();
                 if (!isChatting)
@@ -209,7 +210,7 @@ public class TankNPC extends TankDummy
                 }
             }
 
-            if (isChatting && closeEnough)
+            if (isChatting && playerNear)
                 draw = true;
             else
             {

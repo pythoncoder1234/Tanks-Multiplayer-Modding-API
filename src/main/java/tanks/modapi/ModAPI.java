@@ -4,7 +4,7 @@ import basewindow.BaseFile;
 import basewindow.BaseFontRenderer;
 import basewindow.BaseShapeRenderer;
 import tanks.*;
-import tanks.modapi.events.EventAddTransitionEffect;
+import tanks.challenges.TeamDeathmatch;
 import tanks.event.EventCreateCustomTank;
 import tanks.event.EventSortNPCShopButtons;
 import tanks.event.EventTankTeleport;
@@ -15,9 +15,6 @@ import tanks.modapi.menus.CustomShape;
 import tanks.modapi.menus.FixedMenu;
 import tanks.modapi.menus.FixedText;
 import tanks.modapi.menus.TransitionEffect;
-import tanks.modapi.modlevels.MapLoaderTester;
-import tanks.modapi.modlevels.PartyGames.PartyGames;
-import tanks.modapi.modlevels.TeamDeathmatch;
 import tanks.network.NetworkEventMap;
 import tanks.obstacle.Obstacle;
 import tanks.tank.Tank;
@@ -56,8 +53,6 @@ public class ModAPI
     public static void registerMods()
     {
         registerMod(TeamDeathmatch.class);
-        registerGame(MapLoaderTester.class);
-        registerGame(PartyGames.class);
     }
 
     public static void setUp()
@@ -103,6 +98,7 @@ public class ModAPI
         registeredCustomLevels.add(m);
     }
 
+    /** Skips the countdown before a level starts. */
     public static void skipCountdown()
     {
         if (!(Game.screen instanceof ScreenGame))
@@ -113,15 +109,18 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
-    public static String getLevelString(String levelName)
+    /**
+     * Returns the level or crusade string of a level file.
+     */
+    public static String getLevelString(String levelName) throws FileNotFoundException
     {
         return getLevelString(levelName, false);
     }
 
     /**
-     * Prints the level or crusade string of a level file.
+     * Returns (or prints) the level or crusade string of a level file.
      */
-    public static String getLevelString(String levelName, boolean print)
+    public static String getLevelString(String levelName, boolean print) throws FileNotFoundException
     {
         StringBuilder levelString = new StringBuilder();
 
@@ -147,11 +146,8 @@ public class ModAPI
 
         catch (IOException e)
         {
-            System.err.println("Invalid file name: " + levelName + "\n");
-            Game.exitToCrash(new FileNotFoundException("Level \"" + levelName + "\" not found"));
+            throw new FileNotFoundException("Level \"" + levelName + "\" not found");
         }
-
-        return "";
     }
 
     public static void sendChatMessage(String message)
@@ -179,6 +175,10 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
+    /**
+     * Function to add an object to the correct list
+     * (<code>Game.obstacles</code>, <code>Game.movables</code>, etc.)
+     *  */
     public static void addObject(Object o)
     {
         if (o instanceof Movable)
@@ -205,7 +205,7 @@ public class ModAPI
             ModAPI.menuGroup.add((FixedMenu) o);
 
         else
-            System.err.println("Invalid item given to ModAPI.addObject()");
+            System.err.println("Warning: Invalid item given to ModAPI.addObject()");
     }
 
     public static void clearMenuGroup()
@@ -215,35 +215,72 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
-    public static void displayText(FixedText.types location, String text)
+    /** Displays text on a player's screen, with custom positions. Works with multiplayer. */
+    public static void displayText(double x, double y, String text)
     {
-        displayText(location, text, false, 0, 255, 255, 255);
+        int brightness = (Game.screen instanceof ScreenGame && !Level.isDark()) ? 255 : 0;
+        displayText(x, y, text, brightness, brightness, brightness, 24);
     }
 
+    /** Displays text on a player's screen, with custom positions. Works with multiplayer. */
+    public static void displayText(double x, double y, String text, double r, double g, double b, double fontSize)
+    {
+        EventDisplayText e = new EventDisplayText(x, y, text, false, fontSize, 0, r, g, b);
+        e.execute();
+        Game.eventsOut.add(e);
+    }
+
+    /** Displays text on a player's screen. Works with multiplayer. */
+    public static void displayText(FixedText.types location, String text)
+    {
+        int brightness = (Game.screen instanceof ScreenGame && !Level.isDark()) ? 255 : 0;
+        displayText(location, text, false, 0, brightness, brightness, brightness);
+    }
+
+    /** Displays text on a player's screen, with adjustable colors. Works with multiplayer. */
     public static void displayText(FixedText.types location, String text, double r, double g, double b)
     {
         displayText(location, text, false, 0, r, g, b);
     }
 
-    public static void displayText(FixedText.types location, String text, int durationInMs, double r, double g, double b)
+    /** Displays text on a player's screen, with adjustable display duration and colors. Works with multiplayer. */
+    public static void displayText(FixedText.types location, String text, int duration)
     {
-        EventDisplayText e = new EventDisplayText(location, text, false, durationInMs, r, g, b);
+        int brightness = (Game.screen instanceof ScreenGame && !Level.isDark()) ? 255 : 0;
+
+        EventDisplayText e = new EventDisplayText(location, text, false, 24, duration, brightness, brightness, brightness);
         e.execute();
         Game.eventsOut.add(e);
     }
 
-    public static void displayText(FixedText.types location, String text, boolean afterGameStarted, int durationInMs, double r, double g, double b)
+    /** Displays text on a player's screen, with adjustable display duration and colors. Works with multiplayer. */
+    public static void displayText(FixedText.types location, String text, int duration, double r, double g, double b)
     {
-        EventDisplayText e = new EventDisplayText(location, text, afterGameStarted, durationInMs, r, g, b);
+        EventDisplayText e = new EventDisplayText(location, text, false, 24, duration, r, g, b);
         e.execute();
         Game.eventsOut.add(e);
     }
 
+    /**
+     * Displays text on a player's screen. Works with multiplayer.
+     * @param afterGameStarted Displays the text after the level starts.
+     * @param duration The duration (in milliseconds) for the text to be displayed before fading out. Set to
+     *                     0 for infinite duration.
+     *  */
+    public static void displayText(FixedText.types location, String text, boolean afterGameStarted, int duration, double r, double g, double b)
+    {
+        EventDisplayText e = new EventDisplayText(location, text, afterGameStarted, 24, duration, r, g, b);
+        e.execute();
+        Game.eventsOut.add(e);
+    }
+
+    /** Editw the contents of a {@link FixedText}. */
     public static void editText(FixedText t, String text)
     {
         editText(t.id, text);
     }
 
+    /** Edit the contents of a {@link FixedText}, specify object id instead of object itself. */
     public static void editText(double id, String text)
     {
         EventChangeText e = new EventChangeText(id, text);
@@ -252,28 +289,29 @@ public class ModAPI
     }
 
     @Deprecated
-    public static void displayTextGroup(String location, String[] texts, boolean afterGameStarted, Integer[] durationInMs, double fontSize, double r, double g, double b)
+    public static void displayTextGroup(String location, String[] texts, boolean afterGameStarted, Integer[] duration, double fontSize, double r, double g, double b)
     {
         ArrayList<String> str = new ArrayList<>(Arrays.asList(texts));
-        ArrayList<Integer> ints = new ArrayList<>(Arrays.asList(durationInMs));
+        ArrayList<Integer> ints = new ArrayList<>(Arrays.asList(duration));
 
         displayTextGroup(location, str, afterGameStarted, ints, fontSize, r, g, b);
     }
 
     @Deprecated
-    public static void displayTextGroup(String location, String[] texts, boolean afterGameStarted, Integer[] durationInMs)
+    public static void displayTextGroup(String location, String[] texts, boolean afterGameStarted, Integer[] duration)
     {
-        displayTextGroup(location, texts, afterGameStarted, durationInMs, 24, -1, -1, -1);
+        displayTextGroup(location, texts, afterGameStarted, duration, 24, -1, -1, -1);
     }
 
     @Deprecated
-    public static void displayTextGroup(String location, ArrayList<String> texts, boolean afterGameStarted, ArrayList<Integer> durationInMs, double fontSize, double r, double g, double b)
+    public static void displayTextGroup(String location, ArrayList<String> texts, boolean afterGameStarted, ArrayList<Integer> duration, double fontSize, double r, double g, double b)
     {
-        EventDisplayTextGroup e = new EventDisplayTextGroup(location, texts, afterGameStarted, durationInMs, fontSize, r, g, b);
+        EventDisplayTextGroup e = new EventDisplayTextGroup(location, texts, afterGameStarted, duration, fontSize, r, g, b);
         e.execute();
         Game.eventsOut.add(e);
     }
 
+    /** Draws a tank model at a position on the screen. */
     public static void drawTank(double x, double y, double size, double angle, double r1, double g1, double b1, double r2, double g2, double b2)
     {
         Drawing.drawing.setColor(r2, g2, b2);
@@ -290,7 +328,7 @@ public class ModAPI
     }
 
     /**
-     * If any Tank is within range of an area (in tiles)
+     * Tests if any Tank is within range of an area (in tiles)
      *
      * @return an ArrayList of Tanks
      */
@@ -298,21 +336,34 @@ public class ModAPI
     {
         ArrayList<Tank> output = new ArrayList<>();
 
-        for (Tank t : Tank.idMap.values())
+        for (Movable m : Game.movables)
         {
-            if (Math.pow(t.posX - (x * 50 + 25), 2) + Math.pow(t.posY - (y * 50 + 25), 2) <= (size * 50) * (size * 50))
-                output.add(t);
+            if (m instanceof Tank)
+            {
+                Tank t = (Tank) m;
+
+                if (Math.pow(t.posX - (x * 50 + 25), 2) + Math.pow(t.posY - (y * 50 + 25), 2) <= (size * 50) * (size * 50))
+                    output.add(t);
+            }
         }
 
         return output;
     }
 
-    public static void respawnPlayer(Player p, Object... params)
+    /**
+     *  <b>WIP Function</b><br>
+     *  Respawns a player in one of its team's spawn points.
+     *  */
+    public static void respawnPlayer(Player p)
     {
-        respawnPlayer(p.tank, params);
+        respawnPlayer(p.tank);
     }
 
-    public static void respawnPlayer(Tank t, Object... params)
+    /**
+     *  <b>WIP Function</b><br>
+     *  Respawns a player in one of its team's spawn points.
+     *  */
+    public static void respawnPlayer(Tank t)
     {
         if (!Tank.idMap.containsValue(t))
         {
@@ -320,7 +371,7 @@ public class ModAPI
             t.registerNetworkID();
         }
 
-        for (int attemptNo = 0; attemptNo < 1000; attemptNo++)
+        for (int attemptNo = 0; attemptNo < 100; attemptNo++)
         {
             int spawnIndex = (int) (Math.random() * Game.currentLevel.playerSpawnsX.size());
 
@@ -330,23 +381,18 @@ public class ModAPI
             double x = Game.currentLevel.playerSpawnsX.get(spawnIndex);
             double y = Game.currentLevel.playerSpawnsY.get(spawnIndex);
 
-            if (params.length > 0)
-            {
-                TeleporterOrb o = new TeleporterOrb(t.posX, t.posY, t.posX, t.posY, x, y, t);
-                EventTankTeleport e = new EventTankTeleport(o);
-                e.execute();
-                Game.eventsOut.add(e);
-            }
-            else
-            {
-                t.posX = x;
-                t.posY = y;
-            }
+            TeleporterOrb o = new TeleporterOrb(t.posX, t.posY, t.posX, t.posY, x, y, t);
+            EventTankTeleport e = new EventTankTeleport(o);
+            e.execute();
+            Game.eventsOut.add(e);
 
             break;
         }
     }
 
+    /** Converts a number to a string.<br>
+     * 100.0 -> 100
+     * */
     public static String convertToString(double number)
     {
         if (number != (int) number)
@@ -355,11 +401,13 @@ public class ModAPI
             return "" + (int) number;
     }
 
+    /** Converts a number to a string, and pads zeros in front of it. */
     public static String convertToString(double number, int maxZeroes)
     {
         return ("0".repeat(maxZeroes - ((int) number + "").length())) + (int) number;
     }
 
+    /** Converts a number to a string, and pads zeros in front of it. */
     public static String convertToString(double number, int placeValues, int decimalPlaceValues)
     {
         number = Math.floor(number * Math.pow(10, decimalPlaceValues)) / Math.pow(10, decimalPlaceValues);
@@ -369,7 +417,10 @@ public class ModAPI
 
     public static String capitalize(String s)
     {
-        if (!(Game.lessThan(64, s.charAt(1), 91) || Game.lessThan(96, s.charAt(1), 123)))
+        if (s.length() == 0)
+            throw new RuntimeException("Capitalizing string without letters in it or of size 0");
+
+        if (!(Game.lessThan('A', s.charAt(1), 'Z') || Game.lessThan('a', s.charAt(1), 'z')))
             return s.charAt(0) + capitalize(s.substring(1));
 
         return s.substring(0, 1).toUpperCase() + s.substring(1);
@@ -383,16 +434,19 @@ public class ModAPI
     public static BaseShapeRenderer fixedShapes;
     public static BaseFontRenderer fixedText;
 
+    /** Places an obstacle on a tile. */
     public static void setObstacle(int x, int y, String registryName)
     {
         setObstacle(x, y, registryName, 1, 0);
     }
 
+    /** Places an obstacle on a tile. */
     public static void setObstacle(int x, int y, String registryName, double stackHeight)
     {
         setObstacle(x, y, registryName, stackHeight, 0);
     }
 
+    /** Places an obstacle on a tile. */
     public static void setObstacle(int x, int y, String registryName, double stackHeight, double startHeight)
     {
         try
@@ -404,23 +458,38 @@ public class ModAPI
             o.startHeight = startHeight;
 
             ModAPI.addObject(o);
+
+            if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+            {
+                if (o.bulletCollision)
+                    Game.game.solidGrid[x][y] = true;
+
+                if (o.bulletCollision && !o.shouldShootThrough)
+                    Game.game.unbreakableGrid[x][y] = true;
+
+                Game.obstacleMap[x][y] = o;
+            }
         }
         catch (Exception e)
         {
-            Game.exitToCrash(e);
+            System.err.println("Warning: Bad obstacle provided to setObstacle");
+            e.printStackTrace();
         }
     }
 
+    /** Fills a rectangular area with obstacles. */
     public static void fillObstacle(int startX, int startY, int endX, int endY, String registryName)
     {
         fillObstacle(startX, startY, endX, endY, registryName, 1, 0);
     }
 
+    /** Fills a rectangular area with obstacles. */
     public static void fillObstacle(int startX, int startY, int endX, int endY, String registryName, double stackHeight)
     {
         fillObstacle(startX, startY, endX, endY, registryName, stackHeight, 0);
     }
 
+    /** Fills a rectangular area with obstacles. */
     public static void fillObstacle(int startX, int startY, int endX, int endY, String registryName, double stackHeight, double startHeight)
     {
         EventFillObstacle e = new EventFillObstacle(startX, startY, endX, endY, registryName, stackHeight, startHeight);
@@ -428,14 +497,16 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
+    /** Places an {@link tanks.obstacle.ObstacleText ObstacleText} at the specified location. */
     public static void addTextObstacle(double x, double y, String text)
     {
         addTextObstacle(x, y, text, 0);
     }
 
     /**
-     * {@code duration} is how long you want to wait before the obstacle disappears.
-     * Set it to 0 if you want it to be permanent
+     * Places an {@link tanks.obstacle.ObstacleText ObstacleText} at the specified location.
+     *
+     * @param duration The duration of time before the ObstacleText it gets removed.
      */
     public static void addTextObstacle(double x, double y, String text, long duration)
     {
@@ -461,16 +532,19 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
+    /** Adds a shape (rectangle, oval) to the screen. Works in multiplayer. */
     public static void addCustomShape(boolean all, CustomShape.types type, int x, int y, int sizeX, int sizeY, int r, int g, int b)
     {
         addCustomShape(all, type, x, y, sizeX, sizeY, 0, r, g, b, 255);
     }
 
+    /** Adds a shape (rectangle, oval) to the screen. Works in multiplayer. */
     public static void addCustomShape(boolean all, CustomShape.types type, int x, int y, int sizeX, int sizeY, int r, int g, int b, int a)
     {
         addCustomShape(all, type, x, y, sizeX, sizeY, 0, r, g, b, a);
     }
 
+    /** Adds a shape (rectangle, oval) to the screen. Works in multiplayer. */
     public static void addCustomShape(boolean all, CustomShape.types type, int x, int y, int sizeX, int sizeY, int duration, int r, int g, int b, int a)
     {
         EventAddCustomShape e = new EventAddCustomShape(type, x, y, sizeX, sizeY, duration, r, g, b, a);
@@ -491,6 +565,7 @@ public class ModAPI
         loadLevel(new Level(levelString));
     }
 
+    /** Change the color of a level background. */
     public static void changeBackgroundColor(int r, int g, int b)
     {
         changeBackgroundColor(r, g, b, -1, -1, -1);

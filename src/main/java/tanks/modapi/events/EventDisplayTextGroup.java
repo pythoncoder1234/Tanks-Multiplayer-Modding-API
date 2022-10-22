@@ -27,11 +27,11 @@ public class EventDisplayTextGroup extends PersonalEvent
 
     }
 
-    public EventDisplayTextGroup(String location, ArrayList<String> text, boolean afterGameStarted, ArrayList<Integer> durationInMs, double fontSize, double r, double g, double b)
+    public EventDisplayTextGroup(String location, ArrayList<String> text, boolean afterGameStarted, ArrayList<Integer> duration, double fontSize, double r, double g, double b)
     {
         this.location = location;
         this.texts = text;
-        this.duration = durationInMs;
+        this.duration = duration;
         this.afterGameStarted = afterGameStarted;
 
         this.fontSize = fontSize;

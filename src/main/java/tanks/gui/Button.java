@@ -12,7 +12,7 @@ import tanks.translation.Translation;
 
 import java.util.ArrayList;
 
-public class Button implements IDrawable, ITrigger
+public class Button implements IDrawable, ITrigger, Cloneable
 {
 	public Runnable function;
 	public double posX;
@@ -262,6 +262,29 @@ public class Button implements IDrawable, ITrigger
 	{
 		this.posX = x;
 		this.posY = y;
+	}
+
+	public Button clone(double shiftY)
+	{
+		return clone(0, shiftY);
+	}
+
+	public Button clone(double shiftX, double shiftY)
+	{
+		Button b = null;
+
+		try
+		{
+			b = (Button) super.clone();
+			b.posX += shiftX;
+			b.posY += shiftY;
+		}
+		catch (Exception e)
+		{
+			Game.exitToCrash(e);
+		}
+
+		return b;
 	}
 
 	public void update()

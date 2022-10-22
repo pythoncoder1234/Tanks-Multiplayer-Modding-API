@@ -1529,7 +1529,7 @@ public class Drawing
 		if (Game.angledView)
 			dist = 300;
 
-		if (!Game.followingCam || !(Game.screen instanceof ScreenGame))
+		if (!Game.followingCam || Game.playerTank == null || Game.playerTank.destroy || !(Game.screen instanceof ScreenGame))
 			return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
 		else
 		{

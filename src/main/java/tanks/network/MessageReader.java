@@ -113,13 +113,13 @@ public class MessageReader
 		{
 			if (s != null)
 			{
-				System.err.println("A network exception has occurred: " + e.toString() + " (" + s.rawUsername + "/" + s.clientID + ")");
-				Game.logger.println("A network exception has occurred: " + e.toString() + " (" + s.rawUsername + "/" + s.clientID + ")");
+				System.err.println("A network exception has occurred: " + e + " (" + s.rawUsername + "/" + s.clientID + ")");
+				Game.logger.println("A network exception has occurred: " + e + " (" + s.rawUsername + "/" + s.clientID + ")");
 			}
 			else
 			{
-				System.err.println("A network exception has occurred: " + e.toString());
-				Game.logger.println("A network exception has occurred: " + e.toString());
+				System.err.println("A network exception has occurred: " + e);
+				Game.logger.println("A network exception has occurred: " + e);
 			}
 
 			e.printStackTrace();
@@ -127,12 +127,12 @@ public class MessageReader
 
 			if (ScreenPartyHost.isServer && s != null)
 			{
-				s.sendEventAndClose(new EventKick("A network exception has occurred: " + e.toString()));
+				s.sendEventAndClose(new EventKick("A network exception has occurred: " + e));
 				//Game.screen = new ScreenHostingEnded("A network exception has occurred: " + e.toString());
 			}
 			else if (ScreenPartyLobby.isClient)
 			{
-				EventKick ev = new EventKick("A network exception has occurred: " + e.toString());
+				EventKick ev = new EventKick("A network exception has occurred: " + e);
 				ev.clientID = null;
 				Game.eventsIn.add(ev);
 

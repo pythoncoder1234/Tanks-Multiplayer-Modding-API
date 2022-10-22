@@ -15,57 +15,48 @@ public class FixedText extends FixedMenu
     public double posX;
     public double posY;
     public String text;
-    public boolean afterGameStarted;
+    public boolean afterGameStarted = false;
     public boolean hasItems = false;
 
-    public double fontSize;
+    public double fontSize = 24;
     public double colorR;
     public double colorG;
     public double colorB;
-    public double colorA = 255;
+    public double colorA = 0;
 
-    private long defineTime = 0;
+    private double age = 0;
 
     public FixedText(double x, double y, String text)
     {
-        this(x, y, text, false, 0, 24, 255, 255, 255);
+        this(x, y, text, 255, 255, 255, 24);
     }
 
-    public FixedText(types location, String text)
-    {
-        this(location, text, false, 0, 255, 255, 255);
-    }
-
-    public FixedText(types location, String text, boolean afterGameStarted, int duration, double r, double g, double b)
-    {
-        this.location = location;
-        this.text = text;
-        this.afterGameStarted = afterGameStarted;
-        this.duration = duration;
-
-        this.colorR = r;
-        this.colorG = g;
-        this.colorB = b;
-
-        if (!afterGameStarted)
-            defineTime = System.currentTimeMillis();
-    }
-
-    public FixedText(double x, double y, String text, boolean afterGameStarted, int duration, double fontSize, double r, double g, double b)
+    public FixedText(double x, double y, String text, double r, double g, double b, double fontSize)
     {
         this.posX = x;
         this.posY = y;
         this.text = text;
-        this.duration = duration;
-        this.afterGameStarted = afterGameStarted;
 
-        this.fontSize = fontSize;
         this.colorR = r;
         this.colorG = g;
         this.colorB = b;
+        this.fontSize = fontSize;
+    }
 
-        if (!afterGameStarted)
-            defineTime = System.currentTimeMillis();
+    public FixedText(types location, String text)
+    {
+        this(location, text, 255, 255, 255, 24);
+    }
+
+    public FixedText(types location, String text, double r, double g, double b, double fontSize)
+    {
+        this.location = location;
+        this.text = text;
+        this.fontSize = fontSize;
+
+        this.colorR = r;
+        this.colorG = g;
+        this.colorB = b;
     }
 
     @Override
@@ -77,13 +68,15 @@ public class FixedText extends FixedMenu
                 this.fontSize / 40, this.fontSize / 40,
                 this.text);
 
-        if (duration > 0 && System.currentTimeMillis() - defineTime > duration)
+        if (duration > 0 && age > duration)
         {
             if (this.colorA <= 0)
                 ModAPI.removeMenus.add(this);
 
             this.colorA -= Panel.frameFrequency * 1.25;
         }
+        else
+            this.colorA = Math.min(255, this.colorA + Panel.frameFrequency * 3);
     }
 
     @Override
@@ -93,9 +86,9 @@ public class FixedText extends FixedMenu
         {
             if (Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).playing)
                 return;
-            else if (defineTime == 0)
-                defineTime = System.currentTimeMillis();
         }
+
+        this.age += Panel.frameFrequency;
 
         if (this.location != null)
         {

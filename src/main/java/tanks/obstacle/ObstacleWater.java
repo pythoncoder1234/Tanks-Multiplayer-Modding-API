@@ -60,6 +60,9 @@ public class ObstacleWater extends Obstacle
         {
             Tank t = (Tank) m;
 
+            if (t.posZ >= 0)
+                return;
+
             AttributeModifier a = new AttributeModifier("water", "velocity", AttributeModifier.Operation.multiply, -0.5);
             a.duration = 30;
             a.deteriorationAge = 20;
@@ -73,7 +76,7 @@ public class ObstacleWater extends Obstacle
             else
                 t.waterEnterTime = Math.max(t.waterEnterTime - Panel.frameFrequency, 0);
 
-            if (this.stackHeight > 1 && t.waterEnterTime >= drownTime && t.health > 0)
+            if (this.stackHeight >= 1 && t.waterEnterTime >= drownTime && t.health > 0)
             {
                 boolean kill = t.damage(Panel.frameFrequency / 2500, this);
 
@@ -95,38 +98,31 @@ public class ObstacleWater extends Obstacle
                 }
             }
 
+            double[] dx = {t.vX, -t.vX, 0, 0};
+            double[] dy = {0, 0, t.vY, -t.vY};
+
             boolean floatUp = false;
-            boolean[] found = new boolean[4];
-            for (Obstacle o : Game.obstacles)
+
+            for (int i = 0; i < 4; i++)
             {
-                if (o instanceof ObstacleWater)
+                int x = (int) (t.posX / 50 - 0.5 + dx[i]);
+                int y = (int) (t.posY / 50 - 0.5 + dy[i]);
+
+                Obstacle top = Game.obstacleMap[x][y];
+                Obstacle bottom = Game.obstacleMap[x+1][y+1];
+
+                if (!(top instanceof ObstacleWater && t.posZ >= -top.stackHeight * 50) &&
+                        !(bottom instanceof ObstacleWater && t.posZ >= -bottom.stackHeight * 50))
                 {
-                    if (Game.lessThan(o.posX - 25, t.posX + Game.tile_size * t.vX, o.posX + 25 + 50 * t.vX))
-                        found[0] = true;
-                    if (Game.lessThan(o.posY - 25, t.posY + Game.tile_size * t.vY, o.posY + 25 + 50 * t.vY))
-                        found[1] = true;
-                    if (Game.lessThan(o.posX - 25 - 50 * t.vX, t.posX - Game.tile_size * t.vX, o.posX + 25))
-                        found[2] = true;
-                    if (Game.lessThan(o.posY - 25 - 50 * t.vY, t.posY - Game.tile_size * t.vY, o.posY + 25))
-                        found[3] = true;
+                    floatUp = true;
+                    break;
                 }
             }
 
-            if ((!found[0] && t.vX > 0) ||
-                    (!found[1] && t.vY > 0) ||
-                    (!found[2] && t.vX < 0) ||
-                    (!found[3] && t.vY < 0) ||
-                    (t.posZ < -this.stackHeight * Game.tile_size))
-                floatUp = true;
-
             if (!floatUp && t.posZ > -this.stackHeight * Game.tile_size)
-            {
-                if (((t.vX > 0 || t.vY < 0) && (t.posX > this.posX && t.posX < this.posX + Game.tile_size) && (t.posY < this.posY && t.posY > this.posY - Game.tile_size)) ||
-                        (t.vX < 0 || t.vY > 0) && (t.posX < this.posX && t.posX > this.posX - Game.tile_size) && (t.posY > this.posY && t.posY < t.posY + Game.tile_size))
-                    t.posZ -= Panel.frameFrequency;
-            }
+                t.posZ -= Panel.frameFrequency * 0.75;
             else if (floatUp && t.posZ < 0)
-                t.posZ += Panel.frameFrequency;
+                t.posZ += Panel.frameFrequency * 0.75;
         }
 
         this.onObjectEntryLocal(m);

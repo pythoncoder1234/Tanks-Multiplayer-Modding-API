@@ -291,10 +291,10 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             this.lastVX = vX;
             this.lastVY = vY;
 
-            if (action1 && !this.disabled)
+            if (action1 && !this.disabled && !(Game.currentGame != null && !Game.currentGame.enableShooting))
                 this.shoot();
 
-            if (action2 && !this.disabled)
+            if (action2 && !this.disabled && !(Game.currentGame != null && !Game.currentGame.enableLayingMines))
                 this.layMine();
         }
     }

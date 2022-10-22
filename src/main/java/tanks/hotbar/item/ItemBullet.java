@@ -228,9 +228,9 @@ public class ItemBullet extends Item
 		if (BulletArc.class.isAssignableFrom(this.bulletClass))
 			return this.speed / 3.125 * 1000.0;
 		else if (BulletFlame.class.isAssignableFrom(this.bulletClass))
-			return 400;
+			return this.speed / 3.125 * 400;
 		else if (BulletAir.class.isAssignableFrom(this.bulletClass))
-			return 800;
+			return this.speed / 3.125 * 800;
 		else
 			return -1;
 	}

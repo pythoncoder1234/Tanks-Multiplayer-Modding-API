@@ -21,7 +21,6 @@ public class ObstacleTeleporter extends Obstacle
 	{
 		super(name, posX, posY);
 
-		this.replaceTiles = false;
 		this.enableGroupID = true;
 		this.destructible = false;
 		this.tankCollision = false;
@@ -29,11 +28,13 @@ public class ObstacleTeleporter extends Obstacle
 		this.checkForObjects = true;
 		this.drawLevel = 0;
 		this.update = true;
+		this.replaceTiles = true;
 		this.colorR = 0;
 		this.colorG = 255;
 		this.colorB = 255;
 		this.draggable = false;
 		this.enableStacking = false;
+		this.isFullTile = false;
 
 		this.batchDraw = false;
 

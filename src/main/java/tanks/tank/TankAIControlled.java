@@ -279,6 +279,9 @@ public class TankAIControlled extends Tank
 	/** Alternates for tanks with the alternate AI. Tells tanks to shoot with reflection and then to shoot straight.*/
 	protected boolean straightShoot = false;
 
+	/** Whether a tank has enough space to move away from its mines. Pathfinding tanks only (as of right now). */
+	protected boolean hasSpace = true;
+
 	/** If a direct line of sight to the target enemy exists, set to true*/
 	protected boolean seesTargetEnemy = false;
 
@@ -445,6 +448,7 @@ public class TankAIControlled extends Tank
 	protected double baseMaxSpeed;
 	protected double lastCooldown = this.cooldown;
 
+	/** Variables used in show pathfinding debug feature */
 	protected double drawPathOffsetX = Math.random() * 20;
 	protected double drawPathOffsetY = Math.random() * 20;
 
@@ -580,7 +584,7 @@ public class TankAIControlled extends Tank
 	/** Prepare to fire a bullet*/
 	public void shoot()
 	{
-		if (this.suicidal)
+		if ((Game.currentGame != null && !Game.currentGame.enableShooting) || this.suicidal)
 			return;
 
 		this.cooldownIdleTime = 0;
@@ -1068,13 +1072,12 @@ public class TankAIControlled extends Tank
 		if (!this.currentlySeeking && this.enablePathfinding && this.random.nextDouble() < this.seekChance * Panel.frameFrequency && this.posX > 0 && this.posX < Game.currentSizeX * Game.tile_size && this.posY > 0 && this.posY < Game.currentSizeY * Game.tile_size)
 		{
 			Tile[][] tiles = new Tile[Game.currentSizeX][Game.currentSizeY];
+			this.hasSpace = false;
 
 			for (int i = 0; i < tiles.length; i++)
 			{
 				for (int j = 0; j < tiles[i].length; j++)
-				{
 					tiles[i][j] = new Tile(this.random, i, j);
-				}
 			}
 
 			for (Obstacle o: Game.obstacles)
@@ -1111,7 +1114,7 @@ public class TankAIControlled extends Tank
 					tiles[Math.min(Game.currentSizeX - 1, Math.max(0, (int) (m.posX / Game.tile_size)))][Math.min(Game.currentSizeY - 1, Math.max(0, (int) (m.posY / Game.tile_size)))].interesting = true;
 			}
 
-			// bfs is poggers
+			// bfs is poggers  -Lancelot
 			ArrayList<Tile> queue = new ArrayList<>();
 
 			Tile t = tiles[(int)(this.posX / Game.tile_size)][(int)(this.posY / Game.tile_size)];
@@ -1124,6 +1127,9 @@ public class TankAIControlled extends Tank
 			while (!queue.isEmpty())
 			{
 				current = queue.remove(0);
+
+				if (Math.abs(current.posX - this.posX) + Math.abs(current.posY - this.posY) > 6 * Game.tile_size)
+					this.hasSpace = true;
 
 				if (current.search(queue, tiles))
 				{
@@ -1950,6 +1956,9 @@ public class TankAIControlled extends Tank
 
 	public void layMine(Mine m)
 	{
+		if (Game.currentGame != null && !Game.currentGame.enableLayingMines)
+			return;
+
 		Drawing.drawing.playGlobalSound("lay_mine.ogg");
 
 		Game.eventsOut.add(new EventLayMine(m));
@@ -2445,6 +2454,7 @@ public class TankAIControlled extends Tank
 		public double posX;
 		public double posY;
 
+		/** Variables used in show pathfinding debug feature */
 		public double shiftedX;
 		public double shiftedY;
 

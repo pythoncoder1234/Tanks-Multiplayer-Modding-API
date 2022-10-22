@@ -101,12 +101,9 @@ public class ScreenCrusadePreviewLevel extends Screen implements ILevelPreviewSc
         this.prev.update();
 
         if (Game.enable3d)
-            for (int i = 0; i < Game.obstacles.size(); i++)
+            for (Obstacle o : Game.obstacles)
             {
-                Obstacle o = Game.obstacles.get(i);
-
-                if (o.replaceTiles)
-                    o.postOverride();
+                o.postOverride();
 
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);
