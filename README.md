@@ -35,10 +35,9 @@ New Features:
 - Updates to MapLoader
 - Added documentation
 - Bug fixes and other minor improvements
-
-
 - `getSeverity()` in `IAvoidObject` now takes a `Tank` parameter (to fix, replace `posX` with `t.posX`)
 - `Game.tileDrawables` removed, you can use `Game.obstacleMap[x][y] != null` instead
+
 
 **Mod API v1.1.1a**
 - Updated game version support to Tanks 1.4.1b
