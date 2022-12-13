@@ -10,6 +10,7 @@ import tanks.gui.screen.ITankScreen;
 import tanks.gui.screen.Screen;
 import tanks.gui.screen.ScreenAddSavedTank;
 import tanks.gui.screen.ScreenTankEditor;
+import tanks.obstacle.Obstacle;
 import tanks.registry.RegistryObstacle;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
@@ -46,13 +47,9 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
 
     public Button rotateTankButton = new Button(this.centerX - 380, this.centerY + 240, 350, 40, "Tank orientation", () -> Game.screen = new OverlayRotateTank(Game.screen, screenLevelEditor));
 
-    public Button editHeight = new Button(this.centerX - 380, this.centerY + 240, 350, 40, "", () ->
-    {
-        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
-            Game.screen = new OverlayBlockStartingHeight(Game.screen, this.screenLevelEditor);
-        else
-            Game.screen = new OverlayBlockHeight(Game.screen, this.screenLevelEditor);
-    });
+    public Button editHeight = new Button(this.centerX - 380, this.centerY + 240, 350, 40, "", () -> Game.screen = new OverlayBlockHeight(Game.screen, this.screenLevelEditor));
+
+    public Button editStartingHeight = new Button(this.centerX - 380, this.centerY + 240, 350, 40, "", () -> Game.screen = new OverlayBlockStartingHeight(Game.screen, this.screenLevelEditor));
 
     public Button editGroupID = new Button(this.centerX - 380, this.centerY + 240, 350, 40, "", () -> Game.screen = new OverlayBlockGroupID(Game.screen, screenLevelEditor));
 
@@ -100,6 +97,11 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
         editHeight.imageSizeX = 30;
         editHeight.imageSizeY = 30;
         editHeight.image = "icons/obstacle_height.png";
+
+        editStartingHeight.imageXOffset = -155;
+        editStartingHeight.imageSizeX = 30;
+        editStartingHeight.imageSizeY = 30;
+        editStartingHeight.image = "icons/obstacle_startheight.png";
 
         editGroupID.imageXOffset = -155;
         editGroupID.imageSizeX = 30;
@@ -157,9 +159,18 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
             this.tankButtons.add(b);
         }
 
+        int hiddenEntries = 0;
         for (int i = 0; i < Game.registryObstacle.obstacleEntries.size(); i++)
         {
-            final int j = i;
+            RegistryObstacle.ObstacleEntry currentEntry = Game.registryObstacle.obstacleEntries.get(i);
+
+            if (!Game.mapmaking && currentEntry.hidden)
+            {
+                hiddenEntries++;
+                continue;
+            }
+
+            final int j = i - hiddenEntries;
 
             int rows = objectButtonRows;
             int cols = objectButtonCols;
@@ -167,14 +178,13 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
             double x = this.centerX - 450 + 100 * (index % cols);
             double y = this.centerY - 100 + 100 * ((index / cols) % rows);
 
-            RegistryObstacle.ObstacleEntry currentEntry = Game.registryObstacle.obstacleEntries.get(j);
-
-            tanks.obstacle.Obstacle o = currentEntry.getObstacle(x, y);
+            Obstacle o = currentEntry.getObstacle(x, y);
 
             ButtonObject b = new ButtonObject(o, x, y, 75, 75, () ->
             {
                 screenLevelEditor.obstacleNum = j;
-                screenLevelEditor.mouseObstacle = Game.registryObstacle.getEntry(screenLevelEditor.obstacleNum).getObstacle(0, 0);
+
+                screenLevelEditor.mouseObstacle = currentEntry.getObstacle();
 
                 if (screenLevelEditor.mouseObstacle.enableGroupID)
                     screenLevelEditor.mouseObstacle.setMetadata(screenLevelEditor.mouseObstacleGroup + "");
@@ -283,14 +293,12 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
             if (screenLevelEditor.obstaclePage > 0)
                 previousObstaclePage.update();
 
-            if (screenLevelEditor.mouseObstacle.enableStacking)
-            {
+            if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+                this.editStartingHeight.update();
+            else if (screenLevelEditor.mouseObstacle.enableStacking)
                 this.editHeight.update();
-            }
             else if (screenLevelEditor.mouseObstacle.enableGroupID)
-            {
                 this.editGroupID.update();
-            }
         }
 
         if (screenLevelEditor.tankNum >= Game.registryTank.tankEntries.size())
@@ -388,18 +396,14 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
                     this.obstacleButtons.get(i).draw();
             }
 
-            if (screenLevelEditor.mouseObstacle.enableStacking)
+            if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
             {
-                if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
-                {
-                    this.editHeight.image = "icons/obstacle_startheight.png";
-                    this.editHeight.setText("Start Height: %.1f", screenLevelEditor.mouseObstacleStartHeight);
-                }
-                else
-                {
-                    this.editHeight.image = "icons/obstacle_height.png";
-                    this.editHeight.setText("Block height: %.1f", screenLevelEditor.mouseObstacleHeight);
-                }
+                this.editStartingHeight.setText("Start height: %.1f", screenLevelEditor.mouseObstacleStartHeight);
+                this.editStartingHeight.draw();
+            }
+            else if (screenLevelEditor.mouseObstacle.enableStacking)
+            {
+                this.editHeight.setText("Block height: %.1f", screenLevelEditor.mouseObstacleHeight);
                 this.editHeight.draw();
             }
             else if (screenLevelEditor.mouseObstacle.enableGroupID)

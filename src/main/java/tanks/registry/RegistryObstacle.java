@@ -15,16 +15,15 @@ public class RegistryObstacle
 	{
 		public final Class<? extends Obstacle> obstacle;
 		public final String name;
+		public boolean hidden = false;
 
 		public ObstacleEntry(RegistryObstacle r, Class<? extends Obstacle> obstacle, String name, boolean hidden)
 		{
 			this.obstacle = obstacle;
 			this.name = name;
+			this.hidden = hidden;
 
-			if (!hidden)
-				r.obstacleEntries.add(this);
-			else
-				r.hiddenEntries.add(this);
+			r.obstacleEntries.add(this);
 		}
 
 		protected ObstacleEntry()
@@ -37,6 +36,11 @@ public class RegistryObstacle
 		{
 			this.obstacle = ObstacleUnknown.class;
 			this.name = name;
+		}
+
+		public Obstacle getObstacle()
+		{
+			return getObstacle(0, 0);
 		}
 
 		public Obstacle getObstacle(double x, double y)
@@ -71,17 +75,11 @@ public class RegistryObstacle
 				return r;
 		}
 
-		for (ObstacleEntry r : hiddenEntries)
-		{
-			if (r.name.equals(name))
-				return r;
-		}
-
 		return ObstacleEntry.getUnknownEntry(name);
 	}
 
 	public ObstacleEntry getEntry(int number)
-	{		
+	{
 		return obstacleEntries.get(number);
 	}
 }

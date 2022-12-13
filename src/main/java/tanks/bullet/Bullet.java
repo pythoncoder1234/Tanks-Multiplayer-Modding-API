@@ -64,6 +64,7 @@ public class Bullet extends Movable implements IDrawable
 
 	public Tank tank;
 	public double damage = 1;
+	double baseDamage = 0;
 	public BulletEffect effect = BulletEffect.none;
 	public boolean useCustomWallCollision = false;
 	public double wallCollisionSize = 10;
@@ -229,42 +230,43 @@ public class Bullet extends Movable implements IDrawable
 					this.destroy = true;
 
 				if (Game.currentGame != null)
+				{
 					Game.currentGame.onKill(this.tank, t);
 
-				if (Game.currentLevel instanceof ModLevel)
-					((ModLevel) Game.currentLevel).onKill(this.tank, t);
-
-				if (Game.currentGame != null && Game.currentGame.enableKillMessages)
-				{
-					String message = Game.currentGame.generateKillMessage(t, this.tank, true);
-					ScreenPartyHost.chat.add(0, new ChatMessage(message));
-					Game.eventsOut.add(new EventChat(message));
+					if (Game.currentGame.enableKillMessages && ScreenPartyHost.isServer)
+					{
+						String message = Game.currentGame.generateKillMessage(t, this.tank, true);
+						ScreenPartyHost.chat.add(0, new ChatMessage(message));
+						Game.eventsOut.add(new EventChat(message));
+					}
 				}
 
 				if (Game.currentLevel instanceof ModLevel)
 				{
+					((ModLevel) Game.currentLevel).onKill(this.tank, t);
+
 					if (((ModLevel) Game.currentLevel).enableKillMessages && ScreenPartyHost.isServer)
 					{
 						String message = ((ModLevel) Game.currentLevel).generateKillMessage(t, this.tank, true);
 						ScreenPartyHost.chat.add(0, new ChatMessage(message));
 						Game.eventsOut.add(new EventChat(message));
 					}
+				}
 
-					for (FixedMenu m : ModAPI.menuGroup)
+				for (FixedMenu menu : ModAPI.menuGroup)
+				{
+					if (menu instanceof Scoreboard && ((Scoreboard) menu).objectiveType.equals(Scoreboard.objectiveTypes.kills))
 					{
-						if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.kills))
-						{
-							Scoreboard s = (Scoreboard) m;
+						Scoreboard scoreboard = (Scoreboard) menu;
 
-							if (!s.teams.isEmpty())
-								s.addTeamScore(this.tank.team, 1);
+						if (!scoreboard.teams.isEmpty())
+							scoreboard.addTeamScore(this.tank.team, 1);
 
-							else if (this.tank instanceof TankPlayer && !s.players.isEmpty())
-								s.addPlayerScore(((TankPlayer) this.tank).player, 1);
+						else if (this.tank instanceof TankPlayer && !scoreboard.players.isEmpty())
+							scoreboard.addPlayerScore(((TankPlayer) this.tank).player, 1);
 
-							else if (this.tank instanceof TankPlayerRemote && !s.players.isEmpty())
-								s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
-						}
+						else if (this.tank instanceof TankPlayerRemote && !scoreboard.players.isEmpty())
+							scoreboard.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
 					}
 				}
 
@@ -540,10 +542,13 @@ public class Bullet extends Movable implements IDrawable
 
 			if (o instanceof Tank && !o.destroy)
 			{
-				double horizontalDist = Math.abs(this.posX - o.posX);
-				double verticalDist = Math.abs(this.posY - o.posY);
-
 				Tank t = ((Tank) o);
+
+				if (t.posZ < 1.25 * -Game.tile_size)
+					continue;
+
+				double horizontalDist = Math.abs(this.posX - t.posX);
+				double verticalDist = Math.abs(this.posY - t.posY);
 
 				double bound = this.size / 2 + t.size * t.hitboxSize / 2;
 
@@ -560,7 +565,7 @@ public class Bullet extends Movable implements IDrawable
 			{
 				double distSq = Math.pow(this.posX - o.posX, 2) + Math.pow(this.posY - o.posY, 2);
 
-				double s = 0;
+				double s;
 
 				if (o instanceof Mine)
 					s = ((Mine) o).size;

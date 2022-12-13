@@ -626,17 +626,14 @@ public class Drawing
 	}
 
 	/**
-	 * Options byte:
-	 * <p>
-	 * 0: default
-	 * <p>
-	 * +1 hide behind face
-	 * +2 hide front face
-	 * +4 hide bottom face
-	 * +8 hide top face
-	 * +16 hide left face
-	 * +32 hide right face
-	 * <p>
+	 * Options byte:<br>
+	 * 0: default<br>
+	 * +1 hide behind face<br>
+	 * +2 hide front face<br>
+	 * +4 hide bottom face<br>
+	 * +8 hide top face<br>
+	 * +16 hide left face<br>
+	 * +32 hide right face<br>
 	 * +64 draw on top
 	 */
 	public void fillBox(IBatchRenderableObject o, double x, double y, double z, double sizeX, double sizeY, double sizeZ, byte options)

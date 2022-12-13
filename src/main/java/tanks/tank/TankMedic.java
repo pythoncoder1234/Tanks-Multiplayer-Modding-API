@@ -25,7 +25,6 @@ public class TankMedic extends TankAIControlled
 		this.turretAimSpeed = 0.02;
 		this.bullet.bounces = 0;
 		this.bullet.effect = Bullet.BulletEffect.none;
-		this.bullet.damage = 0.01;
 		this.bullet.bulletClass = BulletHealing.class;
 		this.bullet.cooldownBase = 0;
 		this.bullet.name = "Healing ray";

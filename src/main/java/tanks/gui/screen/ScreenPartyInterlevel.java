@@ -1,6 +1,9 @@
 package tanks.gui.screen;
 
-import tanks.*;
+import tanks.Drawing;
+import tanks.Game;
+import tanks.Level;
+import tanks.Panel;
 import tanks.generator.LevelGeneratorVersus;
 import tanks.gui.Button;
 import tanks.gui.Firework;
@@ -215,7 +218,15 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
             Drawing.drawing.setColor(0, 0, 0);
 
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.winlose);
+
+        if (Panel.subtitle != null && !Panel.subtitle.equals(""))
+        {
+            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 19 / 6, Panel.winlose);
+            Drawing.drawing.setInterfaceFontSize(Math.min(this.textSize, this.textSize * (400 / Game.game.window.fontRenderer.getStringSizeX(this.textSize / 36.0, Panel.subtitle))));
+            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.subtitle);
+        }
+        else
+            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.winlose);
 
         save.draw();
     }

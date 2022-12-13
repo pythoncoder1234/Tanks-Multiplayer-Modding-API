@@ -436,7 +436,16 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 19 / 6, Panel.winlose);
 		}
 		else
-			Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.winlose);
+		{
+			if (Panel.subtitle != null && !Panel.subtitle.equals(""))
+			{
+				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 19 / 6, Panel.winlose);
+				Drawing.drawing.setInterfaceFontSize(Math.min(this.textSize, this.textSize * (400 / Game.game.window.fontRenderer.getStringSizeX(this.textSize / 36.0, Panel.subtitle))));
+				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.subtitle);
+			}
+			else
+				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.winlose);
+		}
 
 		Drawing.drawing.setInterfaceFontSize(this.textSize);
 

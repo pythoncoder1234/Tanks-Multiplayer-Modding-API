@@ -27,6 +27,7 @@ public class OverlayConfirmSave extends ScreenLevelEditorOverlay
     {
         super(previous, s);
         Drawing.drawing.playSound("timer.ogg");
+        this.allowClose = false;
     }
 
     @Override

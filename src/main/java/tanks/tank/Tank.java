@@ -71,6 +71,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	@TankProperty(category = general, id = "base_health", name = "Hitpoints", desc = "The default bullet does one hitpoint of damage")
 	public double baseHealth = 1;
+	public double healRayHealth = 0;
 	public double health = 1;
 
 	@TankProperty(category = general, id = "resist_bullets", name = "Bullet immunity")
@@ -493,6 +494,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		double boost = 0;
 		boolean inWater = false;
+		boolean drownResistant = false;
 
 		for (int i = 0; i < this.attributes.size(); i++)
 		{
@@ -500,7 +502,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 			if (a.name.equals("healray"))
 			{
-				if (this.health < this.baseHealth)
+				if (this.healRayHealth <= 0)
 				{
 					this.attributes.remove(a);
 					i--;
@@ -516,9 +518,11 @@ public abstract class Tank extends Movable implements ISolidObject
 				boost = a.getValue(boost);
 			else if (a.name.equals("water"))
 				inWater = true;
+			else if (a.name.equals("drown_resistant"))
+				drownResistant = true;
 		}
 
-		if (!inWater)
+		if (!inWater || drownResistant)
 		{
 			if (this.waterEnterTime > 0)
 				this.waterEnterTime -= Panel.frameFrequency * 10;
@@ -707,9 +711,9 @@ public abstract class Tank extends Movable implements ISolidObject
 			{
 				if (a.name.equals("healray"))
 				{
-					double mod = 1 + 0.4 * Math.min(1, this.health - this.baseHealth);
+					double mod = 1 + 0.4 * Math.min(1, this.healRayHealth);
 
-					if (this.health > this.baseHealth)
+					if (this.healRayHealth > 0)
 					{
 						if (!Game.enable3d)
 						{
@@ -833,9 +837,16 @@ public abstract class Tank extends Movable implements ISolidObject
 			this.possessor.drawPossessing();
 			this.possessor.drawGlowPossessing();
 		}
+
+		if (Game.showIDs && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && Game.screen instanceof ScreenGame)
+		{
+			Drawing.drawing.setColor(255, 255, 255);
+			Drawing.drawing.setFontSize(24);
+			Drawing.drawing.drawText(this.posX, this.posY, this.networkID + "");
+		}
 	}
 
-	public void drawOutline() 
+	public void drawOutline()
 	{
 		drawAge = Game.tile_size;
 		Drawing drawing = Drawing.drawing;
@@ -949,8 +960,9 @@ public abstract class Tank extends Movable implements ISolidObject
 	public boolean damage(double amount, IGameObject source)
 	{
 		this.health -= amount * this.getDamageMultiplier(source);
+		this.healRayHealth = Math.max(0, this.healRayHealth - amount * this.getDamageMultiplier(source));
 
-		if (this.health <= 1)
+		if (this.health <= this.baseHealth)
 		{
 			for (int i = 0; i < this.attributes.size(); i++)
 			{

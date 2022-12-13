@@ -84,6 +84,7 @@ public class EventCreatePlayer extends PersonalEvent
 				t.registerNetworkID();
 			}
 
+			t.invulnerable = Game.invulnerable;
 			Game.playerTank = t;
 		}
 		else

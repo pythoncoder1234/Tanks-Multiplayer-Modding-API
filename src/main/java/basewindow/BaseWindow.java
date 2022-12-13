@@ -107,6 +107,10 @@ public abstract class BaseWindow
 
     public ModelPart.ShapeDrawer shapeDrawer;
 
+    public boolean shift = false;
+    public boolean capsLock = false;
+    public boolean numLock = false;
+
     public BaseWindow(String name, int x, int y, int z, IUpdater u, IDrawer d, IWindowHandler w, boolean vsync, boolean showMouse)
     {
         this.name = name;

@@ -800,18 +800,28 @@ public class TankAIControlled extends Tank
 		{
 			Movable m = Game.movables.get(i);
 
+			if (!(m instanceof Tank))
+				continue;
+
+			Tank t = (Tank) m;
+
 			boolean correctTeam = (this.isSupportTank() && Team.isAllied(this, m)) || (!this.isSupportTank() && !Team.isAllied(this, m));
-			if (m instanceof Tank && correctTeam && !((Tank) m).hidden && ((Tank) m).targetable && m != this)
+			if (correctTeam && !t.hidden && t.targetable && m != this)
 			{
-				if (BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) && ((Tank) m).health - ((Tank) m).baseHealth >= 1)
+				if (BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) && t.healRayHealth >= 1)
 					continue;
+
+				boolean reachable = !this.shootAIType.equals(ShootAI.straight) ||
+						new Ray(this.posX, this.posY, this.getAngleInDirection(t.posX, t.posY),0, this).getTarget() == t;
 
 				double dist = Movable.distanceBetween(this, m);
 				if (dist < nearestDist)
 				{
 					this.hasTarget = true;
-					nearestDist = dist;
 					nearest = m;
+
+					if (reachable)
+						nearestDist = dist;
 				}
 			}
 		}
@@ -964,6 +974,7 @@ public class TankAIControlled extends Tank
 		t.possessor = this;
 		t.skipNextUpdate = true;
 		t.attributes = this.attributes;
+		t.healRayHealth = this.healRayHealth;
 		t.coinValue = this.coinValue;
 		t.cooldown = this.cooldown;
 
@@ -1114,7 +1125,6 @@ public class TankAIControlled extends Tank
 					tiles[Math.min(Game.currentSizeX - 1, Math.max(0, (int) (m.posX / Game.tile_size)))][Math.min(Game.currentSizeY - 1, Math.max(0, (int) (m.posY / Game.tile_size)))].interesting = true;
 			}
 
-			// bfs is poggers  -Lancelot
 			ArrayList<Tile> queue = new ArrayList<>();
 
 			Tile t = tiles[(int)(this.posX / Game.tile_size)][(int)(this.posY / Game.tile_size)];
@@ -2121,9 +2131,11 @@ public class TankAIControlled extends Tank
 		if (!this.suicidal)
 		{
 			boolean die = true;
-			for (int i = 0; i < Game.movables.size(); i++)
+			for (Movable m : Game.movables)
 			{
-				Movable m = Game.movables.get(i);
+				if (!(m instanceof Tank))
+					continue;
+
 				if (m != this && m.team == this.team && m.dealsDamage && !m.destroy)
 				{
 					die = false;
@@ -2134,6 +2146,7 @@ public class TankAIControlled extends Tank
 			if (die)
 			{
 				this.suicidal = true;
+				this.enablePathfinding = true;
 				this.timeUntilDeath = this.random.nextDouble() * this.suicideTimerRandom + this.suicideTimerBase;
 			}
 

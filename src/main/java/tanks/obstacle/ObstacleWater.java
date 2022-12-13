@@ -5,9 +5,10 @@ import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.modapi.ModAPI;
 import tanks.modapi.ModLevel;
+import tanks.tank.IAvoidObject;
 import tanks.tank.Tank;
 
-public class ObstacleWater extends Obstacle
+public class ObstacleWater extends Obstacle implements IAvoidObject
 {
     public static final int drownTime = 4000;
 
@@ -60,9 +61,6 @@ public class ObstacleWater extends Obstacle
         {
             Tank t = (Tank) m;
 
-            if (t.posZ >= 0)
-                return;
-
             AttributeModifier a = new AttributeModifier("water", "velocity", AttributeModifier.Operation.multiply, -0.5);
             a.duration = 30;
             a.deteriorationAge = 20;
@@ -71,30 +69,35 @@ public class ObstacleWater extends Obstacle
             if (!Game.enable3dBg)
                 return;
 
-            if (t.posZ < -Game.tile_size)
+            if (t.posZ < -Game.tile_size - 15)
                 t.waterEnterTime = Math.min(t.waterEnterTime + Panel.frameFrequency, drownTime);
             else
                 t.waterEnterTime = Math.max(t.waterEnterTime - Panel.frameFrequency, 0);
 
-            if (this.stackHeight >= 1 && t.waterEnterTime >= drownTime && t.health > 0)
+            if (this.stackHeight >= 1 && t.waterEnterTime >= drownTime - 300 && t.health > 0)
             {
-                boolean kill = t.damage(Panel.frameFrequency / 2500, this);
+                t.flashAnimation = 1;
 
-                if (kill && ScreenPartyHost.isServer)
+                if (t.waterEnterTime < drownTime)
                 {
-                    String message = null;
+                    boolean kill = t.damage(Panel.frameFrequency / 2500, this);
 
-                    if (Game.currentGame != null && Game.currentGame.enableKillMessages)
-                        message = Game.currentGame.generateDrownMessage(t);
+                    if (kill && ScreenPartyHost.isServer)
+                    {
+                        String message = null;
 
-                    else if (Game.currentLevel instanceof ModLevel && ((ModLevel) Game.currentLevel).enableKillMessages)
-                        message = ((ModLevel) Game.currentLevel).generateDrownMessage(t);
+                        if (Game.currentGame != null && Game.currentGame.enableKillMessages)
+                            message = Game.currentGame.generateDrownMessage(t);
 
-                    else if (((ModLevel) Game.currentLevel).enableKillMessages)
-                        message = Level.genDrownMessage(t);
+                        else if (Game.currentLevel instanceof ModLevel && ((ModLevel) Game.currentLevel).enableKillMessages)
+                            message = ((ModLevel) Game.currentLevel).generateDrownMessage(t);
 
-                    if (message != null)
-                        ModAPI.sendChatMessage(message);
+                        else if (((ModLevel) Game.currentLevel).enableKillMessages)
+                            message = Level.genDrownMessage(t);
+
+                        if (message != null)
+                            ModAPI.sendChatMessage(message);
+                    }
                 }
             }
 
@@ -107,6 +110,9 @@ public class ObstacleWater extends Obstacle
             {
                 int x = (int) (t.posX / 50 - 0.5 + dx[i]);
                 int y = (int) (t.posY / 50 - 0.5 + dy[i]);
+
+                if (x <= 0 || x >= Game.currentSizeX - 1 || y < 0 || y >= Game.currentSizeY - 1)
+                    continue;
 
                 Obstacle top = Game.obstacleMap[x][y];
                 Obstacle bottom = Game.obstacleMap[x+1][y+1];
@@ -123,6 +129,9 @@ public class ObstacleWater extends Obstacle
                 t.posZ -= Panel.frameFrequency * 0.75;
             else if (floatUp && t.posZ < 0)
                 t.posZ += Panel.frameFrequency * 0.75;
+
+            t.disabled = t.posZ < 1.25 * -Game.tile_size;
+            t.targetable = !t.disabled;
         }
 
         this.onObjectEntryLocal(m);
@@ -139,6 +148,8 @@ public class ObstacleWater extends Obstacle
             double a = m.getPolarDirection();
             Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
             Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
+            e1.posZ = m.posZ;
+            e2.posZ = m.posZ;
             e1.drawLayer = 1;
             e2.drawLayer = 1;
             e1.setPolarMotion(a - Math.PI / 2, t.size * 0.25);
@@ -202,10 +213,19 @@ public class ObstacleWater extends Obstacle
     }
 
     @Override
-    public void drawTile(double r, double g, double b, double depth, double extra)
+    public void drawTile(double r, double g, double b, double d, double extra)
     {
         Drawing.drawing.setColor(r, g, b);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -Game.tile_size * this.stackHeight, Game.tile_size, Game.tile_size, -extra);
+        Drawing.drawing.fillBox(this, this.posX, this.posY, -Game.tile_size * this.stackHeight, Game.tile_size, Game.tile_size, -extra, this.getOptionsByte(extra));
+    }
+
+    @Override
+    public byte getOptionsByte(double h)
+    {
+        if (h == 0)
+            return 61;
+        else
+            return 0;
     }
 
     public double getTileHeight()
@@ -216,5 +236,17 @@ public class ObstacleWater extends Obstacle
     public double getGroundHeight()
     {
         return -this.stackHeight * Game.tile_size;
+    }
+
+    @Override
+    public double getRadius()
+    {
+        return Game.tile_size;
+    }
+
+    @Override
+    public double getSeverity(Tank t)
+    {
+        return 0;
     }
 }

@@ -13,7 +13,6 @@ public class BulletFlame extends Bullet implements IDrawableWithGlow
 
 	double life = 100;
 	double age = 0;
-	double baseDamage = 0;
 	public double sizeMul = 1;
 
 	public BulletFlame(double x, double y, int bounces, Tank t, ItemBullet ib)

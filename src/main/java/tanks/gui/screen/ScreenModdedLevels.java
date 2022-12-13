@@ -57,6 +57,7 @@ public class ScreenModdedLevels extends Screen
 					try
 					{
 						m.getConstructor().newInstance().loadLevel();
+						ScreenInterlevel.fromModdedLevels = true;
 					}
 					catch (Exception e)
 					{
@@ -79,6 +80,8 @@ public class ScreenModdedLevels extends Screen
 						ModGame g = m.getConstructor().newInstance();
 						Game.currentGame = g;
 						g.start();
+
+						ScreenInterlevel.fromModdedLevels = true;
 					}
 					catch (Exception e)
 					{

@@ -527,7 +527,7 @@ public class TextBox implements IDrawable, ITrigger
 			}
 		}
 
-		boolean caps = (this.enableCaps && (Game.game.window.textPressedKeys.contains(InputCodes.KEY_LEFT_SHIFT) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_RIGHT_SHIFT)));
+		boolean caps = (this.enableCaps && (Game.game.window.shift || Game.game.window.capsLock));
 
 		ArrayList<Integer> texts = Game.game.window.getRawTextKeys();
 
@@ -572,7 +572,7 @@ public class TextBox implements IDrawable, ITrigger
 		if (key == InputCodes.KEY_BACKSPACE || key == '\b')
 			inputText = inputText.substring(0, Math.max(0, inputText.length() - 1));
 
-		else if (text != null && inputText.length() + text.length() <= maxChars)
+		else if (inputText.length() + text.length() <= maxChars)
 		{
 			if (text.equals(" "))
 			{
@@ -715,9 +715,7 @@ public class TextBox implements IDrawable, ITrigger
 		String s = Game.game.window.getClipboard();
 
 		for (int i = 0; i < s.length(); i++)
-		{
-			this.inputKey(0, s.substring(i, i + 1).toLowerCase(), Character.isUpperCase(s.charAt(i)));
-		}
+			this.inputKey(0, s.substring(i, i + 1).toLowerCase(), Character.isUpperCase(s.charAt(i)) || Game.game.window.capsLock);
 	}
 
 	@Override

@@ -59,7 +59,7 @@ public class EventAddObstacle extends PersonalEvent
             o.stackHeight = this.stackHeight;
             o.startHeight = this.startHeight;
             Game.obstacles.add(o);
-
+            o.postOverride();
         }
         catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
         {

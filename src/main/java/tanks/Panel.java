@@ -4,6 +4,7 @@ import basewindow.BaseFile;
 import basewindow.InputCodes;
 import basewindow.transformation.Translation;
 import tanks.event.EventBeginLevelCountdown;
+import tanks.event.EventPing;
 import tanks.event.online.IOnlineServerEvent;
 import tanks.extension.Extension;
 import tanks.gui.TextBox;
@@ -46,6 +47,7 @@ public class Panel
 	public static boolean forceRefreshMusic;
 
 	public static String winlose = "";
+	public static String subtitle = "";
 	public static boolean win = false;
 	public static boolean levelPassed = false;
 
@@ -626,6 +628,14 @@ public class Panel
 		if (ScreenPartyLobby.isClient)
 		{
 			Client.handler.reply();
+
+			if (ClientHandler.pingCounter > 0)
+				ClientHandler.pingCounter -= Panel.frameFrequency;
+			else {
+				ClientHandler.lastMessage = System.currentTimeMillis();
+				Client.handler.sendEvent(new EventPing());
+				ClientHandler.pingCounter = 200;
+			}
 		}
 
 		if (forceRefreshMusic || (prevScreen != null && prevScreen != Game.screen && Game.screen != null && !Game.stringsEqual(prevScreen.music, Game.screen.music) && !(Game.screen instanceof IOnlineScreen)))

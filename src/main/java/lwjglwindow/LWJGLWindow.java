@@ -185,13 +185,17 @@ public class LWJGLWindow extends BaseWindow
 				textPressedKeys.remove((Integer) key);
 				textValidPressedKeys.remove((Integer) key);
 			}
+
+			shift = (mods & GLFW_MOD_SHIFT) > 0;
+			capsLock = (mods & GLFW_MOD_CAPS_LOCK) > 0;      // this does not work on mac rip
+			numLock = (mods & GLFW_MOD_NUM_LOCK) > 0;
 		});
 
-		glfwSetScrollCallback(window, (window, xoffset, yoffset) ->
+		glfwSetScrollCallback(window, (window, xOffset, yOffset) ->
 		{
-			if (yoffset > 0)
+			if (yOffset > 0)
 				this.validScrollUp = true;
-			else if (yoffset < 0)
+			else if (yOffset < 0)
 				this.validScrollDown = true;
 		});
 

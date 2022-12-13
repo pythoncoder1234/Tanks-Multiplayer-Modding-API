@@ -15,9 +15,7 @@ public class GameWindowHandler implements IWindowHandler
 			return true;
 
 		if (!Game.screen.allowClose)
-		{
 			Game.screen.onAttemptClose();
-		}
 
 		return Game.screen.allowClose;
 	}

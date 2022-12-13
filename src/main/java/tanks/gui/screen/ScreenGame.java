@@ -117,11 +117,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	/**
 	 * (Whether there is a) Remote level end condition
 	 */
-	public boolean rlec = false;
-	/**
-	 * Remote level end condition met
-	 */
-	public boolean rlecm = false;
+	public boolean remoteLevelEnd = false;
+	public boolean remoteLevelEnded = false;
 	public static boolean skipCountdown = false;
 
 	@SuppressWarnings("unchecked")
@@ -325,8 +322,17 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	}
 	);
 
-	Button quit = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Quit to title", Game::exitToTitle
-	);
+	Button quit = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Quit to title", new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			if (ScreenPartyHost.isServer)
+				quitPartyGame.function.run();
+			else
+				Game.exitToTitle();
+		}
+	});
 
 	Button quitHigherPos;
 
@@ -528,7 +534,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		if (remoteCustomLevelEndCondition)
 		{
 			remoteCustomLevelEndCondition = false;
-			rlec = true;
+			remoteLevelEnd = true;
 		}
 
 		this.selfBatch = false;
@@ -806,6 +812,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			{
 				zoomScrolled = true;
 				Drawing.drawing.movingCamera = true;
+				this.drawFOVCounter = 300;
 
 				if (Panel.zoomTarget == -1)
 					Panel.zoomTarget = Panel.panel.zoomTimer;
@@ -817,6 +824,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			if (Game.game.window.validScrollDown)
 			{
 				zoomScrolled = true;
+				this.drawFOVCounter = 300;
 				Drawing.drawing.movingCamera = true;
 
 				if (Panel.zoomTarget == -1)
@@ -830,7 +838,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		{
 			if (!zoomScrolled)
 			{
-				Drawing.drawing.movingCamera = !Drawing.drawing.movingCamera;
+				if (Panel.zoomTarget % 1 == 0)
+					Drawing.drawing.movingCamera = !Drawing.drawing.movingCamera;
+				else
+					Drawing.drawing.movingCamera = false;
+
 				Panel.zoomTarget = -1;
 			}
 
@@ -857,9 +869,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			int y = (int) (o.posY / Game.tile_size);
 
 			if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-			{
 				Game.game.groundHeightGrid[x][y] = Math.max(o.getGroundHeight(), Game.game.groundHeightGrid[x][y]);
-			}
 		}
 
 		for (int i = 0; i < Game.currentSizeX; i++)
@@ -984,6 +994,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			{
 				Game.game.window.setCursorLocked(false);
 				Game.game.window.setShowCursor(!Panel.showMouseTarget);
+				Game.game.window.pressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
+				Game.game.window.validPressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
 			}
 			else
 			{
@@ -1049,7 +1061,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 						{
 							closeMenuLowerPos.update();
 							restartLowerPos.update();
-							back.update();
+							quit.update();
 						}
 						else if (Crusade.crusadeMode)
 						{
@@ -1082,7 +1094,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 					{
 						resumeLowerPos.update();
 						restart.update();
-						back.update();
+						quit.update();
 					}
 					else if (ScreenInterlevel.tutorialInitial)
 					{
@@ -1521,7 +1533,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				}
 			}
 
-			if ((Game.currentGame != null && Game.currentGame.customLevelEndCondition && Game.currentGame.levelEndCondition()) || (!rlec && rlecm) || (Game.screen == this && Game.currentGame == null && fullyAliveTeams.size() <= 1))
+			if ((Game.currentGame != null && Game.currentGame.customLevelEndCondition && Game.currentGame.levelEndCondition()) || (remoteLevelEnd && remoteLevelEnded) || (Game.screen == this && Game.currentGame == null && !remoteLevelEnd && fullyAliveTeams.size() <= 1))
 			{
 				if (!ScreenGame.finishedQuick)
 				{
@@ -1560,7 +1572,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				TankPlayer.shootStickHidden = false;
 			}
 
-			if ((Game.currentGame != null && Game.currentGame.customLevelEndCondition && Game.currentGame.levelEndCondition()) || (!rlec && rlecm) || (Game.currentGame == null && aliveTeams.size() <= 1))
+			if ((Game.currentGame != null && Game.currentGame.customLevelEndCondition && Game.currentGame.levelEndCondition()) || (remoteLevelEnd && remoteLevelEnded) || (Game.currentGame == null && !remoteLevelEnd && aliveTeams.size() <= 1))
 			{
 				ScreenGame.finished = true;
 				Game.bulletLocked = true;
@@ -1637,12 +1649,21 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 									Panel.win = false;
 								}
-
-								if (Game.currentLevel instanceof ModLevel)
-									((ModLevel) Game.currentLevel).onLevelEnd(Panel.win);
 							}
 							else
 								Panel.win = false;
+
+							if (Game.currentGame != null)
+							{
+								Panel.winlose = Game.currentGame.levelEndString(Panel.win);
+								Panel.subtitle = Game.currentGame.levelEndSubtitle(Panel.win);
+								Game.currentGame.onLevelEnd(Panel.win);
+							}
+							else
+								Panel.subtitle = null;
+
+							if (Game.currentLevel instanceof ModLevel)
+								((ModLevel) Game.currentLevel).onLevelEnd(Panel.win);
 
 							if (Crusade.crusadeMode)
 								Crusade.currentCrusade.saveHotbars();
@@ -1656,8 +1677,20 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 								if (aliveTeams.size() > 0)
 									s = aliveTeams.get(0).name;
 
+								String win = "Victory!";
+								String lose = "You were destroyed!";
+								String winSubtitle = "", loseSubtitle = "";
+
+								if (Game.currentGame != null)
+								{
+									win = Game.currentGame.levelEndString(true);
+									lose = Game.currentGame.levelEndString(false);
+									winSubtitle = Game.currentGame.levelEndSubtitle(true);
+									loseSubtitle = Game.currentGame.levelEndSubtitle(false);
+								}
+
 								ScreenPartyHost.readyPlayers.clear();
-								Game.eventsOut.add(new EventLevelEnd(s));
+								Game.eventsOut.add(new EventLevelEnd(s, win, lose, winSubtitle, loseSubtitle));
 
 								if (Crusade.crusadeMode)
 								{
@@ -2489,7 +2522,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				{
 					closeMenuLowerPos.draw();
 					restartLowerPos.draw();
-					back.draw();
+					quit.draw();
 				}
 				else if (Crusade.crusadeMode)
 				{
@@ -2522,7 +2555,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			{
 				resumeLowerPos.draw();
 				restart.draw();
-				back.draw();
+				quit.draw();
 			}
 			else if (ScreenInterlevel.tutorialInitial)
 			{

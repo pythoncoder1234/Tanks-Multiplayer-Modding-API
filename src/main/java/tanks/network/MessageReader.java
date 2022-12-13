@@ -25,14 +25,14 @@ public class MessageReader
 	protected boolean reading = false;
 	protected int endpoint;
 
-	public boolean queueMessage(ByteBuf m, UUID clientID)
+	public short queueMessage(ByteBuf m, UUID clientID)
 	{
 		return this.queueMessage(null, m, clientID);
 	}
 
-	public synchronized boolean queueMessage(ServerHandler s, ByteBuf m, UUID clientID)
+	public synchronized short queueMessage(ServerHandler s, ByteBuf m, UUID clientID)
 	{
-		boolean reply = false;
+		short reply = -1;
 
 		try
 		{
@@ -68,7 +68,7 @@ public class MessageReader
 							ScreenPartyLobby.connections.clear();
 						}
 
-						return false;
+						return -1;
 					}
 				}
 
@@ -76,7 +76,7 @@ public class MessageReader
 
 				while (queue.readableBytes() >= endpoint)
 				{
-					reply = this.readMessage(s, queue, clientID) || reply;
+					reply = this.readMessage(s, queue, clientID);
 					queue.discardReadBytes();
 
 					reading = false;
@@ -101,7 +101,7 @@ public class MessageReader
 								ScreenPartyLobby.connections.clear();
 							}
 
-							return false;
+							return 0;
 						}
 
 						reading = true;
@@ -144,7 +144,7 @@ public class MessageReader
 		return reply;
 	}
 
-	public synchronized boolean readMessage(ServerHandler s, ByteBuf m, UUID clientID) throws Exception
+	public synchronized short readMessage(ServerHandler s, ByteBuf m, UUID clientID) throws Exception
 	{
 		int i = m.readInt();
 		Class<? extends INetworkEvent> c = NetworkEventMap.get(i);
@@ -156,12 +156,10 @@ public class MessageReader
 		e.read(m);
 
 		if (e instanceof PersonalEvent)
-		{
 			((PersonalEvent) e).clientID = clientID;
-		}
 
-		if (e instanceof EventPing)
-			return true;
+		if (e instanceof EventPing && ((EventPing) e).iteration <= 2)
+			return ((EventPing) e).iteration;
 		else if (e instanceof IOnlineServerEvent)
 			s.sendEventAndClose(new EventKick("This is a party, please join parties through the party menu"));
 		else if (e instanceof IServerThreadEvent)
@@ -174,7 +172,7 @@ public class MessageReader
 			}
 		}
 
-		return false;
+		return -1;
 	}
 
 	public static void updateLastMessageTime()

@@ -219,11 +219,9 @@ public class Level
 		if (!remote && sc == null || (sc instanceof ScreenLevelEditor))
 			Game.eventsOut.add(new EventLoadLevel(this));
 
-		LinkedHashMap<String, TankAIControlled> customTanksMap = new LinkedHashMap();
+		LinkedHashMap<String, TankAIControlled> customTanksMap = new LinkedHashMap<>();
 		for (TankAIControlled t: this.customTanks)
-		{
 			customTanksMap.put(t.name, t);
-		}
 
 		ArrayList<EventCreatePlayer> playerEvents = new ArrayList<>();
 
@@ -422,9 +420,9 @@ public class Level
 
 		if (!preset[2].equals(""))
 		{
-			for (int i = 0; i < tanks.length; i++)
+			for (String s : tanks)
 			{
-				String[] tank = tanks[i].split("-");
+				String[] tank = s.split("-");
 				double x = Game.tile_size * (0.5 + Double.parseDouble(tank[0]));
 				double y = Game.tile_size * (0.5 + Double.parseDouble(tank[1]));
 				String type = tank[2].toLowerCase();
@@ -645,6 +643,7 @@ public class Level
 				else if (!remote)
 				{
 					TankPlayer tank = new TankPlayer(x, y, angle);
+					tank.invulnerable = Game.invulnerable;
 					Game.playerTank = tank;
 					tank.team = team;
 					Game.movables.add(tank);

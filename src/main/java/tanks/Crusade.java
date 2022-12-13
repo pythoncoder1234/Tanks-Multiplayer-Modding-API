@@ -98,6 +98,22 @@ public class Crusade
 		try 
 		{
 			this.fileName = f.path;
+
+			if (!f.exists())
+			{
+				if (this.fileName.contains("\\"))   // Windows to Mac
+				{
+					this.fileName = this.fileName.replaceAll("\\\\", "/");
+					this.fileName = this.fileName.replaceFirst("C:/Users/\\S+/.tanks", Game.homedir + "/.tanks");
+				}
+				else   // Mac to Windows
+				{
+					this.fileName = this.fileName.replaceAll("/", "\\");
+					this.fileName = this.fileName.replaceFirst("Users\\\\\\S+\\\\.tanks", Game.homedir + "\\.tanks");
+				}
+				f = Game.game.fileManager.getFile(this.fileName);
+			}
+
 			f.startReading();
 			ArrayList<String> list = new ArrayList<>();
 
@@ -497,7 +513,7 @@ public class Crusade
 
 	public void quit()
 	{
-		boolean win = (ScreenGame.finishedQuick && Panel.win) || !(Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).playing);
+		boolean win = (ScreenGame.finishedQuick && Panel.win) || !(Game.screen instanceof ScreenGame) || !((ScreenGame) Game.screen).playing;
 
 		if (!win)
 		{

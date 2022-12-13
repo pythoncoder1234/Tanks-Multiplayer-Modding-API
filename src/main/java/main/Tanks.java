@@ -30,6 +30,8 @@ public class Tanks
                 port = Integer.parseInt(arg.split("=")[1]);
             if (arg.equals("debug"))
                 Game.debug = true;
+            if (arg.equals("mapmaking"))
+                Game.mapmaking = true;
             if (arg.equals("mac") || arg.equals("no_relaunch"))
                 relaunch = false;
         }

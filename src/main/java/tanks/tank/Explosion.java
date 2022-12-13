@@ -4,14 +4,14 @@ import tanks.*;
 import tanks.bullet.Bullet;
 import tanks.event.*;
 import tanks.gui.ChatMessage;
-import tanks.modapi.menus.FixedMenu;
-import tanks.modapi.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
 import tanks.modapi.ModAPI;
 import tanks.modapi.ModLevel;
+import tanks.modapi.menus.FixedMenu;
+import tanks.modapi.menus.Scoreboard;
 import tanks.obstacle.Obstacle;
 
 public class Explosion extends Movable
@@ -89,32 +89,43 @@ public class Explosion extends Movable
                             if (kill)
                             {
                                 if (Game.currentGame != null)
+                                {
                                     Game.currentGame.onKill(this.tank, t);
+
+                                    if (Game.currentGame.enableKillMessages && ScreenPartyHost.isServer)
+                                    {
+                                        String message = Game.currentGame.generateKillMessage(t, this.tank, false);
+                                        ScreenPartyHost.chat.add(0, new ChatMessage(message));
+                                        Game.eventsOut.add(new EventChat(message));
+                                    }
+                                }
 
                                 if (Game.currentLevel instanceof ModLevel)
                                 {
                                     ((ModLevel) Game.currentLevel).onKill(this.tank, t);
-
-                                    for (FixedMenu menu : ModAPI.menuGroup)
-                                    {
-                                        if (menu instanceof Scoreboard && ((Scoreboard) menu).objectiveType.equals(Scoreboard.objectiveTypes.kills))
-                                        {
-                                            if (!((Scoreboard) menu).teams.isEmpty())
-                                                ((Scoreboard) menu).addTeamScore(this.tank.team, 1);
-
-                                            else if (this.tank instanceof TankPlayer && !((Scoreboard) menu).players.isEmpty())
-                                                ((Scoreboard) menu).addPlayerScore(((TankPlayer) this.tank).player, 1);
-
-                                            else if (this.tank instanceof TankPlayerRemote && !((Scoreboard) menu).players.isEmpty())
-                                                ((Scoreboard) menu).addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
-                                        }
-                                    }
 
                                     if (((ModLevel) Game.currentLevel).enableKillMessages && ScreenPartyHost.isServer)
                                     {
                                         String message = ((ModLevel) Game.currentLevel).generateKillMessage(t, this.tank, false);
                                         ScreenPartyHost.chat.add(0, new ChatMessage(message));
                                         Game.eventsOut.add(new EventChat(message));
+                                    }
+                                }
+
+                                for (FixedMenu menu : ModAPI.menuGroup)
+                                {
+                                    if (menu instanceof Scoreboard && ((Scoreboard) menu).objectiveType.equals(Scoreboard.objectiveTypes.kills))
+                                    {
+                                        Scoreboard scoreboard = (Scoreboard) menu;
+
+                                        if (!scoreboard.teams.isEmpty())
+                                            scoreboard.addTeamScore(this.tank.team, 1);
+
+                                        else if (this.tank instanceof TankPlayer && !scoreboard.players.isEmpty())
+                                            scoreboard.addPlayerScore(((TankPlayer) this.tank).player, 1);
+
+                                        else if (this.tank instanceof TankPlayerRemote && !scoreboard.players.isEmpty())
+                                            scoreboard.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
                                     }
                                 }
 

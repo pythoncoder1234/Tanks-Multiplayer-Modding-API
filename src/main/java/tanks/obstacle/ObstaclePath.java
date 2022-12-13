@@ -6,6 +6,10 @@ import tanks.tank.Tank;
 
 public class ObstaclePath extends Obstacle
 {
+    int randomR = (int) (Math.random() * 20);
+    int randomG = (int) (Math.random() * 20);
+    int randomB = (int) (Math.random() * 20);
+
     public ObstaclePath(String name, double posX, double posY)
     {
         super(name, posX, posY);
@@ -18,13 +22,10 @@ public class ObstaclePath extends Obstacle
         this.checkForObjects = true;
         this.enableStacking = false;
 
-        this.colorR = 170;
-        this.colorG = 105;
-        this.colorB = 50;
-
         this.replaceTiles = true;
+        updateColor();
 
-        this.description = "A thick puddle of mud that slows tanks down";
+        this.description = "A dusty, worn out brown path";
     }
 
 
@@ -69,6 +70,9 @@ public class ObstaclePath extends Obstacle
     @Override
     public void draw()
     {
+        if (!redrawn)
+            updateColor();
+
         if (!Game.enable3d)
         {
             Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
@@ -91,6 +95,20 @@ public class ObstaclePath extends Obstacle
             Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
             Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d + extra);
         }
+    }
+
+    public void updateColor()
+    {
+        double colorFactor = 1;
+
+        int x = (int) (this.posX / 50);
+        int y = (int) (this.posY / 50);
+        if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+            colorFactor = (Game.tilesR[x][y] + Game.tilesG[x][y] + Game.tilesB[x][y]) / 255;
+
+        this.colorR = 170 * colorFactor + randomR;
+        this.colorG = 105 * colorFactor + randomG;
+        this.colorB = 50 * colorFactor + randomB;
     }
 
     public double getTileHeight()

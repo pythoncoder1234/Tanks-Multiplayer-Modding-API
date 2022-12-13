@@ -46,6 +46,9 @@ public class EventFillObstacle extends PersonalEvent
             {
                 for (int y = startY; y <= endY; y++)
                 {
+                    if (Game.obstacleMap[x][y] != null)
+                        continue;
+
                     Obstacle o = c.newInstance(registryName, x, y);
                     o.stackHeight = stackHeight;
                     o.startHeight = startHeight;

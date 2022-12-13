@@ -4,7 +4,6 @@ import basewindow.BaseFile;
 import basewindow.BaseFontRenderer;
 import basewindow.BaseShapeRenderer;
 import tanks.*;
-import tanks.challenges.TeamDeathmatch;
 import tanks.event.EventCreateCustomTank;
 import tanks.event.EventSortNPCShopButtons;
 import tanks.event.EventTankTeleport;
@@ -25,7 +24,6 @@ import tanks.tank.Turret;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ModAPI
@@ -52,7 +50,6 @@ public class ModAPI
      */
     public static void registerMods()
     {
-        registerMod(TeamDeathmatch.class);
     }
 
     public static void setUp()
@@ -75,7 +72,6 @@ public class ModAPI
         NetworkEventMap.register(EventCustomLevelEndCondition.class);
         NetworkEventMap.register(EventDisableMinimap.class);
         NetworkEventMap.register(EventDisplayText.class);
-        NetworkEventMap.register(EventDisplayTextGroup.class);
         NetworkEventMap.register(EventFillObstacle.class);
         NetworkEventMap.register(EventLoadMapLevel.class);
         NetworkEventMap.register(EventOverrideNPCState.class);
@@ -288,29 +284,6 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
-    @Deprecated
-    public static void displayTextGroup(String location, String[] texts, boolean afterGameStarted, Integer[] duration, double fontSize, double r, double g, double b)
-    {
-        ArrayList<String> str = new ArrayList<>(Arrays.asList(texts));
-        ArrayList<Integer> ints = new ArrayList<>(Arrays.asList(duration));
-
-        displayTextGroup(location, str, afterGameStarted, ints, fontSize, r, g, b);
-    }
-
-    @Deprecated
-    public static void displayTextGroup(String location, String[] texts, boolean afterGameStarted, Integer[] duration)
-    {
-        displayTextGroup(location, texts, afterGameStarted, duration, 24, -1, -1, -1);
-    }
-
-    @Deprecated
-    public static void displayTextGroup(String location, ArrayList<String> texts, boolean afterGameStarted, ArrayList<Integer> duration, double fontSize, double r, double g, double b)
-    {
-        EventDisplayTextGroup e = new EventDisplayTextGroup(location, texts, afterGameStarted, duration, fontSize, r, g, b);
-        e.execute();
-        Game.eventsOut.add(e);
-    }
-
     /** Draws a tank model at a position on the screen. */
     public static void drawTank(double x, double y, double size, double angle, double r1, double g1, double b1, double r2, double g2, double b2)
     {
@@ -495,6 +468,23 @@ public class ModAPI
         EventFillObstacle e = new EventFillObstacle(startX, startY, endX, endY, registryName, stackHeight, startHeight);
         e.execute();
         Game.eventsOut.add(e);
+    }
+
+    /** Places a tree, centered on a specified tile.
+     * @param height Height of the tree, leaves and all.
+     * @param sizeFactor How big the tree will be.
+     * */
+    public static void placeTree(int x, int y, int height, int sizeFactor)
+    {
+        int endX = x + sizeFactor / 2;
+        int endY = y + sizeFactor / 2;
+
+        ModAPI.fillObstacle(x, y, endX, endY, "normal", height * sizeFactor - sizeFactor);
+
+        for (int i = 0; i < sizeFactor; i++)
+        {
+            int placeX = x + i;
+        }
     }
 
     /** Places an {@link tanks.obstacle.ObstacleText ObstacleText} at the specified location. */

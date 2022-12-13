@@ -3,7 +3,6 @@ package tanks.modapi;
 import tanks.Game;
 import tanks.Level;
 import tanks.modapi.events.EventCustomLevelEndCondition;
-import tanks.modapi.events.EventCustomLevelEndConditionMet;
 import tanks.modapi.events.EventDisableMinimap;
 import tanks.tank.Tank;
 
@@ -21,13 +20,17 @@ public abstract class ModGame
     public String description = null;
 
     /** Set this variable to <code>true</code> to end the level if <code>customLevelEndCondition</code> is set to <code>true</code>. */
-    private boolean levelEnded = false;
+    protected boolean levelEnded = false;
 
     public ModGame()
     {
         this.name = this.getClass().getSimpleName().replace("_", " ");
     }
 
+    /**
+     * Override for initialization code when the <code>ModGame</code> is started.
+     *  <code>super.start()</code> call is required.
+     *  */
     public void start()
     {
         if (this.forceDisableMinimap)
@@ -38,17 +41,30 @@ public abstract class ModGame
     }
 
     /**
-     * Called when the <code>Restart this Level</code> button is clicked
+     * Called when the <code>Restart this Level</code> button in the pause menu is clicked
      */
     public void onLevelRestart()
     {
         Game.cleanUp();
-        ModAPI.loadLevel(Game.currentLevelString);
+        this.start();
     }
 
     public void onKill(Tank killer, Tank killed)
     {
 
+    }
+
+    public String levelEndString(boolean levelWon)
+    {
+        if (levelWon)
+            return "Victory!";
+        else
+            return "You were destroyed!";
+    }
+
+    public String levelEndSubtitle(boolean levelWon)
+    {
+        return null;
     }
 
     public boolean levelEndCondition()
@@ -58,7 +74,7 @@ public abstract class ModGame
 
     public void onLevelEnd(boolean levelWon)
     {
-        Game.eventsOut.add(new EventCustomLevelEndConditionMet());
+
     }
 
     public void update()

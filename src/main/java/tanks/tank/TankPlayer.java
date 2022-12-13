@@ -208,9 +208,14 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 			}
 		}
 
-		boolean shoot = !Game.game.window.touchscreen && Game.game.input.shoot.isPressed();
+		boolean shoot = !Game.game.window.touchscreen && Game.game.input.shoot.isValid();
 
-		boolean mine = !Game.game.window.touchscreen && Game.game.input.mine.isPressed();
+		boolean mine = !Game.game.window.touchscreen && Game.game.input.mine.isValid();
+
+  		/*if (shoot)    // uncomment for retro
+			Game.game.input.shoot.invalidate();
+		if (mine)
+			Game.game.input.mine.invalidate();*/
 
 		boolean showRange = false;
 		if (h.enabledItemBar && h.itemBar.selected >= 0)

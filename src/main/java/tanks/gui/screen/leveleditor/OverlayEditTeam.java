@@ -36,13 +36,11 @@ public class OverlayEditTeam extends ScreenLevelEditorOverlay
             if (teamName.inputText.length() <= 0 || duplicate)
                 teamName.inputText = team.name;
             else
-            {
                 team.name = teamName.inputText;
-            }
         }
                 , team.name);
 
-        teamName.lowerCase = true;
+        teamName.enableCaps = true;
 
         if (team.friendlyFire)
             teamFriendlyFire.setText("Friendly fire: ", ScreenOptions.onText);

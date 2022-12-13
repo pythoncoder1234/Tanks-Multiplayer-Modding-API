@@ -104,6 +104,12 @@ public class ScreenPartyHost extends Screen
         toggleIP.textOffsetX = 1.5;
         toggleIP.textOffsetY = 1.5;
 
+        if (ModAPI.registeredCustomLevels.size() == 0 && ModAPI.registeredCustomGames.size() == 0)
+        {
+            myLevels.sizeX = this.objWidth;
+            myLevels.posX -= this.objWidth / 4 - 10;
+        }
+
         chatbox = new ChatBox(this.centerX, Drawing.drawing.interfaceSizeY - 30, Drawing.drawing.interfaceSizeX - 20, 40, Game.game.input.chat, () ->
         {
             ScreenPartyHost.chat.add(0, new ChatMessage(Game.player, ScreenPartyHost.chatbox.inputText));
@@ -111,9 +117,7 @@ public class ScreenPartyHost extends Screen
         });
 
         if (Game.game.window.touchscreen)
-        {
             chatbox.defaultText = "Click here to send a chat message";
-        }
 
         for (int i = 0; i < this.kickButtons.length; i++)
         {

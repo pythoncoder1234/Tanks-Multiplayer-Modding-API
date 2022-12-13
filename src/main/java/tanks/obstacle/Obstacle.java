@@ -6,7 +6,7 @@ import tanks.gui.screen.ScreenGame;
 
 public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IGameObject, IBatchRenderableObject
 {
-	public static final int default_max_height = 8;
+	public static final int default_max_height = 16;
 
 	public Effect.EffectType destroyEffect = Effect.EffectType.obstaclePiece;
 	public double destroyEffectAmount = 1;
@@ -295,7 +295,9 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	}
 
 	/**
-	 * Draws the tile under the obstacle if it needs to be drawn differently than when not covered by an obstacle
+	 * Draws the tile under the obstacle if it needs to be drawn differently than when not covered by an obstacle.<br>
+	 * <br>
+	 * Use <code>Obstacle.draw_size / Game.tile_size</code> to get a percentage of how much the level loading animation is complete.
 	 *
 	 * @param r Red
 	 * @param g Green
@@ -305,7 +307,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	 */
 	public void drawTile(double r, double g, double b, double d, double extra)
 	{
-		if (Obstacle.draw_size < Game.tile_size || extra != 0)
+		if (Obstacle.draw_size < Game.tile_size || extra != 0 || this.startHeight > 0)
 		{
 			Drawing.drawing.setColor(r, g, b);
 			Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d * (1 - Obstacle.draw_size / Game.tile_size));
@@ -417,7 +419,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	{
 		byte o = 0;
 
-		if (Obstacle.draw_size < Game.tile_size)
+		if (Obstacle.draw_size < Game.tile_size || this.startHeight > 0)
 			return 0;
 
 		if (Game.sampleObstacleHeight(this.posX, this.posY + Game.tile_size) >= h)

@@ -38,6 +38,9 @@ public class EventLevelEndQuick extends PersonalEvent
         }
 
         ScreenGame.finishedQuick = true;
+
+        if (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).remoteLevelEnd)
+            ((ScreenGame) Game.screen).remoteLevelEnded = true;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package tanks.gui.screen.leveleditor;
 
 import tanks.Drawing;
+import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.screen.Screen;
 import tanks.obstacle.Obstacle;
@@ -50,7 +51,7 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
 
     public void update()
     {
-        this.increaseHeight.enabled = screenLevelEditor.mouseObstacleHeight < Obstacle.default_max_height;
+        this.increaseHeight.enabled = screenLevelEditor.mouseObstacleHeight < Obstacle.default_max_height / (Game.mapmaking ? 1.0 : 2.0);
         this.decreaseHeight.enabled = screenLevelEditor.mouseObstacleHeight > 0.5;
 
         if (screenLevelEditor.stagger)

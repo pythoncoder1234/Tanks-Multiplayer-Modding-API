@@ -1,6 +1,9 @@
 package tanks;
 
-import basewindow.*;
+import basewindow.BaseFile;
+import basewindow.BaseFileManager;
+import basewindow.BaseWindow;
+import basewindow.ModelPart;
 import tanks.bullet.*;
 import tanks.event.*;
 import tanks.event.online.*;
@@ -17,7 +20,10 @@ import tanks.gui.screen.leveleditor.OverlayEditorMenu;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.ItemBar;
-import tanks.hotbar.item.*;
+import tanks.hotbar.item.Item;
+import tanks.hotbar.item.ItemBullet;
+import tanks.hotbar.item.ItemMine;
+import tanks.hotbar.item.ItemShield;
 import tanks.modapi.ModGame;
 import tanks.network.Client;
 import tanks.network.NetworkEventMap;
@@ -28,7 +34,10 @@ import tanks.registry.*;
 import tanks.tank.*;
 import tanks.translation.Translation;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -101,9 +110,12 @@ public class Game
 
 	//Remember to change the version in android's build.gradle and ios's robovm.properties
 	public static final String version = "Tanks v1.4.1";
-	public static final String ModAPIVersion = "Mod API v1.1.1b";
+	public static final String ModAPIVersion = "Mod API v1.1.1c";
 	public static final int network_protocol = 46;
 	public static boolean debug = false;
+	public static boolean mapmaking = false;
+	public static boolean showIDs = false;
+	public static boolean invulnerable = false;
 	public static boolean traceAllRays = false;
 	public static boolean showPathfinding = false;
 	public static final boolean cinematic = false;
@@ -233,7 +245,6 @@ public class Game
 	public static final String tutorialPath = directoryPath + "/tutorial.txt";
 	public static final String uuidPath = directoryPath + "/uuid";
 	public static final String levelDir = directoryPath + "/levels";
-	//public static final String modLevelDir = directoryPath + "/modlevels/";
 	public static final String crusadeDir = directoryPath + "/crusades";
 	public static final String savedCrusadePath = directoryPath + "/crusades/progress/";
 	public static final String itemDir = directoryPath + "/items";
@@ -440,6 +451,7 @@ public class Game
 
 		registerObstacle(Obstacle.class, "normal");
 		registerObstacle(ObstacleIndestructible.class, "hard");
+		registerObstacle(ObstacleHill.class, "hill", true);
 		registerObstacle(ObstacleHole.class, "hole");
 		registerObstacle(ObstacleBouncy.class, "bouncy");
 		registerObstacle(ObstacleNoBounce.class, "nobounce");
@@ -451,8 +463,8 @@ public class Game
 		registerObstacle(ObstaclePath.class, "path", true);
 		registerObstacle(ObstacleIce.class, "ice");
 		registerObstacle(ObstacleSnow.class, "snow");
-		registerObstacle(ObstacleSand.class, "sand");
-		registerObstacle(ObstacleWater.class, "water");
+		registerObstacle(ObstacleSand.class, "sand", true);
+		registerObstacle(ObstacleWater.class, "water", true);
 		registerObstacle(ObstacleBoostPanel.class, "boostpanel");
 		registerObstacle(ObstacleTeleporter.class, "teleporter");
 
@@ -600,7 +612,7 @@ public class Game
 
 		try
 		{
-			Game.logger = new PrintStream(new FileOutputStream (homedir + logPath, true));
+			Game.logger = new PrintStream(new FileOutputStream(homedir + logPath));
 		}
 		catch (FileNotFoundException e)
 		{
@@ -946,9 +958,9 @@ public class Game
 		{
 			for (int j = 0; j < 18; j++)
 			{
-				Game.tilesR[i][j] = (235 + Math.random() * var);
-				Game.tilesG[i][j] = (207 + Math.random() * var);
-				Game.tilesB[i][j] = (166 + Math.random() * var);
+				Game.tilesR[i][j] = Math.min(255, 235 + Math.random() * var);
+				Game.tilesG[i][j] = Math.min(255, 207 + Math.random() * var);
+				Game.tilesB[i][j] = Math.min(255, 166 + Math.random() * var);
 				Game.tilesDepth[i][j] = Math.random() * var / 2;
 			}
 		}
@@ -1284,6 +1296,7 @@ public class Game
 	{
 		if (nums.length < 2)
 			return true;
+
 
 		for (int i = 0; i < nums.length; i++)
 		{

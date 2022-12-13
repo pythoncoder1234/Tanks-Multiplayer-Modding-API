@@ -28,6 +28,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 	public ChannelHandlerContext ctx;
 	public SteamID steamID;
 
+	public static double pingCounter = 200;
 	public static long lastMessage = -1;
 	public static long latency = 0;
 
@@ -83,6 +84,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 		ScreenPartyLobby.isClient = true;
 
 		this.sendEvent(new EventPing());
+		lastMessage = System.currentTimeMillis();
     }
 
     public void close()
@@ -180,31 +182,19 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
     {
 		this.ctx = ctx;
 		ByteBuf buffy = (ByteBuf) msg;
-		boolean reply = this.reader.queueMessage(buffy, null);
+		short reply = this.reader.queueMessage(buffy, null);
 		ReferenceCountUtil.release(msg);
 
-		if (reply)
+		if (reply >= 0)
 		{
 			if (lastMessage < 0)
 				lastMessage = System.currentTimeMillis();
 
 			long time = System.currentTimeMillis();
-			latency = time - lastMessage;
+			lastLatencyAverage = time - lastMessage;
 			lastMessage = time;
 
-			latencyCount++;
-			latencySum += latency;
-
-			if (time / 1000 > lastLatencyTime)
-			{
-				lastLatencyTime = time / 1000;
-				lastLatencyAverage = latencySum / latencyCount;
-
-				latencySum = 0;
-				latencyCount = 0;
-
-				this.sendEvent(new EventPing());
-			}
+			this.sendEvent(new EventPing(reply));
 		}
     }
 

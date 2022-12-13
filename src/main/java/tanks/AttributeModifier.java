@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class AttributeModifier
 {
-	public enum Operation {add, multiply}
+	public enum Operation {add, multiply, set}
 	
 	/**An unique name for the modifier, to prevent double effects*/
 	public String name = UUID.randomUUID().toString();
@@ -66,6 +66,8 @@ public class AttributeModifier
 			return in + val;
 		else if (this.effect == Operation.multiply)
 			return in * (val + 1);
+		else if (this.effect == Operation.set)
+			return val;
 		else
 			return in;
 			
