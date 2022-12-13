@@ -110,7 +110,7 @@ public class Game
 
 	//Remember to change the version in android's build.gradle and ios's robovm.properties
 	public static final String version = "Tanks v1.4.1";
-	public static final String ModAPIVersion = "Mod API v1.1.1c";
+	public static final String ModAPIVersion = "Mod API v1.1.1";
 	public static final int network_protocol = 46;
 	public static boolean debug = false;
 	public static boolean mapmaking = false;
