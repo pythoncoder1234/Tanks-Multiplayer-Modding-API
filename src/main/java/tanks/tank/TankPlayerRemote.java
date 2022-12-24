@@ -3,8 +3,8 @@ package tanks.tank;
 import tanks.*;
 import tanks.bullet.Bullet;
 import tanks.event.*;
-import tanks.modapi.menus.FixedMenu;
-import tanks.modapi.menus.Scoreboard;
+import tanks.menus.FixedMenu;
+import tanks.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.ItemBar;
@@ -12,7 +12,7 @@ import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemEmpty;
 import tanks.hotbar.item.ItemMine;
-import tanks.modapi.ModAPI;
+import tanks.ModAPI;
 
 public class TankPlayerRemote extends Tank implements IServerPlayerTank
 {
@@ -437,7 +437,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         {
             if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.deaths))
             {
-                if (((Scoreboard) m).players.isEmpty())
+                if (((Scoreboard) m).playerPoints.isEmpty())
                     ((Scoreboard) m).addTeamScore(this.team, 1);
                 else
                     ((Scoreboard) m).addPlayerScore(this.player, 1);

@@ -6,7 +6,7 @@ import tanks.generator.LevelGeneratorVersus;
 import tanks.gui.Button;
 import tanks.gui.ChatBox;
 import tanks.gui.ChatMessage;
-import tanks.modapi.ModAPI;
+import tanks.ModAPI;
 import tanks.network.Server;
 import tanks.network.SynchronizedList;
 import tanks.translation.Translation;

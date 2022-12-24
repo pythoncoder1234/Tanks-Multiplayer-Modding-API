@@ -8,10 +8,10 @@ import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
-import tanks.modapi.ModAPI;
-import tanks.modapi.ModLevel;
-import tanks.modapi.menus.FixedMenu;
-import tanks.modapi.menus.Scoreboard;
+import tanks.ModAPI;
+import tanks.ModLevel;
+import tanks.menus.FixedMenu;
+import tanks.menus.Scoreboard;
 import tanks.obstacle.Obstacle;
 
 public class Explosion extends Movable
@@ -75,8 +75,10 @@ public class Explosion extends Movable
         {
             Game.eventsOut.add(new EventExplosion(this));
 
-            for (Movable m: Game.movables)
+            for (int i = 0; i < Game.movables.size(); i++)
             {
+                Movable m = Game.movables.get(i);
+
                 if (Math.pow(Math.abs(m.posX - this.posX), 2) + Math.pow(Math.abs(m.posY - this.posY), 2) < Math.pow(radius, 2))
                 {
                     if (m instanceof Tank && !m.destroy && ((Tank) m).getDamageMultiplier(this) > 0)
@@ -118,13 +120,13 @@ public class Explosion extends Movable
                                     {
                                         Scoreboard scoreboard = (Scoreboard) menu;
 
-                                        if (!scoreboard.teams.isEmpty())
+                                        if (!scoreboard.teamPoints.isEmpty())
                                             scoreboard.addTeamScore(this.tank.team, 1);
 
-                                        else if (this.tank instanceof TankPlayer && !scoreboard.players.isEmpty())
+                                        else if (this.tank instanceof TankPlayer && !scoreboard.playerPoints.isEmpty())
                                             scoreboard.addPlayerScore(((TankPlayer) this.tank).player, 1);
 
-                                        else if (this.tank instanceof TankPlayerRemote && !scoreboard.players.isEmpty())
+                                        else if (this.tank instanceof TankPlayerRemote && !scoreboard.playerPoints.isEmpty())
                                             scoreboard.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
                                     }
                                 }

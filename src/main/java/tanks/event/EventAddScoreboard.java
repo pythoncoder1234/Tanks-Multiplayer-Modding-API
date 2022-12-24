@@ -1,8 +1,8 @@
 package tanks.event;
 
 import io.netty.buffer.ByteBuf;
-import tanks.modapi.ModAPI;
-import tanks.modapi.menus.RemoteScoreboard;
+import tanks.ModAPI;
+import tanks.menus.RemoteScoreboard;
 import tanks.network.NetworkUtils;
 
 import java.util.ArrayList;

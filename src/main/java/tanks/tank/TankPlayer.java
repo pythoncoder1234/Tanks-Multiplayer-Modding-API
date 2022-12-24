@@ -8,13 +8,13 @@ import tanks.bullet.BulletElectric;
 import tanks.event.EventLayMine;
 import tanks.event.EventShootBullet;
 import tanks.gui.Button;
-import tanks.modapi.menus.FixedMenu;
+import tanks.menus.FixedMenu;
 import tanks.gui.Joystick;
-import tanks.modapi.menus.Scoreboard;
+import tanks.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.item.*;
-import tanks.modapi.ModAPI;
+import tanks.ModAPI;
 
 /**
  * A tank that is controlled by the player.
@@ -32,7 +32,6 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 	public static boolean controlStickMobile = true;
 
 	public Player player = Game.player;
-	public boolean enableDestroyCheat = false;
 
 	public boolean drawTouchCircle = false;
 	public double touchCircleSize = 400;
@@ -58,7 +57,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 		this.orientation = angle;
 		this.player.tank = this;
 
-		if (enableDestroyCheat)
+		if (Game.destroyCheat)
 		{
 			this.showName = true;
 			this.nameTag.colorR = 255;
@@ -96,7 +95,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 				lastTrace = time;
 		}
 
-		if (destroy && this.enableDestroyCheat)
+		if (destroy && Game.destroyCheat)
 		{
 			for (int i = 0; i < Game.movables.size(); i++)
 			{
@@ -480,7 +479,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 		{
 			if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.deaths))
 			{
-				if (((Scoreboard) m).players.isEmpty())
+				if (((Scoreboard) m).playerPoints.isEmpty())
 					((Scoreboard) m).addTeamScore(this.team, 1);
 				else
 					((Scoreboard) m).addPlayerScore(this.player, 1);

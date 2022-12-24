@@ -45,9 +45,8 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		try
 		{
 			assert Game.currentLevel != null;
-			Game.currentLevel = Game.currentLevel.getClass().getConstructor().newInstance();
+			Game.currentLevel = Game.currentLevel.getClass().getConstructor(String.class).newInstance(Game.currentLevel.levelString);
 			Game.currentLevel.loadLevel();
-
 		}
 		catch (Exception e)
 		{

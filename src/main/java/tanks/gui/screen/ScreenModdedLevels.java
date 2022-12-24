@@ -5,9 +5,9 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.ButtonList;
 import tanks.gui.SearchBox;
-import tanks.modapi.ModAPI;
-import tanks.modapi.ModGame;
-import tanks.modapi.ModLevel;
+import tanks.ModAPI;
+import tanks.ModGame;
+import tanks.ModLevel;
 
 import java.util.ArrayList;
 

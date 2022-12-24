@@ -4,7 +4,9 @@ import basewindow.BaseFile;
 import tanks.*;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
+import tanks.hotbar.item.Item;
 import tanks.obstacle.Obstacle;
+import tanks.tank.TankAIControlled;
 import tanks.tank.TankSpawnMarker;
 
 import java.io.IOException;
@@ -125,6 +127,23 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
                     {
                         file.startWriting();
                         file.println(level.levelString);
+
+                        ArrayList<TankAIControlled> customTanks = previous2.crusade.customTanks;
+                        if (customTanks.size() > 0)
+                        {
+                            file.println("tanks");
+                            for (TankAIControlled t : customTanks)
+                                file.println(t.toString());
+                        }
+
+                        ArrayList<Item> shop = previous2.crusade.crusadeItems;
+                        if (shop.size() > 0)
+                        {
+                            file.println("shop");
+                            for (Item i : shop)
+                                file.println(i.toString());
+                        }
+
                         file.stopWriting();
                         success = true;
                     }

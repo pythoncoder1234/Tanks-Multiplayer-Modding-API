@@ -11,8 +11,7 @@ import tanks.gui.TextBox;
 import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
-import tanks.modapi.ModAPI;
-import tanks.modapi.menus.FixedMenu;
+import tanks.menus.FixedMenu;
 import tanks.network.Client;
 import tanks.network.ClientHandler;
 import tanks.network.MessageReader;
@@ -785,12 +784,6 @@ public class Panel
 			this.onlineOverlay.draw();
 		else
 			Game.screen.draw();
-
-		if (Game.screen instanceof ScreenGame)
-		{
-			for (FixedMenu menu : ModAPI.menuGroup)
-				menu.draw();
-		}
 
 		ScreenOverlayChat.draw(!(Game.screen instanceof IHiddenChatboxScreen));
 

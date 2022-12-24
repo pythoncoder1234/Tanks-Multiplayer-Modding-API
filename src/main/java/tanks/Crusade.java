@@ -425,13 +425,12 @@ public class Crusade
 		return true;
 	}
 
-	public ArrayList<Item> getShop() 
+	public ArrayList<Item> getShop()
 	{
 		ArrayList<Item> shop = new ArrayList<>();
-		
-		for (int i = 0; i < this.crusadeItems.size(); i++)
+
+		for (Item item : this.crusadeItems)
 		{
-			Item item = this.crusadeItems.get(i);
 			if (item.levelUnlock <= this.currentLevel)
 				shop.add(item);
 		}

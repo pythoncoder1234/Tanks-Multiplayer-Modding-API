@@ -68,7 +68,7 @@ public class ScreenDownloadLevel extends ScreenLayout
     {
         this.player.screen = this;
 
-        this.player.sendEvent(new EventSetMusic(this.music, Game.musicVolume, true, musicID, 500));
+        this.player.sendEvent(new EventPlayMusic(this.music, Game.musicVolume, true, musicID, 500));
 
         this.player.sendEvent(new EventSendLevelToDownload(this.name, level.level));
 

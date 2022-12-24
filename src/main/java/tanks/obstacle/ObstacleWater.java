@@ -3,8 +3,8 @@ package tanks.obstacle;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
-import tanks.modapi.ModAPI;
-import tanks.modapi.ModLevel;
+import tanks.ModAPI;
+import tanks.ModLevel;
 import tanks.tank.IAvoidObject;
 import tanks.tank.Tank;
 

@@ -21,7 +21,7 @@ public abstract class ScreenSpecial extends ScreenLayout
     public void setScreen()
     {
         this.player.sendEvent(new EventSetScreen(this.id));
-        this.player.sendEvent(new EventSetMusic(this.music, Game.musicVolume, true, musicID, 500));
+        this.player.sendEvent(new EventPlayMusic(this.music, Game.musicVolume, true, musicID, 500));
 
         this.player.screen = this;
 

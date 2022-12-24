@@ -8,7 +8,8 @@ public class SpeedrunTimer
 {
     public static void draw()
     {
-        if (!Game.showSpeedrunTimer || Game.recordMode)
+        if (!Game.showSpeedrunTimer || Game.recordMode ||
+                (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).noSpeedrunTimer))
             return;
 
         double alpha = 127;

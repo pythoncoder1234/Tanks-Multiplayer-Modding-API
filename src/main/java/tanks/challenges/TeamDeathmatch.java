@@ -1,11 +1,11 @@
 package tanks.challenges;
 
-import tanks.modapi.ModAPI;
-import tanks.modapi.ModLevel;
-import tanks.modapi.menus.FixedText;
-import tanks.modapi.menus.Scoreboard;
+import tanks.ModAPI;
+import tanks.ModLevel;
+import tanks.menus.FixedText;
+import tanks.menus.Scoreboard;
 import tanks.obstacle.ObstacleIndestructible;
-import tanks.modapi.TankNPC;
+import tanks.tank.TankNPC;
 
 public class TeamDeathmatch extends ModLevel
 {

@@ -3,13 +3,13 @@ package tanks.bullet;
 import tanks.*;
 import tanks.event.*;
 import tanks.gui.ChatMessage;
-import tanks.modapi.menus.FixedMenu;
-import tanks.modapi.menus.Scoreboard;
+import tanks.menus.FixedMenu;
+import tanks.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.hotbar.item.ItemBullet;
-import tanks.modapi.ModAPI;
-import tanks.modapi.ModLevel;
+import tanks.ModAPI;
+import tanks.ModLevel;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
@@ -173,6 +173,9 @@ public class Bullet extends Movable implements IDrawable
 
 		this.drawLevel = 8;
 
+		if (Game.currentGame != null)
+			Game.currentGame.onBulletFire(this);
+
 		for (FixedMenu m : ModAPI.menuGroup)
 		{
 			if (m instanceof Scoreboard)
@@ -183,7 +186,7 @@ public class Bullet extends Movable implements IDrawable
 						s.objectiveType.equals(Scoreboard.objectiveTypes.shots_fired_no_multiple_fire)
 								&& !(this instanceof BulletHealing || this instanceof BulletFlame))
 				{
-					if (s.players.isEmpty())
+					if (s.playerPoints.isEmpty())
 						s.addTeamScore(this.team, 1);
 					else if (this.tank instanceof TankPlayer)
 						s.addPlayerScore(((TankPlayer) this.tank).player, 1);
@@ -259,13 +262,13 @@ public class Bullet extends Movable implements IDrawable
 					{
 						Scoreboard scoreboard = (Scoreboard) menu;
 
-						if (!scoreboard.teams.isEmpty())
+						if (!scoreboard.teamPoints.isEmpty())
 							scoreboard.addTeamScore(this.tank.team, 1);
 
-						else if (this.tank instanceof TankPlayer && !scoreboard.players.isEmpty())
+						else if (this.tank instanceof TankPlayer && !scoreboard.playerPoints.isEmpty())
 							scoreboard.addPlayerScore(((TankPlayer) this.tank).player, 1);
 
-						else if (this.tank instanceof TankPlayerRemote && !scoreboard.players.isEmpty())
+						else if (this.tank instanceof TankPlayerRemote && !scoreboard.playerPoints.isEmpty())
 							scoreboard.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
 					}
 				}

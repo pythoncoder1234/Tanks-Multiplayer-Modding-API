@@ -5,7 +5,6 @@ import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.gui.screen.leveleditor.ScreenLevelEditorOverlay;
 import tanks.hotbar.item.Item;
-import tanks.modapi.ModAPI;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
@@ -86,9 +85,9 @@ public class Level
 
 	/**
 	 * A level string is structured like this:
-	 * (parentheses signify required parameters, and square brackets signify optional parameters. 
+	 * parentheses signify required parameters, and square brackets signify optional parameters.
 	 * Asterisks indicate that the parameter can be repeated, separated by commas
-	 * Do not include these in the level string.)
+	 * Do not include these in the level string.
 	 * {(SizeX),(SizeY),[(Red),(Green),(Blue)],[(RedNoise),(GreenNoise),(BlueNoise)]|[(ObstacleX)-(ObstacleY)-[ObstacleMetadata]]*|[(TankX)-(TankY)-(TankType)-[TankAngle]-[TeamName]]*|[(TeamName)-[FriendlyFire]-[(Red)-(Green)-(Blue)]]*}
 	 */
 	public Level(String level)
@@ -138,7 +137,7 @@ public class Level
 						if (screen[0].startsWith("*"))
 						{
 							editable = false;
-							screen[0] = screen[0].substring(1);
+							screen[0] = screen[0].substring( 1);
 						}
 					}
 					else if (parsing == 4)
@@ -813,28 +812,28 @@ public class Level
 
 		if (killed.team != null && killed.team.enableColor)
 		{
-			killedR = str(killed.team.teamColorR);
-			killedG = str(killed.team.teamColorG);
-			killedB = str(killed.team.teamColorB);
+			killedR = String.format("%03.0f", killed.team.teamColorR);
+			killedG = String.format("%03.0f", killed.team.teamColorG);
+			killedB = String.format("%03.0f", killed.team.teamColorB);
 		}
 		else
 		{
-			killedR = str(killed.colorR);
-			killedG = str(killed.colorG);
-			killedB = str(killed.colorB);
+			killedR = String.format("%03.0f", killed.colorR);
+			killedG = String.format("%03.0f", killed.colorG);
+			killedB = String.format("%03.0f", killed.colorB);
 		}
 
 		if (killer.team != null && killer.team.enableColor)
 		{
-			killR = str(killer.team.teamColorR);
-			killB = str(killer.team.teamColorB);
-			killG = str(killer.team.teamColorG);
+			killR = String.format("%03.0f", killer.team.teamColorR);
+			killB = String.format("%03.0f", killer.team.teamColorB);
+			killG = String.format("%03.0f", killer.team.teamColorG);
 		}
 		else
 		{
-			killR = str(killer.colorR);
-			killG = str(killer.colorG);
-			killB = str(killer.colorB);
+			killR = String.format("%03.0f", killer.colorR);
+			killG = String.format("%03.0f", killer.colorG);
+			killB = String.format("%03.0f", killer.colorB);
 		}
 
 		message.append("\u00a7").append(killedR).append(killedG).append(killedB).append("255");
@@ -903,15 +902,15 @@ public class Level
 
 		if (killed.team != null && killed.team.enableColor)
 		{
-			killedR = str(killed.team.teamColorR);
-			killedG = str(killed.team.teamColorG);
-			killedB = str(killed.team.teamColorB);
+			killedR = String.format("%03.0f", killed.team.teamColorR);
+			killedG = String.format("%03.0f", killed.team.teamColorG);
+			killedB = String.format("%03.0f", killed.team.teamColorB);
 		}
 		else
 		{
-			killedR = str(killed.colorR);
-			killedG = str(killed.colorG);
-			killedB = str(killed.colorB);
+			killedR = String.format("%03.0f", killed.colorR);
+			killedG = String.format("%03.0f", killed.colorG);
+			killedB = String.format("%03.0f", killed.colorB);
 		}
 
 		message.append("\u00a7").append(killedR).append(killedG).append(killedB).append("255");
@@ -943,11 +942,5 @@ public class Level
 
 		message.append(textColor).append(" drowned");
 		return message.toString();
-	}
-
-	/** im lazy lol */
-	private static String str(double s)
-	{
-		return ModAPI.convertToString(s, 3);
 	}
 }

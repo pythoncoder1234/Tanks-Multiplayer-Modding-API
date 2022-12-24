@@ -3,7 +3,7 @@ package tanks.gui.screen;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
-import tanks.modapi.ModAPI;
+import tanks.ModAPI;
 
 public class ScreenPlaySingleplayer extends Screen
 {

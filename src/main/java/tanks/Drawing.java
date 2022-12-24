@@ -388,7 +388,13 @@ public class Drawing
 		Game.game.window.shapeRenderer.drawOval(drawX, drawY, drawSizeX, drawSizeY);
 	}
 
+
 	public void fillRect(double x, double y, double sizeX, double sizeY)
+	{
+		fillRect(x, y, sizeX, sizeY, 0);
+	}
+
+	public void fillRect(double x, double y, double sizeX, double sizeY, double borderRadius)
 	{
 		double drawX = gameToAbsoluteX(x, sizeX);
 		double drawY = gameToAbsoluteY(y, sizeY);
@@ -399,7 +405,7 @@ public class Drawing
 		double drawSizeX = (sizeX * scale);
 		double drawSizeY = (sizeY * scale);
 
-		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY);
+		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY, borderRadius);
 	}
 
 	public void fillBackgroundRect(IBatchRenderableObject o, double x, double y, double sizeX, double sizeY)
@@ -757,6 +763,16 @@ public class Drawing
 
 	public void drawRect(double x, double y, double sizeX, double sizeY)
 	{
+		drawRect(x, y, sizeX, sizeY, 1, 0);
+	}
+
+	public void drawRect(double x, double y, double sizeX, double sizeY, double borderWidth)
+	{
+		drawRect(x, y, sizeX, sizeY, borderWidth, 0);
+	}
+
+	public void drawRect(double x, double y, double sizeX, double sizeY, double borderWidth, double borderRadius)
+	{
 		double drawX = gameToAbsoluteX(x, sizeX);
 		double drawY = gameToAbsoluteY(y, sizeY);
 
@@ -766,7 +782,7 @@ public class Drawing
 		double drawSizeX = (sizeX * scale);
 		double drawSizeY = (sizeY * scale);
 
-		Game.game.window.shapeRenderer.drawRect(drawX, drawY, drawSizeX, drawSizeY);
+		Game.game.window.shapeRenderer.drawRect(drawX, drawY, drawSizeX, drawSizeY, borderWidth, borderRadius);
 	}
 
 	public void fillInterfaceOval(double x, double y, double sizeX, double sizeY)
@@ -1090,6 +1106,18 @@ public class Drawing
 		}
 
 		//return (y - (drawY / Window.scale + sizeY + yPadding / Window.scale * 2));
+	}
+
+	public void drawPopup(double x, double y, double sX, double sY)
+	{
+		drawPopup(x, y, sX, sY, 0, 0, 0);
+	}
+
+	public void drawPopup(double x, double y, double sX, double sY, double r, double g, double b)
+	{
+		Drawing.drawing.setColor(r, g, b, 64);
+		fillRect(x, y, sX, sY, (sX + sY) / 65);
+		drawRect(x, y, sX, sY,  (sX + sY) / 12, (sX + sY) / 65);
 	}
 
 	public void playMusic(String sound, float volume, boolean looped, String id, long fadeTime)

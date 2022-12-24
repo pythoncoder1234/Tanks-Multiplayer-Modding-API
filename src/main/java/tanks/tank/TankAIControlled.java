@@ -8,7 +8,6 @@ import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
-import tanks.modapi.TankNPC;
 import tanks.obstacle.Obstacle;
 import tanks.obstacle.ObstacleTeleporter;
 import tanks.registry.RegistryTank;

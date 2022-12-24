@@ -3,11 +3,11 @@ package tanks.tank;
 import tanks.*;
 import tanks.event.EventMineChangeTimer;
 import tanks.event.EventMineExplode;
-import tanks.modapi.menus.FixedMenu;
-import tanks.modapi.menus.Scoreboard;
+import tanks.menus.FixedMenu;
+import tanks.menus.Scoreboard;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemMine;
-import tanks.modapi.ModAPI;
+import tanks.ModAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +81,7 @@ public class Mine extends Movable implements IAvoidObject
         {
             if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.mines_placed))
             {
-                if (((Scoreboard) m).players.isEmpty())
+                if (((Scoreboard) m).playerPoints.isEmpty())
                     ((Scoreboard) m).addTeamScore(this.team, 1);
 
                 else if (this.tank instanceof TankPlayer)

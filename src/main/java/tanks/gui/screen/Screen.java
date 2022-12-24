@@ -59,6 +59,8 @@ public abstract class Screen implements IBatchRenderableObject
 		this.titleSize = this.textSize * 1.25;
 
 		this.setupLayoutParameters();
+
+		Game.game.window.setShowCursor(!Panel.showMouseTarget);
 	}
 
 	public abstract void update();

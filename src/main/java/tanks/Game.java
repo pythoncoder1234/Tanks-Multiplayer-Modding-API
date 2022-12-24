@@ -5,6 +5,7 @@ import basewindow.BaseFileManager;
 import basewindow.BaseWindow;
 import basewindow.ModelPart;
 import tanks.bullet.*;
+import tanks.event.EventSetMusic;
 import tanks.event.*;
 import tanks.event.online.*;
 import tanks.extension.Extension;
@@ -24,7 +25,6 @@ import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemMine;
 import tanks.hotbar.item.ItemShield;
-import tanks.modapi.ModGame;
 import tanks.network.Client;
 import tanks.network.NetworkEventMap;
 import tanks.network.SteamNetworkHandler;
@@ -116,6 +116,7 @@ public class Game
 	public static boolean mapmaking = false;
 	public static boolean showIDs = false;
 	public static boolean invulnerable = false;
+	public static boolean destroyCheat = false;
 	public static boolean traceAllRays = false;
 	public static boolean showPathfinding = false;
 	public static final boolean cinematic = false;
@@ -1148,6 +1149,7 @@ public class Game
 		if (Game.game.window != null)
 			Game.game.window.setCursorLocked(false);
 
+		ModAPI.menuGroup.clear();
 		obstacles.clear();
 		tracks.clear();
 		movables.clear();
@@ -1292,16 +1294,36 @@ public class Game
 		return a < b && b < c;
 	}
 
+	public static boolean lessThan(boolean orEqualTo, double a, double b, double c)
+	{
+		if (!orEqualTo)
+			return lessThan(a, b, c);
+
+		return a <= b && b <= c;
+	}
+
 	public static boolean lessThan(double... nums)
+	{
+		return lessThan(false, nums);
+	}
+
+	public static boolean lessThan(boolean orEqualTo, double... nums)
 	{
 		if (nums.length < 2)
 			return true;
 
-
 		for (int i = 0; i < nums.length; i++)
 		{
-			if (nums[i] >= nums[i+1])
-				return false;
+			if (!orEqualTo)
+			{
+				if (nums[i] >= nums[i+1])
+					return false;
+			}
+			else
+			{
+				if (nums[i] > nums[i+1])
+					return false;
+			}
 		}
 
 		return true;

@@ -37,6 +37,7 @@ public class ScreenDebug extends Screen
             traceAllRays.setText(traceText, ScreenOptions.offText);
 
         showPathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
+        destroyCheat.setText("Destroy Cheat: ", Game.destroyCheat ? ScreenOptions.onText : ScreenOptions.offText);
 
         if (Game.firstPerson)
             firstPerson.setText(firstPersonText, ScreenOptions.onText);
@@ -49,19 +50,21 @@ public class ScreenDebug extends Screen
             followingCam.setText(followingCamText, ScreenOptions.offText);
     }
 
-    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 190, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenTitle()
+    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 250, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenTitle()
     );
 
     Button keyboardTest = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 150, this.objWidth, this.objHeight, "Test keyboard", () -> Game.screen = new ScreenTestKeyboard()
     );
 
-    Button textboxTest = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 90, this.objWidth, this.objHeight, "Test text boxes", () -> Game.screen = new ScreenTestTextbox()
+    Button textboxTest = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 150, this.objWidth, this.objHeight, "Test text boxes", () -> Game.screen = new ScreenTestTextbox()
     );
 
-    Button modelTest = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 30, this.objWidth, this.objHeight, "Test models", () -> Game.screen = new ScreenTestModel(Drawing.drawing.createModel("/models/tankcamoflauge/base/"))
+    Button modelTest = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 90, this.objWidth, this.objHeight, "Test models", () -> Game.screen = new ScreenTestModel(Drawing.drawing.createModel("/models/tankcamoflauge/base/"))
     );
 
-    Button mapmaking = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 30, this.objWidth, this.objHeight, "", new Runnable()
+    Button colorsTest = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 90, this.objWidth, this.objHeight, "Test colors", () -> Game.screen = new ScreenTestColors());
+
+    Button mapmaking = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 30, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -75,7 +78,7 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button showIDs = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 90, this.objWidth, this.objHeight, "", new Runnable()
+    Button showIDs = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 30, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -85,7 +88,7 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button traceAllRays = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 150, this.objWidth, this.objHeight, "", new Runnable()
+    Button traceAllRays = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 30, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -99,13 +102,23 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button showPathfinding = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 90, this.objWidth, this.objHeight, "", new Runnable()
+    Button showPathfinding = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 90, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
         {
             Game.showPathfinding = !Game.showPathfinding;
             showPathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button destroyCheat = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.destroyCheat = !Game.destroyCheat;
+            destroyCheat.setText("Destroy Cheat: ", Game.destroyCheat ? ScreenOptions.onText : ScreenOptions.offText);
         }
     });
 
@@ -123,7 +136,7 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button firstPerson = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 30, this.objWidth, this.objHeight, "", new Runnable()
+    Button firstPerson = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 90, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -137,7 +150,7 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button invulnerable = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 90, this.objWidth, this.objHeight, "", new Runnable()
+    Button invulnerable = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -153,10 +166,12 @@ public class ScreenDebug extends Screen
         keyboardTest.update();
         textboxTest.update();
         modelTest.update();
+        colorsTest.update();
         showIDs.update();
         traceAllRays.update();
         mapmaking.update();
         showPathfinding.update();
+        destroyCheat.update();
         followingCam.update();
         firstPerson.update();
         invulnerable.update();
@@ -176,9 +191,11 @@ public class ScreenDebug extends Screen
         modelTest.draw();
         keyboardTest.draw();
         textboxTest.draw();
+        colorsTest.draw();
         mapmaking.draw();
         showIDs.draw();
         traceAllRays.draw();
+        destroyCheat.draw();
         showPathfinding.draw();
         invulnerable.draw();
         back.draw();

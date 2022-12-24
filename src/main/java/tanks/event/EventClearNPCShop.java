@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.Movable;
 import tanks.gui.ButtonList;
 import tanks.gui.screen.ScreenGame;
-import tanks.modapi.TankNPC;
+import tanks.tank.TankNPC;
 
 import java.util.ArrayList;
 

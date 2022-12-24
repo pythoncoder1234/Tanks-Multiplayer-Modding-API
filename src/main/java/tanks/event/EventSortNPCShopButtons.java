@@ -3,7 +3,7 @@ package tanks.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
 import tanks.Movable;
-import tanks.modapi.TankNPC;
+import tanks.tank.TankNPC;
 
 public class EventSortNPCShopButtons extends PersonalEvent
 {

@@ -5,6 +5,6 @@
 .DS_Store
 /.vscode
 /libs/
-/src/main/java/tanks/modapi/modlevels/*
+/src/main/java/tanks/modlevels/*
 /out/
 /.idea/

@@ -14,9 +14,10 @@ import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.ItemBar;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemRemote;
-import tanks.modapi.ModAPI;
-import tanks.modapi.ModLevel;
-import tanks.modapi.menus.Minimap;
+import tanks.ModAPI;
+import tanks.ModLevel;
+import tanks.menus.FixedMenu;
+import tanks.menus.Minimap;
 import tanks.network.Client;
 import tanks.obstacle.Face;
 import tanks.obstacle.ISolidObject;
@@ -31,6 +32,8 @@ import java.util.HashSet;
 public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGameScreen
 {
 	public static float sensMultiplier = 1;
+	public static boolean disableSpeedrunTimer = false;
+	public static boolean addTankMusics = true;
 
 	public boolean playing = false;
 	public boolean paused = false;
@@ -99,7 +102,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 	public HashSet<String> prevTankMusics = new HashSet<>();
 	public HashSet<String> tankMusics = new HashSet<>();
-	protected boolean musicStarted = false;
+	public boolean musicStarted = false;
 
 	public boolean zoomPressed = false;
 	public boolean zoomScrolled = false;
@@ -117,19 +120,26 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	/**
 	 * (Whether there is a) Remote level end condition
 	 */
-	public boolean remoteLevelEnd = false;
+	public boolean remoteLevelEnd;
 	public boolean remoteLevelEnded = false;
 	public static boolean skipCountdown = false;
+
+	public boolean noSpeedrunTimer;
+	public boolean tankMusic;
 
 	@SuppressWarnings("unchecked")
 	public ArrayList<IDrawable>[] drawables = (ArrayList<IDrawable>[]) (new ArrayList[10]);
 
+	public Runnable onLevelStart = null;
+
 	Button play = new Button(Drawing.drawing.interfaceSizeX - 200, Drawing.drawing.interfaceSizeY - 50, 350, 40, "Play", () ->
 	{
+		if (onLevelStart != null)
+			onLevelStart.run();
+
 		playing = true;
 		Game.playerTank.setBufferCooldown(20);
-	}
-	);
+	});
 
 	Button readyButton = new Button(Drawing.drawing.interfaceSizeX - 200, Drawing.drawing.interfaceSizeY - 50, 350, 40, "Ready", () ->
 	{
@@ -280,7 +290,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		Game.silentCleanUp();
 
-		if (Game.currentGame != null && Game.currentGame.customRestart)
+		if (Game.currentGame != null)
 			Game.currentGame.onLevelRestart();
 
 		else if (Game.currentLevel instanceof ModLevel)
@@ -531,11 +541,14 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		quitHigherPos = quit.clone(-this.objYSpace / 2);
 		restartLowerPos = restart.clone(this.objYSpace / 2);
 
-		if (remoteCustomLevelEndCondition)
-		{
-			remoteCustomLevelEndCondition = false;
-			remoteLevelEnd = true;
-		}
+		remoteLevelEnd = remoteCustomLevelEndCondition;
+		remoteCustomLevelEndCondition = false;
+
+		noSpeedrunTimer = disableSpeedrunTimer;
+		disableSpeedrunTimer = false;
+
+		tankMusic = addTankMusics;
+		addTankMusics = true;
 
 		this.selfBatch = false;
 
@@ -641,10 +654,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			startNow.posX -= 20;
 		}
 
-		if (Game.currentLevel != null && Game.currentLevel.timed)
-		{
+		if ((Game.currentLevel != null) && Game.currentLevel.timed)
 			this.timeRemaining = Game.currentLevel.timer;
-		}
 	}
 
 	public ScreenGame(String s)
@@ -906,7 +917,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			this.playCounter = -1;
 		}
 
-		if (this.playCounter < 0 && !finishedQuick)
+		if (this.playCounter < 0 && !finishedQuick && tankMusic)
 		{
 			if (Game.currentLevel != null && Game.currentLevel.timed)
 			{
@@ -931,9 +942,10 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				if (Level.isDark())
 					this.musicID = "battle_night";
 
-
 				if (!this.musicStarted)
+				{
 					this.musicStarted = true;
+				}
 				else
 				{
 					this.prevTankMusics.clear();
@@ -1339,6 +1351,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		}
 		else
 		{
+			if (onLevelStart != null && Game.startTime < 0 && !playing)
+				onLevelStart.run();
+
 			playing = true;
 
 			if (Game.followingCam)
@@ -1521,15 +1536,20 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 				if (this.timeRemaining <= 0)
 				{
-					this.saveRemainingTanks();
-
-					for (Movable m : Game.movables)
+					if (Game.currentGame == null)
 					{
-						m.destroy = true;
+						this.saveRemainingTanks();
 
-						if (m instanceof Tank)
-							((Tank) m).health = 0;
+						for (Movable m : Game.movables)
+						{
+							m.destroy = true;
+
+							if (m instanceof Tank)
+								((Tank) m).health = 0;
+						}
 					}
+					else
+						Game.currentGame.onTimerEnd();
 				}
 			}
 
@@ -2410,6 +2430,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				}
 			}
 		}
+
+		for (FixedMenu menu : ModAPI.menuGroup)
+			menu.draw();
 
 		if (!paused && Game.game.window.touchscreen && !shopScreen)
 		{
