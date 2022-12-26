@@ -17,8 +17,7 @@ public class EventEnterLevel extends PersonalEvent
 	{
 		if (this.clientID == null)
 		{
-			ScreenGame s = new ScreenGame();
-			Game.screen = s;
+			Game.screen = new ScreenGame();
 
 			if (Game.autoReady)
 				Game.eventsOut.add(new EventPlayerAutoReady());

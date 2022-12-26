@@ -115,19 +115,24 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         }
 
         if (Game.enable3d)
-            for (Obstacle o: Game.obstacles)
+        {
+            for (Obstacle o : Game.obstacles)
             {
-                o.postOverride();
-
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);
 
-                if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
+                if (x >= 0 && x < Game.currentSizeX && y > 0 && y < Game.currentSizeY)
                 {
-                    Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
-                    Game.game.groundHeightGrid[x][y] = Math.max(o.getGroundHeight(), Game.game.groundHeightGrid[x][y]);
+                    o.postOverride();
+
+                    if (!(!Game.fancyTerrain || !Game.enable3d))
+                    {
+                        Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
+                        Game.game.groundHeightGrid[x][y] = Math.max(o.getGroundHeight(), Game.game.groundHeightGrid[x][y]);
+                    }
                 }
             }
+        }
 
         this.drawDefaultBackground();
 
@@ -196,168 +201,178 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
 
     public void draw()
     {
-        Transformation prevShadow = Game.game.window.lightBaseTransformation[0];
-        Game.game.window.lightBaseTransformation[0] = this.shadowScale;
-
-        if (Game.enable3d)
+        try
         {
-            Game.game.window.transformations.add(this.transform);
-        }
+            Transformation prevShadow = Game.game.window.lightBaseTransformation[0];
+            Game.game.window.lightBaseTransformation[0] = this.shadowScale;
 
-        Game.game.window.loadPerspective();
-
-        if (Game.game.window.drawingShadow)
-            this.age += Panel.frameFrequency;
-
-        ArrayList<Movable> movables = Game.movables;
-        ArrayList<Obstacle> obstacles = Game.obstacles;
-
-        if (!initialized)
-        {
-            ScreenLevel l0 = new ScreenLevel();
-            this.levels.add(l0);
-            l0.levelString = "{28,18||10000-0-player}";
-
-            for (Crusade.CrusadeLevel level: this.crusade.levels)
+            if (Game.enable3d)
             {
-                ScreenLevel l = new ScreenLevel();
-                this.levels.add(l);
-                l.levelString = level.levelString;
-                l.tanks = level.tanks;
+                Game.game.window.transformations.add(this.transform);
             }
 
-            ScreenLevel l = new ScreenLevel();
-            this.levels.add(l);
-            l.levelString = "{28,18||10000-0-player}";
-        }
+            Game.game.window.loadPerspective();
 
-        double indexStart = getLevelPos(this.age / 10);
-        int iindexStart = (int) indexStart;
-        double rem = indexStart - iindexStart;
+            if (Game.game.window.drawingShadow)
+                this.age += Panel.frameFrequency;
 
-        this.initialized = true;
+            ArrayList<Movable> movables = Game.movables;
+            ArrayList<Obstacle> obstacles = Game.obstacles;
 
-        for (int i = -28; i <= 28 * 2; i++)
-        {
-            if (i == 28 * 2 || this.levelsPos.get((int) getLevelPos(i + iindexStart)) != null)
+            if (!initialized)
             {
-                int j = (int) getLevelPos(i + iindexStart);
-                ScreenLevel l;
-                while (true)
+                ScreenLevel l0 = new ScreenLevel();
+                this.levels.add(l0);
+                l0.levelString = "{28,18||10000-0-player}";
+
+                for (Crusade.CrusadeLevel level : this.crusade.levels)
                 {
-                    if (this.levelsPos.get(j) != null)
-                    {
-                        l = this.levelsPos.get(j);
-                        break;
-                    }
-
-                    j++;
-                    i++;
-
-                    j = (int) getLevelPos(j);
-
-                    if (!allLoaded && j > this.index)
-                    {
-                        ScreenLevel n = this.levels.get(this.levelsLoaded);
-
-                        Game.movables = movables;
-                        Game.obstacles = obstacles;
-
-                        initialize(n);
-                        this.levelsLoaded++;
-
-                        if (levels.indexOf(n) == levels.size() - 1)
-                            allLoaded = true;
-                    }
+                    ScreenLevel l = new ScreenLevel();
+                    this.levels.add(l);
+                    l.levelString = level.levelString;
+                    l.tanks = level.tanks;
                 }
 
-                if (l == null)
-                    break;
+                ScreenLevel l = new ScreenLevel();
+                this.levels.add(l);
+                l.levelString = "{28,18||10000-0-player}";
+            }
 
-                Drawing.drawing.setRenderer(l.renderer);
+            double indexStart = getLevelPos(this.age / 10);
+            int iindexStart = (int) indexStart;
+            double rem = indexStart - iindexStart;
 
-                Game.movables = l.movables;
-                Game.obstacles = l.obstacles;
+            this.initialized = true;
 
-                Drawing.drawing.drawTerrainRenderers(false, Drawing.drawing.interfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size, Game.tile_size * -(i - rem), 0, 1);
-
-                for (Movable m: Game.movables)
+            for (int i = -28; i <= 28 * 2; i++)
+            {
+                if (i == 28 * 2 || this.levelsPos.get((int) getLevelPos(i + iindexStart)) != null)
                 {
-                    drawables[m.drawLevel].add(m);
-
-                    if (m.showName)
-                        drawables[m.nameTag.drawLevel].add(m.nameTag);
-                }
-
-                if (Game.enable3d && Game.game.window.shapeRenderer.supportsBatching)
-                {
-                    for (int n = 0; n < drawables.length; n++)
+                    int j = (int) getLevelPos(i + iindexStart);
+                    ScreenLevel l;
+                    while (true)
                     {
-                        for (Obstacle o : Game.obstacles)
+                        if (this.levelsPos.get(j) != null)
                         {
-                            if (o.drawLevel == n && !o.batchDraw)
+                            l = this.levelsPos.get(j);
+                            break;
+                        }
+
+                        j++;
+                        i++;
+
+                        j = (int) getLevelPos(j);
+
+                        if (!allLoaded && j > this.index)
+                        {
+                            ScreenLevel n = this.levels.get(this.levelsLoaded);
+
+                            Game.movables = movables;
+                            Game.obstacles = obstacles;
+
+                            initialize(n);
+                            this.levelsLoaded++;
+
+                            if (levels.indexOf(n) == levels.size() - 1)
+                                allLoaded = true;
+                        }
+                    }
+
+                    if (l == null)
+                        break;
+
+                    Drawing.drawing.setRenderer(l.renderer);
+
+                    Game.movables = l.movables;
+                    Game.obstacles = l.obstacles;
+
+                    Drawing.drawing.drawTerrainRenderers(false, Drawing.drawing.interfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size, Game.tile_size * -(i - rem), 0, 1);
+
+                    for (Movable m : Game.movables)
+                    {
+                        drawables[m.drawLevel].add(m);
+
+                        if (m.showName)
+                            drawables[m.nameTag.drawLevel].add(m.nameTag);
+                    }
+
+                    if (Game.enable3d && Game.game.window.shapeRenderer.supportsBatching)
+                    {
+                        for (int n = 0; n < drawables.length; n++)
+                        {
+                            for (Obstacle o : Game.obstacles)
                             {
-                                drawables[n].add(o);
+                                if (o.drawLevel == n && !o.batchDraw)
+                                {
+                                    drawables[n].add(o);
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    for (Obstacle o : Game.obstacles)
+                    else
                     {
-                        drawables[o.drawLevel].add(o);
-                    }
-                }
-
-                translation.x = (Drawing.drawing.interfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size) / Game.game.window.absoluteWidth * Drawing.drawing.interfaceScale;
-                translation.y = Game.tile_size * -(i - rem) / Game.game.window.absoluteHeight * Drawing.drawing.scale;
-                translation.applyAsShadow = true;
-                Game.game.window.addMatrix();
-                translation.apply();
-
-                if (Game.game.window.drawingShadow)
-                {
-                    translation.x *= this.shadowScaleNum;
-                    translation.y *= this.shadowScaleNum;
-                }
-
-                for (ArrayList<IDrawable> drawable : this.drawables)
-                {
-                    for (IDrawable d : drawable)
-                    {
-                        if (d != null)
-                            d.draw();
-                    }
-
-                    if (Game.glowEnabled)
-                    {
-                        for (IDrawable d : drawable)
+                        for (Obstacle o : Game.obstacles)
                         {
-                            if (d instanceof IDrawableWithGlow && ((IDrawableWithGlow) d).isGlowEnabled())
-                                ((IDrawableWithGlow) d).drawGlow();
+                            drawables[o.drawLevel].add(o);
                         }
                     }
 
-                    drawable.clear();
+                    translation.x = (Drawing.drawing.interfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size) / Game.game.window.absoluteWidth * Drawing.drawing.interfaceScale;
+                    translation.y = Game.tile_size * -(i - rem) / Game.game.window.absoluteHeight * Drawing.drawing.scale;
+                    translation.applyAsShadow = true;
+                    Game.game.window.addMatrix();
+                    translation.apply();
+
+                    if (Game.game.window.drawingShadow)
+                    {
+                        translation.x *= this.shadowScaleNum;
+                        translation.y *= this.shadowScaleNum;
+                    }
+
+                    for (ArrayList<IDrawable> drawable : this.drawables)
+                    {
+                        for (IDrawable d : drawable)
+                        {
+                            if (d != null)
+                                d.draw();
+                        }
+
+                        if (Game.glowEnabled)
+                        {
+                            for (IDrawable d : drawable)
+                            {
+                                if (d instanceof IDrawableWithGlow && ((IDrawableWithGlow) d).isGlowEnabled())
+                                    ((IDrawableWithGlow) d).drawGlow();
+                            }
+                        }
+
+                        drawable.clear();
+                    }
+
+                    translation.y = 0;
+                    translation.z = 0;
+
+                    Game.game.window.removeMatrix();
                 }
-
-                translation.y = 0;
-                translation.z = 0;
-
-                Game.game.window.removeMatrix();
             }
+
+            Drawing.drawing.setRenderer(Drawing.drawing.defaultRenderer);
+
+            Game.movables = movables;
+            Game.obstacles = obstacles;
+
+            Game.game.window.transformations.remove(this.transform);
+            Game.game.window.transformations.remove(this.translation);
+            Game.game.window.loadPerspective();
+            Game.game.window.lightBaseTransformation[0] = prevShadow;
         }
+        catch (Exception e)
+        {
+            if (Game.previewCrusades)
+                Game.game.window.removeMatrix();
 
-        Drawing.drawing.setRenderer(Drawing.drawing.defaultRenderer);
-
-        Game.movables = movables;
-        Game.obstacles = obstacles;
-
-        Game.game.window.transformations.remove(this.transform);
-        Game.game.window.transformations.remove(this.translation);
-        Game.game.window.loadPerspective();
-        Game.game.window.lightBaseTransformation[0] = prevShadow;
+            Game.exitToCrash(e);
+        }
     }
 
     @Override

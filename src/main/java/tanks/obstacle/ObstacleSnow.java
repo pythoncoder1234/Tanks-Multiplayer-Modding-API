@@ -168,7 +168,7 @@ public class ObstacleSnow extends Obstacle
 
                 double frac = z / (this.depth * 0.8 * (Game.tile_size - base));
                 Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-                Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul + this.startHeight * 50, Game.tile_size, Game.tile_size, z * this.visualDepth, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
+                Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul + this.startHeight * 50 - 10, Game.tile_size, Game.tile_size, z * this.visualDepth + 10, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
             }
         }
     }

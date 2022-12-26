@@ -1,6 +1,7 @@
 package tanks.gui.screen;
 
 import basewindow.InputCodes;
+import tanks.Colors;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
@@ -8,11 +9,10 @@ import tanks.gui.TextBoxSlider;
 
 public class ScreenTestColors extends Screen
 {
-    public int colors = 50;
-    public ColorTile[] tiles;
     public ColorTile selectedTile = null;
-
-    public double sizeX;
+    public static int colors = 50;
+    public static ColorTile[] tiles;
+    public static double sizeX;
 
     TextBoxSlider colorCount = new TextBoxSlider(this.centerX, this.centerY + this.objYSpace * 3, this.objWidth, this.objHeight, "Colors Shown", new Runnable()
     {
@@ -31,7 +31,8 @@ public class ScreenTestColors extends Screen
         this.music = "menu_options.ogg";
         this.musicID = "menu";
 
-        setColorTiles();
+        if (tiles == null)
+            setColorTiles();
     }
 
     @Override
@@ -58,15 +59,8 @@ public class ScreenTestColors extends Screen
         if (validTile)
             tiles[tileIndex].hoverDim = 50;
 
-        if (Game.game.window.pressedButtons.contains(InputCodes.MOUSE_BUTTON_1))
-        {
-            Game.game.window.pressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
-
-            if (validTile)
-                selectedTile = tiles[tileIndex];
-            else
-                selectedTile = null;
-        }
+        if (Game.game.window.pressedButtons.contains(InputCodes.MOUSE_BUTTON_1) && validTile)
+            selectedTile = tiles[tileIndex];
 
         if (selectedTile != null)
             selectedTile.hoverDim = 100;
@@ -79,11 +73,38 @@ public class ScreenTestColors extends Screen
         colorCount.draw();
         back.draw();
 
-        Drawing.drawing.drawPopup(this.centerX, this.centerY, 500, 200);
+        drawColorModal();
+    }
+
+    public void drawColorModal()
+    {
+        Drawing.drawing.drawPopup(this.centerX, this.centerY, this.objXSpace * 1.25, this.objYSpace * 3.25, 20, 10);
+
+        if (selectedTile == null)
+        {
+            Drawing.drawing.setColor(255, 255, 255);
+            Drawing.drawing.setInterfaceFontSize(24);
+            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace / 3, "Click on a tile to display");
+            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY + this.objYSpace / 3, "information about it!");
+        }
+        else
+        {
+            Drawing.drawing.setColor(200, 200, 200);
+            Drawing.drawing.displayUncenteredInterfaceText(this.centerX - this.objXSpace / 2, this.centerY - 37.5,
+                    "Fraction:" + Colors.white + " %s", selectedTile.fracString);
+            Drawing.drawing.displayUncenteredInterfaceText(this.centerX - this.objXSpace / 2, this.centerY + 10,
+                    "RGB:" + Colors.white + " %s", selectedTile.colorString);
+
+            Drawing.drawing.setColor(selectedTile.colorR, selectedTile.colorG, selectedTile.colorB);
+            Drawing.drawing.fillRect(this.centerX + this.objXSpace / 2.5, this.centerY, 75, 75);
+            Drawing.drawing.setColor(50, 50, 50);
+            Drawing.drawing.drawRect(this.centerX + this.objXSpace / 2.5, this.centerY, 75, 75, 2, 2);
+        }
     }
 
     public void setColorTiles()
     {
+        ColorTile closestTile = null;
         tiles = new ColorTile[colors];
 
         sizeX = 800. / colors;
@@ -91,7 +112,16 @@ public class ScreenTestColors extends Screen
         {
             double frac = 1. / colors * i;
             tiles[i] = new ColorTile(frac, i, sizeX, colors / 2.);
+
+            if (selectedTile != null)
+            {
+                if (closestTile == null || Math.abs(tiles[i].frac - selectedTile.frac) < Math.abs(closestTile.frac - selectedTile.frac))
+                    closestTile = tiles[i];
+            }
         }
+
+        if (closestTile != null)
+            selectedTile = closestTile;
     }
 
     public static class ColorTile
@@ -99,7 +129,9 @@ public class ScreenTestColors extends Screen
         public double colorR;
         public double colorG;
         public double colorB;
+        public double frac;
         public String fracString;
+        public String colorString;
 
         public double posX;
         public double sizeX;
@@ -113,7 +145,9 @@ public class ScreenTestColors extends Screen
             this.colorG = col[1];
             this.colorB = col[2];
 
-            this.fracString = String.format("%.3f", frac);
+            this.frac = frac;
+            this.fracString = String.format("%.2f", frac);
+            this.colorString = String.format("%.0f", this.colorR) + ", " + String.format("%.0f", this.colorG) + ", " + String.format("%.0f", this.colorB);
 
             this.posX = i * sizeX + (Game.screen.centerX - halfNum * sizeX);
             this.sizeX = sizeX;

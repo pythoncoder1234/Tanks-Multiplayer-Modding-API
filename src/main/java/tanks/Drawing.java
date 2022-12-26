@@ -860,12 +860,17 @@ public class Drawing
 
 	public void fillInterfaceRect(double x, double y, double sizeX, double sizeY)
 	{
+		fillInterfaceRect(x, y, sizeX, sizeY, 0);
+	}
+
+	public void fillInterfaceRect(double x, double y, double sizeX, double sizeY, double borderRadius)
+	{
 		double drawX = (interfaceScale * (x - sizeX / 2) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
 		double drawY = (interfaceScale * (y - sizeY / 2) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
 		double drawSizeX = (sizeX * interfaceScale);
 		double drawSizeY = (sizeY * interfaceScale);
 
-		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY);
+		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY, borderRadius);
 	}
 
 	public void fillShadedInterfaceRect(double x, double y, double sizeX, double sizeY)
@@ -923,17 +928,22 @@ public class Drawing
 
 	public void drawInterfaceRect(double x, double y, double sizeX, double sizeY)
 	{
-		drawInterfaceRect(x, y, sizeX, sizeY, 1);
+		drawInterfaceRect(x, y, sizeX, sizeY, 1, 0);
 	}
 
-	public void drawInterfaceRect(double x, double y, double sizeX, double sizeY, double thickness)
+	public void drawInterfaceRect(double x, double y, double sizeX, double sizeY, double lineWidth)
 	{
-		double drawX = Math.round(interfaceScale * (x - sizeX / 2 - thickness) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
-		double drawY = Math.round(interfaceScale * (y - sizeY / 2 - thickness) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
+		drawInterfaceRect(x, y, sizeX, sizeY, lineWidth, 0);
+	}
+
+	public void drawInterfaceRect(double x, double y, double sizeX, double sizeY, double lineWidth, double borderRadius)
+	{
+		double drawX = Math.round(interfaceScale * (x - sizeX / 2 - lineWidth) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
+		double drawY = Math.round(interfaceScale * (y - sizeY / 2 - lineWidth) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
 		double drawSizeX = Math.round(sizeX * interfaceScale);
 		double drawSizeY = Math.round(sizeY * interfaceScale);
 
-		Game.game.window.shapeRenderer.drawRect(drawX, drawY, drawSizeX, drawSizeY, thickness);
+		Game.game.window.shapeRenderer.drawRect(drawX, drawY, drawSizeX, drawSizeY, lineWidth, borderRadius);
 	}
 
 	public void drawText(double x, double y, String text)
@@ -1108,16 +1118,22 @@ public class Drawing
 		//return (y - (drawY / Window.scale + sizeY + yPadding / Window.scale * 2));
 	}
 
-	public void drawPopup(double x, double y, double sX, double sY)
+	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius)
 	{
-		drawPopup(x, y, sX, sY, 0, 0, 0);
+		drawPopup(x, y, sX, sY, borderWidth, borderRadius, 0, 0, 0, 150);
 	}
 
-	public void drawPopup(double x, double y, double sX, double sY, double r, double g, double b)
+	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius, double a)
 	{
-		Drawing.drawing.setColor(r, g, b, 64);
-		fillRect(x, y, sX, sY, (sX + sY) / 65);
-		drawRect(x, y, sX, sY,  (sX + sY) / 12, (sX + sY) / 65);
+		drawPopup(x, y, sX, sY, borderWidth, borderRadius, 0, 0, 0, a);
+	}
+
+	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius, double r, double g, double b, double a)
+	{
+		Drawing.drawing.setColor(r, g, b, a);
+		fillRect(x, y, sX, sY, borderRadius);
+		Drawing.drawing.setColor(r, g, b, a / 2);
+		drawRect(x, y, sX, sY,  borderWidth, borderRadius);
 	}
 
 	public void playMusic(String sound, float volume, boolean looped, String id, long fadeTime)

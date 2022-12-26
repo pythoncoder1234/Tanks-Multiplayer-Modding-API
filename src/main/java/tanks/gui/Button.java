@@ -555,5 +555,7 @@ public class Button implements IDrawable, ITrigger, Cloneable
 		this.hoverTextRaw = hoverText;
 		this.hoverTextRawTranslated = Translation.translate(hoverText, objects);
 		this.hoverText = this.hoverTextRawTranslated.split("---");
+
+		this.enableHover = this.hoverTextRaw.length() > 0;
 	}
 }

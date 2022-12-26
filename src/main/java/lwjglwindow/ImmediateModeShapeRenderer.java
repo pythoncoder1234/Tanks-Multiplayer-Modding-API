@@ -373,7 +373,6 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
         glBegin(GL_TRIANGLE_FAN);
 
         int sides = Math.max(4, (int) (radius / 4) + 5) / 2;
-        radius *= 2;
 
         radius = Math.min(radius, sY / 2);
 
@@ -639,9 +638,9 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
             return;
         }
 
-        double innerRadius = radius;
+        width /= 2;
+        double innerRadius = radius / 2;
         int sides = Math.max(4, (int) (radius / 4) + 5);
-        radius *= 2;
 
         // Where the outer arc begins
         final double[] xs = {x + radius, x + sX - radius, x + sX - radius, x + radius};
@@ -650,8 +649,8 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
         final double[] xRadius = {0, radius, 0, -radius};
         final double[] yRadius = {-radius, 0, radius, 0};
-        final double[] innerXRad = {innerRadius, -innerRadius, -innerRadius, innerRadius};
-        final double[] innerYRad = {innerRadius, innerRadius, -innerRadius, -innerRadius};
+        final double[] xWidth = {width, -width, -width, width};
+        final double[] yWidth = {width, width, -width, -width};
 
         for (int i = 0; i < 4; i++)
         {
@@ -664,12 +663,12 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
             int nextI = (i + 1) % 4;
             glVertex2d(xs[nextI] + xRadius[i], ys[nextI] + yRadius[i]);
-            glVertex2d(xs[nextI] - xRadius[nextI] / 2, ys[nextI] - yRadius[nextI] / 2);
+            glVertex2d(xs[nextI] + xWidth[nextI] + innerRadius * Math.cos(maxJ), ys[nextI] + yWidth[nextI] + innerRadius * Math.sin(maxJ));
 
             if (innerRadius > 1)
             {
                 for (double j = maxJ; j >= Math.PI * 2 * (order[i] / 4.); j -= change)
-                    glVertex2d(xs[i] + innerXRad[i] + Math.cos(j) * innerRadius, ys[i] + innerYRad[i] + Math.sin(j) * innerRadius);
+                    glVertex2d(xs[i] + xWidth[i] + Math.cos(j) * innerRadius, ys[i] + yWidth[i] + Math.sin(j) * innerRadius);
             }
 
             glEnd();

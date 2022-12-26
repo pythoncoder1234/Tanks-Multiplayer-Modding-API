@@ -91,11 +91,18 @@ public class FontRenderer extends BaseFontRenderer
 		double curX = x;
 		char[] c = s.toCharArray();
 
+		double prevR = this.window.colorR;
+		double prevG = this.window.colorG;
+		double prevB = this.window.colorB;
+		double prevA = this.window.colorA;
+		boolean changed = false;
+
 		for (int i = 0; i < c.length; i++)
 		{
 			if (c[i] == '\u00C2')
 				continue;
-			else if (c[i] == '\u00A7')
+
+			if (c[i] == '\u00A7')
 			{
 				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + "" + c[i + 3]);
 				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + "" + c[i + 6]);
@@ -103,11 +110,16 @@ public class FontRenderer extends BaseFontRenderer
 				int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + "" + c[i + 12]);
 				this.window.setColor(r, g, b, a);
 
+				changed = true;
+
 				i += 12;
 			}
 			else
 				curX += (drawChar(curX, y, 0, sX, sY, c[i], false) + 1) * sX * 4;
 		}
+
+		if (changed)
+			this.window.setColor(prevR * 255, prevG * 255, prevB * 255, prevA * 255);
 	}
 
 	public double getStringSizeX(double sX, String s)

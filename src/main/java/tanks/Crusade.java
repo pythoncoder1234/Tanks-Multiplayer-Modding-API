@@ -512,7 +512,10 @@ public class Crusade
 
 	public void quit()
 	{
-		boolean win = (ScreenGame.finishedQuick && Panel.win) || !(Game.screen instanceof ScreenGame) || !((ScreenGame) Game.screen).playing;
+		if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
+			return;
+
+		boolean win = ScreenGame.finishedQuick && Panel.win;
 
 		if (!win)
 		{
