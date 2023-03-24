@@ -39,6 +39,7 @@ public class ModAPI
     public static void registerMods()
     {
         Game.registerMinigame(TeamDeathmatch.class);
+//        Game.registerMinigame(GameMap.class);
     }
 
     public static void setUp()

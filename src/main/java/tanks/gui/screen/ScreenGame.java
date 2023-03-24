@@ -333,8 +333,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			Game.screen = new ScreenPlaySingleplayer();
 		else if (ScreenInterlevel.fromMinigames)
 			Game.screen = new ScreenMinigames();
-		else if (ScreenInterlevel.fromSavedLevels)
-			Game.screen = new ScreenPlaySavedLevels();
+		else if (ScreenInterlevel.fromSavedLevels || name != null)
+			Game.screen = new ScreenSavedLevels();
 		else
 			Game.screen = new ScreenPlaySingleplayer();
 
@@ -650,9 +650,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	{
 		this();
 		this.name = s;
-
-		ScreenInterlevel.fromSavedLevels = true;
-		quit.setText("Quit to my levels");
 	}
 
 	public ScreenGame(ArrayList<Item> shop)
@@ -1622,6 +1619,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			}
 			else
 			{
+				if (firstFrame && (name != null || ScreenInterlevel.fromSavedLevels))
+					quit.setText("Quit to my levels");
+
 				firstFrame = false;
 				endCondition.aliveTeams = aliveTeams;
 				endCondition.fullyAliveTeams = fullyAliveTeams;
