@@ -41,17 +41,11 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
         staggering.imageSizeX = 40;
         staggering.imageSizeY = 40;
         staggering.fullInfo = true;
-
-        increaseHeight.textOffsetX = 1.5;
-        increaseHeight.textOffsetY = 1.5;
-
-        decreaseHeight.textOffsetX = 1.5;
-        decreaseHeight.textOffsetY = 1.5;
     }
 
     public void update()
     {
-        this.increaseHeight.enabled = screenLevelEditor.mouseObstacleHeight < Obstacle.default_max_height / (Game.mapmaking ? 1.0 : 2.0);
+        this.increaseHeight.enabled = screenLevelEditor.mouseObstacleHeight < Obstacle.default_max_height / (Game.debug ? 1 : 2.);
         this.decreaseHeight.enabled = screenLevelEditor.mouseObstacleHeight > 0.5;
 
         if (screenLevelEditor.stagger)

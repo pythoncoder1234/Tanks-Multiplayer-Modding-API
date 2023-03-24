@@ -1,7 +1,7 @@
 package lwjglwindow;
 
 import basewindow.BaseShapeRenderer;
-import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL11;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -23,6 +23,7 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
         int sides = Math.max(4, (int) (sX + sY) / 4 + 5);
 
         glBegin(GL_TRIANGLE_FAN);
+
         for (double i = 0; i < Math.PI * 2; i += Math.PI * 2 / sides)
             glVertex2d(x + Math.cos(i) * sX / 2, y + Math.sin(i) * sY / 2);
 
@@ -352,7 +353,7 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
     public void fillRect(double x, double y, double sX, double sY)
     {
-        glBegin(GL_TRIANGLE_FAN);
+        glBegin(GL_QUADS);
 
         glVertex2d(x, y);
         glVertex2d(x + sX, y);
@@ -382,33 +383,31 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
         for (int i = 0; i < 4; i++)
         {
-            for (double j = Math.PI * 2 * (order[i] / 4.); j < Math.PI * 2 * (order[i] + 1) / 4; j += Math.PI / 2 / sides)
+            for (double j = Math.PI * 2 * (order[i] / 4.); j <= Math.PI * 2 * (order[i] + 1) / 4; j += Math.PI / 2 / sides)
                 glVertex2d(xs[i] + Math.cos(j) * radius, ys[i] + Math.sin(j) * radius);
         }
 
         glEnd();
     }
 
-    public void fillBox(double x, double y, double z, double sX, double sY, double sZ)
+    public void fillBox(double x, double y, double z, double sX, double sY, double sZ, String texture)
     {
-        fillBox(x, y, z, sX, sY, sZ, (byte) 0);
+        fillBox(x, y, z, sX, sY, sZ, (byte) 0, texture);
     }
 
     /**
-     * Options byte:
+     * <h2>Options byte:</h2>
      *
-     * 0: default
-     *
-     * +1 hide behind face
-     * +2 hide front face
-     * +4 hide bottom face
-     * +8 hide top face
-     * +16 hide left face
-     * +32 hide right face
-     *
+     * 0: default<br>
+     * +1 hide behind face<br>
+     * +2 hide front face<br>
+     * +4 hide bottom face<br>
+     * +8 hide top face<br>
+     * +16 hide left face<br>
+     * +32 hide right face<br>
      * +64 draw on top
      * */
-    public void fillBox(double x, double y, double z, double sX, double sY, double sZ, byte options)
+    public void fillBox(double x, double y, double z, double sX, double sY, double sZ, byte options, String texture)
     {
         if (!this.window.batchMode)
         {
@@ -422,68 +421,178 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
             else
                 glDepthFunc(GL_ALWAYS);
 
-            glBegin(GL_QUADS);
+            if (texture != null)
+            {
+                if (!this.window.textures.containsKey(texture))
+                    this.window.createImage(texture);
+
+                glMatrixMode(GL_MODELVIEW);
+                this.window.enableTexture();
+
+                glEnable(GL_BLEND);
+                this.window.setTransparentBlendFunc();
+
+                glBindTexture(GL_TEXTURE_2D, this.window.textures.get(texture));
+            }
+
+            GL11.glBegin(GL11.GL_QUADS);
         }
 
         if (options % 2 == 0)
         {
-            glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
-            glVertex3d(x + sX, y, z);
-            glVertex3d(x, y, z);
-            glVertex3d(x, y + sY, z);
-            glVertex3d(x + sX, y + sY, z);
+            GL11.glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
+
+            if (texture != null)
+            {
+                glTexCoord2d(1, 0);
+                GL11.glVertex3d(x + sX, y, z);
+                glTexCoord2d(0, 0);
+                GL11.glVertex3d(x, y, z);
+                glTexCoord2d(0, 1);
+                GL11.glVertex3d(x, y + sY, z);
+                glTexCoord2d(1, 1);
+                GL11.glVertex3d(x + sX, y + sY, z);
+            }
+            else
+            {
+                GL11.glVertex3d(x + sX, y, z);
+                GL11.glVertex3d(x, y, z);
+                GL11.glVertex3d(x, y + sY, z);
+                GL11.glVertex3d(x + sX, y + sY, z);
+            }
         }
 
         if ((options >> 2) % 2 == 0)
         {
-            glColor4d(this.window.colorR * 0.8, this.window.colorG * 0.8, this.window.colorB * 0.8, this.window.colorA);
-            glVertex3d(x + sX, y + sY, z + sZ);
-            glVertex3d(x, y + sY, z + sZ);
-            glVertex3d(x, y + sY, z);
-            glVertex3d(x + sX, y + sY, z);
+            GL11.glColor4d(this.window.colorR * 0.8, this.window.colorG * 0.8, this.window.colorB * 0.8, this.window.colorA);
+
+            if (texture != null)
+            {
+                glTexCoord2d(1, 1);
+                GL11.glVertex3d(x + sX, y + sY, z + sZ);
+                glTexCoord2d(0, 1);
+                GL11.glVertex3d(x, y + sY, z + sZ);
+                glTexCoord2d(0, 0);
+                GL11.glVertex3d(x, y + sY, z);
+                glTexCoord2d(1, 0);
+                GL11.glVertex3d(x + sX, y + sY, z);
+            }
+            else
+            {
+                GL11.glVertex3d(x + sX, y + sY, z + sZ);
+                GL11.glVertex3d(x, y + sY, z + sZ);
+                GL11.glVertex3d(x, y + sY, z);
+                GL11.glVertex3d(x + sX, y + sY, z);
+            }
         }
 
         if ((options >> 3) % 2 == 0)
         {
-            glColor4d(this.window.colorR * 0.8, this.window.colorG * 0.8, this.window.colorB * 0.8, this.window.colorA);
-            glVertex3d(x + sX, y, z + sZ);
-            glVertex3d(x, y, z + sZ);
-            glVertex3d(x, y, z);
-            glVertex3d(x + sX, y, z);
+            GL11.glColor4d(this.window.colorR * 0.8, this.window.colorG * 0.8, this.window.colorB * 0.8, this.window.colorA);
+
+            if (texture != null)
+            {
+                glTexCoord2d(1, 1);
+                GL11.glVertex3d(x + sX, y, z + sZ);
+                glTexCoord2d(0, 1);
+                GL11.glVertex3d(x, y, z + sZ);
+                glTexCoord2d(0, 0);
+                GL11.glVertex3d(x, y, z);
+                glTexCoord2d(1, 0);
+                GL11.glVertex3d(x + sX, y, z);
+            }
+            else
+            {
+                GL11.glVertex3d(x + sX, y, z + sZ);
+                GL11.glVertex3d(x, y, z + sZ);
+                GL11.glVertex3d(x, y, z);
+                GL11.glVertex3d(x + sX, y, z);
+            }
         }
 
         if ((options >> 4) % 2 == 0)
         {
-            glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
-            glVertex3d(x, y + sY, z + sZ);
-            glVertex3d(x, y + sY, z);
-            glVertex3d(x, y, z);
-            glVertex3d(x, y, z + sZ);
+            GL11.glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
+
+            if (texture != null)
+            {
+                glTexCoord2d(1, 1);
+                GL11.glVertex3d(x, y + sY, z + sZ);
+                glTexCoord2d(1, 0);
+                GL11.glVertex3d(x, y + sY, z);
+                glTexCoord2d(0, 0);
+                GL11.glVertex3d(x, y, z);
+                glTexCoord2d(0, 1);
+                GL11.glVertex3d(x, y, z + sZ);
+            }
+            else
+            {
+                GL11.glVertex3d(x, y + sY, z + sZ);
+                GL11.glVertex3d(x, y + sY, z);
+                GL11.glVertex3d(x, y, z);
+                GL11.glVertex3d(x, y, z + sZ);
+            }
         }
 
         if ((options >> 5) % 2 == 0)
         {
-            glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
-            glVertex3d(x + sX, y + sY, z);
-            glVertex3d(x + sX, y + sY, z + sZ);
-            glVertex3d(x + sX, y, z + sZ);
-            glVertex3d(x + sX, y, z);
+            GL11.glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
+
+            if (texture != null)
+            {
+                glTexCoord2d(1, 0);
+                GL11.glVertex3d(x + sX, y + sY, z);
+                glTexCoord2d(1, 1);
+                GL11.glVertex3d(x + sX, y + sY, z + sZ);
+                glTexCoord2d(0, 1);
+                GL11.glVertex3d(x + sX, y, z + sZ);
+                glTexCoord2d(0, 0);
+                GL11.glVertex3d(x + sX, y, z);
+            }
+            else
+            {
+                GL11.glVertex3d(x + sX, y + sY, z);
+                GL11.glVertex3d(x + sX, y + sY, z + sZ);
+                GL11.glVertex3d(x + sX, y, z + sZ);
+                GL11.glVertex3d(x + sX, y, z);
+            }
         }
 
         if ((options >> 1) % 2 == 0)
         {
-            glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
-            glVertex3d(x + sX, y + sY, z + sZ);
-            glVertex3d(x, y + sY, z + sZ);
-            glVertex3d(x, y, z + sZ);
-            glVertex3d(x + sX, y, z + sZ);
+            GL11.glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
+
+            if (texture != null)
+            {
+                glTexCoord2d(1, 1);
+                GL11.glVertex3d(x + sX, y + sY, z + sZ);
+                glTexCoord2d(0, 1);
+                GL11.glVertex3d(x, y + sY, z + sZ);
+                glTexCoord2d(0, 0);
+                GL11.glVertex3d(x, y, z + sZ);
+                glTexCoord2d(1, 0);
+                GL11.glVertex3d(x + sX, y, z + sZ);
+            }
+            else
+            {
+                GL11.glVertex3d(x + sX, y + sY, z + sZ);
+                GL11.glVertex3d(x, y + sY, z + sZ);
+                GL11.glVertex3d(x, y, z + sZ);
+                GL11.glVertex3d(x + sX, y, z + sZ);
+            }
         }
 
         if (!this.window.batchMode)
         {
-            glEnd();
+            GL11.glEnd();
             this.window.disableDepthtest();
             glDepthMask(true);
+
+            if (texture != null)
+            {
+                glMatrixMode(GL_PROJECTION);
+                this.window.disableTexture();
+            }
         }
     }
 
@@ -515,68 +624,68 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
         if (options % 2 == 0)
         {
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
-            glVertex3d(x1, y1, z);
-            glVertex3d(x2, y2, z);
-            glVertex3d(x3, y3, z);
-            glVertex3d(x4, y4, z);
-            glEnd();
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+            GL11.glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
+            GL11.glVertex3d(x1, y1, z);
+            GL11.glVertex3d(x2, y2, z);
+            GL11.glVertex3d(x3, y3, z);
+            GL11.glVertex3d(x4, y4, z);
+            GL11.glEnd();
         }
 
         if ((options >> 2) % 2 == 0)
         {
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
-            glVertex3d(x1, y1, z + sZ);
-            glVertex3d(x2, y2, z + sZ);
-            glVertex3d(x2, y2, z);
-            glVertex3d(x1, y1, z);
-            glEnd();
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+            GL11.glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
+            GL11.glVertex3d(x1, y1, z + sZ);
+            GL11.glVertex3d(x2, y2, z + sZ);
+            GL11.glVertex3d(x2, y2, z);
+            GL11.glVertex3d(x1, y1, z);
+            GL11.glEnd();
         }
 
         if ((options >> 3) % 2 == 0)
         {
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
-            glVertex3d(x3, y3, z + sZ);
-            glVertex3d(x4, y4, z + sZ);
-            glVertex3d(x4, y4, z);
-            glVertex3d(x3, y3, z);
-            glEnd();
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+            GL11.glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
+            GL11.glVertex3d(x3, y3, z + sZ);
+            GL11.glVertex3d(x4, y4, z + sZ);
+            GL11.glVertex3d(x4, y4, z);
+            GL11.glVertex3d(x3, y3, z);
+            GL11.glEnd();
         }
 
         if ((options >> 4) % 2 == 0)
         {
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4d(this.window.colorR * 0.8, this.window.colorG * 0.8, this.window.colorB * 0.8, this.window.colorA);
-            glVertex3d(x1, y1, z + sZ);
-            glVertex3d(x4, y4, z + sZ);
-            glVertex3d(x4, y4, z);
-            glVertex3d(x1, y1, z);
-            glEnd();
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+            GL11.glColor4d(this.window.colorR * 0.8, this.window.colorG * 0.8, this.window.colorB * 0.8, this.window.colorA);
+            GL11.glVertex3d(x1, y1, z + sZ);
+            GL11.glVertex3d(x4, y4, z + sZ);
+            GL11.glVertex3d(x4, y4, z);
+            GL11.glVertex3d(x1, y1, z);
+            GL11.glEnd();
         }
 
         if ((options >> 5) % 2 == 0)
         {
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
-            glVertex3d(x3, y3, z + sZ);
-            glVertex3d(x2, y2, z + sZ);
-            glVertex3d(x2, y2, z);
-            glVertex3d(x3, y3, z);
-            glEnd();
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+            GL11.glColor4d(this.window.colorR * 0.6, this.window.colorG * 0.6, this.window.colorB * 0.6, this.window.colorA);
+            GL11.glVertex3d(x3, y3, z + sZ);
+            GL11.glVertex3d(x2, y2, z + sZ);
+            GL11.glVertex3d(x2, y2, z);
+            GL11.glVertex3d(x3, y3, z);
+            GL11.glEnd();
         }
 
         if ((options >> 1) % 2 == 0)
         {
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
-            glVertex3d(x1, y1, z + sZ);
-            glVertex3d(x2, y2, z + sZ);
-            glVertex3d(x3, y3, z + sZ);
-            glVertex3d(x4, y4, z + sZ);
-            glEnd();
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+            GL11.glColor4d(this.window.colorR, this.window.colorG, this.window.colorB, this.window.colorA);
+            GL11.glVertex3d(x1, y1, z + sZ);
+            GL11.glVertex3d(x2, y2, z + sZ);
+            GL11.glVertex3d(x3, y3, z + sZ);
+            GL11.glVertex3d(x4, y4, z + sZ);
+            GL11.glEnd();
         }
 
         this.window.disableDepthtest();
@@ -587,13 +696,19 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
         glBegin(GL_LINES);
         glVertex2d(x, y);
         glVertex2d(x + sX, y);
+        glEnd();
 
+        glBegin(GL_LINES);
         glVertex2d(x, y);
         glVertex2d(x, y + sY);
+        glEnd();
 
+        glBegin(GL_LINES);
         glVertex2d(x, y + sY);
         glVertex2d(x + sX, y + sY);
+        glEnd();
 
+        glBegin(GL_LINES);
         glVertex2d(x + sX, y);
         glVertex2d(x + sX, y + sY);
         glEnd();
@@ -601,46 +716,66 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
     public void drawRect(double x, double y, double sX, double sY, double width)
     {
-        if (width == 1)
+        width = Math.min(Math.min(width, sX), sY);
+
+        if (width <= 1)
         {
             drawRect(x, y, sX, sY);
             return;
         }
 
+        if (width > Math.min(sX, sY) / 2)
+        {
+            fillRect(x, y, sX, sY);
+            return;
+        }
+
+        x += width;
+        y += width;
+
         glBegin(GL_QUADS);
         glVertex2d(x, y);
-        glVertex2d(x + sX, y);
-        glVertex2d(x + sX, y + width);
+        glVertex2d(x + sX - width, y);
+        glVertex2d(x + sX - width, y + width);
         glVertex2d(x, y + width);
 
-        glVertex2d(x, y);
-        glVertex2d(x, y + sY);
-        glVertex2d(x + width, y + sY);
-        glVertex2d(x + width, y);
+        glVertex2d(x, y + width);
+        glVertex2d(x, y + sY - width);
+        glVertex2d(x + width, y + sY - width);
+        glVertex2d(x + width, y + width);
 
-        glVertex2d(x, y + sY);
+        glVertex2d(x, y + sY - width);
+        glVertex2d(x + sX, y + sY - width);
         glVertex2d(x + sX, y + sY);
-        glVertex2d(x + sX, y + sY + width);
-        glVertex2d(x, y + sY + width);
+        glVertex2d( x, y + sY);
 
+        glVertex2d(x + sX - width, y);
+        glVertex2d(x + sX - width, y + sY - width);
+        glVertex2d(x + sX, y + sY - width);
         glVertex2d(x + sX, y);
-        glVertex2d(x + sX, y + sY);
-        glVertex2d(x + sX + width, y + sY);
-        glVertex2d(x + sX + width, y);
         glEnd();
     }
 
     public void drawRect(double x, double y, double sX, double sY, double width, double radius)
     {
-        if (radius <= 0.2)
+        if (radius < width / 6)
         {
             drawRect(x, y, sX, sY, width);
             return;
         }
 
+        if (width >= Math.min(sX, sY) * 0.9 || radius >= Math.min(sX, sY) * 0.9)
+        {
+            fillRect(x, y, sX, sY, radius);
+            return;
+        }
+
+        radius = Math.min(radius, Math.min(width, (Math.min(sX, sY) - width) / 2));
+
         width /= 2;
         double innerRadius = radius / 2;
         int sides = Math.max(4, (int) (radius / 4) + 5);
+        double change = Math.PI / 2 / sides;
 
         // Where the outer arc begins
         final double[] xs = {x + radius, x + sX - radius, x + sX - radius, x + radius};
@@ -655,10 +790,9 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
         for (int i = 0; i < 4; i++)
         {
             glBegin(GL_TRIANGLE_FAN);
-            double change = Math.PI / 2 / sides;
             double maxJ = Math.PI * 2 * (order[i] + 1) / 4;
 
-            for (double j = Math.PI * 2 * (order[i] / 4.); j <= maxJ - change * 2; j += change)
+            for (double j = Math.PI * 2 * (order[i] / 4.); j <= maxJ + change / 2; j += change)
                 glVertex2d(xs[i] + Math.cos(j) * radius, ys[i] + Math.sin(j) * radius);
 
             int nextI = (i + 1) % 4;
@@ -667,7 +801,7 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
             if (innerRadius > 1)
             {
-                for (double j = maxJ; j >= Math.PI * 2 * (order[i] / 4.); j -= change)
+                for (double j = maxJ; j >= Math.PI * 2 * (order[i] / 4.) - change / 2; j -= change)
                     glVertex2d(xs[i] + xWidth[i] + Math.cos(j) * innerRadius, ys[i] + yWidth[i] + Math.sin(j) * innerRadius);
             }
 
@@ -736,9 +870,6 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
         glMatrixMode(GL_PROJECTION);
         this.window.disableTexture();
-
-        if (!this.window.drawingShadow)
-            GL20.glUniform1i(this.window.textureFlag, 0);
     }
 
     public void drawImage(double x, double y, double sX, double sY, double u1, double v1, double u2, double v2, String image, double rotation, boolean scaled)
@@ -948,7 +1079,7 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
         }
         else
         {
-            glEnd();
+            GL11.glEnd();
             window.disableDepthtest();
             glDepthMask(true);
             window.setTransparentBlendFunc();

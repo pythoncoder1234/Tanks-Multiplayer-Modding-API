@@ -1,7 +1,7 @@
 package tanks.gui.screen;
 
 import tanks.*;
-import tanks.event.EventShareLevel;
+import tanks.network.event.EventShareLevel;
 import tanks.gui.Button;
 import tanks.obstacle.Obstacle;
 import tanks.tank.TankSpawnMarker;
@@ -79,8 +79,10 @@ public class ScreenPreviewShareLevel extends Screen implements ILevelPreviewScre
         this.upload.update();
 
         if (Game.enable3d)
-            for (Obstacle o : Game.obstacles)
+            for (int i = 0; i < Game.obstacles.size(); i++)
             {
+                Obstacle o = Game.obstacles.get(i);
+
                 o.postOverride();
 
                 int x = (int) (o.posX / Game.tile_size);

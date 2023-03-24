@@ -3,6 +3,7 @@ package tanks.gui.screen;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
+import tanks.gui.TextBox;
 
 public class ScreenOptionsSpeedrun extends Screen
 {

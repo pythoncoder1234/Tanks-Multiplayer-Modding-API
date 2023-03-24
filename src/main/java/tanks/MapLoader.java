@@ -1,15 +1,14 @@
 package tanks;
 
 import tanks.gui.screen.ScreenGame;
-import tanks.hotbar.item.Item;
-import tanks.event.EventLoadMapLevel;
+import tanks.gui.screen.ScreenPartyLobby;
+import tanks.network.event.EventLoadMapLevel;
 import tanks.obstacle.Obstacle;
-import tanks.tank.Tank;
-import tanks.tank.TankPlayer;
-import tanks.tank.TankPlayerRemote;
+import tanks.tank.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 public class MapLoader
 {
@@ -17,6 +16,7 @@ public class MapLoader
      * Distance (in tiles) before loading a new level onto the map
      */
     public static final int baseTilesBeforeLoad = 40;
+    public static boolean debug = true;
     public static int tilesBeforeLoad = baseTilesBeforeLoad;
 
     /** Level to use when any part of the grid is <code>null</code> */
@@ -101,18 +101,50 @@ public class MapLoader
         {
             this.current = this.grid[spawnX][spawnY];
             this.current.level.loadLevel();
+            this.current.loaded = true;
             Section.loadedColumns[spawnX] = true;
             Section.loadedRows[spawnY] = true;
-            this.current.loaded = true;
+
+            for (Obstacle o : Game.obstacles)
+            {
+                o.posX += spawnX * 50;
+                o.posY += spawnY * 50;
+            }
+
+            for (Movable m : Game.movables)
+            {
+                m.posX += spawnX * 50;
+                m.posY += spawnY * 50;
+            }
+
+            if (spawnX > 0 || spawnY > 0)
+            {
+                Game.currentSizeX = this.current.sizeX;
+                Game.currentSizeY = this.current.sizeY;
+
+                Section.loadTiles(this.current.level, 0, 0, grid);
+            }
+
+            for (Player p : Game.players)
+            {
+                if (p.tank == null)
+                    continue;
+
+                targetTank = p.tank;
+                handleCloseTiles(spawnX, spawnY);
+            }
         }
 
         Game.screen = new ScreenGame();
+        ((ScreenGame) Game.screen).mapLoader = this;
     }
 
     public void update()
     {
         if (!loaded)
             return;
+
+        tilesBeforeLoad = Math.min(tilesBeforeLoad, 100);
 
         for (Player p : Game.players)
         {
@@ -152,34 +184,22 @@ public class MapLoader
 
     private void setCurrentPos()
     {
-        double posX = targetTank.posX;
         for (currentX = 0; currentX < this.grid[0].length; currentX++)
         {
             this.current = this.grid[currentX][currentY];
-            if (!current.loaded)
-            {
-                posX += (this.current.totalX - this.current.startX) * Game.tile_size;
-                continue;
-            }
 
-            if (posX <= this.current.totalX * Game.tile_size)
+            if (targetTank.posX <= this.current.totalX * Game.tile_size)
                 break;
         }
 
         if (currentX == this.grid[0].length)
             currentX--;
 
-        double posY = targetTank.posY;
         for (currentY = 0; currentY < this.grid.length; currentY++)
         {
             this.current = this.grid[currentX][currentY];
-            if (!current.loaded)
-            {
-                posY += (this.current.totalY - this.current.startY) * Game.tile_size;
-                continue;
-            }
 
-            if (posY <= this.current.totalY * Game.tile_size)
+            if (targetTank.posY <= this.current.totalY * Game.tile_size)
                 break;
         }
 
@@ -197,7 +217,7 @@ public class MapLoader
             int newX = x + dx[i];
             int newY = y + dy[i];
 
-            if (!Game.lessThan(-1, newX, this.grid[0].length) || !Game.lessThan(-1, newY, this.grid[1].length))
+            if (newX < 0 || newX >= this.grid.length || newY < 0 || newY >= this.grid[0].length)
                 continue;
 
             Section tile = this.grid[newX][newY];
@@ -207,16 +227,7 @@ public class MapLoader
 
             if (distX <= loadDistance * 50 && distY <= loadDistance * 50 && !tile.loaded)
             {
-                int offX = 0;
-                int offY = 0;
-
-                if (newY - currentY < 0 && !Section.loadedRows[newY])
-                    offX = tile.totalX - tile.startX;
-
-                if (newX - currentX < 0 && !Section.loadedColumns[newX])
-                    offY = tile.totalY - tile.startY;
-
-                tile.load(offX, offY);
+                tile.load(tile.startX, tile.sizeY);
                 handleCloseTiles(newX, newY);
             }
 
@@ -231,6 +242,7 @@ public class MapLoader
             }
         }
     }
+
 
     public static class Section
     {
@@ -249,10 +261,16 @@ public class MapLoader
         public int posY;
         public int sizeX;
         public int sizeY;
+
         public int startX;
         public int startY;
         public int totalX;
         public int totalY;
+
+        public int loadedX = 0;
+        public int loadedY = 0;
+
+        protected LinkedHashMap<String, TankAIControlled> customTanksMap = new LinkedHashMap<>();
 
         public Section(int x, int y, Level l, int prevX, int prevY)
         {
@@ -283,29 +301,23 @@ public class MapLoader
 
             if (saved)
             {
-                moveObjects(moveX, moveY);
-
                 Game.obstacles.addAll(obstacles);
                 Game.movables.addAll(movables);
+                loadTiles(level, loadedX, loadedY, grid);
             }
             else
             {
                 Game.currentSizeX = Math.max(Game.currentSizeX, totalX);
                 Game.currentSizeY = Math.max(Game.currentSizeY, totalY);
 
-                moveObjects(moveX, moveY);
+                Game.eventsOut.add(new EventLoadMapLevel(level, moveX, moveY));
 
-                int offsetX = startX - moveX;
-                int offsetY = startY - moveY;
-
-                Game.eventsOut.add(new EventLoadMapLevel(level, offsetX, offsetY, moveX, moveY));
-
-                loadTiles(level, startX + moveX, startY + moveY);
-                ArrayList[] newObjects = loadLevelWithOffset(level, offsetX, offsetY);
-                obstacles.addAll(newObjects[0]);
-                movables.addAll(newObjects[1]);
+                loadTiles(level, loadedX, loadedY, grid);
+                loadLevelWithOffset(level, moveX, moveY);
                 saved = true;
             }
+
+            updateLoadedSizes();
         }
 
         public void unload()
@@ -315,12 +327,16 @@ public class MapLoader
             else
                 return;
 
+            obstacles = new ArrayList<>();
+            movables = new ArrayList<>();
+
             for (Obstacle o : Game.obstacles)
             {
                 if (Game.lessThan(startX, o.posX / 50 - 0.5, totalX) && Game.lessThan(startY, o.posY / 50 - 0.5, totalY))
                     obstacles.add(o);
             }
 
+            movables = new ArrayList<>();
             for (Movable m : Game.movables)
             {
                 if (!(!(m instanceof Tank) || m instanceof TankPlayer || m instanceof TankPlayerRemote) &&
@@ -338,22 +354,38 @@ public class MapLoader
             }
         }
 
-        public static void moveObjects(int moveX, int moveY)
+        private void updateLoadedSizes()
         {
-            for (Obstacle o : Game.obstacles)
+            if (posX > 0)
             {
-                o.posX += moveX * 50;
-                o.posY += moveY * 50;
+                for (int i = posX; i < grid.length; i++)
+                {
+                    Section current = grid[i][posY];
+                    Section prev = grid[i - 1][posY];
+
+                    current.loadedX = prev.loadedX;
+
+                    if (prev.loaded)
+                        current.loadedX += prev.sizeX;
+                }
             }
 
-            for (Movable m : Game.movables)
+            if (posY > 0)
             {
-                m.posX += moveX * 50;
-                m.posY += moveY * 50;
+                for (int i = posY; i < grid.length; i++)
+                {
+                    Section current = grid[posX][i];
+                    Section prev = grid[posX][i - 1];
+
+                    current.loadedY = prev.loadedY;
+
+                    if (prev.loaded)
+                        current.loadedY += prev.sizeY;
+                }
             }
         }
 
-        public static void loadTiles(Level level, int startX, int startY)
+        public static void loadTiles(Level level, int startX, int startY, Section[][] grid)
         {
             double[][] tilesR = Game.tilesR;
             double[][] tilesG = Game.tilesG;
@@ -367,24 +399,47 @@ public class MapLoader
             Game.tilesDepth = new double[Game.currentSizeX][Game.currentSizeY];
             Game.obstacleMap = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
-            for (int i = 0; i < Game.currentSizeX; i++)
+            int tileX = -1;
+            int tileY = -1;
+            int nextX = -1;
+            int nextY = -1;
+            Section currentTile = null;
+
+            for (int x = 0; x < Game.currentSizeX; x++)
             {
-                for (int j = 0; j < Game.currentSizeY; j++)
+                for (int y = 0; y < Game.currentSizeY; y++)
                 {
-                    if (i + startX < tilesR.length && j + startY < tilesR[0].length)
+                    if (x > nextX)
                     {
-                        Game.tilesR[i][j] = tilesR[i + startX][j + startY];
-                        Game.tilesG[i][j] = tilesG[i + startX][j + startY];
-                        Game.tilesB[i][j] = tilesB[i + startX][j + startY];
-                        Game.tilesDepth[i][j] = tilesDepth[i + startX][j + startY];
-                        Game.obstacleMap[i][j] = map[i + startX][j + startY];
+                        tileX++;
+                        nextX = grid[tileX][Math.max(0, tileY)].totalX;
+                        currentTile = grid[tileX][Math.max(0, tileY)];
+                    }
+
+                    if (y > nextY)
+                    {
+                        tileY++;
+                        nextY = grid[tileX][tileY].totalY;
+                        currentTile = grid[tileX][tileY];
+                    }
+
+                    if (!currentTile.loaded)
+                        continue;
+
+                    if (x + startX < tilesR.length && y + startY < tilesR[0].length)
+                    {
+                        Game.tilesR[x][y] = tilesR[x + startX][y + startY];
+                        Game.tilesG[x][y] = tilesG[x + startX][y + startY];
+                        Game.tilesB[x][y] = tilesB[x + startX][y + startY];
+                        Game.tilesDepth[x][y] = tilesDepth[x + startX][y + startY];
+                        Game.obstacleMap[x][y] = map[x + startX][y + startY];
                     }
                     else
                     {
-                        Game.tilesR[i][j] = (level.colorR + Math.random() * level.colorVarR);
-                        Game.tilesG[i][j] = (level.colorG + Math.random() * level.colorVarG);
-                        Game.tilesB[i][j] = (level.colorB + Math.random() * level.colorVarB);
-                        Game.tilesDepth[i][j] = Math.random() * 10;
+                        Game.tilesR[x][y] = (level.colorR + Math.random() * level.colorVarR);
+                        Game.tilesG[x][y] = (level.colorG + Math.random() * level.colorVarG);
+                        Game.tilesB[x][y] = (level.colorB + Math.random() * level.colorVarB);
+                        Game.tilesDepth[x][y] = Math.random() * 10;
                     }
                 }
             }
@@ -400,29 +455,32 @@ public class MapLoader
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);
 
-                if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                o.postOverride();
+
+                if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && o.startHeight < 1)
                 {
                     if (o.bulletCollision)
                         Game.game.solidGrid[x][y] = true;
 
-                    if (o.startHeight == 0)
-                        Game.obstacleMap[x][y] = o;
+                    if (!o.shouldShootThrough)
+                        Game.game.unbreakableGrid[x][y] = true;
                 }
             }
 
             Drawing.drawing.setScreenBounds(Game.currentSizeX * Game.tile_size, Game.currentSizeY * Game.tile_size);
         }
 
-        public static ArrayList[] loadLevelWithOffset(Level level, int offsetX, int offsetY)
+        public static void loadLevelWithOffset(Level level, int offsetX, int offsetY)
         {
-            ArrayList<Obstacle> obstacles = new ArrayList<>();
-            ArrayList<Movable> movables = new ArrayList<>();
+            loadLevelWithOffset(level, offsetX, offsetY, null);
+        }
 
-            Game.currentLevel = level;
-            Game.currentLevelString = level.levelString;
+        public static void loadLevelWithOffset(Level level, int offsetX, int offsetY, Section section)
+        {
+            for (TankAIControlled t : level.customTanks)
+                section.customTanksMap.put(t.name, t);
 
-            ScreenGame.finishTimer = ScreenGame.finishTimerMax;
-
+            // note to self: copy Level.loadLevel code, starting with team loading
             if (level.enableTeams)
             {
                 level.tankTeams = new Team[level.teams.length];
@@ -462,48 +520,19 @@ public class MapLoader
 
             Level.currentCloudCount = (int) (Math.random() * (double) level.sizeX / 10.0D + Math.random() * (double) level.sizeY / 10.0D);
 
-            if (level.screen.length >= 5)
-            {
-                level.colorR = Integer.parseInt(level.screen[2]);
-                level.colorG = Integer.parseInt(level.screen[3]);
-                level.colorB = Integer.parseInt(level.screen[4]);
-
-                if (level.screen.length >= 8)
-                {
-                    level.colorVarR = Math.min(255 - level.colorR, Integer.parseInt(level.screen[5]));
-                    level.colorVarG = Math.min(255 - level.colorG, Integer.parseInt(level.screen[6]));
-                    level.colorVarB = Math.min(255 - level.colorB, Integer.parseInt(level.screen[7]));
-                }
-            }
-
-            if (level.screen.length >= 9)
-            {
-                int length = Integer.parseInt(level.screen[8]) * 100;
-
-                if (length > 0)
-                {
-                    level.timed = true;
-                    level.timer = length;
-                }
-            }
-
             if (level.screen.length >= 11)
             {
                 level.light = Integer.parseInt(level.screen[9]) / 100.0;
                 level.shadow = Integer.parseInt(level.screen[10]) / 100.0;
             }
 
-            for (Item i : level.shop)
-                i.importProperties();
-
-            for (Item i : level.startingItems)
-                i.importProperties();
+            level.reloadTiles();
 
             if (!((level.obstaclesPos.length == 1 && level.obstaclesPos[0].equals("")) || level.obstaclesPos.length == 0))
             {
-                for (String pos : level.obstaclesPos)
+                for (int i = 0; i < level.obstaclesPos.length; i++)
                 {
-                    String[] obs = pos.split("-");
+                    String[] obs = level.obstaclesPos[i].split("-");
 
                     String[] xPos = obs[0].split("\\.\\.\\.");
 
@@ -537,10 +566,11 @@ public class MapLoader
                     if (obs.length >= 4)
                         meta = obs[3];
 
+                    if (obs.length >= 5)
+                        meta += "-" + obs[4];
+
                     startX += offsetX;
-                    endX += offsetX;
                     startY += offsetY;
-                    endY += offsetY;
 
                     for (double x = startX; x <= endX; x++)
                     {
@@ -552,7 +582,6 @@ public class MapLoader
                                 o.setMetadata(meta);
 
                             Game.obstacles.add(o);
-                            obstacles.add(o);
                         }
                     }
                 }
@@ -560,37 +589,50 @@ public class MapLoader
 
             Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
             Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-            Game.obstacleMap = new Obstacle[Game.currentSizeX][Game.currentSizeY];
+            boolean[][] solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
 
             for (Obstacle o: Game.obstacles)
             {
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);
 
-                if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                o.postOverride();
+
+                if (o.bulletCollision && o.startHeight < 1 && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
                 {
-                    if (o.bulletCollision)
-                        Game.game.solidGrid[x][y] = true;
+                    Game.game.solidGrid[x][y] = true;
 
-                    if (o.bulletCollision && !o.shouldShootThrough)
+                    if (!o.shouldShootThrough)
                         Game.game.unbreakableGrid[x][y] = true;
+                }
 
-                    Game.obstacleMap[x][y] = o;
+                if (o.tankCollision && o.startHeight < 1 && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                    solidGrid[x][y] = true;
+            }
+
+            boolean[][] tankGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
+
+            for (Movable m : Game.movables)
+            {
+                if (m instanceof Tank)
+                {
+                    int x = (int) (m.posX / Game.tile_size);
+                    int y = (int) (m.posY / Game.tile_size);
+
+                    if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                        tankGrid[x][y] = true;
                 }
             }
 
             if (!level.preset[2].equals(""))
             {
-                for (String s : level.tanks)
+                for (int i = 0; i < level.tanks.length; i++)
                 {
-                    String[] tank = s.split("-");
+                    String[] tank = level.tanks[i].split("-");
                     double x = Game.tile_size * (0.5 + Double.parseDouble(tank[0]) + offsetX);
                     double y = Game.tile_size * (0.5 + Double.parseDouble(tank[1]) + offsetY);
                     String type = tank[2].toLowerCase();
                     double angle = 0;
-
-                    if (type.equals("player"))
-                        continue;
 
                     if (tank.length >= 4)
                         angle = (Math.PI / 2 * Double.parseDouble(tank[3]));
@@ -608,15 +650,51 @@ public class MapLoader
                             team = null;
                     }
 
-                    Tank t = Game.registryTank.getEntry(type).getTank(x, y, angle);
+                    Tank t;
+                    if (type.equals("player"))
+                    {
+                        if (team == Game.enemyTeam)
+                            team = Game.playerTeam;
+
+                        if (team == Game.enemyTeamNoFF)
+                            team = Game.playerTeamNoFF;
+
+                        level.playerSpawnsX.add(x);
+                        level.playerSpawnsY.add(y);
+                        level.playerSpawnsAngle.add(angle);
+                        level.playerSpawnsTeam.add(team);
+
+                        int x1 = (int) Double.parseDouble(tank[0]);
+                        int y1 = (int) Double.parseDouble(tank[1]);
+
+                        if (x1 >= 0 && y1 >= 0 && x1 < tankGrid.length && y1 < tankGrid[0].length)
+                            tankGrid[x1][y1] = true;
+
+                        continue;
+                    }
+                    else
+                    {
+                        if (section.customTanksMap.get(type) != null)
+                            t = section.customTanksMap.get(type).instantiate(type, x, y, angle);
+                        else
+                            t = Game.registryTank.getEntry(type).getTank(x, y, angle);
+                    }
+
                     t.team = team;
-                    Game.movables.add(t);
-                    movables.add(t);
+
+                    // Don't do this in your code! We only want to dynamically generate tank IDs on level load!
+                    t.networkID = Tank.nextFreeNetworkID();
+                    Tank.idMap.put(t.networkID, t);
+
+                    if (ScreenPartyLobby.isClient)
+                    {
+                        TankRemote t1 = new TankRemote(t);
+                        Game.movables.add(t1);
+                    }
+                    else
+                        Game.movables.add(t);
                 }
             }
-            redrawCounter = 50;
-
-            return new ArrayList[] {obstacles, movables};
         }
     }
 }

@@ -114,12 +114,18 @@ public class Hotbar
 
 			if (shields > 0)
 			{
-				Drawing.drawing.setColor(255, 0 , 0, (100 - this.percentHidden) * 2.55);
+				Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
 				Drawing.drawing.fillInterfaceOval(x - 175, y, 18, 18);
+				//Drawing.drawing.drawImage("shield.png", x - 175, y + 1, 14, 14);
 				Drawing.drawing.setInterfaceFontSize(12);
 				Drawing.drawing.setColor(255, 255, 255, (100 - this.percentHidden) * 2.55);
 				Drawing.drawing.drawInterfaceText(x - 175, y, shields + "");
 			}
+		/*	else
+			{
+				Drawing.drawing.setColor(0, 160, 0);
+				Drawing.drawing.drawImage("emblems/medic.png", x - 175, y, 14, 14);
+			}*/
 		}
 
 		if (this.enabledAmmunitionBar)
@@ -219,7 +225,7 @@ public class Hotbar
 
 			for (Movable m : Game.movables)
 			{
-				if (m instanceof Tank && !Team.isAllied(Game.playerTank, m) && !m.destroy && ((Tank) m).mandatoryKill)
+				if (m instanceof Tank && !Team.isAllied(Game.playerTank, m) && !m.destroy && ((Tank)m).mandatoryKill)
 					count++;
 			}
 
@@ -239,15 +245,12 @@ public class Hotbar
 			Drawing.drawing.setColor(207, 16, 16, (100 - this.percentHidden) * 2.55);
 			Drawing.drawing.drawInterfaceModel(TankModels.tank.turretBase, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
 
-			if (count > 0)
-			{
-				Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
-				Drawing.drawing.setInterfaceFontSize(24);
-				Drawing.drawing.drawInterfaceText(x - 17, y + 1, "" + count, true);
-			}
+			Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
+			Drawing.drawing.setInterfaceFontSize(24);
+			Drawing.drawing.drawInterfaceText(x - 20, y, "" + count, true);
 		}
 
-		if (Game.currentLevel != null && Game.currentLevel.timed && Game.screen instanceof ScreenGame)
+		if (Game.currentLevel != null && (Game.currentLevel.timed && Game.screen instanceof ScreenGame))
 		{
 			int secondsTotal = (int) (((ScreenGame) Game.screen).timeRemaining / 100 + 0.5);
 			double secondsFrac = (((ScreenGame) Game.screen).timeRemaining / 100 + 0.5) - secondsTotal;

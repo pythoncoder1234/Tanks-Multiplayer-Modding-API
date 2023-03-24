@@ -13,6 +13,7 @@ public class ObstacleUnknown extends Obstacle
 	{
 		super(name, posX, posY);
 
+		this.replaceTiles = false;
 		this.colorR = 255;
 		this.colorG = 0;
 		this.colorB = 0;

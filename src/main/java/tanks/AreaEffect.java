@@ -15,7 +15,7 @@ public abstract class AreaEffect extends Movable
 	@Override
 	public void update()
 	{
-		this.age += Panel.frameFrequency;
+		this.age += Panel.frameFrequency * this.getAttributeValue(AttributeModifier.clock_speed, 1);
 		
 		if (constantlyImbue)
 		{

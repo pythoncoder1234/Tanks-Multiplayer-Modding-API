@@ -1,13 +1,12 @@
 package tanks.tank;
 
 import tanks.*;
-import tanks.event.EventMineChangeTimer;
-import tanks.event.EventMineExplode;
-import tanks.menus.FixedMenu;
-import tanks.menus.Scoreboard;
+import tanks.gui.menus.FixedMenu;
+import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemMine;
-import tanks.ModAPI;
+import tanks.network.event.EventMineChangeTimer;
+import tanks.network.event.EventMineRemove;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,7 @@ public class Mine extends Movable implements IAvoidObject
     public double cooldown = 0;
     public int lastBeep = Integer.MAX_VALUE;
 
-    public int networkID;
+    public int networkID = -1;
 
     public static int currentID = 0;
     public static ArrayList<Integer> freeIDs = new ArrayList<>();
@@ -77,18 +76,20 @@ public class Mine extends Movable implements IAvoidObject
             idMap.put(this.networkID, this);
         }
 
-        for (FixedMenu m : ModAPI.menuGroup)
+        for (FixedMenu m : ModAPI.fixedMenus)
         {
             if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.mines_placed))
             {
-                if (((Scoreboard) m).playerPoints.isEmpty())
-                    ((Scoreboard) m).addTeamScore(this.team, 1);
+                Scoreboard s = ((Scoreboard) m);
+
+                if (!s.teamPoints.isEmpty())
+                    s.addTeamScore(this.team, 1);
 
                 else if (this.tank instanceof TankPlayer)
-                    ((Scoreboard) m).addPlayerScore(((TankPlayer) this.tank).player, 1);
+                    s.addPlayerScore(((TankPlayer) this.tank).player, 1);
 
                 else if (this.tank instanceof TankPlayerRemote)
-                    ((Scoreboard) m).addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
+                    s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
             }
         }
     }
@@ -189,14 +190,14 @@ public class Mine extends Movable implements IAvoidObject
 
     public void explode()
     {
-        Game.eventsOut.add(new EventMineExplode(this));
+        Game.eventsOut.add(new EventMineRemove(this));
         Game.removeMovables.add(this);
-
-        freeIDs.add(this.networkID);
-        idMap.remove(this.networkID);
 
         if (!ScreenPartyLobby.isClient)
         {
+            freeIDs.add(this.networkID);
+            idMap.remove(this.networkID);
+
             Explosion e = new Explosion(this);
             e.explode();
 
@@ -211,7 +212,7 @@ public class Mine extends Movable implements IAvoidObject
     }
 
     @Override
-    public double getSeverity(Tank t)
+    public double getSeverity(double posX, double posY)
     {
         return this.timer;
     }

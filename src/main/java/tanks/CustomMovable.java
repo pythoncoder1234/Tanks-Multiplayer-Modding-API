@@ -55,9 +55,9 @@ public class CustomMovable extends Movable
             }
         }
 
-        if (startReadingAt < this.drawInstructions.stripTrailing().length() - 1)
+        if (startReadingAt < this.drawInstructions.length() - 1)
         {
-            executeFunction(funcName.toString().stripTrailing(), parameters.toString().split(","));
+            executeFunction(funcName.toString(), parameters.toString().split(","));
             draw();
         }
         else

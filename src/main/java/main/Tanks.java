@@ -2,14 +2,22 @@ package main;
 
 import basewindow.ComputerFileManager;
 import lwjglwindow.LWJGLWindow;
+import tanks.Panel;
 import tanks.*;
 import tanks.extension.Extension;
 import tanksonline.CommandExecutor;
 import tanksonline.PlayerMap;
 import tanksonline.TanksOnlineServer;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Properties;
 
 public class Tanks
 {
@@ -30,60 +38,61 @@ public class Tanks
                 port = Integer.parseInt(arg.split("=")[1]);
             if (arg.equals("debug"))
                 Game.debug = true;
-            if (arg.equals("mapmaking"))
-                Game.mapmaking = true;
             if (arg.equals("mac") || arg.equals("no_relaunch"))
                 relaunch = false;
         }
 
         if (!Game.isOnlineServer)
         {
-            if (relaunch && Game.framework == Game.Framework.lwjgl)
+            try
             {
-                // Attempts to relaunch from the .jar file.
-                try
+                if (relaunch && Game.framework == Game.Framework.lwjgl)
                 {
-                    String path = new File(Tanks.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-
-                    if (path.endsWith(".jar"))
+                    // Attempts to relaunch from the .jar file.
+                    try
                     {
-                        String[] command = new String[]{"java", "-XstartOnFirstThread", "-jar", path, "mac", String.join(" ", args)};
-                        Runtime.getRuntime().exec(command);
+                        String path = new File(Tanks.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
 
-                        command[3] = "\"" + command[3] + "\"";
-                        System.out.println("To debug the jar, run this command:");
-                        System.out.println(String.join(" ", command) + "\n");
-                        Runtime.getRuntime().exit(0);
-                        return;
+                        if (path.endsWith(".jar"))
+                        {
+                            String[] command = new String[]{"java", "-XstartOnFirstThread", "-jar", path, "mac"};
+                            Runtime.getRuntime().exec(command);
+                            Runtime.getRuntime().exit(0);
+                            return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
                     }
                 }
-                catch (Exception e)
+
+                if (Game.framework == Game.Framework.lwjgl)
+                    Game.game.fileManager = new ComputerFileManager();
+
+                Game.initScript();
+
+                if (Game.framework == Game.Framework.lwjgl)
                 {
-                    e.printStackTrace();
+                    // Creates and configures the LWJGL window.
+                    Game.game.window = new LWJGLWindow(
+                            "Tanks",
+                            1400, 900 + Drawing.drawing.statsHeight,
+                            Game.absoluteDepthBase,
+                            new GameUpdater(), new GameDrawer(), new GameWindowHandler(),
+                            Game.vsync, !Panel.showMouseTarget
+                    );
+                    Game.game.window.antialiasingEnabled = Game.antialiasing;
                 }
+
+                Game.postInitScript();
+
+                Game.game.window.run();
             }
-
-            if (Game.framework == Game.Framework.lwjgl)
-                Game.game.fileManager = new ComputerFileManager();
-
-            Game.initScript();
-
-            if (Game.framework == Game.Framework.lwjgl)
+            catch (Throwable t)
             {
-                // Creates and configures the LWJGL window.
-                Game.game.window = new LWJGLWindow(
-                    "Tanks",
-                    1400, 900 + Drawing.drawing.statsHeight,
-                    Game.absoluteDepthBase,
-                    new GameUpdater(), new GameDrawer(), new GameWindowHandler(),
-                    Game.vsync, !Panel.showMouseTarget
-                );
-                Game.game.window.antialiasingEnabled = Game.antialiasing;
+                fail(t);
             }
-
-            Game.postInitScript();
-
-            Game.game.window.run();
         }
         else
         {
@@ -93,6 +102,99 @@ public class Tanks
             new CommandExecutor().run();
             new TanksOnlineServer(port).run();
         }
+    }
+
+    public static void fail(Throwable e)
+    {
+        JFrame jFrame = new JFrame();
+        jFrame.getRootPane().setWindowDecorationStyle(JRootPane.ERROR_DIALOG);
+        jFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+        JDialog jd = new JDialog(jFrame);
+
+        jd.setLayout(new FlowLayout());
+
+        jd.setBounds(500, 300, 400, 300);
+
+        StringWriter s = new StringWriter();
+        PrintWriter p = new PrintWriter(s);
+        e.printStackTrace(p);
+
+        StringBuilder props = new StringBuilder();
+        Properties pr = System.getProperties();
+        for (Object sr: pr.keySet())
+            props.append(sr).append(": ").append(pr.get(sr)).append("\n");
+
+        JTextArea jLabel = new JTextArea("Oh noes!\n" +
+                "Tanks ran into a problem and was unable to start :(\n\n" +
+                "This may be caused by an error in the game, by launching the game incorrectly, or by missing drivers or unsupported hardware.\n\n" +
+                "If you would like support regarding this issue, you may join the Tanks Discord via the following link:\n" +
+                "https://discord.gg/aWPaJD3\n\n" +
+                "Crash details:\n" +
+                s.toString() + "\n" +
+                "System properties:\n" + props +
+                "\n", 40, 80);
+
+        jLabel.setEditable(false);
+        jLabel.setLineWrap(true);
+
+        jd.addWindowListener(new WindowListener()
+        {
+            @Override
+            public void windowOpened(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                System.exit(0);
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e)
+            {
+
+            }
+        });
+
+
+        JScrollPane scroll = new JScrollPane(jLabel);
+        scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.createVerticalScrollBar();
+        scroll.setBounds(0, 0, 100, 50);
+
+        jd.add(scroll);
+        jd.pack();
+        jd.setVisible(true);
+        jd.setTitle("Tanks");
+
+        e.printStackTrace();
     }
 
     /**

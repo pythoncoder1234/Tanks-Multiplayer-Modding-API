@@ -1,9 +1,6 @@
 package tanks.gui.screen;
 
-import tanks.Drawing;
-import tanks.Game;
-import tanks.Level;
-import tanks.Panel;
+import tanks.*;
 import tanks.generator.LevelGeneratorVersus;
 import tanks.gui.Button;
 import tanks.gui.Firework;
@@ -49,7 +46,7 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
         Game.screen = ScreenPartyHost.activeScreen;
         ScreenGame.versus = false;
         ScreenInterlevel.fromSavedLevels = false;
-        ScreenInterlevel.fromModdedLevels = false;
+        ScreenInterlevel.fromMinigames = false;
     }
     );
 
@@ -61,13 +58,28 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
     }
     );
 
+    Button replayMinigame = new Button(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "Play again", () ->
+    {
+        ScreenInterlevel.fromMinigames = false;
+        try
+        {
+            assert Game.currentGame != null;
+            Game.currentGame = Game.currentGame.getClass().getConstructor().newInstance();
+            Game.currentGame.start();
+        }
+        catch (Exception e)
+        {
+            Game.exitToCrash(e.getCause());
+        }
+    });
+
     Button quitHigherPos = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Back to party", () ->
     {
         Game.resetTiles();
         Game.screen = ScreenPartyHost.activeScreen;
         ScreenGame.versus = false;
         ScreenInterlevel.fromSavedLevels = false;
-        ScreenInterlevel.fromModdedLevels = false;
+        ScreenInterlevel.fromMinigames = false;
     }
     );
 
@@ -120,6 +132,8 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
             }
         }
 
+        Game.reset();
+
         save.posX = Drawing.drawing.interfaceSizeX - Drawing.drawing.interfaceScaleZoom * 40;
         save.posY = Drawing.drawing.interfaceSizeY - 50 - Drawing.drawing.interfaceScaleZoom * 40;
         save.image = "icons/save.png";
@@ -139,10 +153,15 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
         {
             next.update();
         }
-        else if (ScreenInterlevel.fromSavedLevels || ScreenInterlevel.fromModdedLevels)
+        else if (ScreenInterlevel.fromSavedLevels)
         {
             quitHigherPos.update();
             replayHigherPos.update();
+        }
+        else if (ScreenInterlevel.fromMinigames)
+        {
+            replayMinigame.update();
+            quitHigherPos.update();
         }
         else
         {
@@ -151,7 +170,8 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
             newLevel.update();
         }
 
-        save.update();
+        if (!ScreenInterlevel.fromMinigames)
+            save.update();
     }
 
     @Override
@@ -198,10 +218,15 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
         {
             next.draw();
         }
-        else if (ScreenInterlevel.fromSavedLevels || ScreenInterlevel.fromModdedLevels)
+        else if (ScreenInterlevel.fromSavedLevels)
         {
             quitHigherPos.draw();
             replayHigherPos.draw();
+        }
+        else if (ScreenInterlevel.fromMinigames)
+        {
+            quitHigherPos.draw();
+            replayMinigame.draw();
         }
         else
         {
@@ -210,7 +235,8 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
             newLevel.draw();
         }
 
-        SpeedrunTimer.draw();
+        if (Game.showSpeedrunTimer)
+            SpeedrunTimer.draw();
 
         if ((Panel.win && Game.effectsEnabled) || Level.isDark())
             Drawing.drawing.setColor(255, 255, 255);
@@ -218,17 +244,10 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
             Drawing.drawing.setColor(0, 0, 0);
 
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.winlose);
 
-        if (Panel.subtitle != null && !Panel.subtitle.equals(""))
-        {
-            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 19 / 6, Panel.winlose);
-            Drawing.drawing.setInterfaceFontSize(Math.min(this.textSize, this.textSize * (400 / Game.game.window.fontRenderer.getStringSizeX(this.textSize / 36.0, Panel.subtitle))));
-            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.subtitle);
-        }
-        else
-            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.winlose);
-
-        save.draw();
+        if (!ScreenInterlevel.fromMinigames)
+           save.draw();
     }
 
     public ArrayList<Firework> getFireworkArray()

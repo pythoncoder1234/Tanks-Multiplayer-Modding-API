@@ -2,8 +2,7 @@ package tanks.gui.screen;
 
 import basewindow.BaseFile;
 import tanks.*;
-import tanks.gui.Button;
-import tanks.gui.TextBox;
+import tanks.gui.*;
 import tanks.obstacle.Obstacle;
 import tanks.tank.TankSpawnMarker;
 
@@ -127,8 +126,10 @@ public class ScreenSaveLevel extends Screen implements ILevelPreviewScreen
             this.levelName.update();
 
         if (Game.enable3d)
-            for (Obstacle o : Game.obstacles)
+            for (int i = 0; i < Game.obstacles.size(); i++)
             {
+                Obstacle o = Game.obstacles.get(i);
+
                 o.postOverride();
 
                 int x = (int) (o.posX / Game.tile_size);

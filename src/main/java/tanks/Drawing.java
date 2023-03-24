@@ -1,10 +1,11 @@
 package tanks;
 
 import basewindow.*;
-import tanks.event.EventPlaySound;
+import tanks.network.event.EventPlaySound;
 import tanks.gui.Button;
 import tanks.gui.Joystick;
 import tanks.gui.screen.ScreenGame;
+import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.translation.Translation;
 
@@ -77,6 +78,7 @@ public class Drawing
 
 	public static class LevelRenderer
 	{
+//		public BaseShapeBatchRenderer particleRenderer = Game.game.window.createShapeBatchRenderer();
 		public BaseShapeBatchRenderer terrainRenderer = Game.game.window.createShapeBatchRenderer();
 		public BaseShapeBatchRenderer terrainRendererTransparent = Game.game.window.createShapeBatchRenderer();
 		public BaseShapeBatchRenderer terrainRendererShrubbery = Game.game.window.createShapeBatchRenderer();
@@ -388,7 +390,6 @@ public class Drawing
 		Game.game.window.shapeRenderer.drawOval(drawX, drawY, drawSizeX, drawSizeY);
 	}
 
-
 	public void fillRect(double x, double y, double sizeX, double sizeY)
 	{
 		fillRect(x, y, sizeX, sizeY, 0);
@@ -578,7 +579,17 @@ public class Drawing
 
 	public void fillBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ)
 	{
-		fillBox(x, y, z, sizeX, sizeY, sizeZ, (byte) 0);
+		fillBox(x, y, z, sizeX, sizeY, sizeZ, (byte) 0, null);
+	}
+
+	public void fillBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ, String texture)
+	{
+		fillBox(x, y, z, sizeX, sizeY, sizeZ, (byte) 0, texture);
+	}
+
+	public void fillBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ, byte options)
+	{
+		fillBox(x, y, z, sizeX, sizeY, sizeZ, options, null);
 	}
 
 	/**
@@ -595,7 +606,7 @@ public class Drawing
 	 * <p>
 	 * +64 draw on top
 	 */
-	public void fillBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ, byte options)
+	public void fillBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ, byte options, String texture)
 	{
 		double drawX = gameToAbsoluteX(x, sizeX);
 		double drawY = gameToAbsoluteY(y, sizeY);
@@ -623,7 +634,7 @@ public class Drawing
 				options = (byte) (options | 4);
 		}
 
-		Game.game.window.shapeRenderer.fillBox(drawX, drawY, drawZ, drawSizeX, drawSizeY, drawSizeZ, options);
+		Game.game.window.shapeRenderer.fillBox(drawX, drawY, drawZ, drawSizeX, drawSizeY, drawSizeZ, options, texture);
 	}
 
 	public void fillBox(IBatchRenderableObject o, double x, double y, double z, double sizeX, double sizeY, double sizeZ)
@@ -632,14 +643,17 @@ public class Drawing
 	}
 
 	/**
-	 * Options byte:<br>
-	 * 0: default<br>
-	 * +1 hide behind face<br>
-	 * +2 hide front face<br>
-	 * +4 hide bottom face<br>
-	 * +8 hide top face<br>
-	 * +16 hide left face<br>
-	 * +32 hide right face<br>
+	 * Options byte:
+	 * <p>
+	 * 0: default
+	 * <p>
+	 * +1 hide behind face
+	 * +2 hide front face
+	 * +4 hide bottom face
+	 * +8 hide top face
+	 * +16 hide left face
+	 * +32 hide right face
+	 * <p>
 	 * +64 draw on top
 	 */
 	public void fillBox(IBatchRenderableObject o, double x, double y, double z, double sizeX, double sizeY, double sizeZ, byte options)
@@ -671,7 +685,7 @@ public class Drawing
 		double drawSizeY = sizeY * scale;
 		double drawSizeZ = sizeZ * scale;
 
-		Game.game.window.shapeRenderer.fillBox(drawX, drawY, drawZ, drawSizeX, drawSizeY, drawSizeZ, options);
+		Game.game.window.shapeRenderer.fillBox(drawX, drawY, drawZ, drawSizeX, drawSizeY, drawSizeZ, options, null);
 	}
 
 	public void drawModel(IModel m, double x, double y, double width, double height, double angle)
@@ -828,6 +842,55 @@ public class Drawing
 		Game.game.window.shapeRenderer.fillGlow(drawX, drawY, drawZ, drawSizeX, drawSizeY, false);
 	}
 
+	public void addInterfaceVertexRotated(double x, double y, double z, double ox, double oy, double rot)
+	{
+		Drawing.drawing.addInterfaceVertex(x + Math.cos(rot) * ox + Math.sin(rot) * oy, y - Math.sin(rot) * ox + Math.cos(rot) * oy, z);
+	}
+
+	public void fillInterfaceGlowSparkle(double x, double y, double z, double size, double angle)
+	{
+		double size2 = size * 0.05;
+		Game.game.window.shapeRenderer.setBatchMode(true, true, false, true);
+
+		double r = this.currentColorR;
+		double g = this.currentColorG;
+		double b = this.currentColorB;
+		double a = this.currentColorA;
+
+		Drawing.drawing.setColor(0, 0, 0, 0);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, size, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, size, angle);
+		Drawing.drawing.setColor(r, g, b, a);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, 0, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, 0, angle);
+
+		Drawing.drawing.setColor(0, 0, 0, 0);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, -size, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, -size, angle);
+		Drawing.drawing.setColor(r, g, b, a);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, 0, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, 0, angle);
+
+		angle += Math.PI / 2;
+		Drawing.drawing.setColor(0, 0, 0, 0);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, size, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, size, angle);
+		Drawing.drawing.setColor(r, g, b, a);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, 0, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, 0, angle);
+
+		Drawing.drawing.setColor(0, 0, 0, 0);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, -size, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, -size, angle);
+		Drawing.drawing.setColor(r, g, b, a);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, size2, 0, angle);
+		Drawing.drawing.addInterfaceVertexRotated(x, y, z, -size2, 0, angle);
+
+		Game.game.window.shapeRenderer.setBatchMode(false, true, false, true);
+
+	}
+
+
 	public void fillInterfaceGlow(double x, double y, double sizeX, double sizeY, boolean shade)
 	{
 		double drawX = (interfaceScale * (x - sizeX / 2) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
@@ -860,17 +923,12 @@ public class Drawing
 
 	public void fillInterfaceRect(double x, double y, double sizeX, double sizeY)
 	{
-		fillInterfaceRect(x, y, sizeX, sizeY, 0);
-	}
-
-	public void fillInterfaceRect(double x, double y, double sizeX, double sizeY, double borderRadius)
-	{
 		double drawX = (interfaceScale * (x - sizeX / 2) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
 		double drawY = (interfaceScale * (y - sizeY / 2) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
 		double drawSizeX = (sizeX * interfaceScale);
 		double drawSizeY = (sizeY * interfaceScale);
 
-		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY, borderRadius);
+		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY);
 	}
 
 	public void fillShadedInterfaceRect(double x, double y, double sizeX, double sizeY)
@@ -881,7 +939,7 @@ public class Drawing
 		double drawSizeY = (sizeY * interfaceScale);
 
 		Game.game.window.shapeRenderer.setBatchMode(true, true, true, false, false);
-		Game.game.window.shapeRenderer.fillBox(drawX, drawY, 0, drawSizeX, drawSizeY, 0, (byte) 61);
+		Game.game.window.shapeRenderer.fillBox(drawX, drawY, 0, drawSizeX, drawSizeY, 0, (byte) 61, null);
 		Game.game.window.shapeRenderer.setBatchMode(false, true, true, false, false);
 	}
 
@@ -928,7 +986,12 @@ public class Drawing
 
 	public void drawInterfaceRect(double x, double y, double sizeX, double sizeY)
 	{
-		drawInterfaceRect(x, y, sizeX, sizeY, 1, 0);
+		double drawX = Math.round(interfaceScale * (x - sizeX / 2) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
+		double drawY = Math.round(interfaceScale * (y - sizeY / 2) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
+		double drawSizeX = Math.round(sizeX * interfaceScale);
+		double drawSizeY = Math.round(sizeY * interfaceScale);
+
+		Game.game.window.shapeRenderer.drawRect(drawX, drawY, drawSizeX, drawSizeY);
 	}
 
 	public void drawInterfaceRect(double x, double y, double sizeX, double sizeY, double lineWidth)
@@ -978,6 +1041,12 @@ public class Drawing
 		double drawY = (interfaceScale * y - sizeY / 2 + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
 
 		Game.game.window.fontRenderer.drawString(drawX, drawY, this.fontSize, this.fontSize, text);
+
+		if (Game.game.window.fontRenderer.drawBox)
+		{
+			Drawing.drawing.setColor(0, 255, 0);
+			Game.game.window.shapeRenderer.drawRect(drawX, drawY, sizeX, sizeY);
+		}
 	}
 
 	public void drawInterfaceText(double x, double y, String text, boolean rightAligned)
@@ -1111,9 +1180,7 @@ public class Drawing
 
 		setColor(255, 255, 255);
 		for (int i = 0; i < text.length; i++)
-		{
 			drawUncenteredInterfaceText(x + xPadding, y + 2 + yPadding * (2 * i + 1), text[i]);
-		}
 
 		//return (y - (drawY / Window.scale + sizeY + yPadding / Window.scale * 2));
 	}
@@ -1130,10 +1197,9 @@ public class Drawing
 
 	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius, double r, double g, double b, double a)
 	{
-		Drawing.drawing.setColor(r, g, b, a);
+		Drawing.drawing.setColor(r, g, b, a * 0.75);
 		fillRect(x, y, sX, sY, borderRadius);
-		Drawing.drawing.setColor(r, g, b, a / 2);
-		drawRect(x, y, sX, sY,  borderWidth, borderRadius);
+		drawRect(x, y, sX, sY, borderWidth, borderRadius);
 	}
 
 	public void playMusic(String sound, float volume, boolean looped, String id, long fadeTime)
@@ -1570,12 +1636,14 @@ public class Drawing
 		if (Game.angledView)
 			dist = 300;
 
-		if (!Game.followingCam || Game.playerTank == null || Game.playerTank.destroy || !(Game.screen instanceof ScreenGame))
+		Tank t = ScreenGame.focusedTank();
+
+		if ((!Game.followingCam || !Drawing.drawing.movingCamera) || !(Game.screen instanceof ScreenGame))
 			return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
 		else
 		{
-			return (drawX - gameToAbsoluteX(Game.playerTank.posX, 0)) * Math.cos(Game.playerTank.angle)
-					+ (drawY - gameToAbsoluteY(Game.playerTank.posY, 0)) * Math.sin(Game.playerTank.angle) < -dist;
+			return (drawX - gameToAbsoluteX(t.posX, 0)) * Math.cos(t.angle)
+					+ (drawY - gameToAbsoluteY(t.posY, 0)) * Math.sin(t.angle) < -dist;
 		}
 	}
 

@@ -2,16 +2,23 @@ package tanks.network;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
-import tanks.event.*;
-import tanks.event.online.IOnlineServerEvent;
+import tanks.network.event.online.*;
+import tanks.network.event.*;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 
 import java.util.UUID;
 
-public class MessageReader
+public class MessageReader 
 {
 	public static final int max_event_size = 1048576;
+
+	/**
+	 *  When this value is set to true, all network events will be printed in the console.
+	 *  To debug network events, set this variable to true (via debug mode or relaunch) and reproduce the bug.
+	 *  A list of network event classes (most recent event last) will be printed to the console.
+	 *  */
+	public static boolean debugNetworkEvents = false;
 
 	public static int downstreamBytes;
 	public static int upstreamBytes;
@@ -25,15 +32,17 @@ public class MessageReader
 	protected boolean reading = false;
 	protected int endpoint;
 
-	public short queueMessage(ByteBuf m, UUID clientID)
+	protected int lastID;
+
+	public int queueMessage(ByteBuf m, UUID clientID)
 	{
 		return this.queueMessage(null, m, clientID);
 	}
 
-	public synchronized short queueMessage(ServerHandler s, ByteBuf m, UUID clientID)
+	public synchronized int queueMessage(ServerHandler s, ByteBuf m, UUID clientID)
 	{
-		short reply = -1;
-
+		int reply = -1;
+		
 		try
 		{
 			byte[] bytes = new byte[59];
@@ -71,16 +80,16 @@ public class MessageReader
 						return -1;
 					}
 				}
-
+				
 				reading = true;
 
 				while (queue.readableBytes() >= endpoint)
 				{
 					reply = this.readMessage(s, queue, clientID);
 					queue.discardReadBytes();
-
+					
 					reading = false;
-
+					
 					if (queue.readableBytes() >= 4)
 					{
 						endpoint = queue.readInt();
@@ -101,7 +110,7 @@ public class MessageReader
 								ScreenPartyLobby.connections.clear();
 							}
 
-							return 0;
+							return -1;
 						}
 
 						reading = true;
@@ -144,13 +153,18 @@ public class MessageReader
 		return reply;
 	}
 
-	public synchronized short readMessage(ServerHandler s, ByteBuf m, UUID clientID) throws Exception
+	public synchronized int readMessage(ServerHandler s, ByteBuf m, UUID clientID) throws Exception
 	{
 		int i = m.readInt();
 		Class<? extends INetworkEvent> c = NetworkEventMap.get(i);
 
+		if (debugNetworkEvents)		// see javadoc for the variable
+			System.out.println(NetworkEventMap.get(this.lastID));
+
 		if (c == null)
-			throw new Exception("Invalid network event: " + i);
+			throw new Exception("Invalid network event: " + i + " (Previous event: " + NetworkEventMap.get(this.lastID) + ")");
+
+		this.lastID = i;
 
 		INetworkEvent e = c.getConstructor().newInstance();
 		e.read(m);

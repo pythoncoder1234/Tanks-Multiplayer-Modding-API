@@ -18,7 +18,7 @@ public class ObstacleLight extends Obstacle
 		this.colorB = 235;
 		this.glow = 1.0;
 		this.batchDraw = false;
-		this.isFullTile = false;
+		this.replaceTiles = false;
 
 		this.drawLevel = 9;
 
@@ -38,7 +38,7 @@ public class ObstacleLight extends Obstacle
 		Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, this.colorA, this.glow);
 
 		if (Game.enable3d)
-			Drawing.drawing.fillBox(this, this.posX, this.posY, this.startHeight * 50, Obstacle.draw_size / 2, Obstacle.draw_size / 2, Obstacle.draw_size / 2);
+			Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Obstacle.draw_size / 2, Obstacle.draw_size / 2, Obstacle.draw_size / 2);
 		else
 			Drawing.drawing.fillRect(this, this.posX, this.posY, Obstacle.draw_size / 2, Obstacle.draw_size / 2);
 
@@ -56,7 +56,7 @@ public class ObstacleLight extends Obstacle
 		double s = this.stackHeight * Game.tile_size * 4;
 		double frac = Obstacle.draw_size / Game.tile_size * 0.75;
 		Drawing.drawing.setColor(this.colorR * frac, this.colorG * frac, this.colorB * frac, this.colorA, this.glow);
-		Drawing.drawing.fillForcedGlow(this.posX, this.posY, this.startHeight * 50, s, s, false, false, false, false);
+		Drawing.drawing.fillForcedGlow(this.posX, this.posY, 0, s, s, false, false, false, false);
 	}
 
 	@Override

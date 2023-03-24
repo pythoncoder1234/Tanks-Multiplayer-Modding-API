@@ -30,12 +30,11 @@ public class InputBindings
     public InputBindingGroup zoomIn = new InputBindingGroup("game.zoomIn", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_EQUAL));
     public InputBindingGroup zoomOut = new InputBindingGroup("game.zoomOut", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_MINUS));
     public InputBindingGroup zoomAuto = new InputBindingGroup("game.zoomAuto", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_O));
-    public InputBindingGroup perspective = new InputBindingGroup("game.perspective", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F5));
-    public InputBindingGroup followingCamPitch = new InputBindingGroup("game.yaw", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F), new InputBinding(InputBinding.InputType.mouse, InputCodes.MOUSE_BUTTON_5));
     public InputBindingGroup chat = new InputBindingGroup("game.chat", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_T));
-
     public InputBindingGroup hidePause = new InputBindingGroup("game.hidePauseMenu", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F1));
     public InputBindingGroup fullscreen = new InputBindingGroup("game.fullscreen", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F11), new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F10));
+    public InputBindingGroup perspective = new InputBindingGroup("game.perspective", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F5));
+    public InputBindingGroup followingCamPitch = new InputBindingGroup("game.pitch", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F), new InputBinding(InputBinding.InputType.mouse, InputCodes.MOUSE_BUTTON_5));
 
     public InputBindingGroup minimapToggle = new InputBindingGroup("minimap.toggle", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_M));
     public InputBindingGroup minimapIncreaseScale = new InputBindingGroup("minimap.increaseScale", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_RIGHT_BRACKET));
@@ -85,7 +84,6 @@ public class InputBindings
     public InputBindingGroup editorCopy = new InputBindingGroup("editor.copy", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_C));
     public InputBindingGroup editorCut = new InputBindingGroup("editor.cut", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_X));
     public InputBindingGroup editorPaste = new InputBindingGroup("editor.paste", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_V));
-    public InputBindingGroup editorFR = new InputBindingGroup("editor.fr", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F));
 
     public void save()
     {

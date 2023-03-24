@@ -1,17 +1,13 @@
 package tanks;
 
-import basewindow.IBatchRenderableObject;
-
 import java.util.ArrayList;
 
-public class Cloud extends Movable implements IBatchRenderableObject
+public class Cloud extends Movable
 {
     public ArrayList<Double> posX = new ArrayList<>();
     public ArrayList<Double> posY = new ArrayList<>();
     public double posZ = Math.random() * 100 + 500;
     public double size = Math.random() * 300 + 100;
-
-    protected boolean redrawn = false;
 
     public Cloud(double x, double y)
     {
@@ -28,13 +24,13 @@ public class Cloud extends Movable implements IBatchRenderableObject
     @Override
     public void draw()
     {
-        if (!Game.followingCam || !Game.enable3d || !Drawing.drawing.movingCamera)
+        if (!Game.followingCam || !Game.enable3d || !Drawing.drawing.movingCamera || Game.game.window.drawingShadow)
             return;
 
         for (int i = 0; i < this.posY.size(); i++)
         {
-            Drawing.drawing.setColor(255 * Level.currentLightIntensity, 255 * Level.currentLightIntensity, 255 * Level.currentLightIntensity, 128);
-            Drawing.drawing.fillBox(this, this.posX.get(i), this.posY.get(i), this.posZ, size, size, 30, (byte) 0);
+            Drawing.drawing.setColor(255 * Level.currentLightIntensity, 255 * Level.currentLightIntensity, 255 * Level.currentLightIntensity, 255);
+            Drawing.drawing.fillBox(this.posX.get(i), this.posY.get(i), this.posZ, size, size, 30, (byte) 0);
         }
     }
 
@@ -49,29 +45,5 @@ public class Cloud extends Movable implements IBatchRenderableObject
 
         if (this.posX.get(0) < 0 || this.posX.get(0) > Game.currentSizeX * 50)
             Game.removeClouds.add(this);
-    }
-
-    @Override
-    public boolean positionChanged()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean colorChanged()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean wasRedrawn()
-    {
-        return redrawn;
-    }
-
-    @Override
-    public void setRedrawn(boolean b)
-    {
-        redrawn = b;
     }
 }

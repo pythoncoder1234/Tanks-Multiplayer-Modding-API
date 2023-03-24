@@ -2,10 +2,10 @@ package tanks.bullet;
 
 import tanks.*;
 import tanks.AttributeModifier.Operation;
-import tanks.event.EventBulletDestroyed;
-import tanks.event.EventBulletElectricStunEffect;
-import tanks.event.EventBulletInstantWaypoint;
-import tanks.event.EventShootBullet;
+import tanks.network.event.EventBulletDestroyed;
+import tanks.network.event.EventBulletElectricStunEffect;
+import tanks.network.event.EventBulletInstantWaypoint;
+import tanks.network.event.EventShootBullet;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.item.ItemBullet;
 import tanks.tank.Mine;
@@ -166,7 +166,7 @@ public class BulletElectric extends BulletInstant
 		this.posX = movable.posX;
 		this.posY = movable.posY;
 
-		AttributeModifier a = new AttributeModifier("velocity", Operation.multiply, -1);
+		AttributeModifier a = new AttributeModifier(AttributeModifier.velocity, Operation.multiply, -1);
 		a.duration = 100;
 		movable.addAttribute(a);
 

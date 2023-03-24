@@ -2,7 +2,7 @@ package tanks.gui.screen;
 
 import tanks.Drawing;
 import tanks.Game;
-import tanks.event.EventChat;
+import tanks.network.event.EventChat;
 import tanks.gui.Button;
 import tanks.gui.ChatBox;
 import tanks.gui.ChatMessage;
@@ -42,8 +42,6 @@ public class ScreenPartyLobby extends Screen
 		super(350, 40, 380, 60);
 
 		toggleIP.fullInfo = true;
-		toggleIP.textOffsetX = 1.5;
-		toggleIP.textOffsetY = 1.5;
 
 		this.music = "menu_4.ogg";
 		this.musicID = "menu";

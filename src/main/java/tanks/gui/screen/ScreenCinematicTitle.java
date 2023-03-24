@@ -28,6 +28,7 @@ public class ScreenCinematicTitle extends Screen implements ISeparateBackgroundS
         this.logo.drawAge = 50;
         this.logo.depthTest = false;
         Game.movables.clear();
+        this.logo.networkID = 0;
         Game.movables.add(logo);
         ScreenGame.finished = false;
 
@@ -139,6 +140,10 @@ public class ScreenCinematicTitle extends Screen implements ISeparateBackgroundS
         }
 
         Obstacle.draw_size = Game.tile_size;
+        for (int i = 0; i < Game.tracks.size(); i++)
+        {
+            Game.tracks.get(i).update();
+        }
 
         for (int i = 0; i < Game.movables.size(); i++)
         {

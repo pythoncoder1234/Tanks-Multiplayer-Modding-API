@@ -9,7 +9,7 @@ public class ScreenOptionsInterface extends Screen
     public static final String infoBarText = "Info bar: ";
     public static final String warnText = "Warn before exit: ";
 
-    Button showStats = new Button(this.centerX, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    Button showStats = new Button(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -30,7 +30,7 @@ public class ScreenOptionsInterface extends Screen
                     "Network latency (if in a party)---" +
                     "Memory usage");
 
-    Button confirmClose = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    Button confirmClose = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -44,16 +44,6 @@ public class ScreenOptionsInterface extends Screen
         }
     },
             "Warn before closing the game---while in an editor");
-
-    Button pauseOnDefocus = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.pauseOnDefocus = !Game.pauseOnDefocus;
-            pauseOnDefocus.setText("Pause on defocus: " + (Game.pauseOnDefocus ? ScreenOptions.onText : ScreenOptions.offText));
-        }
-    });
 
     Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptions()
     );
@@ -73,8 +63,6 @@ public class ScreenOptionsInterface extends Screen
         else
             confirmClose.setText(warnText, ScreenOptions.offText);
 
-        pauseOnDefocus.setText("Pause on defocus: ", Game.pauseOnDefocus ? ScreenOptions.onText : ScreenOptions.offText);
-
         if (Game.framework == Game.Framework.libgdx)
         {
             confirmClose.enabled = false;
@@ -88,7 +76,6 @@ public class ScreenOptionsInterface extends Screen
         back.update();
         showStats.update();
         confirmClose.update();
-        pauseOnDefocus.update();
     }
 
     @Override
@@ -97,7 +84,6 @@ public class ScreenOptionsInterface extends Screen
         this.drawDefaultBackground();
 
         back.draw();
-        pauseOnDefocus.draw();
         confirmClose.draw();
         showStats.draw();
 

@@ -2,9 +2,8 @@ package tanks.tank;
 
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.event.*;
-import tanks.menus.FixedMenu;
-import tanks.menus.Scoreboard;
+import tanks.network.event.*;
+import tanks.gui.menus.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.ItemBar;
@@ -12,7 +11,6 @@ import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemEmpty;
 import tanks.hotbar.item.ItemMine;
-import tanks.ModAPI;
 
 public class TankPlayerRemote extends Tank implements IServerPlayerTank
 {
@@ -60,6 +58,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
     public TankPlayerRemote(double x, double y, double angle, Player p)
     {
         super("player", x, y, Game.tile_size, 0, 150, 255);
+
         this.player = p;
         this.showName = true;
         this.angle = angle;
@@ -77,8 +76,10 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
     {
         super.update();
 
-        this.bullet.updateCooldown();
-        this.mine.updateCooldown();
+        double reload = this.getAttributeValue(AttributeModifier.reload, 1);
+
+        this.bullet.updateCooldown(reload);
+        this.mine.updateCooldown(reload);
 
         Hotbar h = this.player.hotbar;
         if (h.enabledItemBar)
@@ -87,12 +88,14 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             {
                 if (i != null && !(i instanceof ItemEmpty))
                 {
-                    i.updateCooldown();
+                    i.updateCooldown(reload);
                 }
             }
         }
 
-        Game.eventsOut.add(new EventTankControllerUpdateS(this, this.forceMotion, this.recoil));
+        if (shouldUpdate)
+            Game.eventsOut.add(new EventTankControllerUpdateS(this, this.forceMotion, this.recoil));
+
         this.forceMotion = false;
         this.recoil = false;
         this.dXSinceFrame = 0;
@@ -104,6 +107,17 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             this.lastVY = this.vY;
             //this.lastPosX = this.posX;
             //this.lastPosY = this.posY;
+        }
+
+        if (this.player.chromaaa)
+        {
+            this.colorR = TankPlayer.rainbowColor(Game.player.colorR, 1);
+            this.colorG = TankPlayer.rainbowColor(Game.player.colorG, 3);
+            this.colorB = TankPlayer.rainbowColor(Game.player.colorB, 2);
+
+            this.secondaryColorR = TankPlayer.rainbowColor(Game.player.turretColorR, 1);
+            this.secondaryColorG = TankPlayer.rainbowColor(Game.player.turretColorG, 3);
+            this.secondaryColorB = TankPlayer.rainbowColor(Game.player.turretColorB, 2);
         }
 
         if (this.tookRecoil)
@@ -209,17 +223,8 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
                     vY *= maxSpeed / speed;
                 }
 
-                double vX2 = vX * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
-                double vY2 = vY * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
-
-                for (AttributeModifier a : this.attributes)
-                {
-                    if (a.type.equals("velocity"))
-                    {
-                        vX2 = a.getValue(vX2);
-                        vY2 = a.getValue(vY2);
-                    }
-                }
+                double vX2 = this.getAttributeValue(AttributeModifier.velocity, vX * ScreenGame.finishTimer / ScreenGame.finishTimerMax);
+                double vY2 = this.getAttributeValue(AttributeModifier.velocity, vY * ScreenGame.finishTimer / ScreenGame.finishTimerMax);
 
                 double maxDist = 1;
 
@@ -291,10 +296,10 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             this.lastVX = vX;
             this.lastVY = vY;
 
-            if (action1 && !this.disabled && !(Game.currentGame != null && !Game.currentGame.enableShooting))
+            if (action1 && !(Game.currentGame != null && !Game.currentGame.enableShooting) && !this.disabled)
                 this.shoot();
 
-            if (action2 && !this.disabled && !(Game.currentGame != null && !Game.currentGame.enableLayingMines))
+            if (action2 && !(Game.currentGame != null && !Game.currentGame.enableLayingMines) && !this.disabled)
                 this.layMine();
         }
     }
@@ -391,7 +396,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
 
         double vX = this.vX;
         double vY = this.vY;
-        this.addPolarMotion(b.getPolarDirection() + Math.PI, 25.0 / 32.0 * b.recoil * b.frameDamageMultipler);
+        this.addPolarMotion(b.getPolarDirection() + Math.PI, 25.0 / 32.0 * b.recoil * this.getAttributeValue(AttributeModifier.recoil, 1) * b.frameDamageMultipler);
 
         if (b.moveOut)
             b.moveOut(50 / speed * this.size / Game.tile_size);
@@ -433,11 +438,11 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         if (Crusade.crusadeMode)
             this.player.remainingLives--;
 
-        for (FixedMenu m : ModAPI.menuGroup)
+        for (FixedMenu m : ModAPI.fixedMenus)
         {
             if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.deaths))
             {
-                if (((Scoreboard) m).playerPoints.isEmpty())
+                if (!((Scoreboard) m).teamPoints.isEmpty())
                     ((Scoreboard) m).addTeamScore(this.team, 1);
                 else
                     ((Scoreboard) m).addPlayerScore(this.player, 1);

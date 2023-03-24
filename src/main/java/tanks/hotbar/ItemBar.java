@@ -1,17 +1,23 @@
 package tanks.hotbar;
 
 import tanks.*;
-import tanks.event.EventSetItem;
-import tanks.event.EventSetItemBarSlot;
 import tanks.gui.Button;
 import tanks.gui.input.InputBindingGroup;
 import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemEmpty;
+import tanks.minigames.Arcade;
+import tanks.network.ServerHandler;
+import tanks.network.event.EventSetHotbar;
+import tanks.network.event.EventSetItem;
+import tanks.network.event.EventSetItemBarSlot;
 
 public class ItemBar
 {
+	public static boolean forceEnabled = false;
+
 	public static int size = 50; // The slot size.
 	public static int count_margin_right = 26; // Item number's distance from right.
 	public static int count_margin_bottom = 35; // Item number's distance from bottom.
@@ -34,8 +40,13 @@ public class ItemBar
 	public double selectedTimer = 0;
 
 	public int selected = -1;
-	
+
+	public double lastItemSwitch = -1000;
+	public double age;
+
 	public Player player;
+
+	protected ItemEmpty defaultItemEmpty = new ItemEmpty();
 
 	public ItemBar(Player p)
 	{
@@ -49,6 +60,14 @@ public class ItemBar
 			final int j = i;
 			this.slotButtons[i] = new Button(0, 0, size + 2.5, size * 1.5, "", () -> setItem(j));
 		}
+	}
+
+	public static void setEnabled(boolean enabled)
+	{
+		for (Player p : Game.players)
+			p.hotbar.enabledItemBar = enabled;
+
+		Game.eventsOut.add(new EventSetHotbar(enabled, -2));
 	}
 
 	public boolean addItem(Item item)
@@ -139,11 +158,30 @@ public class ItemBar
 
 		slots[selected].attemptUse();
 
+		boolean destroy = false;
 		if (slots[selected].destroy)
+		{
+			destroy = true;
 			slots[selected] = new ItemEmpty();
+			this.lastItemSwitch = this.age;
+		}
 
 		if (this.player != Game.player)
 			Game.eventsOut.add(new EventSetItem(this.player, this.selected, this.slots[this.selected]));
+
+		if (destroy && Game.currentGame instanceof Arcade)
+		{
+			selected = -1;
+
+			if (ScreenPartyHost.isServer)
+			{
+				for (ServerHandler sh : ScreenPartyHost.server.connections)
+				{
+					if (sh.player.equals(this.player))
+						sh.events.add(new EventSetItemBarSlot(-1));
+				}
+			}
+		}
 
 		return true;
 	}
@@ -164,6 +202,7 @@ public class ItemBar
 
 	public void update()
 	{
+		this.age += Panel.frameFrequency;
 		checkKey(Game.game.input.hotbarDeselect, -1);
 		checkKey(Game.game.input.hotbar1, 0);
 		checkKey(Game.game.input.hotbar2, 1);
@@ -223,6 +262,7 @@ public class ItemBar
 
 		this.selected = (this.selected == index ? -1 : index);
 		this.selectedTimer = 300;
+		this.lastItemSwitch = this.age;
 
 		if (ScreenPartyLobby.isClient)
 			Game.eventsOut.add(new EventSetItemBarSlot(this.selected));
@@ -329,6 +369,31 @@ public class ItemBar
 
 					Drawing.drawing.drawInterfaceText(this.slotButtons[i].posX, this.slotButtons[i].posY, g.getInputs());
 				}
+			}
+		}
+
+		if (this.age - lastItemSwitch < 200 && !Game.followingCam)
+		{
+			Item i = defaultItemEmpty;
+			if (selected >= 0)
+				i = this.slots[this.selected];
+
+			if (Game.playerTank != null && !Game.playerTank.destroy)
+			{
+				Drawing.drawing.setColor(255, 255, 255, Math.min(1, 2 - (this.age - this.lastItemSwitch) / 100.0) * 255);
+
+				String icon = i.icon;
+
+				if (i.icon == null)
+				{
+					Drawing.drawing.setColor(255, 255, 255, Math.min(1, 2 - (this.age - this.lastItemSwitch) / 100.0) * 127);
+					icon = "noitem.png";
+				}
+
+				if (Game.enable3d)
+					Drawing.drawing.drawImage(icon, Game.playerTank.posX, Game.playerTank.posY, Game.playerTank.size, Game.tile_size, Game.tile_size);
+				else
+					Drawing.drawing.drawImage(icon, Game.playerTank.posX, Game.playerTank.posY, Game.tile_size, Game.tile_size);
 			}
 		}
 	}

@@ -70,6 +70,7 @@ public abstract class BaseWindow
     public ArrayList<Double> frameFrequencies = new ArrayList<>();
     public long lastFrame = System.currentTimeMillis();
     public double frameFrequency = 1;
+    public final double frameFreqThreshold = 100;
 
     public String name;
 
@@ -107,6 +108,9 @@ public abstract class BaseWindow
 
     public ModelPart.ShapeDrawer shapeDrawer;
 
+    public boolean focused = true;
+
+    // capsLock and numLock do not work on mac (glfw limitation) :(
     public boolean shift = false;
     public boolean capsLock = false;
     public boolean numLock = false;
@@ -159,19 +163,18 @@ public abstract class BaseWindow
         frameFrequencies.add(freq);
 
         if (frameFrequencies.size() > 5)
-        {
             frameFrequencies.remove(0);
-        }
 
         double totalFrequency = 0;
 
         for (Double frequency : frameFrequencies)
-        {
             totalFrequency += frequency;
-        }
 
         //frameFrequency = Math.max(0, totalFrequency / frameFrequencies.size());
         frameFrequency = freq;
+
+        if (frameFrequency > frameFreqThreshold)
+            frameFrequency = 100 / 60.;
     }
 
     public abstract void run();

@@ -1,7 +1,7 @@
 package tanksonline.screen;
 
 import tanks.Game;
-import tanks.event.online.*;
+import tanks.network.event.online.*;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 import tanks.gui.screen.ScreenOnline;
@@ -68,7 +68,7 @@ public class ScreenDownloadLevel extends ScreenLayout
     {
         this.player.screen = this;
 
-        this.player.sendEvent(new EventPlayMusic(this.music, Game.musicVolume, true, musicID, 500));
+        this.player.sendEvent(new EventSetMusic(this.music, Game.musicVolume, true, musicID, 500));
 
         this.player.sendEvent(new EventSendLevelToDownload(this.name, level.level));
 

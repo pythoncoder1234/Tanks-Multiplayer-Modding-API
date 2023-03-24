@@ -3,37 +3,29 @@ package tanks;
 import basewindow.BaseFile;
 import basewindow.BaseFontRenderer;
 import basewindow.BaseShapeRenderer;
-import tanks.event.*;
+import tanks.gui.menus.FixedMenu;
+import tanks.gui.menus.FixedText;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
-import tanks.menus.CustomShape;
-import tanks.menus.FixedMenu;
-import tanks.menus.FixedText;
-import tanks.menus.TransitionEffect;
-import tanks.modlevels.Arcade.java.ArcadeMain;
-import tanks.modlevels.GameMap;
+import tanks.gui.screen.ScreenPartyLobby;
+import tanks.minigames.TeamDeathmatch;
+import tanks.network.EventMinigameStart;
 import tanks.network.NetworkEventMap;
-import tanks.obstacle.Obstacle;
+import tanks.network.event.*;
 import tanks.tank.*;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Objects;
 
 public class ModAPI
 {
-    /**
-     * Stores registered mods
-     */
-    public static ArrayList<Class<? extends ModGame>> registeredCustomGames = new ArrayList<>();
-    public static ArrayList<Class<? extends ModLevel>> registeredCustomLevels = new ArrayList<>();
-    public static ArrayList<FixedMenu> menuGroup = new ArrayList<>();
+    public static ArrayList<FixedMenu> fixedMenus = new ArrayList<>();
     public static HashMap<Double, FixedMenu> ids = new HashMap<>();
     public static ArrayList<FixedMenu> removeMenus = new ArrayList<>();
 
-    // Directions in radians
+    // Directions in radians in terms of tank
     public static final double up = Math.toRadians(-90);
     public static final double down = Math.toRadians(90);
     public static final double left = Math.toRadians(180);
@@ -46,8 +38,7 @@ public class ModAPI
      */
     public static void registerMods()
     {
-        registerGame(ArcadeMain.class);
-        registerGame(GameMap.class);
+        Game.registerMinigame(TeamDeathmatch.class);
     }
 
     public static void setUp()
@@ -56,40 +47,30 @@ public class ModAPI
 
         NetworkEventMap.register(EventAddCustomMovable.class);
         NetworkEventMap.register(EventAddCustomShape.class);
-        NetworkEventMap.register(EventAddNPC.class);
+        NetworkEventMap.register(EventAddTankNPC.class);
         NetworkEventMap.register(EventAddNPCShopItem.class);
         NetworkEventMap.register(EventAddObstacle.class);
         NetworkEventMap.register(EventAddObstacleText.class);
-        NetworkEventMap.register(EventAddScoreboard.class);
-        NetworkEventMap.register(EventAddTransitionEffect.class);
+        NetworkEventMap.register(EventCreateScoreboard.class);
         NetworkEventMap.register(EventChangeBackgroundColor.class);
         NetworkEventMap.register(EventChangeNPCMessage.class);
-        NetworkEventMap.register(EventChangeScoreboardAttribute.class);
         NetworkEventMap.register(EventClearMenuGroup.class);
         NetworkEventMap.register(EventClearNPCShop.class);
         NetworkEventMap.register(EventCustomLevelEndCondition.class);
         NetworkEventMap.register(EventDisableMinimap.class);
         NetworkEventMap.register(EventDisplayText.class);
-        NetworkEventMap.register(EventFillObstacle.class);
+        NetworkEventMap.register(EventMinigameStart.class);
         NetworkEventMap.register(EventLoadMapLevel.class);
         NetworkEventMap.register(EventOverrideNPCState.class);
         NetworkEventMap.register(EventPurchaseNPCItem.class);
+        NetworkEventMap.register(EventSetHotbar.class);
+        NetworkEventMap.register(EventSetObstacle.class);
         NetworkEventMap.register(EventScoreboardUpdateScore.class);
         NetworkEventMap.register(EventSortNPCShopButtons.class);
         NetworkEventMap.register(EventSkipCountdown.class);
 
         fixedShapes = Game.game.window.shapeRenderer;
         fixedText = Game.game.window.fontRenderer;
-    }
-
-    public static void registerGame(Class<? extends ModGame> m)
-    {
-        registeredCustomGames.add(m);
-    }
-
-    public static void registerMod(Class<? extends ModLevel> m)
-    {
-        registeredCustomLevels.add(m);
     }
 
     /** Skips the countdown before a level starts. */
@@ -106,7 +87,7 @@ public class ModAPI
     /**
      * Returns the level or crusade string of a level file.
      */
-    public static String getLevelString(String levelName) throws FileNotFoundException
+    public static String getLevelString(String levelName)
     {
         return getLevelString(levelName, false);
     }
@@ -114,7 +95,7 @@ public class ModAPI
     /**
      * Returns (or prints) the level or crusade string of a level file.
      */
-    public static String getLevelString(String levelName, boolean print) throws FileNotFoundException
+    public static String getLevelString(String levelName, boolean print)
     {
         StringBuilder levelString = new StringBuilder();
 
@@ -128,7 +109,7 @@ public class ModAPI
                 String line = level.nextLine();
 
                 if (print)
-                    System.out.print(line + "\\n");
+                    System.out.println(line);
 
                 levelString.append(line).append("\n");
             }
@@ -140,8 +121,30 @@ public class ModAPI
 
         catch (IOException e)
         {
-            throw new FileNotFoundException("Level \"" + levelName + "\" not found");
+            throw new RuntimeException("Level \"" + levelName + "\" not found");
         }
+    }
+
+
+    /**
+     * Coordinates for top left or top right corner (to put gui elements)
+     */
+    public static double[] topCoords(boolean left)
+    {
+        double[] output = new double[2];
+        output[0] = -(Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeX) / 2 + Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale + 50;
+        output[1] = -((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2 + 50;
+
+        if (!Game.showSpeedrunTimer || (Game.currentGame != null && Game.currentGame.hideSpeedrunTimer))
+            output[1] -= 30;
+
+        if (!left)
+        {
+            output[0] = Game.game.window.absoluteWidth - output[0];
+            output[1] = Game.game.window.absoluteHeight - output[1];
+        }
+
+        return output;
     }
 
     public static void setLevelTimer(int minutes, int seconds)
@@ -149,6 +152,9 @@ public class ModAPI
         setLevelTimer(minutes * 60 + seconds);
     }
 
+    /**
+     * Set to 0 to clear the level timer
+     */
     public static void setLevelTimer(int seconds)
     {
         if (Game.currentLevel == null)
@@ -162,12 +168,22 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
-    public static void setMusic(String music)
+    public static void setScreenMusic(String music)
     {
         if (music.equals(Game.screen.music))
             return;
 
         EventSetMusic e = new EventSetMusic(music);
+        e.execute();
+        Game.eventsOut.add(e);
+    }
+
+    public static void setScreenMusic(MusicState state)
+    {
+        if (Objects.equals(state.music, Game.screen.music) && !(Game.screen instanceof ScreenGame && !Objects.equals(state.intro, ((ScreenGame) Game.screen).introMusic)))
+            return;
+
+        EventSetMusic e = new EventSetMusic(state);
         e.execute();
         Game.eventsOut.add(e);
     }
@@ -197,39 +213,6 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
-    /**
-     * Function to add an object to the correct list
-     * (<code>Game.obstacles</code>, <code>Game.movables</code>, etc.)
-     *  */
-    public static void addObject(Object o)
-    {
-        if (o instanceof Movable)
-        {
-            ((Movable) o).posX = ((Movable) o).posX * 50 + 25;
-            Game.movables.add((Movable) o);
-
-            if (o instanceof TankNPC)
-                Game.eventsOut.add(new EventAddNPC((TankNPC) o));
-
-            else if (o instanceof Tank)
-                Game.eventsOut.add(new EventCreateCustomTank((Tank) o));
-
-            else if (o instanceof CustomMovable)
-                Game.eventsOut.add(new EventAddCustomMovable((CustomMovable) o));
-        }
-        else if (o instanceof Obstacle)
-        {
-            EventAddObstacle e = new EventAddObstacle((Obstacle) o);
-            e.execute();
-            Game.eventsOut.add(e);
-        }
-        else if (o instanceof FixedMenu)
-            ModAPI.menuGroup.add((FixedMenu) o);
-
-        else
-            System.err.println("Warning: Invalid item given to ModAPI.addObject()");
-    }
-
     public static void clearMenuGroup()
     {
         EventClearMenuGroup e = new EventClearMenuGroup();
@@ -237,84 +220,10 @@ public class ModAPI
         Game.eventsOut.add(e);
     }
 
-    /** Displays text on a player's screen, with custom positions. Works with multiplayer. */
-    public static FixedText displayText(double x, double y, String text, Animations.Animation... animations)
+    public static void displayText(FixedText text)
     {
-        int brightness = (Game.screen instanceof ScreenGame && !Level.isDark()) ? 255 : 0;
-        return displayText(x, y, text, brightness, brightness, brightness, 24, animations);
-    }
-
-    /** Displays text on a player's screen, with custom positions. Works with multiplayer. */
-    public static FixedText displayText(double x, double y, String text, double r, double g, double b, double fontSize, Animations.Animation... animations)
-    {
-        FixedText t = new FixedText(x, y, text, r, g, b, fontSize);
-
-        if (!t.animations.isEmpty())
-            t.animations = new ArrayList<>(List.of(animations));
-
-        ModAPI.menuGroup.add(t);
-        Game.eventsOut.add(new EventDisplayText(t));
-        return t;
-    }
-
-    /** Displays text on a player's screen. Works with multiplayer. */
-    public static FixedText displayText(FixedText.types location, String text, Animations.Animation... animations)
-    {
-        int brightness = (Game.screen instanceof ScreenGame && !Level.isDark()) ? 255 : 0;
-        return displayText(location, text, false, 0, brightness, brightness, brightness, animations);
-    }
-
-    /** Displays text on a player's screen, with adjustable colors. Works with multiplayer. */
-    public static FixedText displayText(FixedText.types location, String text, double r, double g, double b, Animations.Animation... animations)
-    {
-        return displayText(location, text, false, 0, r, g, b, animations);
-    }
-
-    /** Displays text on a player's screen, with adjustable display duration and colors. Works with multiplayer. */
-    public static FixedText displayText(FixedText.types location, String text, int duration, Animations.Animation... animations)
-    {
-        int brightness = (Game.screen instanceof ScreenGame && !Level.isDark()) ? 255 : 0;
-
-        FixedText t = new FixedText(location, text, duration, brightness, brightness, brightness);
-
-        if (!t.animations.isEmpty())
-            t.animations = new ArrayList<>(List.of(animations));
-
-        ModAPI.menuGroup.add(t);
-        Game.eventsOut.add(new EventDisplayText(t));
-        return t;
-    }
-
-    /** Displays text on a player's screen, with adjustable display duration and colors. Works with multiplayer. */
-    public static FixedText displayText(FixedText.types location, String text, int duration, double r, double g, double b, Animations.Animation... animations)
-    {
-        FixedText t = new FixedText(location, text, duration, r, g, b);
-
-        if (!t.animations.isEmpty())
-            t.animations = new ArrayList<>(List.of(animations));
-
-        ModAPI.menuGroup.add(t);
-        Game.eventsOut.add(new EventDisplayText(t));
-        return t;
-    }
-
-    /**
-     * Displays text on a player's screen. Works with multiplayer.
-     * @param afterGameStarted Displays the text after the level starts.
-     * @param duration The duration (in centiseconds) for the text to be displayed before fading out. Set to
-     *                     0 for infinite duration.
-     *  */
-    public static FixedText displayText(FixedText.types location, String text, boolean afterGameStarted, int duration, double r, double g, double b, Animations.Animation... animations)
-    {
-        FixedText t = new FixedText(location, text, duration, r, g, b);
-
-        if (!t.animations.isEmpty())
-            t.animations = new ArrayList<>(List.of(animations));
-
-        t.afterGameStarted = afterGameStarted;
-        ModAPI.menuGroup.add(t);
-        Game.eventsOut.add(new EventDisplayText(t));
-        return t;
+        Game.eventsOut.add(new EventDisplayText(text));
+        ModAPI.fixedMenus.add(text);
     }
 
 
@@ -387,19 +296,27 @@ public class ModAPI
 
             TankPlayer p = new TankPlayer(x, y, angle);
             p.team = t.team;
-            Game.movables.add(p);
+            Game.movables.add(new Crate(p));
             Game.playerTank = p;
 
             break;
         }
     }
 
-    /** Converts a number to a string, and removes the <code>.0</code>.<br>
+    public static Crate spawnTankCrate(Tank t)
+    {
+        Crate c = new Crate(t);
+        Game.movables.add(c);
+        return c;
+    }
+
+    /**
+     * Converts a number to a string, and removes the <code>.0</code>.<br>
      * 100.0 -> 100, 100.1 -> 100.1
-     * */
+     */
     public static String convertToString(double number)
     {
-        if (number != (int) number)
+        if (number % 1 != 0)
             return "" + number;
         else
             return "" + (int) number;
@@ -439,32 +356,9 @@ public class ModAPI
     /** Places an obstacle on a tile. */
     public static void setObstacle(int x, int y, String registryName, double stackHeight, double startHeight)
     {
-        try
-        {
-            Obstacle o = Game.registryObstacle.getEntry(registryName).obstacle
-                    .getConstructor(String.class, double.class, double.class)
-                    .newInstance(registryName, x, y);
-            o.stackHeight = stackHeight;
-            o.startHeight = startHeight;
-
-            ModAPI.addObject(o);
-
-            if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-            {
-                if (o.bulletCollision)
-                    Game.game.solidGrid[x][y] = true;
-
-                if (o.bulletCollision && !o.shouldShootThrough)
-                    Game.game.unbreakableGrid[x][y] = true;
-
-                Game.obstacleMap[x][y] = o;
-            }
-        }
-        catch (Exception e)
-        {
-            System.err.println("Warning: Bad obstacle provided to setObstacle");
-            e.printStackTrace();
-        }
+        EventSetObstacle e = new EventSetObstacle(x, y, registryName, stackHeight, startHeight);
+        e.execute();
+        Game.eventsOut.add(e);
     }
 
     /** Fills a rectangular area with obstacles. */
@@ -488,19 +382,27 @@ public class ModAPI
     }
 
     /** Places a tree, centered on a specified tile.
-     * @param height Height of the tree, leaves and all.
+     * @param height Height of the tree, including leaves
      * @param sizeFactor How big the tree will be.
      * */
-    public static void placeTree(int x, int y, int height, int sizeFactor)
+    public static void placeTree(int x, int y, int height, double sizeFactor)
     {
-        int endX = x + sizeFactor / 2;
-        int endY = y + sizeFactor / 2;
-
-        ModAPI.fillObstacle(x, y, endX, endY, "normal", height * sizeFactor - sizeFactor);
-
-        for (int i = 0; i < sizeFactor; i++)
+        if (sizeFactor > 3)
         {
-            int placeX = x + i;
+            System.err.println("Warning (ModAPI.placeTree): Size Factor greater than 3, canceling");
+            return;
+        }
+
+        ModAPI.fillObstacle((int) Math.round(x - sizeFactor / 4), (int) Math.round(y - sizeFactor / 4), (int) Math.round(x + sizeFactor / 4), (int) Math.round(y + sizeFactor / 4), "normal", height * sizeFactor);
+
+        sizeFactor *= 4;
+        x -= sizeFactor / 2;
+        y -= sizeFactor / 2;
+
+        for (int i = 0; i < sizeFactor / 2; i++)
+        {
+            for (int j = 0; j < sizeFactor / 4; j++)
+                ModAPI.fillObstacle(x + i + j, y + i + j, (int) (x + sizeFactor - i - j), (int) (y + sizeFactor - i - j), "shrub", sizeFactor, height + i + j * (sizeFactor / 4));
         }
     }
 
@@ -522,54 +424,26 @@ public class ModAPI
         e.execute();
     }
 
-    public static void addTransitionEffect(TransitionEffect.types type)
+    public static void loadLevel(Level l, boolean forceNotRemote)
     {
-        addTransitionEffect(type, 1, 0, 0, 0);
-    }
-
-    public static void addTransitionEffect(TransitionEffect.types type, int colR, int colG, int colB)
-    {
-        addTransitionEffect(type, 1, colR, colG, colB);
-    }
-
-    public static void addTransitionEffect(TransitionEffect.types type, float speed, int colR, int colG, int colB)
-    {
-        EventAddTransitionEffect e = new EventAddTransitionEffect(type, speed, colR, colG, colB);
-        e.execute();
-        Game.eventsOut.add(e);
-    }
-
-    /** Adds a shape (rectangle, oval) to the screen. Works in multiplayer. */
-    public static void addCustomShape(boolean all, CustomShape.types type, int x, int y, int sizeX, int sizeY, int r, int g, int b)
-    {
-        addCustomShape(all, type, x, y, sizeX, sizeY, 0, r, g, b, 255);
-    }
-
-    /** Adds a shape (rectangle, oval) to the screen. Works in multiplayer. */
-    public static void addCustomShape(boolean all, CustomShape.types type, int x, int y, int sizeX, int sizeY, int r, int g, int b, int a)
-    {
-        addCustomShape(all, type, x, y, sizeX, sizeY, 0, r, g, b, a);
-    }
-
-    /** Adds a shape (rectangle, oval) to the screen. Works in multiplayer. */
-    public static void addCustomShape(boolean all, CustomShape.types type, int x, int y, int sizeX, int sizeY, int duration, int r, int g, int b, int a)
-    {
-        EventAddCustomShape e = new EventAddCustomShape(type, x, y, sizeX, sizeY, duration, r, g, b, a);
-        e.execute();
-
-        if (all)
-            Game.eventsOut.add(e);
+        l.loadLevel(!forceNotRemote && ScreenPartyLobby.isClient);
+        Game.screen = new ScreenGame();
     }
 
     public static void loadLevel(Level l)
     {
-        l.loadLevel();
-        Game.screen = new ScreenGame();
+        loadLevel(l, false);
     }
 
-    public static void loadLevel(String levelString)
+    public static Level loadLevel(String levelString)
     {
-        loadLevel(new Level(levelString));
+        Level l = new Level(levelString);
+        loadLevel(l, false);
+
+        if (Game.currentGame != null)
+            Game.currentGame.level = l;
+
+        return l;
     }
 
     /** Change the color of a level background. */

@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashSet;
 
 public class ScreenTankEditor extends Screen implements IItemScreen
@@ -92,9 +92,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         this.resetLayout();
         Game.screen = (Screen) this.tankScreen;
         for (String m : this.tankMusics)
-        {
             Drawing.drawing.removeSyncedMusic(m, 500);
-        }
 
         this.tankScreen.refreshTanks(this.tank);
     }
@@ -137,9 +135,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         {
             Field[] fields2 = new Field[this.fields.length];
             for (int i = 0; i < fields2.length; i++)
-            {
                 fields2[i] = fields[fields.length - 1 - i];
-            }
             this.fields = fields2;
         }
 
@@ -395,9 +391,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         public void drawUIElements()
         {
             for (int i = Math.min(page * rows * 3 + rows * 3, this.uiElements.size()) - 1; i >= page * rows * 3; i--)
-            {
                 this.uiElements.get(i).draw();
-            }
         }
 
         public void draw()
@@ -1245,7 +1239,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
             }
             else if (p.miscType() == TankProperty.MiscType.music)
             {
-                HashSet<String> a = (HashSet<String>) f.get(tank);
+                HashSet<String> a = ((HashSet<String>) f.get(tank));
                 ArrayList<String> musics = new ArrayList<>();
 
                 for (HashSet<String> s: Game.registryTank.tankMusics.values())
@@ -1257,7 +1251,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     }
                 }
 
-                musics.sort(Comparator.naturalOrder());
+                Collections.sort(musics, (o1, o2) -> o1.compareTo(o2));
 
                 String[] musicsArray = new String[musics.size()];
                 boolean[] selectedMusicsArray = new boolean[musics.size()];
@@ -1436,9 +1430,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         this.setupLayoutParameters();
 
         if (this.tankScreen instanceof ScreenLevelEditorOverlay)
-        {
             this.updateMusic();
-        }
 
         if (this.message != null)
             this.dismissMessage.update();
@@ -1536,9 +1528,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
             Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 200, this.currentTab.name);
 
             for (Button b : this.topLevelButtons)
-            {
                 b.draw();
-            }
 
             this.currentTab.draw();
 

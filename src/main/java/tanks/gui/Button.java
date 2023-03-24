@@ -12,7 +12,7 @@ import tanks.translation.Translation;
 
 import java.util.ArrayList;
 
-public class Button implements IDrawable, ITrigger, Cloneable
+public class Button implements IDrawable, ITrigger
 {
 	public Runnable function;
 	public double posX;
@@ -242,7 +242,7 @@ public class Button implements IDrawable, ITrigger, Cloneable
 					drawing.setColor(0, 0, 255);
 					drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
 					drawing.setColor(255, 255, 255);
-					drawing.drawInterfaceText(this.posX + 1 + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
+					drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
 				}
 
 				drawing.drawTooltip(this.hoverText);
@@ -252,7 +252,7 @@ public class Button implements IDrawable, ITrigger, Cloneable
 				drawing.setColor(0, 150, 255);
 				drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
 				drawing.setColor(255, 255, 255);
-				drawing.drawInterfaceText(this.posX + 1 + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
+				drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
 			}
 		}
 	}
@@ -262,29 +262,6 @@ public class Button implements IDrawable, ITrigger, Cloneable
 	{
 		this.posX = x;
 		this.posY = y;
-	}
-
-	public Button clone(double shiftY)
-	{
-		return clone(0, shiftY);
-	}
-
-	public Button clone(double shiftX, double shiftY)
-	{
-		Button b = null;
-
-		try
-		{
-			b = (Button) super.clone();
-			b.posX += shiftX;
-			b.posY += shiftY;
-		}
-		catch (Exception e)
-		{
-			Game.exitToCrash(e);
-		}
-
-		return b;
 	}
 
 	public void update()
@@ -453,12 +430,15 @@ public class Button implements IDrawable, ITrigger, Cloneable
 
 	public static void addEffect(double posX, double posY, double sizeX, double sizeY, ArrayList<Effect> glowEffects, double velocity, double mul, double max)
 	{
+		if (!Game.effectsEnabled)
+			return;
+
 		Effect e = Effect.createNewEffect(posX, posY, Effect.EffectType.interfacePiece);
 
 		if (mul == -1)
 			mul = 2 * Math.max(0, (sizeY / 2 - 20) / sizeY);
 
-		double total = (sizeX - sizeY) * 2 + sizeY * Math.PI;
+		double total = (sizeX - sizeY) * 2 + sizeY * Math.PI * 2;
 		double rand = Math.random() * total;
 
 		if (rand < sizeX - sizeY)
@@ -473,9 +453,9 @@ public class Button implements IDrawable, ITrigger, Cloneable
 			e.posY = posY - sizeY / 2 * mul;
 			e.vY = -velocity;
 		}
-		else if (rand < (sizeX - sizeY) * 2 + sizeY * Math.PI / 2)
+		else if (rand < (sizeX - sizeY) * 2 + sizeY * Math.PI)
 		{
-			double a = (rand - (sizeX - sizeY) * 2) / sizeY * 2 - Math.PI / 2;
+			double a = (rand - (sizeX - sizeY) * 2) / sizeY - Math.PI / 2;
 			e.posX = posX + (sizeX - sizeY) / 2;
 			e.posX += sizeY / 2 * Math.cos(a) * mul;
 			e.posY += sizeY / 2 * Math.sin(a) * mul;
@@ -483,7 +463,7 @@ public class Button implements IDrawable, ITrigger, Cloneable
 		}
 		else
 		{
-			double a = (rand - (sizeX - sizeY) * 2 + sizeY * Math.PI / 2) / sizeY * 2 + Math.PI / 2;
+			double a = (rand - (sizeX - sizeY) * 2 + sizeY * Math.PI) / sizeY + Math.PI / 2;
 			e.posX = posX - (sizeX - sizeY) / 2;
 			e.posX += sizeY / 2 * Math.cos(a) * mul;
 			e.posY += sizeY / 2 * Math.sin(a) * mul;
@@ -555,7 +535,5 @@ public class Button implements IDrawable, ITrigger, Cloneable
 		this.hoverTextRaw = hoverText;
 		this.hoverTextRawTranslated = Translation.translate(hoverText, objects);
 		this.hoverText = this.hoverTextRawTranslated.split("---");
-
-		this.enableHover = this.hoverTextRaw.length() > 0;
 	}
 }

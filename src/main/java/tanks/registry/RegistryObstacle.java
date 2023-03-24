@@ -9,13 +9,21 @@ import java.util.ArrayList;
 public class RegistryObstacle 
 {
 	public ArrayList<ObstacleEntry> obstacleEntries = new ArrayList<>();
-	public ArrayList<ObstacleEntry> hiddenEntries = new ArrayList<>();
 
 	public static class ObstacleEntry
 	{
 		public final Class<? extends Obstacle> obstacle;
 		public final String name;
-		public boolean hidden = false;
+		public final boolean hidden;
+
+		public ObstacleEntry(RegistryObstacle r, Class<? extends Obstacle> obstacle, String name)
+		{
+			this.obstacle = obstacle;
+			this.name = name;
+			this.hidden = false;
+
+			r.obstacleEntries.add(this);
+		}
 
 		public ObstacleEntry(RegistryObstacle r, Class<? extends Obstacle> obstacle, String name, boolean hidden)
 		{
@@ -30,17 +38,14 @@ public class RegistryObstacle
 		{
 			this.obstacle = ObstacleUnknown.class;
 			this.name = "unknown";
+			this.hidden = true;
 		}
 
 		protected ObstacleEntry(String name)
 		{
 			this.obstacle = ObstacleUnknown.class;
 			this.name = name;
-		}
-
-		public Obstacle getObstacle()
-		{
-			return getObstacle(0, 0);
+			this.hidden = true;
 		}
 
 		public Obstacle getObstacle(double x, double y)
@@ -68,18 +73,22 @@ public class RegistryObstacle
 	}
 
 	public ObstacleEntry getEntry(String name)
-	{
-		for (ObstacleEntry r : obstacleEntries)
+	{		
+		for (int i = 0; i < obstacleEntries.size(); i++)
 		{
+			ObstacleEntry r = obstacleEntries.get(i);
+
 			if (r.name.equals(name))
+			{
 				return r;
+			}
 		}
 
 		return ObstacleEntry.getUnknownEntry(name);
 	}
 
 	public ObstacleEntry getEntry(int number)
-	{
+	{		
 		return obstacleEntries.get(number);
 	}
 }

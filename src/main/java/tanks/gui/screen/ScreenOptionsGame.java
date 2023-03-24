@@ -9,8 +9,9 @@ public class ScreenOptionsGame extends Screen
 {
     public static final String autostartText = "Autostart: ";
     public static final String fullStatsText = "Stats animations: ";
+    public static final String pauseText = "Pause on defocus: ";
 
-    Button autostart = new Button(this.centerX, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    Button autostart = new Button(this.centerX, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -25,7 +26,7 @@ public class ScreenOptionsGame extends Screen
     },
             "When enabled, levels will---start playing automatically---4 seconds after they are---loaded (if the play button---isn't clicked earlier)");
 
-    Button fullStats = new Button(this.centerX, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    Button fullStats = new Button(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -40,18 +41,21 @@ public class ScreenOptionsGame extends Screen
     },
             "When off, skips directly to the summary tab---of the crusade end stats screen");
 
-    Button displayZoom = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    Button pauseOnDefocus = new Button(this.centerX, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
         {
-            Panel.displayZoom = !Panel.displayZoom;
-            displayZoom.setText("Display zoom: ", Panel.displayZoom ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    },
-            "Displays zoom and auto zoom when---its keybinds are pressed");
+            Panel.pauseOnDefocus = !Panel.pauseOnDefocus;
 
-    Button speedrunOptions = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Speedrunning options", () -> Game.screen = new ScreenOptionsSpeedrun());
+            if (Panel.pauseOnDefocus)
+                pauseOnDefocus.setText(pauseText, ScreenOptions.onText);
+            else
+                pauseOnDefocus.setText(pauseText, ScreenOptions.offText);
+        }
+    });
+
+    Button speedrunOptions = new Button(this.centerX, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Speedrunning options", () -> Game.screen = new ScreenOptionsSpeedrun());
 
     Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptions());
 
@@ -70,10 +74,10 @@ public class ScreenOptionsGame extends Screen
         else
             fullStats.setText(fullStatsText, ScreenOptions.offText);
 
-        displayZoom.setText("Display zoom: ", (Game.framework == Game.Framework.lwjgl && Panel.displayZoom) ? ScreenOptions.onText : ScreenOptions.offText);
-
-        if (Game.framework == Game.Framework.libgdx)
-            displayZoom.enabled = false;
+        if (Panel.pauseOnDefocus)
+            pauseOnDefocus.setText(pauseText, ScreenOptions.onText);
+        else
+            pauseOnDefocus.setText(pauseText, ScreenOptions.offText);
     }
 
     @Override
@@ -81,9 +85,9 @@ public class ScreenOptionsGame extends Screen
     {
         back.update();
         speedrunOptions.update();
-        autostart.update();
+        pauseOnDefocus.update();
         fullStats.update();
-        displayZoom.update();
+        autostart.update();
     }
 
     @Override
@@ -93,9 +97,9 @@ public class ScreenOptionsGame extends Screen
 
         back.draw();
         speedrunOptions.draw();
+        pauseOnDefocus.draw();
         fullStats.draw();
         autostart.draw();
-        displayZoom.draw();
 
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.setColor(0, 0, 0);

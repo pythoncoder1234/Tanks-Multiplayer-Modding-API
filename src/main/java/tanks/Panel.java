@@ -3,18 +3,18 @@ package tanks;
 import basewindow.BaseFile;
 import basewindow.InputCodes;
 import basewindow.transformation.Translation;
-import tanks.event.EventBeginLevelCountdown;
-import tanks.event.EventPing;
-import tanks.event.online.IOnlineServerEvent;
 import tanks.extension.Extension;
 import tanks.gui.TextBox;
 import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
-import tanks.menus.FixedMenu;
 import tanks.network.Client;
 import tanks.network.ClientHandler;
 import tanks.network.MessageReader;
+import tanks.network.event.EventBeginLevelCountdown;
+import tanks.network.event.EventPing;
+import tanks.network.event.INetworkEvent;
+import tanks.network.event.online.IOnlineServerEvent;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
@@ -25,12 +25,9 @@ public class Panel
 {
 	public static boolean onlinePaused;
 
-	public static boolean prevFocused = true;
-
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
 	public static boolean autoZoom = true;
-	public static boolean displayZoom = true;
 	public static double lastAutoZoomSpeed = 0;
 
 	public static double windowWidth = 1400;
@@ -40,13 +37,14 @@ public class Panel
 	public boolean playedTutorialIntroMusic = false;
 
 	public static boolean showMouseTarget = true;
+	public static boolean showMouseTargetHeight = false;
+	public static boolean pauseOnDefocus = true;
 
 	public static Panel panel;
 
 	public static boolean forceRefreshMusic;
 
 	public static String winlose = "";
-	public static String subtitle = "";
 	public static boolean win = false;
 	public static boolean levelPassed = false;
 
@@ -100,18 +98,14 @@ public class Panel
 	public boolean started = false;
 	public boolean settingUp = true;
 
+	protected boolean prevFocused = true;
+
 	public static void initialize()
 	{
 		if (!initialized)
 			panel = new Panel();
 
 		initialized = true;
-	}
-
-	public static void onChangeFocus(boolean focused)
-	{
-		if (!focused && Game.screen instanceof ScreenGame)
-			((ScreenGame) Game.screen).paused = true;
 	}
 
 	private Panel()
@@ -133,7 +127,7 @@ public class Panel
 		if (Game.game.fullscreen)
 			Game.game.window.setFullscreen(Game.game.fullscreen);
 
-		Game.game.window.setIcon("/images/icon.png");
+		Game.game.window.setIcon("/images/icon64.png");
 
 		double scale = 1;
 		if (Game.game.window.touchscreen && Game.game.window.pointHeight > 0 && Game.game.window.pointHeight <= 500)
@@ -161,7 +155,6 @@ public class Panel
 
 		Game.dummyTank = new TankDummy("dummy",0, 0, 0);
 		Game.dummyTank.team = null;
-		Game.dummyTank.networkID = -1;
 
 		for (Extension e : Game.extensionRegistry.extensions)
 			e.loadResources();
@@ -195,16 +188,12 @@ public class Panel
 			Game.game.window.soundPlayer.musicPlaying = true;
 
 			for (int i = 1; i <= 5; i++)
-			{
 				Game.game.window.soundPlayer.registerCombinedMusic("/music/menu_" + i + ".ogg", "menu");
-			}
 
 			Game.game.window.soundPlayer.registerCombinedMusic("/music/menu_options.ogg", "menu");
 
 			for (int i = 1; i <= 2; i++)
-			{
 				Game.game.window.soundPlayer.registerCombinedMusic("/music/ready_music_" + i + ".ogg", "ready");
-			}
 
 			Game.game.window.soundPlayer.registerCombinedMusic("/music/battle.ogg", "battle");
 			Game.game.window.soundPlayer.registerCombinedMusic("/music/battle_paused.ogg", "battle");
@@ -230,6 +219,9 @@ public class Panel
 			Game.game.window.soundPlayer.loadMusic("/music/battle_timed_paused.ogg");
 
 			Game.game.window.soundPlayer.loadMusic("/music/battle.ogg");
+
+			for (int i = 1; i <= 8; i++)
+				Game.game.window.soundPlayer.loadMusic("/music/arcade/rampage" + i + ".ogg");
 		}
 
 		settingUp = false;
@@ -249,14 +241,16 @@ public class Panel
 		{
 			started = true;
 			this.startTime = System.currentTimeMillis() + splash_duration;
-			//Drawing.drawing.playSound("splash_jingle.ogg");
+//			Drawing.drawing.playSound("splash_jingle.ogg");
 		}
 
 		if (!started)
 			this.startTime = System.currentTimeMillis();
 
 		int maxFps = Game.maxFPS;
-		if (Game.deterministicMode)
+		if (Game.deterministicMode && Game.deterministic30Fps)
+			maxFps = 30;
+		else if (Game.deterministicMode)
 			maxFps = 60;
 
 		if (maxFps > 0)
@@ -301,6 +295,13 @@ public class Panel
 				Drawing.drawing.playMusic("menu_intro.ogg", Game.musicVolume, false, "intro", 0, false);
 		}
 
+		if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_F8))
+		{
+			Game.recordMode = !Game.recordMode;
+			Drawing.drawing.statsHeight = Drawing.drawing.enableStats && !Game.recordMode ? 40 : 0;
+			Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_F8);
+		}
+
 		Game.game.window.constrainMouse = Game.constrainMouse && ((Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).paused) || Game.screen instanceof ScreenLevelEditor);
 
 		if (!Game.shadowsEnabled)
@@ -325,17 +326,12 @@ public class Panel
 
 		Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
 
-		if (Game.deterministicMode)
+		if (Game.deterministicMode && Game.deterministic30Fps)
+			Panel.frameFrequency = 100.0 / 30;
+		else if (Game.deterministicMode)
 			Panel.frameFrequency = 100.0 / 60;
 		else
 			Panel.frameFrequency = Game.game.window.frameFrequency;
-
-		if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_F8))
-		{
-			Game.recordMode = !Game.recordMode;
-			Drawing.drawing.statsHeight = (!Game.recordMode && Drawing.drawing.enableStats) ? 40 : 0;
- 			Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_F8);
-		}
 
 		Game.game.window.showKeyboard = false;
 
@@ -363,11 +359,6 @@ public class Panel
 		if (settingUp)
 			return;
 
-		if (Game.screen instanceof ScreenGame)
-		{
-			for (FixedMenu menu : ModAPI.menuGroup)
-				menu.update();
-		}
 
 		synchronized (Game.eventsIn)
 		{
@@ -439,9 +430,6 @@ public class Panel
 			if (!(Game.screen instanceof ScreenGame) || Panel.zoomTarget < 0 ||
 					((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null)) || !((ScreenGame) Game.screen).playing)
 				this.zoomTimer -= 0.02 * Panel.frameFrequency;
-
-			if (Game.screen instanceof ScreenGame && ((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null) || !((ScreenGame) Game.screen).playing || ScreenGame.finishedQuick))
-				((ScreenGame) Game.screen).pitch = Math.max(0, ((ScreenGame) Game.screen).pitch -= Panel.frameFrequency / 100);
 		}
 
 		if (((Game.playerTank != null && !Game.playerTank.destroy) || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).spectatingTank != null)) && !ScreenGame.finished
@@ -584,6 +572,12 @@ public class Panel
 		Drawing.drawing.interfaceSizeX = Drawing.drawing.baseInterfaceSizeX / Drawing.drawing.interfaceScaleZoom;
 		Drawing.drawing.interfaceSizeY = Drawing.drawing.baseInterfaceSizeY / Drawing.drawing.interfaceScaleZoom;
 
+		if (Game.game.window.focused != prevFocused)
+		{
+			prevFocused = Game.game.window.focused;
+			Game.screen.onFocusChange(prevFocused);
+		}
+
 		if (!onlinePaused)
 			Game.screen.update();
 		else
@@ -593,6 +587,20 @@ public class Panel
 		{
 			Game.game.input.fullscreen.invalidate();
 			Game.game.window.setFullscreen(!Game.game.window.fullscreen);
+		}
+
+		if (ScreenPartyLobby.isClient)
+		{
+			Client.handler.pingTimer -= Panel.frameFrequency;
+
+			if (Client.handler.pingTimer <= 0)
+			{
+				Game.eventsOut.add(new EventPing());
+				Client.handler.pingTimer = 150;
+				ClientHandler.lastLatencyTime = System.currentTimeMillis();
+			}
+
+			Client.handler.reply();
 		}
 
 		if (Game.steamNetworkHandler.initialized)
@@ -612,9 +620,18 @@ public class Panel
 					ScreenPartyHost.server.connections.get(j).reply();
 				}
 			}
-
-			Game.eventsOut.clear();
 		}
+
+		for (INetworkEvent e : Game.eventsOut)
+		{
+			for (EventListener l : Game.eventListeners)
+			{
+				if (e.getClass() == l.event)
+					l.function.apply(e);
+			}
+		}
+
+		Game.eventsOut.clear();
 
 		if (prevScreen != Game.screen)
 		{
@@ -622,19 +639,6 @@ public class Panel
 			Drawing.drawing.interfaceSizeY = Drawing.drawing.baseInterfaceSizeY / Drawing.drawing.interfaceScaleZoom;
 
 			Panel.selectedTextBox = null;
-		}
-
-		if (ScreenPartyLobby.isClient)
-		{
-			Client.handler.reply();
-
-			if (ClientHandler.pingCounter > 0)
-				ClientHandler.pingCounter -= Panel.frameFrequency;
-			else {
-				ClientHandler.lastMessage = System.currentTimeMillis();
-				Client.handler.sendEvent(new EventPing());
-				ClientHandler.pingCounter = 200;
-			}
 		}
 
 		if (forceRefreshMusic || (prevScreen != null && prevScreen != Game.screen && Game.screen != null && !Game.stringsEqual(prevScreen.music, Game.screen.music) && !(Game.screen instanceof IOnlineScreen)))
@@ -756,7 +760,7 @@ public class Panel
 
 		if (!(Game.screen instanceof ScreenExit))
 		{
-			if (Game.screen instanceof ScreenGame && Game.currentLevel != null && Game.followingCam)
+			if (Game.followingCam && Game.screen instanceof ScreenGame && Game.currentLevel != null)
 				Drawing.drawing.setColor(133 * (Level.currentLightIntensity * 0.7), 193 * (Level.currentLightIntensity * 0.7), 233 * (Level.currentLightIntensity * 0.7));
 			else
 				Drawing.drawing.setColor(174, 92, 16);
@@ -803,10 +807,16 @@ public class Panel
 
 		if (Game.game.window.pressedKeys.contains(InputCodes.KEY_F3))
 		{
-			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_Q))
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
 			{
 				Game.game.window.constrainMouse = !Game.game.window.constrainMouse;
-				Game.game.window.pressedKeys.remove(InputCodes.KEY_Q);
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_P);
+			}
+
+			if (Game.debug && Game.game.window.shift && Game.game.window.pressedKeys.contains(InputCodes.KEY_S))
+			{
+				System.out.println(Game.screen.getClass().getSimpleName());
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_S);
 			}
 
 			int brightness = 0;
@@ -819,7 +829,7 @@ public class Panel
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
 				text = "(" + (int) Game.game.window.absoluteWidth + ", " + (int) Game.game.window.absoluteHeight + ")";
 
-			else if (Game.game.window.pressedKeys.contains(InputCodes.KEY_C))
+			else if (Game.game.window.pressedKeys.contains(InputCodes.KEY_S))
 				text = "(" + (int) Game.game.window.absoluteMouseX + ", " + (int) Game.game.window.absoluteMouseY + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
 
 			else {
@@ -834,7 +844,7 @@ public class Panel
 				text = "(" + posX + ", " + posY + ")";
 			}
 
-			Game.game.window.fontRenderer.drawString(Game.game.window.absoluteMouseX + 25, Game.game.window.absoluteMouseY + 10, Drawing.drawing.fontSize, Drawing.drawing.fontSize, text);
+			Game.game.window.fontRenderer.drawString(Game.game.window.absoluteMouseX + 10, Game.game.window.absoluteMouseY + 10, Drawing.drawing.fontSize, Drawing.drawing.fontSize, text);
 		}
 	}
 
@@ -875,6 +885,127 @@ public class Panel
 			}
 
 			Drawing.drawing.drawInterfaceImage("cursor.png", mx, my, 48, 48);
+		}
+
+		if (Game.enable3d && ((Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).paused && !((ScreenGame) Game.screen).shopScreen && Game.playerTank != null) || Game.screen instanceof ScreenLevelEditor) && Panel.showMouseTargetHeight)
+		{
+			double c = 127 * Obstacle.draw_size / Game.tile_size;
+
+			double r = c;
+			double g = c;
+			double b = c;
+			double a = 255;
+
+			double r2 = 0;
+			double g2 = 0;
+			double b2 = 0;
+			double a2 = 0;
+
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Game.game.window.shapeRenderer.setBatchMode(true, false, true, true, false);
+
+			double size = 12 * Drawing.drawing.interfaceScale / Drawing.drawing.scale;
+			double height = 100;
+			double thickness = 2;
+
+			double x = Drawing.drawing.toGameCoordsX(mx);
+			double y = Drawing.drawing.toGameCoordsY(my);
+
+			Game.game.window.shapeRenderer.setBatchMode(false, false, true, true, false);
+			Game.game.window.shapeRenderer.setBatchMode(true, true, true, true, false);
+
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x - size, y - thickness, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y - thickness, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x + size, y - thickness, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y - thickness, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x - size, y + thickness, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y - thickness, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x + size, y + thickness, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y + thickness, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x - size, y - thickness, 0);
+			Drawing.drawing.addVertex(x - size, y + thickness, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x + size, y - thickness, 0);
+			Drawing.drawing.addVertex(x + size, y + thickness, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x - thickness, y - size, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x - thickness, y, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x - thickness, y + size, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x - thickness, y, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x + thickness, y - size, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x + thickness, y, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x + thickness, y + size, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x + thickness, y, 0);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x - thickness, y - size, 0);
+			Drawing.drawing.addVertex(x + thickness, y - size, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y, height);
+
+			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+			Drawing.drawing.addVertex(x - thickness, y + size, 0);
+			Drawing.drawing.addVertex(x + thickness, y + size, 0);
+			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.addVertex(x, y, height);
+
+			double res = 40;
+			double height2 = height * 0.75;
+			for (int i = 0; i < res; i++)
+			{
+				Drawing.drawing.setColor(r, g, b, a, 1);
+				double x1 = Math.cos(i / res * Math.PI * 2) * size;
+				double x2 = Math.cos((i + 1) / res * Math.PI * 2) * size;
+				double y1 = Math.sin(i / res * Math.PI * 2) * size;
+				double y2 = Math.sin((i + 1) / res * Math.PI * 2) * size;
+
+				Drawing.drawing.addVertex(x + x1, y + y1, 0);
+				Drawing.drawing.addVertex(x + x2, y + y2, 0);
+
+				Drawing.drawing.setColor(r2, g2, b2, a2, 1);
+				Drawing.drawing.addVertex(x + x2, y + y2, height2);
+				Drawing.drawing.addVertex(x + x1, y + y1, height2);
+			}
+
+			Game.game.window.shapeRenderer.setBatchMode(false, true, false);
 		}
 	}
 
@@ -924,8 +1055,8 @@ public class Panel
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);
 			partyIpLen += 50;
 
-			s = "Latency: " + ClientHandler.lastLatencyAverage + "ms";
-			double[] col = getLatencyColor(ClientHandler.lastLatencyAverage);
+			s = "Latency: " + ClientHandler.latency + "ms";
+			double[] col = getLatencyColor(ClientHandler.latency);
 			Drawing.drawing.setColor(col[0], col[1], col[2]);
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - 10 - offset, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, s);
 		}

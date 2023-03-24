@@ -2,9 +2,6 @@ package tanks.obstacle;
 
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.ScreenPartyHost;
-import tanks.ModAPI;
-import tanks.ModLevel;
 import tanks.tank.IAvoidObject;
 import tanks.tank.Tank;
 
@@ -34,7 +31,6 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
             this.colorR = 50;
             this.colorG = 100;
             this.colorB = 255 - Math.random() * 45;
-            this.colorA = 175;
         }
         else
         {
@@ -42,6 +38,8 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
             this.colorG = 100;
             this.colorB = 255;
         }
+
+        this.colorA = 175;
 
         for (int i = 0; i < default_max_height; i++)
         {
@@ -61,68 +59,46 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
         {
             Tank t = (Tank) m;
 
-            AttributeModifier a = new AttributeModifier("water", "velocity", AttributeModifier.Operation.multiply, -0.5);
-            a.duration = 30;
-            a.deteriorationAge = 20;
-            t.addUnduplicateAttribute(a);
+            t.addStatusEffect(StatusEffect.snow_velocity, 0, 20, 30);
+            t.addStatusEffect(StatusEffect.snow_friction, 0, 5, 10);
 
-            if (!Game.enable3dBg)
-                return;
+            CustomPropertiesMap p = t.customProperties;
 
             if (t.posZ < -Game.tile_size - 15)
-                t.waterEnterTime = Math.min(t.waterEnterTime + Panel.frameFrequency, drownTime);
-            else
-                t.waterEnterTime = Math.max(t.waterEnterTime - Panel.frameFrequency, 0);
-
-            if (this.stackHeight >= 1 && t.waterEnterTime >= drownTime - 300 && t.health > 0)
             {
-                t.flashAnimation = 1;
+                p.putIfAbsent("drown", 0D);
+                double drown = p.getDouble("drown") + Panel.frameFrequency;
+                p.put("drown", drown);
+                p.put("last_water_enter", System.currentTimeMillis());
 
-                if (t.waterEnterTime < drownTime)
-                {
-                    boolean kill = t.damage(Panel.frameFrequency / 2500, this);
-
-                    if (kill && ScreenPartyHost.isServer)
-                    {
-                        String message = null;
-
-                        if (Game.currentGame != null && Game.currentGame.enableKillMessages)
-                            message = Game.currentGame.generateDrownMessage(t);
-
-                        else if (Game.currentLevel instanceof ModLevel && ((ModLevel) Game.currentLevel).enableKillMessages)
-                            message = ((ModLevel) Game.currentLevel).generateDrownMessage(t);
-
-                        else if (((ModLevel) Game.currentLevel).enableKillMessages)
-                            message = Level.genDrownMessage(t);
-
-                        if (message != null)
-                            ModAPI.sendChatMessage(message);
-                    }
-                }
+                if (drown > drownTime)
+                    t.addStatusEffect(StatusEffect.drown_damage, 0, 0, 10);
+            }
+            else
+            {
+                Long lastEnter = p.getLong("last_water_enter");
+                if (lastEnter != null && System.currentTimeMillis() - lastEnter > 1000)
+                    p.put("drown", 0D);
             }
 
-            double[] dx = {t.vX, -t.vX, 0, 0};
-            double[] dy = {0, 0, t.vY, -t.vY};
+            int vx = (int) t.vX;
+            int vy = (int) t.vY;
+
+            int[] dx = {-vx, vx, 0, 0};
+            int[] dy = {0, 0, -vy, vy};
 
             boolean floatUp = false;
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < dx.length; i++)
             {
                 int x = (int) (t.posX / 50 - 0.5 + dx[i]);
                 int y = (int) (t.posY / 50 - 0.5 + dy[i]);
 
-                if (x <= 0 || x >= Game.currentSizeX - 1 || y < 0 || y >= Game.currentSizeY - 1)
+                if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
                     continue;
 
-                Obstacle top = Game.obstacleMap[x][y];
-                Obstacle bottom = Game.obstacleMap[x+1][y+1];
-
-                if (!(top instanceof ObstacleWater && t.posZ >= -top.stackHeight * 50) &&
-                        !(bottom instanceof ObstacleWater && t.posZ >= -bottom.stackHeight * 50))
-                {
-                    floatUp = true;
-                    break;
-                }
+                floatUp = shouldFloat(x, y, t) || shouldFloat(x + dy[i], y + dx[i], t);
+                if (floatUp) break;
             }
 
             if (!floatUp && t.posZ > -this.stackHeight * Game.tile_size)
@@ -216,16 +192,13 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
     public void drawTile(double r, double g, double b, double d, double extra)
     {
         Drawing.drawing.setColor(r, g, b);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -Game.tile_size * this.stackHeight, Game.tile_size, Game.tile_size, -extra, this.getOptionsByte(extra));
+        Drawing.drawing.fillBox(this, this.posX, this.posY, -Game.tile_size * this.stackHeight, Game.tile_size, Game.tile_size, -extra);
     }
 
-    @Override
-    public byte getOptionsByte(double h)
+    protected boolean shouldFloat(int testX, int testY, Tank t)
     {
-        if (h == 0)
-            return 61;
-        else
-            return 0;
+        Obstacle o = Game.obstacleMap[Math.min(Math.max(testX, 0), Game.currentSizeX - 1)][Math.min(Math.max(testY, 0), Game.currentSizeY - 1)];
+        return !(o instanceof ObstacleWater) || t.posZ <= -o.stackHeight * 50;
     }
 
     public double getTileHeight()
@@ -238,14 +211,12 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
         return -this.stackHeight * Game.tile_size;
     }
 
-    @Override
     public double getRadius()
     {
         return Game.tile_size;
     }
 
-    @Override
-    public double getSeverity(Tank t)
+    public double getSeverity(double x, double y)
     {
         return 0;
     }

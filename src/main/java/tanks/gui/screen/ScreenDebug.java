@@ -7,37 +7,20 @@ import tanks.gui.Button;
 public class ScreenDebug extends Screen
 {
     public String traceText = "Trace rays: ";
-    public String mapmakingText = "Mapmaking: ";
     public String firstPersonText = "First person: ";
     public String followingCamText = "Immersive camera: ";
+    public String tankIDsText = "Show tank IDs: ";
+    public String invulnerableText = "Invulnerable: ";
 
     public ScreenDebug()
     {
         this.music = "menu_options.ogg";
         this.musicID = "menu";
 
-        if (Game.mapmaking)
-            mapmaking.setText(mapmakingText, ScreenOptions.onText);
-        else
-            mapmaking.setText(mapmakingText, ScreenOptions.offText);
-
-        if (Game.showIDs)
-            showIDs.setText("Show IDs: ", ScreenOptions.onText);
-        else
-            showIDs.setText("Show IDs: ", ScreenOptions.offText);
-
-        if (Game.invulnerable)
-            invulnerable.setText("Invulnerable: ", ScreenOptions.onText);
-        else
-            invulnerable.setText("Invulnerable: ", ScreenOptions.offText);
-
         if (Game.traceAllRays)
             traceAllRays.setText(traceText, ScreenOptions.onText);
         else
             traceAllRays.setText(traceText, ScreenOptions.offText);
-
-        showPathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
-        destroyCheat.setText("Destroy Cheat: ", Game.destroyCheat ? ScreenOptions.onText : ScreenOptions.offText);
 
         if (Game.firstPerson)
             firstPerson.setText(firstPersonText, ScreenOptions.onText);
@@ -48,47 +31,41 @@ public class ScreenDebug extends Screen
             followingCam.setText(followingCamText, ScreenOptions.onText);
         else
             followingCam.setText(followingCamText, ScreenOptions.offText);
+
+        if (Game.showTankIDs)
+            tankIDs.setText(tankIDsText, ScreenOptions.onText);
+        else
+            tankIDs.setText(tankIDsText, ScreenOptions.offText);
+
+        if (Game.invulnerable)
+            invulnerable.setText(invulnerableText, ScreenOptions.onText);
+        else
+            invulnerable.setText(invulnerableText, ScreenOptions.offText);
+
+        tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
+        allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
     }
 
-    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 250, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenTitle()
+    Button back = new Button(this.centerX, this.centerY + 210, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenTitle()
     );
 
-    Button keyboardTest = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 150, this.objWidth, this.objHeight, "Test keyboard", () -> Game.screen = new ScreenTestKeyboard()
+    Button keyboardTest = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "Test keyboard", () -> Game.screen = new ScreenTestKeyboard()
     );
 
-    Button textboxTest = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 150, this.objWidth, this.objHeight, "Test text boxes", () -> Game.screen = new ScreenTestTextbox()
+    Button textboxTest = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "Test text boxes", () -> Game.screen = new ScreenTestTextbox()
     );
 
-    Button modelTest = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 90, this.objWidth, this.objHeight, "Test models", () -> Game.screen = new ScreenTestModel(Drawing.drawing.createModel("/models/tankcamoflauge/base/"))
+    Button modelTest = new Button(this.centerX - this.objXSpace, this.centerY, this.objWidth, this.objHeight, "Test models", () -> Game.screen = new ScreenTestModel(Drawing.drawing.createModel("/models/tankcamoflauge/base/"))
     );
 
-    Button colorsTest = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 90, this.objWidth, this.objHeight, "Test colors", () -> Game.screen = new ScreenTestColors());
+    Button fontTest = new Button(this.centerX - this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Test fonts", () -> Game.screen = new ScreenTestFonts()
+    );
 
-    Button mapmaking = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 30, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.mapmaking = !Game.mapmaking;
+    Button shapeTest = new Button(this.centerX - this.objXSpace, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "Test shapes", () -> Game.screen = new ScreenTestShapes());
 
-            if (Game.mapmaking)
-                mapmaking.setText(mapmakingText, ScreenOptions.onText);
-            else
-                mapmaking.setText(mapmakingText, ScreenOptions.offText);
-        }
-    });
-
-    Button showIDs = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 30, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.showIDs = !Game.showIDs;
-            showIDs.setText("Show IDs: ", Game.showIDs ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button traceAllRays = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 30, this.objWidth, this.objHeight, "", new Runnable()
+    Button traceAllRays = new Button(this.centerX, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -102,41 +79,7 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button showPathfinding = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 90, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.showPathfinding = !Game.showPathfinding;
-            showPathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button destroyCheat = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.destroyCheat = !Game.destroyCheat;
-            destroyCheat.setText("Destroy Cheat: ", Game.destroyCheat ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button followingCam = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 30, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.followingCam = !Game.followingCam;
-
-            if (Game.followingCam)
-                followingCam.setText(followingCamText, ScreenOptions.onText);
-            else
-                followingCam.setText(followingCamText, ScreenOptions.offText);
-        }
-    });
-
-    Button firstPerson = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 90, this.objWidth, this.objHeight, "", new Runnable()
+    Button firstPerson = new Button(this.centerX, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -150,13 +93,86 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button invulnerable = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "", new Runnable()
+    Button followingCam = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.followingCam = !Game.followingCam;
+
+            if (Game.followingCam)
+                followingCam.setText(followingCamText, ScreenOptions.onText);
+            else
+                followingCam.setText(followingCamText, ScreenOptions.offText);
+        }
+    });
+
+    Button tankIDs = new Button(this.centerX, this.centerY + this.objYSpace * 1, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showTankIDs = !Game.showTankIDs;
+
+            if (Game.showTankIDs)
+                tankIDs.setText(tankIDsText, ScreenOptions.onText);
+            else
+                tankIDs.setText(tankIDsText, ScreenOptions.offText);
+        }
+    });
+
+    Button invulnerable = new Button(this.centerX, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
         {
             Game.invulnerable = !Game.invulnerable;
-            invulnerable.setText("Invulnerable: ", Game.invulnerable ? ScreenOptions.onText : ScreenOptions.offText);
+
+            if (Game.invulnerable)
+                invulnerable.setText(invulnerableText, ScreenOptions.onText);
+            else
+                invulnerable.setText(invulnerableText, ScreenOptions.offText);
+        }
+    });
+
+    Button tankHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showTankHitboxes = !Game.showTankHitboxes;
+            tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button obstacleHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showObstacleHitboxes = !Game.showObstacleHitboxes;
+            obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button pathfinding = new Button(this.centerX + this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showPathfinding = !Game.showPathfinding;
+            pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button allNums = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.allowAllNumbers = !Game.allowAllNumbers;
+
+            allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
         }
     });
 
@@ -166,15 +182,17 @@ public class ScreenDebug extends Screen
         keyboardTest.update();
         textboxTest.update();
         modelTest.update();
-        colorsTest.update();
-        showIDs.update();
+        fontTest.update();
+        shapeTest.update();
         traceAllRays.update();
-        mapmaking.update();
-        showPathfinding.update();
-        destroyCheat.update();
         followingCam.update();
         firstPerson.update();
         invulnerable.update();
+        tankIDs.update();
+        tankHitboxes.update();
+        obstacleHitboxes.update();
+        pathfinding.update();
+        allNums.update();
         back.update();
     }
 
@@ -184,20 +202,22 @@ public class ScreenDebug extends Screen
         this.drawDefaultBackground();
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 260, "Debug menu");
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 210, "Debug menu");
 
         firstPerson.draw();
         followingCam.draw();
         modelTest.draw();
         keyboardTest.draw();
         textboxTest.draw();
-        colorsTest.draw();
-        mapmaking.draw();
-        showIDs.draw();
+        shapeTest.draw();
         traceAllRays.draw();
-        destroyCheat.draw();
-        showPathfinding.draw();
+        allNums.draw();
+        obstacleHitboxes.draw();
+        tankHitboxes.draw();
+        pathfinding.draw();
+        tankIDs.draw();
         invulnerable.draw();
+        fontTest.draw();
         back.draw();
     }
 }

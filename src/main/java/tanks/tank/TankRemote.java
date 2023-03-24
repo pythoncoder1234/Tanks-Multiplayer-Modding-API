@@ -18,6 +18,7 @@ public class TankRemote extends Tank
 
 	public double interpolatedOffX = 0;
 	public double interpolatedOffY = 0;
+	public double angleRate = 0;
 	public double interpolatedProgress = interpolationTime;
 
 	public double interpolatedPosX = this.posX;
@@ -42,7 +43,7 @@ public class TankRemote extends Tank
 	
 	public TankRemote(Tank t)
 	{
-		super(t.name, t.posX, t.posY, t.size, t.colorR, t.colorG, t.colorB, false);
+		super(t.name, t.posX, t.posY, t.size, t.colorR, t.colorG, t.colorB);
 		this.angle = t.angle;
 		this.orientation = t.orientation;
 		this.team = t.team;
@@ -52,12 +53,13 @@ public class TankRemote extends Tank
 		this.isCopy = false;
 		this.tank = t;
 		this.mandatoryKill = t.mandatoryKill;
+		this.drawAge = t.drawAge;
 
 		this.copyTank(t);
 
 		this.invulnerable = true;
-		this.networkID = t.networkID;
-		Tank.idMap.put(this.networkID, this);
+
+		this.setNetworkID(t.networkID);
 	}
 
 	public void copyTank(Tank t)
@@ -91,6 +93,7 @@ public class TankRemote extends Tank
 		this.lightIntensity = t.lightIntensity;
 		this.bullet = t.bullet;
 		this.mine = t.mine;
+		this.collisionPush = t.collisionPush;
 		this.musicTracks = t.musicTracks;
 		this.fromRegistry = t.fromRegistry;
 	}
@@ -102,6 +105,7 @@ public class TankRemote extends Tank
 
 		this.posX = this.posX - this.interpolatedOffX * (interpolationTime - interpolatedProgress) / interpolationTime;
 		this.posY = this.posY - this.interpolatedOffY * (interpolationTime - interpolatedProgress) / interpolationTime;
+		this.angle += angleRate / interpolationTime * Panel.frameFrequency;
 
 		this.localAge += Panel.frameFrequency;
 		super.update();

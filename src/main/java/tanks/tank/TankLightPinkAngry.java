@@ -1,8 +1,9 @@
 package tanks.tank;
 
-import tanks.Game;
+import tanks.*;
 import tanks.bullet.Bullet;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class TankLightPinkAngry extends TankAIControlled

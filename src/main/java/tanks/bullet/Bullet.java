@@ -1,15 +1,13 @@
 package tanks.bullet;
 
 import tanks.*;
-import tanks.event.*;
 import tanks.gui.ChatMessage;
-import tanks.menus.FixedMenu;
-import tanks.menus.Scoreboard;
+import tanks.gui.menus.FixedMenu;
+import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.hotbar.item.ItemBullet;
-import tanks.ModAPI;
-import tanks.ModLevel;
+import tanks.network.event.*;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
@@ -64,7 +62,6 @@ public class Bullet extends Movable implements IDrawable
 
 	public Tank tank;
 	public double damage = 1;
-	double baseDamage = 0;
 	public BulletEffect effect = BulletEffect.none;
 	public boolean useCustomWallCollision = false;
 	public double wallCollisionSize = 10;
@@ -135,23 +132,10 @@ public class Bullet extends Movable implements IDrawable
 		if (!this.tank.isRemote && this.affectsMaxLiveBullets)
 			this.item.liveBullets++;
 
-		for (AttributeModifier a: this.tank.attributes)
-		{
-			if (a.name.equals("bullet_boost"))
-			{
-				AttributeModifier c = new AttributeModifier("boost_speed", "velocity", AttributeModifier.Operation.multiply, a.value);
-				c.duration = a.duration;
-				c.deteriorationAge = a.deteriorationAge;
-				c.age = a.age;
-				this.addUnduplicateAttribute(c);
+		AttributeModifier a = this.tank.getAttribute(AttributeModifier.bullet_boost);
 
-				AttributeModifier b = new AttributeModifier("boost_glow", "glow", AttributeModifier.Operation.multiply, 1);
-				b.duration = a.duration;
-				b.deteriorationAge = a.deteriorationAge;
-				b.age = a.age;
-				this.addUnduplicateAttribute(b);
-			}
-		}
+		if (a != null)
+			this.addStatusEffect(StatusEffect.boost_bullet, a.age, 0, a.deteriorationAge, a.duration);
 
 		this.trails = (ArrayList<Trail>[])(new ArrayList[10]);
 
@@ -173,20 +157,17 @@ public class Bullet extends Movable implements IDrawable
 
 		this.drawLevel = 8;
 
-		if (Game.currentGame != null)
-			Game.currentGame.onBulletFire(this);
-
-		for (FixedMenu m : ModAPI.menuGroup)
+		for (FixedMenu m : ModAPI.fixedMenus)
 		{
 			if (m instanceof Scoreboard)
 			{
 				Scoreboard s = (Scoreboard) m;
 
 				if (s.objectiveType.equals(Scoreboard.objectiveTypes.shots_fired) ||
-						s.objectiveType.equals(Scoreboard.objectiveTypes.shots_fired_no_multiple_fire)
-								&& !(this instanceof BulletHealing || this instanceof BulletFlame))
+						(s.objectiveType.equals(Scoreboard.objectiveTypes.shots_fired_no_multiple_fire)
+								&& !(this instanceof BulletHealing || this instanceof BulletFlame)))
 				{
-					if (s.playerPoints.isEmpty())
+					if (!s.teamPoints.isEmpty())
 						s.addTeamScore(this.team, 1);
 					else if (this.tank instanceof TankPlayer)
 						s.addPlayerScore(((TankPlayer) this.tank).player, 1);
@@ -242,46 +223,29 @@ public class Bullet extends Movable implements IDrawable
 						ScreenPartyHost.chat.add(0, new ChatMessage(message));
 						Game.eventsOut.add(new EventChat(message));
 					}
-				}
 
-				if (Game.currentLevel instanceof ModLevel)
-				{
-					((ModLevel) Game.currentLevel).onKill(this.tank, t);
-
-					if (((ModLevel) Game.currentLevel).enableKillMessages && ScreenPartyHost.isServer)
+					for (FixedMenu m : ModAPI.fixedMenus)
 					{
-						String message = ((ModLevel) Game.currentLevel).generateKillMessage(t, this.tank, true);
-						ScreenPartyHost.chat.add(0, new ChatMessage(message));
-						Game.eventsOut.add(new EventChat(message));
-					}
-				}
+						if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.kills))
+						{
+							Scoreboard s = (Scoreboard) m;
 
-				for (FixedMenu menu : ModAPI.menuGroup)
-				{
-					if (menu instanceof Scoreboard && ((Scoreboard) menu).objectiveType.equals(Scoreboard.objectiveTypes.kills))
-					{
-						Scoreboard scoreboard = (Scoreboard) menu;
+							if (!(s.teamPoints.isEmpty()))
+								s.addTeamScore(this.tank.team, 1);
 
-						if (!scoreboard.teamPoints.isEmpty())
-							scoreboard.addTeamScore(this.tank.team, 1);
+							else if (this.tank instanceof TankPlayer)
+								s.addPlayerScore(((TankPlayer) this.tank).player, 1);
 
-						else if (this.tank instanceof TankPlayer && !scoreboard.playerPoints.isEmpty())
-							scoreboard.addPlayerScore(((TankPlayer) this.tank).player, 1);
-
-						else if (this.tank instanceof TankPlayerRemote && !scoreboard.playerPoints.isEmpty())
-							scoreboard.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
+							else if (this.tank instanceof TankPlayerRemote)
+								s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
+						}
 					}
 				}
 
 				if (this.tank.equals(Game.playerTank))
 				{
-					if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
-					{
-						if (Game.currentGame != null)
-							Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
-						else if (Game.currentLevel instanceof ModLevel)
-							Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
-					}
+					if (Game.currentGame != null && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
+						Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
 					else
 						Game.player.hotbar.coins += t.coinValue;
 				}
@@ -298,17 +262,17 @@ public class Bullet extends Movable implements IDrawable
 						Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
 					}
 				}
-				else if (Game.currentLevel instanceof ModLevel && ((ModLevel) Game.currentLevel).playerKillCoins > 0)
+				else if (Game.currentGame != null && Game.currentGame.playerKillCoins > 0)
 				{
 					if (this.tank instanceof TankPlayer)
 					{
-						((TankPlayer) this.tank).player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
+						((TankPlayer) this.tank).player.hotbar.coins += Game.currentGame.playerKillCoins;
 						Game.eventsOut.add(new EventUpdateCoins(((TankPlayer) this.tank).player));
 					}
 
 					else if (this.tank instanceof TankPlayerRemote)
 					{
-						((TankPlayerRemote) this.tank).player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
+						((TankPlayerRemote) this.tank).player.hotbar.coins += Game.currentGame.playerKillCoins;
 						Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
 					}
 				}
@@ -545,13 +509,10 @@ public class Bullet extends Movable implements IDrawable
 
 			if (o instanceof Tank && !o.destroy)
 			{
+				double horizontalDist = Math.abs(this.posX - o.posX);
+				double verticalDist = Math.abs(this.posY - o.posY);
+
 				Tank t = ((Tank) o);
-
-				if (t.posZ < 1.25 * -Game.tile_size)
-					continue;
-
-				double horizontalDist = Math.abs(this.posX - t.posX);
-				double verticalDist = Math.abs(this.posY - t.posY);
 
 				double bound = this.size / 2 + t.size * t.hitboxSize / 2;
 
@@ -568,7 +529,7 @@ public class Bullet extends Movable implements IDrawable
 			{
 				double distSq = Math.pow(this.posX - o.posX, 2) + Math.pow(this.posY - o.posY, 2);
 
-				double s;
+				double s = 0;
 
 				if (o instanceof Mine)
 					s = ((Mine) o).size;
@@ -707,7 +668,7 @@ public class Bullet extends Movable implements IDrawable
 
 			if (Game.bulletTrails)
 			{
-				while (this.ageFrac >= 1)
+				while (this.ageFrac >= 1 && Game.effectsEnabled)
 				{
 					this.ageFrac -= 1;
 
@@ -899,15 +860,7 @@ public class Bullet extends Movable implements IDrawable
 	@Override
 	public void draw()
 	{
-		double glow = 0.5;
-		for (int i = 0; i < this.attributes.size(); i++)
-		{
-			AttributeModifier a = this.attributes.get(i);
-			if (a.type.equals("glow"))
-			{
-				glow = a.getValue(glow);
-			}
-		}
+		double glow = this.getAttributeValue(AttributeModifier.glow, 0.5);
 
 		if (Game.glowEnabled)
 		{
@@ -942,9 +895,7 @@ public class Bullet extends Movable implements IDrawable
 		for (ArrayList<Trail> trail : this.trails)
 		{
 			for (Trail t : trail)
-			{
 				t.draw();
-			}
 		}
 
 		if (this.destroyTimer < 60.0)
@@ -965,11 +916,13 @@ public class Bullet extends Movable implements IDrawable
 					Drawing.drawing.fillOval(posX, posY, s * size + sizeModifier, s * size + sizeModifier);
 			}
 
-
 			Drawing.drawing.setColor(this.outlineColorR, this.outlineColorG, this.outlineColorB, opacity * opacity * opacity * 255.0, glow);
 
 			if (Game.enable3d)
+			{
+				Drawing.drawing.fillOval(posX, posY, posZ - 0.5, size + sizeModifier, size + sizeModifier, false, true);
 				Drawing.drawing.fillOval(posX, posY, posZ, size + sizeModifier, size + sizeModifier);
+			}
 			else
 				Drawing.drawing.fillOval(posX, posY, size + sizeModifier, size + sizeModifier);
 

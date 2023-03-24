@@ -2,7 +2,6 @@ package tanks.gui.screen.leveleditor;
 
 import tanks.Drawing;
 import tanks.Game;
-import tanks.Panel;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 import tanks.gui.screen.Screen;
@@ -11,7 +10,6 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
 {
     public TextBox sizeX;
     public TextBox sizeY;
-    double resizeCounter = 0;
 
     public Button back3 = new Button(this.centerX, (int) (this.centerY + this.objYSpace * 2), this.objWidth, this.objHeight, "Back", this::escape);
 
@@ -30,7 +28,6 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
             }
 
             screenLevelEditor.level.reloadTiles();
-            resizeCounter = 50;
         }
                 , screenLevelEditor.level.sizeX + "");
 
@@ -53,7 +50,6 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
             }
 
             screenLevelEditor.level.reloadTiles();
-            resizeCounter = 50;
         }
                 , screenLevelEditor.level.sizeY + "");
 
@@ -71,13 +67,7 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
         this.sizeX.update();
         this.sizeY.update();
         this.back3.update();
-
-        if (resizeCounter > 0)
-            resizeCounter -= Panel.frameFrequency;
-        else if (resizeCounter < 0) {
-            Drawing.drawing.forceRedrawTerrain();
-            resizeCounter = 0;
-        }
+        Drawing.drawing.forceRedrawTerrain();
 
         super.update();
     }

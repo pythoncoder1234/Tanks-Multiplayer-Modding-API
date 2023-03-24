@@ -5,21 +5,20 @@ import basewindow.InputPoint;
 import tanks.*;
 import tanks.bullet.Bullet;
 import tanks.bullet.BulletElectric;
-import tanks.event.EventLayMine;
-import tanks.event.EventShootBullet;
 import tanks.gui.Button;
-import tanks.menus.FixedMenu;
 import tanks.gui.Joystick;
-import tanks.menus.Scoreboard;
+import tanks.gui.menus.*;
 import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenTitle;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.item.*;
-import tanks.ModAPI;
+import tanks.network.event.EventLayMine;
+import tanks.network.event.EventShootBullet;
 
 /**
- * A tank that is controlled by the player.
+ * A tank that is controlled by the player. TankPlayerController is used instead if we are connected to a party as a client.
  */
-public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
+public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerTank
 {
 	public static ItemBullet default_bullet;
 	public static ItemMine default_mine;
@@ -32,6 +31,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 	public static boolean controlStickMobile = true;
 
 	public Player player = Game.player;
+	public static boolean enableDestroyCheat = false;
 
 	public boolean drawTouchCircle = false;
 	public double touchCircleSize = 400;
@@ -57,7 +57,14 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 		this.orientation = angle;
 		this.player.tank = this;
 
-		if (Game.destroyCheat)
+		this.colorR = Game.player.colorR;
+		this.colorG = Game.player.colorG;
+		this.colorB = Game.player.colorB;
+		this.secondaryColorR = Game.player.turretColorR;
+		this.secondaryColorG = Game.player.turretColorG;
+		this.secondaryColorB = Game.player.turretColorB;
+
+		if (enableDestroyCheat)
 		{
 			this.showName = true;
 			this.nameTag.colorR = 255;
@@ -66,6 +73,22 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 
 			this.nameTag.name = "Destroy cheat enabled!!!";
 		}
+
+		if (Game.invulnerable)
+		{
+			this.resistExplosions = true;
+			this.resistBullets = true;
+		}
+	}
+
+	public void setDefaultColor()
+	{
+		this.colorR = 0;
+		this.colorG = 150;
+		this.colorB = 255;
+		this.secondaryColorR = Turret.calculateSecondaryColor(this.colorR);
+		this.secondaryColorG = Turret.calculateSecondaryColor(this.colorG);
+		this.secondaryColorB = Turret.calculateSecondaryColor(this.colorB);
 	}
 
 	@Override
@@ -95,7 +118,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 				lastTrace = time;
 		}
 
-		if (destroy && Game.destroyCheat)
+		if (destroy && enableDestroyCheat)
 		{
 			for (int i = 0; i < Game.movables.size(); i++)
 			{
@@ -192,8 +215,22 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 				this.setPolarMotion(this.getPolarDirection(), maxVelocity);
 		}
 
-		this.bullet.updateCooldown();
-		this.mine.updateCooldown();
+		double reload = this.getAttributeValue(AttributeModifier.reload, 1);
+
+		this.bullet.updateCooldown(reload);
+		this.mine.updateCooldown(reload);
+
+		if (Game.player.chromaaa)
+		{
+			this.colorR = rainbowColor(Game.player.colorR, 1);
+			this.colorG = rainbowColor(Game.player.colorG, 3);
+			this.colorB = rainbowColor(Game.player.colorB, 2);
+
+			this.secondaryColorR = rainbowColor(Game.player.turretColorR, 1);
+			this.secondaryColorG = rainbowColor(Game.player.turretColorG, 3);
+			this.secondaryColorB = rainbowColor(Game.player.turretColorB, 2);
+		}
+
 
 		Hotbar h = Game.player.hotbar;
 		if (h.enabledItemBar)
@@ -202,19 +239,14 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 			{
 				if (i != null && !(i instanceof ItemEmpty))
 				{
-					i.updateCooldown();
+					i.updateCooldown(reload);
 				}
 			}
 		}
 
-		boolean shoot = !Game.game.window.touchscreen && Game.game.input.shoot.isValid();
-
-		boolean mine = !Game.game.window.touchscreen && Game.game.input.mine.isValid();
-
-  		/*if (shoot)    // uncomment for retro
-			Game.game.input.shoot.invalidate();
-		if (mine)
-			Game.game.input.mine.invalidate();*/
+		boolean shoot = !(Game.currentGame != null && !Game.currentGame.enableShooting) && !Game.game.window.touchscreen && Game.game.input.shoot.isValid();
+		boolean mine = !(Game.currentGame != null && !Game.currentGame.enableLayingMines) && !Game.game.window.touchscreen && Game.game.input.mine.isPressed();
+//		Game.game.input.shoot.invalidate();
 
 		boolean showRange = false;
 		if (h.enabledItemBar && h.itemBar.selected >= 0)
@@ -334,7 +366,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 		if (mine && this.getItem(true).cooldown <= 0 && !this.disabled)
 			this.layMine();
 
-		if ((trace || lockTrace) && !Game.bulletLocked && !this.disabled && Game.screen instanceof ScreenGame)
+		if ((trace || lockTrace) && !Game.bulletLocked && !this.disabled && (Game.screen instanceof ScreenGame || Game.screen instanceof ScreenTitle))
 		{
 			double range = -1;
 
@@ -375,6 +407,15 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 		super.update();
 	}
 
+	public static double rainbowColor(double start, double speed)
+	{
+		double chromaStart = Math.max(0, start - 25);
+		if (chromaStart > 230)
+			chromaStart -= 25;
+
+		return Math.sin(System.currentTimeMillis() / 2e3 * speed) * 50 + chromaStart;
+	}
+
 	public Item getItem(boolean rightClick)
 	{
 		Item i;
@@ -396,7 +437,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 
 	public void shoot()
 	{
-		if (Game.bulletLocked || this.destroy || (Game.currentGame != null && !Game.currentGame.enableShooting))
+		if (Game.bulletLocked || this.destroy)
 			return;
 
 		if (Game.player.hotbar.enabledItemBar)
@@ -410,7 +451,7 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 
 	public void layMine()
 	{
-		if (Game.bulletLocked || this.destroy || (Game.currentGame != null && !Game.currentGame.enableLayingMines))
+		if (Game.bulletLocked || this.destroy)
 			return;
 
 		if (Game.player.hotbar.enabledItemBar)
@@ -429,12 +470,12 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 
 		if (b.itemSound != null)
 		{
-			Drawing.drawing.playGlobalSound(b.itemSound, (float) ((Bullet.bullet_size / this.bullet.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
+			Drawing.drawing.playGlobalSound(b.itemSound, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
 		}
 
 		b.setPolarMotion(this.angle + offset, speed);
 		b.speed = speed;
-		this.addPolarMotion(b.getPolarDirection() + Math.PI, 25.0 / 32.0 * b.recoil * b.frameDamageMultipler);
+		this.addPolarMotion(b.getPolarDirection() + Math.PI, 25.0 / 32.0 * b.recoil * this.getAttributeValue(AttributeModifier.recoil, 1) * b.frameDamageMultipler);
 
 		if (b.moveOut)
 			b.moveOut(50 / speed * this.size / Game.tile_size);
@@ -475,11 +516,11 @@ public class TankPlayer extends Tank implements IPlayerTank, IServerPlayerTank
 		if (Crusade.crusadeMode)
 			this.player.remainingLives--;
 
-		for (FixedMenu m : ModAPI.menuGroup)
+		for (FixedMenu m : ModAPI.fixedMenus)
 		{
 			if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.deaths))
 			{
-				if (((Scoreboard) m).playerPoints.isEmpty())
+				if (!((Scoreboard) m).teamPoints.isEmpty())
 					((Scoreboard) m).addTeamScore(this.team, 1);
 				else
 					((Scoreboard) m).addPlayerScore(this.player, 1);

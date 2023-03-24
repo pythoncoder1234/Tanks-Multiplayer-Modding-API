@@ -20,6 +20,8 @@ public class ScreenOptions extends Screen
 	public static final String offText = "\u00A7200000000255off";
 	public static ArrayList<String> extraOptions = new ArrayList<>();
 
+	TankPlayer preview = new TankPlayer(0, 0, 0);
+
 	public ScreenOptions()
 	{
 		this.music = "menu_options.ogg";
@@ -29,7 +31,7 @@ public class ScreenOptions extends Screen
 			soundOptions.enabled = false;
 	}
 
-	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () ->
+	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Back", () ->
 	{
 		saveOptions(Game.homedir);
 		Game.screen = new ScreenTitle();
@@ -54,12 +56,15 @@ public class ScreenOptions extends Screen
 		if (Game.game.window.touchscreen)
 			Game.screen = new ScreenOptionsInputTouchscreen();
 		else
-			Game.screen = new ScreenOptionsInputDesktop();
-	}
-	);
+			Game.screen = ScreenOverlayControls.lastControlsScreen;
+	});
+
+	Button personalize = new Button(this.centerX, this.centerY - this.objYSpace * 2.4, this.objWidth * 1.5, this.objHeight * 2, "", () -> Game.screen = new ScreenOptionsPersonalize());
 
 	Button interfaceOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Interface options", () -> Game.screen = new ScreenOptionsInterface()
 	);
+
+	Button extensionOptions = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Extension options", () -> Game.screen = new ScreenOptionsExtensions());
 
 	@Override
 	public void update()
@@ -71,6 +76,7 @@ public class ScreenOptions extends Screen
 		graphicsOptions.update();
 		inputOptions.update();
 		multiplayerOptions.update();
+		personalize.update();
 
 		back.update();
 	}
@@ -79,6 +85,7 @@ public class ScreenOptions extends Screen
 	public void draw()
 	{
 		this.drawDefaultBackground();
+
 		back.draw();
 		multiplayerOptions.draw();
 		inputOptions.draw();
@@ -86,10 +93,41 @@ public class ScreenOptions extends Screen
 		interfaceOptions.draw();
 		gameOptions.draw();
 		soundOptions.draw();
+		personalize.draw();
 
 		Drawing.drawing.setInterfaceFontSize(this.titleSize);
 		Drawing.drawing.setColor(0, 0, 0);
-		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Options");
+
+		if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale > personalize.sizeX - 240)
+			Drawing.drawing.setInterfaceFontSize(this.titleSize * (personalize.sizeX - 240) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale));
+
+		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Options");
+
+		if (Game.player.colorR + Game.player.colorG + Game.player.colorB >= 380 && Game.player.username.length() >= 1)
+		{
+			Drawing.drawing.setColor(127, 127, 127);
+			double s = Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale;
+			Drawing.drawing.fillInterfaceRect(personalize.posX, personalize.posY + personalize.sizeY * 0.1, s, 40);
+			Drawing.drawing.fillInterfaceOval(personalize.posX - (s) / 2, personalize.posY + personalize.sizeY * 0.1, 40, 40);
+			Drawing.drawing.fillInterfaceOval(personalize.posX + (s) / 2, personalize.posY + personalize.sizeY * 0.1, 40, 40);
+		}
+
+		preview.drawForInterface(personalize.posX - personalize.sizeX / 2 + personalize.sizeY * 0.7, personalize.posY, 1);
+
+		Drawing.drawing.setColor(Game.player.turretColorR, Game.player.turretColorG, Game.player.turretColorB);
+		Drawing.drawing.drawInterfaceText(personalize.posX + 2, personalize.posY + personalize.sizeY * 0.1 + 2, Game.player.username);
+		Drawing.drawing.setColor(Game.player.colorR, Game.player.colorG, Game.player.colorB);
+		Drawing.drawing.drawInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, Game.player.username);
+
+		if (Game.player.username.length() < 1)
+		{
+			Drawing.drawing.setColor(127, 127, 127);
+			Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, "Pick a username...");
+		}
+
+		Drawing.drawing.setInterfaceFontSize(this.titleSize * 0.65);
+		Drawing.drawing.setColor(80, 80, 80);
+		Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY - personalize.sizeY * 0.3, "My profile");
 	}
 
 	public static void initOptions(String homedir)
@@ -137,10 +175,12 @@ public class ScreenOptions extends Screen
 			f.println("vsync=" + Game.vsync);
 			f.println("max_fps=" + Game.maxFPS);
 			f.println("antialiasing=" + Game.antialiasing);
-			f.println("perspective=" + ScreenOptionsGraphics.viewNo);
+			f.println("perspective=" + ScreenOptionsGraphics.viewNum);
 			f.println("preview_crusades=" + Game.previewCrusades);
 			f.println("tank_textures=" + Game.tankTextures);
 			f.println("mouse_target=" + Panel.showMouseTarget);
+			f.println("mouse_target_height=" + Panel.showMouseTargetHeight);
+			f.println("pause_on_lost_focus=" + Panel.pauseOnDefocus);
 			f.println("constrain_mouse=" + Game.constrainMouse);
 			f.println("fullscreen=" + fullscreen);
 			f.println("vibrations=" + Game.enableVibrations);
@@ -155,8 +195,6 @@ public class ScreenOptions extends Screen
 			f.println("full_stats=" + Game.fullStats);
 			f.println("timer=" + Game.showSpeedrunTimer);
 			f.println("deterministic=" + Game.deterministicMode);
-			f.println("pause_on_defocus=" + Game.pauseOnDefocus);
-			f.println("display_zoom=" + Panel.displayZoom);
 			f.println("warn_before_closing=" + Game.warnBeforeClosing);
 			f.println("info_bar=" + Drawing.drawing.enableStats);
 			f.println("port=" + Game.port);
@@ -176,14 +214,19 @@ public class ScreenOptions extends Screen
 			f.println("tank_red_2=" + Game.player.turretColorR);
 			f.println("tank_green_2=" + Game.player.turretColorG);
 			f.println("tank_blue_2=" + Game.player.turretColorB);
+
+			if (Game.player.chromaaa)
+				f.println("cHrOmA=true");
+
 			f.println("translation=" + (Translation.currentTranslation == null ? "null" : Translation.currentTranslation.fileName));
 			f.println("last_version=" + Game.lastVersion);
 			f.println("enable_extensions=" + Game.enableExtensions);
 			f.println("auto_load_extensions=" + Game.autoLoadExtensions);
-			f.stopWriting();
 
 			for (String s : extraOptions)
 				f.println(s);
+
+			f.stopWriting();
 		}
 		catch (FileNotFoundException e)
 		{
@@ -205,9 +248,7 @@ public class ScreenOptions extends Screen
 				String[] optionLine = line.split("=");
 
 				if (optionLine[0].charAt(0) == '#')
-				{
 					continue;
-				}
 
 				switch (optionLine[0].toLowerCase())
 				{
@@ -259,6 +300,12 @@ public class ScreenOptions extends Screen
 					case "mouse_target":
 						Panel.showMouseTarget = Boolean.parseBoolean(optionLine[1]);
 						break;
+					case "mouse_target_height":
+						Panel.showMouseTargetHeight = Boolean.parseBoolean(optionLine[1]);
+						break;
+					case "pause_on_lost_focus":
+						Panel.pauseOnDefocus = Boolean.parseBoolean(optionLine[1]);
+						break;
 					case "constrain_mouse":
 						Game.constrainMouse = Boolean.parseBoolean(optionLine[1]);
 						break;
@@ -298,12 +345,6 @@ public class ScreenOptions extends Screen
 					case "deterministic":
 						Game.deterministicMode = Boolean.parseBoolean(optionLine[1]);
 						break;
-					case "pause_on_defocus":
-						Game.pauseOnDefocus = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "display_zoom":
-						Panel.displayZoom = Boolean.parseBoolean(optionLine[1]);
-						break;
 					case "info_bar":
 						Drawing.drawing.showStats(Boolean.parseBoolean(optionLine[1]));
 						break;
@@ -311,8 +352,8 @@ public class ScreenOptions extends Screen
 						Game.warnBeforeClosing = Boolean.parseBoolean(optionLine[1]);
 						break;
 					case "perspective":
-						ScreenOptionsGraphics.viewNo = Integer.parseInt(optionLine[1]);
-						switch (ScreenOptionsGraphics.viewNo)
+						ScreenOptionsGraphics.viewNum = Integer.parseInt(optionLine[1]);
+						switch (ScreenOptionsGraphics.viewNum)
 						{
 							case 0:
 								Game.angledView = false;
@@ -401,6 +442,9 @@ public class ScreenOptions extends Screen
 					case "tank_blue_2":
 						Game.player.turretColorB = Integer.parseInt(optionLine[1]);
 						break;
+					case "chroma":
+						Game.player.chromaaa = Boolean.parseBoolean(optionLine[1]);
+						break;
 					case "translation":
 						Translation.setCurrentTranslation(optionLine[1]);
 						break;
@@ -433,7 +477,6 @@ public class ScreenOptions extends Screen
 
 			if (!Game.musicEnabled)
 				Game.musicVolume = 0;
-
 
 			if (TankPlayerRemote.weakTimeCheck)
 				TankPlayerRemote.anticheatMaxTimeOffset = TankPlayerRemote.anticheatStrongTimeOffset;

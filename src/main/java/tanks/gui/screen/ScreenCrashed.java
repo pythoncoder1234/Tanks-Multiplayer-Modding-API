@@ -1,5 +1,6 @@
 package tanks.gui.screen;
 
+import basewindow.InputCodes;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
@@ -12,6 +13,7 @@ public class ScreenCrashed extends Screen
 	{
 		super(350, 40, 380, 60);
 
+		Game.currentGame = null;
 		if (Math.random() < 0.01)
 			sadFace = ":)";
 	}
@@ -25,6 +27,9 @@ public class ScreenCrashed extends Screen
 	{
 		this.quit.update();
 		this.exit.update();
+
+		if (Game.game.window.pressedKeys.contains(InputCodes.KEY_ESCAPE))
+			Game.exitToTitle();
 	}
 
 	@Override

@@ -60,7 +60,7 @@ public class ScreenOverlayChat
 
                     ChatMessage c = chat.get(in);
 
-                    if (time - c.time <= 30000 || chatbox.selected)
+                    if (time - c.time <= 6000 || chatbox.selected)
                     {
                         Drawing.drawing.setInterfaceFontSize(24);
 
@@ -76,10 +76,15 @@ public class ScreenOverlayChat
                         double height = 22 * c.lines.size() + 8 * (c.lines.size() - 1);
                         double radius = 13.5;
 
+                        double opacity = 255 - Math.max(0, time - c.time - 5500) / 500. * 255;
+
+                        if (chatbox.selected)
+                            opacity = 255;
+
                         if (isDark())
-                            Drawing.drawing.setColor(0, 0, 0, 127);
+                            Drawing.drawing.setColor(0, 0, 0, opacity / 2);
                         else
-                            Drawing.drawing.setColor(255, 255, 255, 127);
+                            Drawing.drawing.setColor(255, 255, 255, opacity / 2);
 
                         Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.interfaceSizeY - i * 30 - 70 + radius / 2, width + xPad, radius);
                         Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.interfaceSizeY - (i + (c.lines.size() - 1)) * 30 - 70 - radius / 2, width + xPad, radius);
@@ -131,17 +136,16 @@ public class ScreenOverlayChat
 
                         if (c.enableTankIcon)
                         {
-                            Drawing.drawing.setColor(c.r2, c.g2, c.b2);
+                            Drawing.drawing.setColor(c.r2, c.g2, c.b2, opacity);
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.base, x, y, size, size, 0);
 
-                            Drawing.drawing.setColor(c.r1, c.g1, c.b1);
+                            Drawing.drawing.setColor(c.r1, c.g1, c.b1, opacity);
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.color, x, y, size, size, 0);
 
-                            Drawing.drawing.setColor(c.r2, c.g2, c.b2);
-
+                            Drawing.drawing.setColor(c.r2, c.g2, c.b2, opacity);
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.turret, x, y, size, size, 0);
 
-                            Drawing.drawing.setColor((c.r1 + c.r2) / 2, (c.g1 + c.g2) / 2, (c.b1 + c.b2) / 2);
+                            Drawing.drawing.setColor((c.r1 + c.r2) / 2, (c.g1 + c.g2) / 2, (c.b1 + c.b2) / 2, opacity);
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.turretBase, x, y, size, size, 0);
                         }
 
@@ -151,9 +155,9 @@ public class ScreenOverlayChat
                             double my = Drawing.drawing.interfaceSizeY - i * 30 - 70;
 
                             if (isDark())
-                                Drawing.drawing.setColor(255, 255, 255);
+                                Drawing.drawing.setColor(255, 255, 255, opacity);
                             else
-                                Drawing.drawing.setColor(0, 0, 0);
+                                Drawing.drawing.setColor(0, 0, 0, opacity);
 
                             Drawing.drawing.drawInterfaceText(mx, my, c.lines.get(j), false);
                             i++;

@@ -29,8 +29,6 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
     {
         super(previous, screenLevelEditor);
 
-        screenLevelEditor.changedSetting = true;
-
         levelName = new TextBox(this.centerX, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "Level name", () ->
         {
             BaseFile file = Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + screenLevelEditor.name);

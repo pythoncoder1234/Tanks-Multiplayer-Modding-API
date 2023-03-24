@@ -22,30 +22,29 @@ To create a custom game or level, the source code is needed.
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?cid=1E1C6A69D73A57B9&resid=1E1C6A69D73A57B9%21134&authkey=ADQ8bnLBKs1ntck).
+You can download the JAR file [here](https://onedrive.live.com/download?cid=1E1C6A69D73A57B9&resid=1E1C6A69D73A57B9%21136&authkey=ACQuBT0dXqlDsCM).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
 New Features:
 ---
 
-**Mod API v1.1.1**
-- Mapmaking mode: Run with the `mapmaking` launch argument or enable the feature in debug menu!
-- Gives access to hidden obstacles:
-- Path obstacle, changes its color automatically based on the level background
-- Hill obstacle, changes its color ot the same level as a background, but has changeable stack height
-- Updated game version support to Tanks 1.4.1
-- Press F to move the third person camera up and down with the cursor
-- Level editor improvements (shift click Block Height to change the starting height of an obstacle!)
-- Added functions to override the "Victory!" message in ModGame
-- The base damage for healing rays and flamethrowers is now 1, and changing the value will multiply how much damage the bullet will do.
-- MapLoader class, stitches levels together to create a map (unfinished, buggy)
-- Added documentation to ModAPI class
+- Updated to Tanks 1.5.0
+- Removed ModLevel and renamed ModGame to Minigame
+
+
+- Fields can now be synced across the network, which means you can change it without sending an event. Read the JavaDoc on the `ISyncable` and `SyncedFieldMap` classes.
+- Added synced fields to the text and scoreboard. To use them, set their `syncEnabled` property to true.
+- Added animations! These can change the zoom, position, and opacity of text or shapes.
+- Scoreboards are now sorted, and their sorting can be customized.
+- `TextWithStyling`: Displays text with styling. All fields are synced.
+- `EndCondition`: Override to change the condition for teams or players to win. 
+- `EndText`: Override to change the text shown on `ScreenInterlevel`
+- `EventListener`: Listens for network events, such as `EventShootBullet` for bullet firing.
+- `MusicState`: Changes the music that is currently being played on the current `Game.screen`.
+- `IModdedTank`: Implement to give the tank a custom creation network event.
+- Movables now have a `CustomPropertiesMap` in which you can store data in each movable.
 - Bug fixes and other minor improvements
-
-
-- `getSeverity()` in `IAvoidObject` now takes a `Tank` parameter (to fix, replace `posX` with `t.posX`)
-- `Game.tileDrawables` removed, you can use `Game.obstacleMap[x][y] != null` instead
 
 
 [Older Changelogs](changelog.md)

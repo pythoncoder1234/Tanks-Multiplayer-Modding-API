@@ -11,7 +11,6 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.openal.ALC11;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryStack;
-import tanks.Panel;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -100,8 +99,6 @@ public class LWJGLWindow extends BaseWindow
 
 	public double lastDrawTime = Double.MIN_VALUE;
 
-	private boolean prevFocused = true;
-
 	public LWJGLWindow(String name, int x, int y, int z, IUpdater u, IDrawer d, IWindowHandler w, boolean vsync, boolean showMouse)
 	{
 		super(name, x, y, z, u, d, w, vsync, showMouse);
@@ -187,15 +184,15 @@ public class LWJGLWindow extends BaseWindow
 			}
 
 			shift = (mods & GLFW_MOD_SHIFT) > 0;
-			capsLock = (mods & GLFW_MOD_CAPS_LOCK) > 0;      // this does not work on mac rip
+			capsLock = (mods & GLFW_MOD_CAPS_LOCK) > 0;
 			numLock = (mods & GLFW_MOD_NUM_LOCK) > 0;
 		});
 
-		glfwSetScrollCallback(window, (window, xOffset, yOffset) ->
+		glfwSetScrollCallback(window, (window, xoffset, yoffset) ->
 		{
-			if (yOffset > 0)
+			if (yoffset > 0)
 				this.validScrollUp = true;
-			else if (yOffset < 0)
+			else if (yoffset < 0)
 				this.validScrollDown = true;
 		});
 
@@ -371,9 +368,7 @@ public class LWJGLWindow extends BaseWindow
 		SoundPlayer soundPlayer = (SoundPlayer) this.soundPlayer;
 
 		if (soundPlayer != null)
-		{
 			soundPlayer.update();
-		}
 
 		this.updater.update();
 
@@ -413,6 +408,8 @@ public class LWJGLWindow extends BaseWindow
 		else
 			glfwSetWindowSizeLimits(window, GLFW_DONT_CARE, GLFW_DONT_CARE, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
+		focused = glfwGetWindowAttrib(window, GLFW_FOCUSED) == GLFW_TRUE;
+
 		glfwGetFramebufferSize(window, w, h);
 
 		if (shadowsEnabled)
@@ -434,12 +431,6 @@ public class LWJGLWindow extends BaseWindow
 			if (!shouldClose)
 				glfwSetWindowShouldClose(window, false);
 		}
-
-		boolean focused = glfwGetWindowAttrib(window, GLFW_FOCUSED) == GLFW_TRUE;
-		if (focused != prevFocused)
-			Panel.onChangeFocus(focused);
-
-		prevFocused = focused;
 
 		this.stopTiming();
 
@@ -627,7 +618,6 @@ public class LWJGLWindow extends BaseWindow
 		}
 		catch (Exception e)
 		{
-			System.err.println("Failed to load: " + icon);
 			e.printStackTrace();
 		}
 	}

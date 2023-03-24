@@ -7,33 +7,34 @@ import tanks.gui.Button;
 
 public class ScreenConfirmDeleteCrusade extends Screen
 {
-    public ScreenCrusadeLevels background;
-    public int sY = 5;
-    public int posY = -1;
-
-    public Screen previous;
+    public ScreenCrusadeDetails previous;
     public Crusade crusade;
 
-    public Button cancelDelete = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "No", () -> Game.screen = previous);
-
-    public Button confirmDelete = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "Yes", () ->
+    public Button cancelDelete = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "No", new Runnable()
     {
-        Game.game.fileManager.getFile(crusade.fileName).delete();
-        Game.screen = new ScreenCrusades();
-    });
+        @Override
+        public void run()
+        {
+            Game.screen = previous;
+        }
+    }
+    );
 
-    public ScreenConfirmDeleteCrusade(Screen previous, Crusade crusade)
+    public Button confirmDelete = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "Yes", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.game.fileManager.getFile(crusade.fileName).delete();
+            Game.screen = new ScreenCrusades();
+        }
+    }
+    );
+
+    public ScreenConfirmDeleteCrusade(ScreenCrusadeDetails previous, Crusade crusade)
     {
         this.previous = previous;
         this.crusade = crusade;
-
-        if (this.previous instanceof ScreenCrusadeDetails)
-        {
-            ScreenCrusadeDetails s = (ScreenCrusadeDetails) this.previous;
-            this.background = s.background;
-            this.posY = s.popupY;
-            this.sY = s.popupSY;
-        }
 
         this.music = previous.music;
         this.musicID = previous.musicID;
@@ -49,17 +50,19 @@ public class ScreenConfirmDeleteCrusade extends Screen
     @Override
     public void draw()
     {
-        if (this.background != null)
+        if (previous.background != null)
         {
-            this.background.draw();
-
-            Drawing.drawing.drawPopup(this.centerX, this.centerY + this.objYSpace * posY,
-                    Drawing.drawing.interfaceSizeX * 0.7, this.objYSpace * sY, 10, 10);
+            previous.background.draw();
+            Drawing.drawing.drawPopup(this.centerX, this.centerY, Drawing.drawing.interfaceSizeX * 0.7, this.objYSpace * 9, 20, 10);
         }
         else
             this.drawDefaultBackground();
 
-        Drawing.drawing.setColor(255, 255, 255);
+        if (previous.background != null)
+            Drawing.drawing.setColor(255, 255, 255);
+        else
+            Drawing.drawing.setColor(0, 0, 0);
+
         Drawing.drawing.setInterfaceFontSize(this.textSize);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 1.5, "Are you sure you want to delete the crusade?");
 

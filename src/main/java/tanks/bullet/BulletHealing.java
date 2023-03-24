@@ -2,7 +2,7 @@ package tanks.bullet;
 
 import tanks.*;
 import tanks.AttributeModifier.Operation;
-import tanks.event.EventTankUpdateHealth;
+import tanks.network.event.EventTankUpdateHealth;
 import tanks.hotbar.item.ItemBullet;
 import tanks.tank.Tank;
 
@@ -21,7 +21,7 @@ public class BulletHealing extends BulletInstant
 		this.baseColorB = 0;
 		this.name = bullet_name;
 		this.effect = BulletEffect.none;
-		this.baseDamage = 0.01;
+		this.damage = 0.01;
 		this.shouldDodge = false;
 		this.dealsDamage = false;
 
@@ -66,23 +66,20 @@ public class BulletHealing extends BulletInstant
 		if (Game.game.window.touchscreen)
 			freq = 1;
 
-		double before = t.healRayHealth;
+		double before = t.health;
 
-		if (t.healRayHealth < 1)
-		{
-			t.healRayHealth = Math.min(1, t.healRayHealth + this.damage * this.baseDamage * this.frameDamageMultipler);
-			t.health += t.healRayHealth - before;
-		}
+		if (t.health < t.baseHealth + 1)
+			t.health = Math.min(t.baseHealth + 1, t.health + this.damage * this.frameDamageMultipler);
 
 		t.checkHit(this.tank, this);
 
-		Drawing.drawing.playGlobalSound("heal2.ogg", (float) (t.healRayHealth * 0.12 + 0.63), freq / 2);
+		Drawing.drawing.playGlobalSound("heal2.ogg", (float) ((Math.min(t.health, t.baseHealth + 1) / (t.baseHealth + 1) / 2) + 1f) / 2, freq / 2);
 
 		Game.eventsOut.add(new EventTankUpdateHealth(t));
 
-		t.addAttribute(new AttributeModifier("healray", "healray", Operation.add, 1.0));
+		t.addAttribute(new AttributeModifier("healray", AttributeModifier.healray, Operation.add, 1.0));
 
-		if (t.health > 6 && (int) (before) != (int) (t.healRayHealth))
+		if (t.health > 6 && (int) (before) != (int) (t.health))
 		{
 			Effect e = Effect.createNewEffect(t.posX, t.posY, t.posZ + t.size * 0.75, Effect.EffectType.shield);
 			e.size = t.size;

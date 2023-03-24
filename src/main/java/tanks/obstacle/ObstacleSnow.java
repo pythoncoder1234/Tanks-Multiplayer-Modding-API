@@ -2,10 +2,9 @@ package tanks.obstacle;
 
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.event.EventObstacleSnowMelt;
 import tanks.gui.screen.*;
+import tanks.network.event.EventObstacleSnowMelt;
 import tanks.tank.Tank;
-import tanks.tank.TankAIControlled;
 
 public class ObstacleSnow extends Obstacle
 {
@@ -58,18 +57,8 @@ public class ObstacleSnow extends Obstacle
     {
         if (!ScreenPartyLobby.isClient && (m instanceof Tank || m instanceof Bullet))
         {
-            AttributeModifier a = new AttributeModifier("snow_velocity", "velocity", AttributeModifier.Operation.multiply, -0.25);
-            a.duration = 30;
-            a.deteriorationAge = 20;
-            m.addUnduplicateAttribute(a);
-
-            if (!(m instanceof TankAIControlled))
-            {
-                AttributeModifier b = new AttributeModifier("snow_friction", "friction", AttributeModifier.Operation.multiply, 4);
-                b.duration = 10;
-                b.deteriorationAge = 5;
-                m.addUnduplicateAttribute(b);
-            }
+            m.addStatusEffect(StatusEffect.snow_velocity, 0, 20, 30);
+            m.addStatusEffect(StatusEffect.snow_friction, 0, 5, 10);
 
             this.depth -= Panel.frameFrequency * 0.005;
 
@@ -122,10 +111,14 @@ public class ObstacleSnow extends Obstacle
                 this.visualDepth = Math.min(this.visualDepth + Panel.frameFrequency / 255, 1);
 
             if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
+            {
                 this.visualDepth = 0.5;
+            }
 
             if (ScreenGame.finishedQuick && Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !((ScreenGame) Game.screen).paused))
+            {
                 this.visualDepth = Math.max(0.5, this.visualDepth - Panel.frameFrequency / 127);
+            }
         }
 
         this.colorR = this.baseColorR * (this.depth + 4) / 5;
@@ -168,9 +161,15 @@ public class ObstacleSnow extends Obstacle
 
                 double frac = z / (this.depth * 0.8 * (Game.tile_size - base));
                 Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-                Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul + this.startHeight * 50 - 10, Game.tile_size, Game.tile_size, z * this.visualDepth + 10, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
+                Drawing.drawing.setShrubberyMode();
+                Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul, Game.tile_size, Game.tile_size, z * this.visualDepth, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
             }
         }
+    }
+
+    public int unfavorability()
+    {
+        return 3;
     }
 
     public byte getOptionsByte(double h)

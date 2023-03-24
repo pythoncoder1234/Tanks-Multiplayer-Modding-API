@@ -9,11 +9,10 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import tanks.Game;
 import tanks.Player;
-import tanks.event.*;
 import tanks.gui.ChatMessage;
 import tanks.gui.screen.ScreenPartyHost;
+import tanks.network.event.*;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter
@@ -35,11 +34,6 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 
 	public long lastMessage = -1;
 	public long latency = 0;
-
-	public long latencySum = 0;
-	public int latencyCount = 1;
-	public long lastLatencyTime = 0;
-	public long lastLatencyAverage = 0;
 
 	public boolean closed = false;
 
@@ -84,7 +78,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 			}
 		}
 
-		System.out.println(eventFrequencies);
+		//System.out.println(eventFrequencies);
 	}
 
 	@Override
@@ -95,7 +89,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 
 		this.ctx = ctx;
 		ByteBuf buffy = (ByteBuf) msg;
-		short reply = this.reader.queueMessage(this, buffy, this.clientID);
+		int reply = this.reader.queueMessage(this, buffy, this.clientID);
 
 		if (steamID == null)
 			ReferenceCountUtil.release(msg);
@@ -106,7 +100,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 				lastMessage = System.currentTimeMillis();
 
 			long time = System.currentTimeMillis();
-			lastLatencyAverage = time - lastMessage;
+			latency = time - lastMessage;
 			lastMessage = time;
 
 			this.sendEvent(new EventPing(reply));
@@ -117,6 +111,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 	{
 		synchronized (this.events)
 		{
+			for (SyncedFieldMap map : SyncedFieldMap.mapIDs.values())
+			{
+				EventSyncField e = map.update();
+				if (e != null)
+					this.events.add(e);
+			}
+
 			for (int i = 0; i < this.events.size(); i++)
 			{
 				INetworkEvent e = this.events.get(i);
@@ -135,12 +136,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 		this.sendEvent(e, true);
 	}
 
-	public HashMap<String, Integer> eventFrequencies = new HashMap<>();
+	//public HashMap<String, Integer> eventFrequencies = new HashMap<>();
 
 	public synchronized void sendEvent(INetworkEvent e, boolean flush)
 	{
-		eventFrequencies.putIfAbsent(e.getClass().getSimpleName(), 0);
-		eventFrequencies.put(e.getClass().getSimpleName(), eventFrequencies.get(e.getClass().getSimpleName()) + 1);
+		//eventFrequencies.putIfAbsent(e.getClass().getSimpleName(), 0);
+		//eventFrequencies.put(e.getClass().getSimpleName(), eventFrequencies.get(e.getClass().getSimpleName()) + 1);
 
 		if (steamID != null)
 		{

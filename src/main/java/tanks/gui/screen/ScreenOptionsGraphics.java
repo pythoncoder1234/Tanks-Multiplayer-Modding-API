@@ -23,7 +23,7 @@ public class ScreenOptionsGraphics extends Screen
     public static final String birdsEyeText = "\u00A7000100200255bird's-eye";
     public static final String angledText = "\u00A7200100000255angled";
 
-    public static int viewNo = 0;
+    public static int viewNum = 0;
 
     public ScreenOptionsGraphics()
     {
@@ -57,7 +57,7 @@ public class ScreenOptionsGraphics extends Screen
 
         update3dGroundButton();
 
-        switch (viewNo)
+        switch (viewNum)
         {
             case 0:
                 altPerspective.setText(perspectiveText, birdsEyeText);
@@ -258,13 +258,13 @@ public class ScreenOptionsGraphics extends Screen
         @Override
         public void run()
         {
-            viewNo = (viewNo + 1);
+            viewNum = (viewNum + 1);
             if (!Game.debug)
-                viewNo = viewNo % 2;
+                viewNum = viewNum % 2;
             else
-                viewNo = viewNo % 4;
+                viewNum = viewNum % 4;
 
-            switch (viewNo)
+            switch (viewNum)
             {
                 case 0:
                     altPerspective.setText(perspectiveText, birdsEyeText);
@@ -351,7 +351,7 @@ public class ScreenOptionsGraphics extends Screen
 
     Button window = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Window options", () -> Game.screen = new ScreenOptionsWindow());
 
-    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptions());
+    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptions());
 
     Button shadows = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsShadows(), "Fancy lighting enables shadows and---allows for custom lighting in levels------Fancy lighting is quite graphically intense---and may significantly reduce framerate");
 
@@ -416,43 +416,6 @@ public class ScreenOptionsGraphics extends Screen
 
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Graphics options");
-    }
-
-    public static void changePerspective(boolean up)
-    {
-        if (up)
-            viewNo = (viewNo + 1) % (Game.followingCamEnabled ? 4 : 2);
-        else {
-            viewNo--;
-            if (viewNo < 0)
-                viewNo += (Game.followingCamEnabled ? 4 : 2);
-        }
-
-        switch (viewNo)
-        {
-            case 0:
-                Game.angledView = false;
-                Game.followingCam = false;
-                Game.firstPerson = false;
-                return;
-
-            case 1:
-                Game.angledView = true;
-                Game.followingCam = false;
-                Game.firstPerson = false;
-                return;
-
-            case 2:
-                Game.angledView = false;
-                Game.followingCam = true;
-                Game.firstPerson = false;
-                return;
-
-            case 3:
-                Game.angledView = false;
-                Game.followingCam = true;
-                Game.firstPerson = true;
-        }
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Graphics options");
     }
 }

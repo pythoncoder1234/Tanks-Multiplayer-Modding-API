@@ -1,10 +1,13 @@
 package tanks;
 
-import tanks.event.*;
-import tanks.gui.screen.*;
+import tanks.gui.screen.ILevelPreviewScreen;
+import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenPartyHost;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.gui.screen.leveleditor.ScreenLevelEditorOverlay;
 import tanks.hotbar.item.Item;
+import tanks.network.event.*;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
@@ -85,9 +88,9 @@ public class Level
 
 	/**
 	 * A level string is structured like this:
-	 * parentheses signify required parameters, and square brackets signify optional parameters.
+	 * (parentheses signify required parameters, and square brackets signify optional parameters.
 	 * Asterisks indicate that the parameter can be repeated, separated by commas
-	 * Do not include these in the level string.
+	 * Do not include these in the level string.)
 	 * {(SizeX),(SizeY),[(Red),(Green),(Blue)],[(RedNoise),(GreenNoise),(BlueNoise)]|[(ObstacleX)-(ObstacleY)-[ObstacleMetadata]]*|[(TankX)-(TankY)-(TankType)-[TankAngle]-[TeamName]]*|[(TeamName)-[FriendlyFire]-[(Red)-(Green)-(Blue)]]*}
 	 */
 	public Level(String level)
@@ -137,7 +140,7 @@ public class Level
 						if (screen[0].startsWith("*"))
 						{
 							editable = false;
-							screen[0] = screen[0].substring( 1);
+							screen[0] = screen[0].substring(1);
 						}
 					}
 					else if (parsing == 4)
@@ -222,7 +225,7 @@ public class Level
 		for (TankAIControlled t: this.customTanks)
 			customTanksMap.put(t.name, t);
 
-		ArrayList<EventCreatePlayer> playerEvents = new ArrayList<>();
+		ArrayList<EventTankPlayerCreate> playerEvents = new ArrayList<>();
 
 		Tank.currentID = 0;
 		Tank.freeIDs.clear();
@@ -317,11 +320,11 @@ public class Level
 
 		this.reloadTiles();
 
-		if (!((obstaclesPos.length == 1 && obstaclesPos[0].equals("")) || obstaclesPos.length == 0)) 
+		if (!((obstaclesPos.length == 1 && obstaclesPos[0].equals("")) || obstaclesPos.length == 0))
 		{
-			for (String pos : obstaclesPos)
+			for (int i = 0; i < obstaclesPos.length; i++)
 			{
-				String[] obs = pos.split("-");
+				String[] obs = obstaclesPos[i].split("-");
 
 				String[] xPos = obs[0].split("\\.\\.\\.");
 
@@ -364,9 +367,6 @@ public class Level
 					{
 						Obstacle o = Game.registryObstacle.getEntry(name).getObstacle(x, y);
 
-						if (x == 13 && y == 18)
-							x = x;
-
 						if (meta != null)
 							o.setMetadata(meta);
 
@@ -385,18 +385,18 @@ public class Level
 			int x = (int) (o.posX / Game.tile_size);
 			int y = (int) (o.posY / Game.tile_size);
 
-			if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+			o.postOverride();
+
+			if (o.bulletCollision && o.startHeight < 1 && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 			{
-				if (o.bulletCollision)
-				{
-					Game.game.solidGrid[x][y] = true;
+				Game.game.solidGrid[x][y] = true;
 
-					if (!o.shouldShootThrough)
-						Game.game.unbreakableGrid[x][y] = true;
-				}
-
-				Game.obstacleMap[x][y] = o;
+				if (!o.shouldShootThrough)
+					Game.game.unbreakableGrid[x][y] = true;
 			}
+
+			if (o.tankCollision && o.startHeight < 1 && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+				solidGrid[x][y] = true;
 		}
 
 		boolean[][] tankGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
@@ -419,9 +419,9 @@ public class Level
 
 		if (!preset[2].equals(""))
 		{
-			for (String s : tanks)
+			for (int i = 0; i < tanks.length; i++)
 			{
-				String[] tank = s.split("-");
+				String[] tank = tanks[i].split("-");
 				double x = Game.tile_size * (0.5 + Double.parseDouble(tank[0]));
 				double y = Game.tile_size * (0.5 + Double.parseDouble(tank[1]));
 				String type = tank[2].toLowerCase();
@@ -481,9 +481,12 @@ public class Level
 
 				t.team = team;
 
+				// Don't do this in your code! We only want to dynamically generate tank IDs on level load!
+				t.networkID = Tank.nextFreeNetworkID();
+				Tank.idMap.put(t.networkID, t);
+
 				if (remote)
 				{
-					t.registerNetworkID();
 					TankRemote t1 = new TankRemote(t);
 					Game.movables.add(t1);
 				}
@@ -634,17 +637,13 @@ public class Level
 				Team team = this.playerSpawnsTeam.get(spawn);
 
 				if (ScreenPartyHost.isServer)
-				{
-					EventCreatePlayer e = new EventCreatePlayer(this.includedPlayers.get(i), x, y, angle, team);
-					playerEvents.add(e);
-					Game.eventsOut.add(e);
-				}
+					Game.addPlayerTank(this.includedPlayers.get(i), x, y, angle, team);
 				else if (!remote)
 				{
 					TankPlayer tank = new TankPlayer(x, y, angle);
-					tank.invulnerable = Game.invulnerable;
 					Game.playerTank = tank;
 					tank.team = team;
+					tank.registerNetworkID();
 					Game.movables.add(tank);
 				}
 			}
@@ -665,14 +664,14 @@ public class Level
 				((ScreenLevelEditor) sc).movePlayer = (sc.getSpawns().size() <= 1);
 		}
 
-		for (EventCreatePlayer e: playerEvents)
+		for (EventTankPlayerCreate e : playerEvents)
 			e.execute();
 
 		if (Crusade.crusadeMode && Crusade.currentCrusade.retry)
 		{
 			for (Tank t: tanksToRemove)
 			{
-				INetworkEvent e = new EventRemoveTank(t);
+				INetworkEvent e = new EventTankRemove(t, false);
 				Game.removeMovables.add(t);
 				Game.eventsOut.add(e);
 			}
@@ -704,6 +703,8 @@ public class Level
 		Game.tilesG = new double[Game.currentSizeX][Game.currentSizeY];
 		Game.tilesB = new double[Game.currentSizeX][Game.currentSizeY];
 		Game.tilesDepth = new double[Game.currentSizeX][Game.currentSizeY];
+		Game.tilesFlash = new double[Game.currentSizeX][Game.currentSizeY];
+		Game.obstacleMap = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
 		for (int i = 0; i < Game.currentSizeX; i++)
 		{
@@ -732,22 +733,20 @@ public class Level
 
 		Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
 		Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-		Game.obstacleMap = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
 		for (Obstacle o: Game.obstacles)
 		{
 			int x = (int) (o.posX / Game.tile_size);
 			int y = (int) (o.posY / Game.tile_size);
 
-			if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+			o.postOverride();
+
+			if (o.bulletCollision && o.startHeight < 1 && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 			{
-				if (o.bulletCollision)
-					Game.game.solidGrid[x][y] = true;
+				Game.game.solidGrid[x][y] = true;
 
-				if (o.bulletCollision && !o.shouldShootThrough)
+				if (!o.shouldShootThrough)
 					Game.game.unbreakableGrid[x][y] = true;
-
-				Game.obstacleMap[x][y] = o;
 			}
 		}
 
@@ -794,153 +793,5 @@ public class Level
 	public static boolean isDark()
 	{
 		return Level.currentColorR + Level.currentColorG + Level.currentColorB <= 127 * 3 || (Game.framework != Game.Framework.libgdx && currentLightIntensity <= 0.5);
-	}
-
-	public static String genKillMessage(Tank killed, Tank killer, boolean isBullet)
-	{
-		String textColor = Level.isDark() ? Colors.white : Colors.black;
-
-		StringBuilder message = new StringBuilder();
-
-		String killedR;
-		String killedG;
-		String killedB;
-
-		String killR;
-		String killG;
-		String killB;
-
-		if (killed.team != null && killed.team.enableColor)
-		{
-			killedR = String.format("%03.0f", killed.team.teamColorR);
-			killedG = String.format("%03.0f", killed.team.teamColorG);
-			killedB = String.format("%03.0f", killed.team.teamColorB);
-		}
-		else
-		{
-			killedR = String.format("%03.0f", killed.colorR);
-			killedG = String.format("%03.0f", killed.colorG);
-			killedB = String.format("%03.0f", killed.colorB);
-		}
-
-		if (killer.team != null && killer.team.enableColor)
-		{
-			killR = String.format("%03.0f", killer.team.teamColorR);
-			killB = String.format("%03.0f", killer.team.teamColorB);
-			killG = String.format("%03.0f", killer.team.teamColorG);
-		}
-		else
-		{
-			killR = String.format("%03.0f", killer.colorR);
-			killG = String.format("%03.0f", killer.colorG);
-			killB = String.format("%03.0f", killer.colorB);
-		}
-
-		message.append("\u00a7").append(killedR).append(killedG).append(killedB).append("255");
-
-		if (killed instanceof TankPlayer)
-			message.append(((TankPlayer) killed).player.username);
-		else if (killed instanceof TankPlayerRemote)
-			message.append(((TankPlayerRemote) killed).player.username);
-		else
-		{
-			String name = killed.getClass().getSimpleName();
-			StringBuilder outputName = new StringBuilder();
-			int prevBeginIndex = 0;
-
-			for (int i = 1; i < name.length(); i++)
-			{
-				if (65 <= name.charAt(i) && name.charAt(i) <= 90)
-				{
-					if (prevBeginIndex > 0)
-						outputName.append(name, prevBeginIndex, i).append(" ");
-					prevBeginIndex = i;
-				}
-			}
-			outputName.append(name.substring(prevBeginIndex)).append(" Tank");
-			message.append(outputName);
-		}
-		message.append(textColor).append(" was ").append(isBullet ? "shot" : "blown up").append(" by ").append("\u00a7").append(killR).append(killG).append(killB).append("255");
-
-		if (killer instanceof TankPlayer)
-			message.append(((TankPlayer) killer).player.username);
-
-		else if (killer instanceof TankPlayerRemote)
-			message.append(((TankPlayerRemote) killer).player.username);
-
-		else
-		{
-			String name = killer.getClass().getSimpleName();
-			StringBuilder outputName = new StringBuilder();
-			int prevBeginIndex = 0;
-
-			for (int i = 1; i < name.length(); i++)
-			{
-				if (65 <= name.charAt(i) && name.charAt(i) <= 90)
-				{
-					if (prevBeginIndex > 0)
-						outputName.append(name, prevBeginIndex, i).append(" ");
-					prevBeginIndex = i;
-				}
-			}
-			outputName.append(name.substring(prevBeginIndex)).append(" Tank");
-			message.append(outputName);
-		}
-
-		return message.toString();
-	}
-
-	public static String genDrownMessage(Tank killed)
-	{
-		String textColor = Level.isDark() ? Colors.white : Colors.black;
-
-		StringBuilder message = new StringBuilder();
-
-		String killedR;
-		String killedG;
-		String killedB;
-
-		if (killed.team != null && killed.team.enableColor)
-		{
-			killedR = String.format("%03.0f", killed.team.teamColorR);
-			killedG = String.format("%03.0f", killed.team.teamColorG);
-			killedB = String.format("%03.0f", killed.team.teamColorB);
-		}
-		else
-		{
-			killedR = String.format("%03.0f", killed.colorR);
-			killedG = String.format("%03.0f", killed.colorG);
-			killedB = String.format("%03.0f", killed.colorB);
-		}
-
-		message.append("\u00a7").append(killedR).append(killedG).append(killedB).append("255");
-
-		if (killed instanceof TankPlayer)
-			message.append(((TankPlayer) killed).player.username);
-
-		else if (killed instanceof TankPlayerRemote)
-			message.append(((TankPlayerRemote) killed).player.username);
-
-		else
-		{
-			String name = killed.getClass().getSimpleName();
-			StringBuilder outputName = new StringBuilder();
-			int prevBeginIndex = 0;
-
-			for (int i = 1; i < name.length(); i++)
-			{
-				if (65 <= name.charAt(i) && name.charAt(i) <= 90)
-				{
-					if (prevBeginIndex > 0)
-						outputName.append(name, prevBeginIndex, i).append(" ");
-					prevBeginIndex = i;
-				}
-			}
-			outputName.append(name.substring(prevBeginIndex)).append(" Tank");
-			message.append(outputName);
-		}
-
-		message.append(textColor).append(" drowned");
-		return message.toString();
 	}
 }

@@ -6,7 +6,7 @@ import tanks.gui.screen.ScreenGame;
 
 public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IGameObject, IBatchRenderableObject
 {
-	public static final int default_max_height = 16;
+	public static final int default_max_height = 8;
 
 	public Effect.EffectType destroyEffect = Effect.EffectType.obstaclePiece;
 	public double destroyEffectAmount = 1;
@@ -19,7 +19,6 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	 * If set to true, AI tanks will treat this block as breakable and shoot at it if there are tanks behind it
 	 */
 	public boolean shouldShootThrough = false;
-	public boolean compressed = false;
 
 	public boolean isSurfaceTile = false;
 
@@ -37,7 +36,6 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	public boolean bouncy = false;
 	public boolean allowBounce = true;
 	public boolean replaceTiles = true;
-	public boolean isFullTile = true;
 
 	/**
 	 * If set to true, will draw as a VBO. Set to false for simpler rendering of more dynamic obstacles.
@@ -78,6 +76,9 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public double baseGroundHeight;
 
+	/** Used for debugging purposes. Set this variable to true to draw a dot above this obstacle. */
+	public boolean drawDot = false;
+
 	public Obstacle(String name, double posX, double posY)
 	{
 		this.name = name;
@@ -110,6 +111,13 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	@Override
 	public void draw()
 	{
+		if (this.drawDot)
+		{
+			this.drawDot = false;
+			Drawing.drawing.setColor(69, 69, 69);
+			Drawing.drawing.fillForcedBox(posX, posY, 50, 30, 30, 10, (byte) 0);
+		}
+
 		if (this.stackHeight <= 0)
 			return;
 
@@ -161,9 +169,25 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 			drawing.fillRect(this, this.posX, this.posY, draw_size, draw_size);
 	}
 
-	public void draw3dOutline(double a)
+	public void drawOutline()
 	{
-		draw3dOutline(this.colorR, this.colorG, this.colorB, a);
+		drawOutline(this.colorR, this.colorG, this.colorB, this.colorA);
+	}
+
+	public void drawOutline(double r, double g, double b, double a)
+	{
+		Drawing drawing = Drawing.drawing;
+		drawing.setColor(r, g, b, a);
+		drawing.fillRect(this.posX - Game.tile_size * 0.4, this.posY, Game.tile_size * 0.2, Game.tile_size);
+		drawing.fillRect(this.posX + Game.tile_size * 0.4, this.posY, Game.tile_size * 0.2, Game.tile_size);
+		drawing.fillRect(this.posX, this.posY - Game.tile_size * 0.4, Game.tile_size, Game.tile_size * 0.2);
+		drawing.fillRect(this.posX, this.posY + Game.tile_size * 0.4, Game.tile_size, Game.tile_size * 0.2);
+	}
+
+
+	public void draw3dOutline()
+	{
+		draw3dOutline(this.colorR, this.colorG, this.colorB, 128);
 	}
 
 	public void draw3dOutline(double r, double g, double b)
@@ -219,21 +243,6 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 		drawing.fillInterfaceRect(x, y, draw_size, draw_size);
 	}
 
-	public void drawOutline()
-	{
-		drawOutline(this.colorR, this.colorG, this.colorB, this.colorA);
-	}
-
-	public void drawOutline(double r, double g, double b, double a)
-	{
-		Drawing drawing = Drawing.drawing;
-		drawing.setColor(r, g, b, a);
-		drawing.fillRect(this.posX - Game.tile_size * 0.4, this.posY, Game.tile_size * 0.2, Game.tile_size);
-		drawing.fillRect(this.posX + Game.tile_size * 0.4, this.posY, Game.tile_size * 0.2, Game.tile_size);
-		drawing.fillRect(this.posX, this.posY - Game.tile_size * 0.4, Game.tile_size, Game.tile_size * 0.2);
-		drawing.fillRect(this.posX, this.posY + Game.tile_size * 0.4, Game.tile_size, Game.tile_size * 0.2);
-	}
-
 	public void onObjectEntry(Movable m)
 	{
 		this.onObjectEntryLocal(m);
@@ -255,6 +264,15 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	}
 
+	/** The tank will try to find an alternate route that is less than this amount of tiles farther. */
+	public int unfavorability()
+	{
+		if (this.destructible)
+			return 20;
+
+		return 0;
+	}
+
 	public boolean hasNeighbor(int ox, int oy, boolean unbreakable)
 	{
 		int x = (int) (this.posX / Game.tile_size) + ox;
@@ -262,9 +280,6 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 		if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 		{
-			if (Game.obstacleMap[x][y] != null && (Game.obstacleMap[x][y].startHeight != this.startHeight || Game.obstacleMap[x][y].stackHeight != this.stackHeight))
-				return false;
-
 			if (unbreakable)
 				return Game.game.unbreakableGrid[x][y];
 			else
@@ -295,9 +310,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	}
 
 	/**
-	 * Draws the tile under the obstacle if it needs to be drawn differently than when not covered by an obstacle.<br>
-	 * <br>
-	 * Use <code>Obstacle.draw_size / Game.tile_size</code> to get a percentage of how much the level loading animation is complete.
+	 * Draws the tile under the obstacle if it needs to be drawn differently than when not covered by an obstacle
 	 *
 	 * @param r Red
 	 * @param g Green
@@ -316,8 +329,8 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public void postOverride()
 	{
-		int x = (int)(this.posX / Game.tile_size);
-		int y = (int)(this.posY / Game.tile_size);
+		int x = (int) (this.posX / Game.tile_size);
+		int y = (int) (this.posY / Game.tile_size);
 
 		if (this.isSurfaceTile)
 			this.startHeight = -1;
@@ -369,8 +382,8 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public boolean[] getValidHorizontalFaces(boolean unbreakable)
 	{
-		this.validFaces[0] = !this.hasNeighbor(0, -1, unbreakable) && this.startHeight == 0;
-		this.validFaces[1] = !this.hasNeighbor(0, 1, unbreakable) && this.startHeight == 0;
+		this.validFaces[0] = !this.hasNeighbor(0, -1, unbreakable) || this.startHeight >= 1;
+		this.validFaces[1] = !this.hasNeighbor(0, 1, unbreakable) || this.startHeight >= 1;
 		return this.validFaces;
 	}
 
@@ -390,8 +403,8 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public boolean[] getValidVerticalFaces(boolean unbreakable)
 	{
-		this.validFaces[0] = !this.hasNeighbor(-1, 0, unbreakable) || this.startHeight > 1;
-		this.validFaces[1] = !this.hasNeighbor(1, 0, unbreakable) || this.startHeight > 1;
+		this.validFaces[0] = !this.hasNeighbor(-1, 0, unbreakable) || this.startHeight >= 1;
+		this.validFaces[1] = !this.hasNeighbor(1, 0, unbreakable) || this.startHeight >= 1;
 		return this.validFaces;
 	}
 
@@ -400,7 +413,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	 * */
 	public double getTileHeight()
 	{
-		if (Obstacle.draw_size < Game.tile_size || this.startHeight > 1)
+		if (Obstacle.draw_size < Game.tile_size || this.startHeight >= 1)
 			return 0;
 
 		return this.stackHeight * Game.tile_size;
@@ -482,7 +495,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 							}
 
 							double dist = Movable.distanceBetween(this, e);
-							double angle = Movable.getPolarDirection(e.posX - posX, e.posY - posY);
+							double angle = (Math.random() - 0.5) * 0.1 + Movable.getPolarDirection(e.posX - posX, e.posY - posY);
 							double rad = radius - Game.tile_size / 2;
 							double v = (rad * Math.sqrt(2) - dist) / (rad * 2);
 							e.addPolarMotion(angle, (v + Math.random() * 2) * 1.5);

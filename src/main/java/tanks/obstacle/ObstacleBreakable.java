@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.Movable;
 import tanks.Panel;
 import tanks.bullet.Bullet;
-import tanks.event.EventObstacleHit;
+import tanks.network.event.EventObstacleHit;
 
 public class ObstacleBreakable extends Obstacle
 {
@@ -134,12 +134,12 @@ public class ObstacleBreakable extends Obstacle
                 if (stackHeight % 1 == 0)
                 {
                     o = (byte) (option | this.getOptionsByte(((i + 1) + stackHeight % 1.0) * Game.tile_size + offset));
-                    drawing.fillBox(this, this.posX, this.posY, offset + i * Game.tile_size, draw_size, draw_size, draw_size, o);
+                    drawing.fillBox(this, this.posX, this.posY, offset + (i + startHeight) * Game.tile_size, draw_size, draw_size, draw_size, o);
                 }
                 else
                 {
                     o = (byte) (option | this.getOptionsByte((i + stackHeight % 1.0) * Game.tile_size + offset));
-                    drawing.fillBox(this, this.posX, this.posY, offset + (i - 1 + stackHeight % 1.0) * Game.tile_size + cutoff + this.startHeight * 50, draw_size, draw_size, draw_size - cutoff, o);
+                    drawing.fillBox(this, this.posX, this.posY, offset + (i - 1 + startHeight + stackHeight % 1.0) * Game.tile_size + cutoff, draw_size, draw_size, draw_size - cutoff, o);
                 }
 
                 options[i] = o;

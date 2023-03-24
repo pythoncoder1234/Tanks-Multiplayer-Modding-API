@@ -4,8 +4,8 @@ import tanks.Game;
 import tanks.Movable;
 import tanks.Panel;
 import tanks.bullet.Bullet;
-import tanks.bullet.BulletAir;
-import tanks.event.EventObstacleDestroy;
+import tanks.network.event.EventLayMine;
+import tanks.network.event.EventObstacleDestroy;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
 import tanks.tank.*;
@@ -22,7 +22,6 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
 
         this.draggable = false;
         this.destructible = true;
-        this.allowBounce =false;
         this.colorR = 255;
         this.colorG = Math.random() * 40 + 80;
         this.colorB = 0;
@@ -53,7 +52,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
         if (this.trigger != Game.dummyTank)
             return;
 
-        if ((m instanceof Bullet && !(m instanceof BulletAir)) || m instanceof Tank)
+        if (m instanceof Bullet || m instanceof Tank)
         {
             if (m instanceof Bullet)
             {
@@ -107,7 +106,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
         e.explode();
 
         Game.removeObstacles.add(this);
-        Game.eventsOut.add(new EventObstacleDestroy(this.posX, this.posY));
+        Game.eventsOut.add(new EventObstacleDestroy(this.posX, this.posY, this.name));
     }
 
     @Override
@@ -117,8 +116,8 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
     }
 
     @Override
-    public double getSeverity(Tank t)
+    public double getSeverity(double posX, double posY)
     {
-        return Math.sqrt(Math.pow(t.posX - this.posX, 2) + Math.pow(t.posY - this.posY, 2));
+        return Math.sqrt(Math.pow(posX - this.posX, 2) + Math.pow(posY - this.posY, 2));
     }
 }

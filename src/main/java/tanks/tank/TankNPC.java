@@ -1,36 +1,41 @@
 package tanks.tank;
 
 import basewindow.InputCodes;
+import io.netty.buffer.ByteBuf;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.ModAPI;
 import tanks.Panel;
-import tanks.event.*;
 import tanks.gui.Button;
 import tanks.gui.ButtonList;
 import tanks.gui.input.InputBinding;
 import tanks.gui.input.InputBindingGroup;
+import tanks.gui.menus.NPCMessage;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemRemote;
-import tanks.menus.NPCMesssage;
+import tanks.network.ISyncable;
+import tanks.network.NetworkUtils;
+import tanks.network.SyncedFieldMap;
+import tanks.network.event.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static tanks.gui.screen.ScreenGame.shopOffset;
 
-public class TankNPC extends TankDummy
+public class TankNPC extends TankDummy implements ISyncable, IModdedTank
 {
-    /**
-     * Not recommended; it may bring back old network speeds if any event-sending functions are repeatedly called.
-     */
-    public static boolean disableEventCooldown = false;
+    public SyncedFieldMap map = new SyncedFieldMap();
+
+    public static final String shopCommand = "/shop";
     public static final InputBindingGroup select = new InputBindingGroup("viewNPC", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_E));
 
-    public String[] messages = null;
+    public String npcName;
+    public MessageList messages = null;
     public String tagName;
     public ButtonList npcShopList;
     public ArrayList<Item> shopItems;
@@ -45,42 +50,41 @@ public class TankNPC extends TankDummy
     public double counter = 0;
 
     public final TankDummy icon = new TankDummy("icon", 200, 60, ModAPI.right);
-    public NPCMesssage messager;
+    public NPCMessage messageDisplay;
 
-    public double eventCooldown = 0;
-
-    public TankNPC(String name, double x, double y, double angle, String messages, double r, double g, double b)
+    public TankNPC(String name, int x, int y, double angle, MessageList messageList, double r, double g, double b)
     {
-        this(name, x, y, angle, messages, "", r, g, b);
+        this(name, x, y, angle, messageList, "", r, g, b);
     }
 
-    public TankNPC(String name, double x, double y, double angle, String messages, String tagName, double r, double g, double b)
+    public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b)
     {
-        this(name, x, y, angle, messages, tagName, r, g, b, r, g, b, Game.currentLevel.shop);
+        this(name, x, y, angle, messageList, tagName, r, g, b, r, g, b, new ArrayList<>());
     }
 
-    public TankNPC(String name, double x, double y, double angle, String messages, String tagName, double r, double g, double b, Item... shop)
+    public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, Item... shop)
     {
-        this(name, x, y, angle, messages, tagName, r, g, b, r, g, b, new ArrayList<>(Arrays.asList(shop)));
+        this(name, x, y, angle, messageList, tagName, r, g, b, r, g, b, new ArrayList<>(Arrays.asList(shop)));
     }
 
-    public TankNPC(String name, double x, double y, double angle, String messages, String tagName, double r, double g, double b, double nameR, double nameG, double nameB, Item... shop)
+    public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, double nameR, double nameG, double nameB, Item... shop)
     {
-        this(name, x, y, angle, messages, tagName, r, g, b, nameR, nameG, nameB, new ArrayList<>(Arrays.asList(shop)));
+        this(name, x, y, angle, messageList, tagName, r, g, b, nameR, nameG, nameB, new ArrayList<>(Arrays.asList(shop)));
     }
 
-    public TankNPC(String name, double x, double y, double angle, String messages, String tagName, double r, double g, double b, ArrayList<Item> shop)
+    public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, ArrayList<Item> shop)
     {
-        this(name, x, y, angle, messages, tagName, r, g, b, r, g, b, shop);
+        this(name, x, y, angle, messageList, tagName, r, g, b, r, g, b, shop);
     }
 
-    public TankNPC(String name, double x, double y, double angle, String messages, String tagName, double r, double g, double b, double nameR, double nameG, double nameB, ArrayList<Item> shop)
+    public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, double nameR, double nameG, double nameB, ArrayList<Item> shop)
     {
-        super(name, x, y * 50 + 25, angle);
+        super("npc", x, y * 50 + 25, angle);
 
-        if (messages != null && messages.length() > 0)
-            this.messages = messages.split("\n");
+        if (messageList != null && messageList.size() > 0)
+            this.messages = messageList;
 
+        this.npcName = name;
         this.shopItems = shop;
         this.tagName = tagName;
         this.showName = tagName != null && tagName.length() > 0;
@@ -97,6 +101,7 @@ public class TankNPC extends TankDummy
 
         this.invulnerable = true;
         this.targetable = false;
+        this.collisionPush = false;
         this.mandatoryKill = false;
 
         icon.colorR = r;
@@ -106,8 +111,7 @@ public class TankNPC extends TankDummy
         icon.secondaryColorG = Turret.calculateSecondaryColor(this.colorG);
         icon.secondaryColorB = Turret.calculateSecondaryColor(this.colorB);
 
-        this.messager = new NPCMesssage(this);
-        ModAPI.menuGroup.add(this.messager);
+        this.messageDisplay = new NPCMessage(this);
     }
 
     public void initShop(ArrayList<Item> shop)
@@ -148,8 +152,8 @@ public class TankNPC extends TankDummy
 
             b.image = item.icon;
             b.imageXOffset = -145;
-            b.imageSizeX = 30;
-            b.imageSizeY = 30;
+            b.imageSizeX = 35;
+            b.imageSizeY = 35;
             b.subtext = price;
 
             shopItemButtons.add(b);
@@ -178,7 +182,6 @@ public class TankNPC extends TankDummy
     {
         super.update();
 
-        this.eventCooldown -= Panel.frameFrequency;
         playerNear = ModAPI.withinRange((this.posX - 25) / 50, (this.posY - 25) / 50, 3).contains(Game.playerTank);
 
         if (((ScreenGame) Game.screen).npcShopScreen && !playerNear)
@@ -190,15 +193,22 @@ public class TankNPC extends TankDummy
             {
                 select.invalidate();
                 if (!isChatting)
+                {
                     isChatting = true;
 
-                else if (this.currentLine.length() < messages[messageNum].length())
-                    this.currentLine = messages[messageNum];
+                    if (!ModAPI.fixedMenus.contains(this.messageDisplay))
+                        ModAPI.fixedMenus.add(this.messageDisplay);
 
-                else if (messageNum + 1 == messages.length)
+                    initMessageScreen();
+                }
+                else if (messageNum == messages.size() - 1)
                 {
                     isChatting = false;
                     messageNum = 0;
+                }
+                else if (this.currentLine.length() < messages.get(messageNum).length())
+                {
+                    this.currentLine = messages.get(messageNum);
                 }
                 else
                 {
@@ -217,12 +227,12 @@ public class TankNPC extends TankDummy
             }
         }
 
-        if (this.draw && (!((ScreenGame) Game.screen).paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && this.messages != null && this.messages[messageNum] != null)
+        if (this.draw && (!((ScreenGame) Game.screen).paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && this.messages != null && this.messages.get(messageNum) != null)
         {
             if (this.counter <= 0)
             {
-                if (this.currentLine.length() < this.messages[this.messageNum].length())
-                    this.currentLine += this.messages[this.messageNum].charAt(this.currentLine.length());
+                if (this.currentLine.length() < this.messages.get(messageNum).length())
+                    this.currentLine += this.messages.get(messageNum).charAt(this.currentLine.length());
 
                 this.counter = 3;
             }
@@ -230,9 +240,52 @@ public class TankNPC extends TankDummy
         }
     }
 
-    public void setMessages(String message)
+    /** Only writes the properties that are used in this NPC and isn't written already by {@link EventTankCreate}. */
+    public void writeTo(ByteBuf b)
     {
-        this.messages = message.split("\n");
+        NetworkUtils.writeString(b, String.join("&#13;", messages.raw));
+
+        b.writeDouble(this.colorR);
+        b.writeDouble(this.colorG);
+        b.writeDouble(this.colorB);
+
+        b.writeInt(this.networkID);
+
+        b.writeBoolean(this.nameTag != null);
+        if (this.nameTag != null)
+            this.nameTag.writeTo(b);
+
+        b.writeInt(this.shopItems.size());
+        for (Item i : this.shopItems)
+            NetworkUtils.writeString(b, i.toString());
+    }
+
+    /** Only reads the properties that are used in this NPC and isn't read already by {@link EventTankCreate}. */
+    public static TankNPC readFrom(ByteBuf b, double posX, double posY, double angle)
+    {
+        TankNPC t = new TankNPC("npc", (int) posX, (int) (posY / Game.tile_size), angle,
+                new MessageList(Objects.requireNonNull(NetworkUtils.readString(b)).split("&#13;")),
+                b.readDouble(), b.readDouble(), b.readDouble());
+
+        t.networkID = b.readInt();
+
+        if (b.readBoolean())
+        {
+            t.nameTag = NameTag.readFrom(b);
+            t.nameTag.movable = t;
+            t.showName = true;
+        }
+
+        int size = b.readInt();
+        for (int i = 0; i < size; i++)
+            t.shopItems.add(Item.parseItem(null, Objects.requireNonNull(NetworkUtils.readString(b))));
+
+        return t;
+    }
+
+    public void setMessages(MessageList messages)
+    {
+        this.messages = messages;
         this.initMessageScreen();
 
         Game.eventsOut.add(new EventChangeNPCMessage(this));
@@ -245,26 +298,21 @@ public class TankNPC extends TankDummy
 
     public void setOverrideState(boolean displayState, boolean override)
     {
-        if (disableEventCooldown || this.eventCooldown <= 0)
-        {
-            this.eventCooldown = 3;
+        this.overrideDisplayState = override;
+        this.draw = displayState;
 
-            this.overrideDisplayState = override;
-            this.draw = displayState;
+        if (this.draw)
+            initMessageScreen();
 
-            if (this.draw)
-                initMessageScreen();
-
-            Game.eventsOut.add(new EventOverrideNPCState(this));
-        }
+        Game.eventsOut.add(new EventOverrideNPCState(this));
     }
 
     public void initMessageScreen()
     {
-        if (this.messages == null || this.messages[messageNum] == null)
+        if (this.messages == null || this.messages.get(messageNum) == null)
             return;
 
-        if (this.messages[this.messageNum].equals("/shop"))
+        if (this.messages.get(messageNum).equals(shopCommand))
         {
             this.initShop(this.shopItems);
 
@@ -277,6 +325,38 @@ public class TankNPC extends TankDummy
             return;
         }
 
-        this.currentLine = String.valueOf(this.messages[messageNum].charAt(0));
+        this.currentLine = String.valueOf(this.messages.get(messageNum).charAt(0));
+    }
+
+    @Override
+    public void addFieldsToSync()
+    {
+        map.putAll("colorR", "colorG", "colorB");
+    }
+
+    @Override
+    public Class<? extends EventTankCreate> getCreateEvent()
+    {
+        return EventAddTankNPC.class;
+    }
+
+    public static class MessageList
+    {
+        public String[] raw;
+
+        public MessageList(String... messages)
+        {
+            this.raw = messages;
+        }
+
+        public String get(int index)
+        {
+            return raw[index];
+        }
+
+        public int size()
+        {
+            return raw.length;
+        }
     }
 }

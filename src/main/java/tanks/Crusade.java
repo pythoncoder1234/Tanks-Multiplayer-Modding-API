@@ -1,7 +1,6 @@
 package tanks;
-
 import basewindow.BaseFile;
-import tanks.event.*;
+import tanks.network.event.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.hotbar.ItemBar;
@@ -17,6 +16,8 @@ public class Crusade
 {
 	public static Crusade currentCrusade = null;
 	public static boolean crusadeMode = false;
+
+	public boolean disableFriendlyFire = false;
 
 	public boolean retry = false;
 	public boolean replay = false;
@@ -74,6 +75,8 @@ public class Crusade
 
 	public boolean respawnTanks = true;
 
+	public String description = null;
+
 	public Crusade(ArrayList<String> levelArray, String name, String file)
 	{
 		internal = true;
@@ -98,22 +101,6 @@ public class Crusade
 		try 
 		{
 			this.fileName = f.path;
-
-			if (!f.exists())
-			{
-				if (this.fileName.contains("\\"))   // Windows to Mac
-				{
-					this.fileName = this.fileName.replaceAll("\\\\", "/");
-					this.fileName = this.fileName.replaceFirst("C:/Users/\\S+/.tanks", Game.homedir + "/.tanks");
-				}
-				else   // Mac to Windows
-				{
-					this.fileName = this.fileName.replaceAll("/", "\\");
-					this.fileName = this.fileName.replaceFirst("Users\\\\\\S+\\\\.tanks", Game.homedir + "\\.tanks");
-				}
-				f = Game.game.fileManager.getFile(this.fileName);
-			}
-
 			f.startReading();
 			ArrayList<String> list = new ArrayList<>();
 
@@ -195,6 +182,9 @@ public class Crusade
 
 						if (z.length > 3)
 							this.respawnTanks = Boolean.parseBoolean(z[3]);
+
+						if (z.length > 4)
+							this.disableFriendlyFire = Boolean.parseBoolean(z[4]);
 					}
 					else if (parsing == 3)
 					{
@@ -302,6 +292,9 @@ public class Crusade
 
 		for (Player player : Game.players)
 		{
+			if (disableFriendlyFire && player.tank.team != null)
+				player.tank.team.friendlyFire = false;
+
 			player.hotbar.coins = crusadePlayers.get(player).coins;
 
 			ItemBar i = crusadePlayers.get(player).itemBar;
@@ -425,12 +418,13 @@ public class Crusade
 		return true;
 	}
 
-	public ArrayList<Item> getShop()
+	public ArrayList<Item> getShop() 
 	{
 		ArrayList<Item> shop = new ArrayList<>();
-
-		for (Item item : this.crusadeItems)
+		
+		for (int i = 0; i < this.crusadeItems.size(); i++)
 		{
+			Item item = this.crusadeItems.get(i);
 			if (item.levelUnlock <= this.currentLevel)
 				shop.add(item);
 		}
@@ -512,9 +506,6 @@ public class Crusade
 
 	public void quit()
 	{
-		if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
-			return;
-
 		boolean win = ScreenGame.finishedQuick && Panel.win;
 
 		if (!win)

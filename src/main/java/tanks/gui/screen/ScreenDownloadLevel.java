@@ -93,8 +93,10 @@ public class ScreenDownloadLevel extends ScreenOnline implements ILevelPreviewSc
             this.levelName.update();
 
         if (Game.enable3d)
-            for (Obstacle o : Game.obstacles)
+            for (int i = 0; i < Game.obstacles.size(); i++)
             {
+                Obstacle o = Game.obstacles.get(i);
+
                 o.postOverride();
 
                 int x = (int) (o.posX / Game.tile_size);

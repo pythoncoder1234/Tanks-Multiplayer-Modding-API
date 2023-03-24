@@ -4,7 +4,6 @@ import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.tank.Tank;
-import tanks.tank.TankAIControlled;
 
 public class ObstacleSand extends Obstacle
 {
@@ -21,9 +20,9 @@ public class ObstacleSand extends Obstacle
         this.destroyEffectAmount = 1.5;
 
         if (Math.random() > 0.1)
-            this.stackHeight = 0.4;
+            this.stackHeight = 0.3;
         else
-            this.stackHeight = 0.55;
+            this.stackHeight = 0.45;
 
         if (Game.fancyTerrain)
         {
@@ -53,18 +52,8 @@ public class ObstacleSand extends Obstacle
     {
         if (!ScreenPartyLobby.isClient && m instanceof Tank)
         {
-            AttributeModifier a = new AttributeModifier("sand_velocity", "velocity", AttributeModifier.Operation.multiply, -0.25);
-            a.duration = 30;
-            a.deteriorationAge = 20;
-            m.addUnduplicateAttribute(a);
-
-            if (!(m instanceof TankAIControlled))
-            {
-                AttributeModifier b = new AttributeModifier("sand_friction", "friction", AttributeModifier.Operation.multiply, 4);
-                b.duration = 10;
-                b.deteriorationAge = 5;
-                m.addUnduplicateAttribute(b);
-            }
+            m.addStatusEffect(StatusEffect.snow_velocity, 0, 20, 30);
+            m.addStatusEffect(StatusEffect.snow_friction, 0, 5, 10);
         }
 
         this.onObjectEntryLocal(m);
@@ -100,6 +89,11 @@ public class ObstacleSand extends Obstacle
                 Game.effects.add(e);
             }
         }
+    }
+
+    public int unfavorability()
+    {
+        return 3;
     }
 
     public double getTileHeight()

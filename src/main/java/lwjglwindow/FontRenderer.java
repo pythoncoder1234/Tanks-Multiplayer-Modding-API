@@ -51,6 +51,16 @@ public class FontRenderer extends BaseFontRenderer
 		int col = (int) (i % size);
 		int row = (int) (i / size);
 		int width = charSizes[i];
+		//this.window.shapeRenderer.drawRect(x, y - sY * 16, sX * width * 4, sY * 64);
+
+		if (this.drawBox)
+		{
+			this.window.shapeRenderer.drawRect(x, y, sX * width * 2, sY * 32);
+			this.window.shapeRenderer.drawRect(x, y + sY * 16, sX * width * 2, sY * 16);
+			this.window.shapeRenderer.drawRect(x + sX * width * 2, y, sX * width * 2, sY * 32);
+			this.window.shapeRenderer.drawRect(x + sX * width * 2, y + sY * 16, sX * width * 2, sY * 16);
+		}
+
 		this.window.shapeRenderer.drawImage(x, y - sY * 16, z, sX * 32 * size, sY * 32 * size,
 				col / size, (row * hSpace) / size,
 				(col + width / 8f) / size, (row * hSpace + 2) / size,
@@ -91,18 +101,11 @@ public class FontRenderer extends BaseFontRenderer
 		double curX = x;
 		char[] c = s.toCharArray();
 
-		double prevR = this.window.colorR;
-		double prevG = this.window.colorG;
-		double prevB = this.window.colorB;
-		double prevA = this.window.colorA;
-		boolean changed = false;
-
 		for (int i = 0; i < c.length; i++)
 		{
 			if (c[i] == '\u00C2')
 				continue;
-
-			if (c[i] == '\u00A7')
+			else if (c[i] == '\u00A7')
 			{
 				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + "" + c[i + 3]);
 				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + "" + c[i + 6]);
@@ -110,16 +113,11 @@ public class FontRenderer extends BaseFontRenderer
 				int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + "" + c[i + 12]);
 				this.window.setColor(r, g, b, a);
 
-				changed = true;
-
 				i += 12;
 			}
 			else
 				curX += (drawChar(curX, y, 0, sX, sY, c[i], false) + 1) * sX * 4;
 		}
-
-		if (changed)
-			this.window.setColor(prevR * 255, prevG * 255, prevB * 255, prevA * 255);
 	}
 
 	public double getStringSizeX(double sX, String s)
@@ -131,7 +129,8 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-			else if (c[i] == '\u00A7')
+
+			if (c[i] == '\u00A7')
 				i += 12;
 			else if (this.chars.indexOf(c[i]) == -1)
 				c[i] = '?';
@@ -139,7 +138,7 @@ public class FontRenderer extends BaseFontRenderer
 				w += (charSizes[this.chars.indexOf(c[i])] + 1) * sX * 4;
 		}
 
-		return Math.max(w - 1, 0);
+		return Math.max(w - sX * 4, 0);
 	}
 
 	public double getStringSizeY(double sY, String s)

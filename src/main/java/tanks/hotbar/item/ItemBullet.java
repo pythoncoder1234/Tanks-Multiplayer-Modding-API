@@ -1,9 +1,13 @@
 package tanks.hotbar.item;
 
+import tanks.AttributeModifier;
 import tanks.Game;
 import tanks.Panel;
 import tanks.Player;
-import tanks.bullet.*;
+import tanks.bullet.Bullet;
+import tanks.bullet.BulletAir;
+import tanks.bullet.BulletArc;
+import tanks.bullet.BulletFlame;
 import tanks.gui.property.UIPropertyBoolean;
 import tanks.gui.property.UIPropertyDouble;
 import tanks.gui.property.UIPropertyInt;
@@ -86,6 +90,8 @@ public class ItemBullet extends Item
 
 			int q = (int) Math.min(this.shotCount, Math.ceil(remainingQty / useAmt));
 
+			double speedmul = m.getAttributeValue(AttributeModifier.bullet_speed, 1);
+
 			for (int i = 0; i < q; i++)
 			{
 				double baseOff = 0;
@@ -118,7 +124,7 @@ public class ItemBullet extends Item
 				this.cooldown = this.cooldownBase;
 
 				double off = baseOff + (Math.random() - 0.5) * Math.toRadians(this.accuracy);
-				m.fireBullet(b, speed, off);
+				m.fireBullet(b, speed * speedmul, off);
 
 				while (this.fractionUsed >= 1 && !this.unlimitedStack)
 				{
@@ -228,9 +234,9 @@ public class ItemBullet extends Item
 		if (BulletArc.class.isAssignableFrom(this.bulletClass))
 			return this.speed / 3.125 * 1000.0;
 		else if (BulletFlame.class.isAssignableFrom(this.bulletClass))
-			return this.speed / 3.125 * 400;
+			return 400;
 		else if (BulletAir.class.isAssignableFrom(this.bulletClass))
-			return this.speed / 3.125 * 800;
+			return 800;
 		else
 			return -1;
 	}

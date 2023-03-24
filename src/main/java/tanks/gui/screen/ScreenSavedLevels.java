@@ -55,10 +55,11 @@ public class ScreenSavedLevels extends Screen
 	{
 		String name = System.currentTimeMillis() + ".tanks";
 
-		Level l = new Level("{28,18||1-8-player}");
-		Game.screen = new ScreenLevelEditor(name, l, true);
+		Level l = new Level("{28,18||2-8-player}");
+		Game.screen = new ScreenLevelEditor(name, l);
 		l.loadLevel((ILevelPreviewScreen) Game.screen);
-	});
+	}
+	);
 
 	public ScreenSavedLevels()
 	{
@@ -79,7 +80,7 @@ public class ScreenSavedLevels extends Screen
 						Game.screen = new OverlayEditorMenu(s, s);
 					}
 				},
-				(file) -> "Last opened on " + Game.formatTime(file.lastModified(), "M/d/u---hh:mm a (") + Game.timeInterval(file.lastModified(), System.currentTimeMillis()) + " ago)");
+				(file) -> "Last modified---" + Game.timeInterval(file.lastModified(), System.currentTimeMillis()) + " ago");
 
 		fullSavedLevelsList.sortedByTime = sortByTime;
 		fullSavedLevelsList.sort(sortByTime);

@@ -22,7 +22,6 @@ public class ObstaclePath extends Obstacle
         this.checkForObjects = true;
         this.enableStacking = false;
 
-        this.replaceTiles = true;
         updateColor();
 
         this.description = "A dusty, worn out brown path";
@@ -36,19 +35,13 @@ public class ObstaclePath extends Obstacle
         {
             double speed = Math.sqrt((Math.pow(m.vX, 2) + Math.pow(m.vY, 2)));
 
-            double mul = 0.0625 / 4;
-
-            double amt = speed * mul * Panel.frameFrequency * Game.effectMultiplier * 10;
-
-            if (amt < 1 && Math.random() < amt % 1)
-                amt += 2;
+            double amt = speed * Panel.frameFrequency * Game.effectMultiplier * 1.4 * Math.random();
 
             for (int i = 1; i < amt; i++)
             {
                 double angle = m.getPolarDirection() + Math.PI / 2;
 
                 Effect e = Effect.createNewEffect(m.posX, m.posY, m.posZ, Effect.EffectType.snow);
-                e.size = 2;
                 e.colR = this.colorR;
                 e.colG = this.colorG;
                 e.colB = this.colorB;

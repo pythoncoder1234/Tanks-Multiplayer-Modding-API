@@ -1,5 +1,20 @@
 Older Changelogs
 ---
+**Mod API v1.1.1**
+- Mapmaking mode: Run with the `mapmaking` launch argument or enable the feature in debug menu!
+- Gives access to hidden obstacles:
+- Path obstacle, changes its color automatically based on the level background
+- Hill obstacle, changes its color ot the same level as a background, but has changeable stack height
+- Updated game version support to Tanks 1.4.1
+- Press F to move the third person camera up and down with the cursor
+- Level editor improvements (shift click Block Height to change the starting height of an obstacle!)
+- Added functions in ModGame to override the "Victory!" message
+- The base damage for healing rays and flamethrowers is now 1, and changing the value will multiply how much damage the bullet will do.
+- MapLoader class, stitches levels together to create a map (unfinished, buggy)
+- Added documentation to ModAPI class
+- Bug fixes and other minor improvements
+- `getSeverity()` in `IAvoidObject` now takes a `Tank` parameter (to fix, replace `posX` with `t.posX`)
+- `Game.tileDrawables` removed, you can use `Game.obstacleMap[x][y] != null` instead
 
 **Mod API v1.1.1b**
 - Shift click `Block Height` in the level editor for something cool ;D

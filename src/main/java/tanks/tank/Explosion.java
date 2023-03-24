@@ -2,16 +2,14 @@ package tanks.tank;
 
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.event.*;
 import tanks.gui.ChatMessage;
+import tanks.gui.menus.FixedMenu;
+import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
-import tanks.ModAPI;
-import tanks.ModLevel;
-import tanks.menus.FixedMenu;
-import tanks.menus.Scoreboard;
+import tanks.network.event.*;
 import tanks.obstacle.Obstacle;
 
 public class Explosion extends Movable
@@ -75,10 +73,8 @@ public class Explosion extends Movable
         {
             Game.eventsOut.add(new EventExplosion(this));
 
-            for (int i = 0; i < Game.movables.size(); i++)
+            for (Movable m: Game.movables)
             {
-                Movable m = Game.movables.get(i);
-
                 if (Math.pow(Math.abs(m.posX - this.posX), 2) + Math.pow(Math.abs(m.posY - this.posY), 2) < Math.pow(radius, 2))
                 {
                     if (m instanceof Tank && !m.destroy && ((Tank) m).getDamageMultiplier(this) > 0)
@@ -94,6 +90,23 @@ public class Explosion extends Movable
                                 {
                                     Game.currentGame.onKill(this.tank, t);
 
+                                    for (FixedMenu menu : ModAPI.fixedMenus)
+                                    {
+                                        if (menu instanceof Scoreboard && ((Scoreboard) menu).objectiveType.equals(Scoreboard.objectiveTypes.kills))
+                                        {
+                                            Scoreboard s = (Scoreboard) menu;
+
+                                            if (!s.teamPoints.isEmpty())
+                                                s.addTeamScore(this.tank.team, 1);
+
+                                            else if (this.tank instanceof TankPlayer)
+                                                s.addPlayerScore(((TankPlayer) this.tank).player, 1);
+
+                                            else if (this.tank instanceof TankPlayerRemote)
+                                                s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
+                                        }
+                                    }
+
                                     if (Game.currentGame.enableKillMessages && ScreenPartyHost.isServer)
                                     {
                                         String message = Game.currentGame.generateKillMessage(t, this.tank, false);
@@ -102,45 +115,11 @@ public class Explosion extends Movable
                                     }
                                 }
 
-                                if (Game.currentLevel instanceof ModLevel)
-                                {
-                                    ((ModLevel) Game.currentLevel).onKill(this.tank, t);
-
-                                    if (((ModLevel) Game.currentLevel).enableKillMessages && ScreenPartyHost.isServer)
-                                    {
-                                        String message = ((ModLevel) Game.currentLevel).generateKillMessage(t, this.tank, false);
-                                        ScreenPartyHost.chat.add(0, new ChatMessage(message));
-                                        Game.eventsOut.add(new EventChat(message));
-                                    }
-                                }
-
-                                for (FixedMenu menu : ModAPI.menuGroup)
-                                {
-                                    if (menu instanceof Scoreboard && ((Scoreboard) menu).objectiveType.equals(Scoreboard.objectiveTypes.kills))
-                                    {
-                                        Scoreboard scoreboard = (Scoreboard) menu;
-
-                                        if (!scoreboard.teamPoints.isEmpty())
-                                            scoreboard.addTeamScore(this.tank.team, 1);
-
-                                        else if (this.tank instanceof TankPlayer && !scoreboard.playerPoints.isEmpty())
-                                            scoreboard.addPlayerScore(((TankPlayer) this.tank).player, 1);
-
-                                        else if (this.tank instanceof TankPlayerRemote && !scoreboard.playerPoints.isEmpty())
-                                            scoreboard.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
-                                    }
-                                }
-
 
                                 if (this.tank.equals(Game.playerTank))
                                 {
-                                    if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
-                                    {
-                                        if (Game.currentGame != null)
-                                            Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
-                                        else if (Game.currentLevel instanceof ModLevel)
-                                            Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
-                                    }
+                                    if (Game.currentGame != null && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
+                                        Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
                                     else
                                         Game.player.hotbar.coins += t.coinValue;
                                 }
@@ -148,14 +127,11 @@ public class Explosion extends Movable
                                 {
                                     if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
                                     {
-                                        if (Game.currentGame != null)
-                                            Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
-                                        else if (Game.currentLevel instanceof ModLevel)
-                                            Game.player.hotbar.coins += ((ModLevel) Game.currentLevel).playerKillCoins;
+                                        if (Game.currentGame != null && Game.currentGame.playerKillCoins > 0)
+                                            ((TankPlayerRemote) this.tank).player.hotbar.coins += Game.currentGame.playerKillCoins;
+                                        else
+                                            ((TankPlayerRemote) this.tank).player.hotbar.coins += t.coinValue;
                                     }
-                                    else
-                                        Game.player.hotbar.coins += t.coinValue;
-
                                     Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
                                 }
                             }
@@ -183,11 +159,11 @@ public class Explosion extends Movable
         {
             for (Obstacle o: Game.obstacles)
             {
-                if (Math.pow(Math.abs(o.posX - this.posX), 2) + Math.pow(Math.abs(o.posY - this.posY) + o.startHeight * 50, 2) < Math.pow(radius, 2) && o.destructible && !Game.removeObstacles.contains(o))
+                if (Math.pow(Math.abs(o.posX - this.posX), 2) + Math.pow(Math.abs(o.posY - this.posY), 2) + Math.pow(o.startHeight * 50, 2) < Math.pow(radius, 2) && o.destructible && !Game.removeObstacles.contains(o))
                 {
                     o.onDestroy(this);
                     o.playDestroyAnimation(this.posX, this.posY, this.radius);
-                    Game.eventsOut.add(new EventObstacleDestroy(o.posX, o.posY, this.posX, this.posY, this.radius));
+                    Game.eventsOut.add(new EventObstacleDestroy(o.posX, o.posY, o.name, this.posX, this.posY, this.radius));
                 }
             }
         }

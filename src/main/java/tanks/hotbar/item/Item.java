@@ -74,7 +74,7 @@ public abstract class Item implements IGameObject
 
 
 	/**name-image-price-level-quantity-max_quantity-type
-	 * <br>if (type == bullet):-class-effect-speed-bounces-damage-max_on_screen-cooldown-size*/
+	 * <br>if (type == bullet): -class-effect-speed-bounces-damage-max_on_screen-cooldown-size*/
 	public static Item parseItem(Player pl, String s)
 	{
 		if (s.contains("[") && s.contains("]"))
@@ -136,7 +136,7 @@ public abstract class Item implements IGameObject
 			/*for (FixedMenu m : ModAPI.menuGroup)
 			{
 				if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.items_used)) {
-					if (((Scoreboard) m).players.isEmpty())
+					if (!((Scoreboard) m).teamPoints.isEmpty())
 						((Scoreboard) m).addTeamScore(this.player.tank.team, 1);
 					else
 						((Scoreboard) m).addPlayerScore(this.player, 1);
@@ -226,9 +226,11 @@ public abstract class Item implements IGameObject
 		return null;
 	}
 
-	public void updateCooldown()
+	public void updateCooldown(double reload)
 	{
-		this.cooldown = Math.max(0, this.cooldown - Panel.frameFrequency);
+		Tank t = this.getUser();
+
+		this.cooldown = Math.max(0, this.cooldown - Panel.frameFrequency * reload);
 	}
 
 	public Item clone()
