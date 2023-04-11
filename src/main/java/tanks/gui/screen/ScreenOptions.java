@@ -43,7 +43,7 @@ public class ScreenOptions extends Screen
 	Button multiplayerOptions = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Multiplayer options", () -> Game.screen = new ScreenOptionsMultiplayer()
 	);
 
-	Button gameOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY, this.objWidth, this.objHeight, "Game options", () -> Game.screen = new ScreenOptionsGame()
+	Button miscOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Miscellaneous options", () -> Game.screen = new ScreenOptionsMisc()
 	);
 
 	Button graphicsOptions = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "Graphics options", () -> Game.screen = new ScreenOptionsGraphics()
@@ -62,8 +62,7 @@ public class ScreenOptions extends Screen
 
 	Button personalize = new Button(this.centerX, this.centerY - this.objYSpace * 2.4, this.objWidth * 1.5, this.objHeight * 2, "", () -> Game.screen = new ScreenOptionsPersonalize());
 
-	Button interfaceOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Interface options", () -> Game.screen = new ScreenOptionsInterface()
-	);
+	Button windowOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY, this.objWidth, this.objHeight, "Window options", () -> Game.screen = new ScreenOptionsWindow());
 
 	Button extensionOptions = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Extension options", () -> Game.screen = new ScreenOptionsExtensions());
 
@@ -71,8 +70,8 @@ public class ScreenOptions extends Screen
 	public void update()
 	{
 		soundOptions.update();
-		gameOptions.update();
-		interfaceOptions.update();
+		miscOptions.update();
+		windowOptions.update();
 
 		graphicsOptions.update();
 		inputOptions.update();
@@ -91,8 +90,8 @@ public class ScreenOptions extends Screen
 		multiplayerOptions.draw();
 		inputOptions.draw();
 		graphicsOptions.draw();
-		interfaceOptions.draw();
-		gameOptions.draw();
+		windowOptions.draw();
+		miscOptions.draw();
 		soundOptions.draw();
 		personalize.draw();
 
@@ -177,6 +176,7 @@ public class ScreenOptions extends Screen
 			f.println("max_fps=" + Game.maxFPS);
 			f.println("antialiasing=" + Game.antialiasing);
 			f.println("perspective=" + ScreenOptionsGraphics.viewNum);
+			f.println("bullet_indicator=" + Game.xrayBullets);
 			f.println("preview_crusades=" + Game.previewCrusades);
 			f.println("tank_textures=" + Game.tankTextures);
 			f.println("mouse_target=" + Panel.showMouseTarget);
@@ -377,6 +377,9 @@ public class ScreenOptions extends Screen
 								Game.followingCam = true;
 								Game.firstPerson = true;
 						}
+						break;
+					case "bullet_indicator":
+						Game.xrayBullets = Boolean.parseBoolean(optionLine[1]);
 						break;
 					case "tank_textures":
 						Game.tankTextures = Boolean.parseBoolean(optionLine[1]);

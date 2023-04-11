@@ -7,7 +7,7 @@ import tanks.gui.TextBoxSlider;
 
 public class ScreenOptionsShadows extends Screen
 {
-    public static final String shadowsText = "Fancy lighting: ";
+    public static final String shadowsText = "Shadows: ";
 
     Button shadows = new Button(this.centerX, this.centerY - this.objYSpace * 0.75, this.objWidth, this.objHeight, "", new Runnable()
     {
@@ -30,7 +30,7 @@ public class ScreenOptionsShadows extends Screen
         @Override
         public void run()
         {
-            if (shadowQuality.inputText.length() <= 0)
+            if (shadowQuality.inputText.length() == 0)
                 shadowQuality.inputText = shadowQuality.previousInputText;
 
             Game.shadowQuality = Integer.parseInt(shadowQuality.inputText);

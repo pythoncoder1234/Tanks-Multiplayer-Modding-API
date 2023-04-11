@@ -3,12 +3,14 @@ package tanks.gui.screen;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
-import tanks.gui.TextBox;
 
 public class ScreenOptionsSpeedrun extends Screen
 {
     public static final String deterministicText = "Deterministic: ";
     public static final String timerText = "Timer: ";
+
+    public static final String deterministic30 = "\u00A700010020025530 FPS";
+    public static final String deterministic60 = "\u00A700020000025560 FPS";
 
     Button timer = new Button(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "", new Runnable()
     {
@@ -30,10 +32,20 @@ public class ScreenOptionsSpeedrun extends Screen
         @Override
         public void run()
         {
-            Game.deterministicMode = !Game.deterministicMode;
+            if (Game.deterministic30Fps)
+            {
+                Game.deterministicMode = false;
+                Game.deterministic30Fps = false;
+            }
+            else if (Game.deterministicMode)
+                Game.deterministic30Fps = true;
+            else
+                Game.deterministicMode = true;
 
-            if (Game.deterministicMode)
-                deterministic.setText(deterministicText, ScreenOptions.onText);
+            if (Game.deterministicMode && Game.deterministic30Fps)
+                deterministic.setText(deterministicText, deterministic30);
+            else if (Game.deterministicMode)
+                deterministic.setText(deterministicText, deterministic60);
             else
                 deterministic.setText(deterministicText, ScreenOptions.offText);
         }
@@ -41,7 +53,7 @@ public class ScreenOptionsSpeedrun extends Screen
             "Deterministic mode changes the random number---generation to be fixed based on a seed, and---the game speed to be locked and independent---of framerate." +
                     "------This is useful for fair speedruns but may---provide for a less smooth experience.");
 
-    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptionsGame()
+    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptionsMisc()
     );
 
     public ScreenOptionsSpeedrun()
@@ -54,8 +66,10 @@ public class ScreenOptionsSpeedrun extends Screen
         else
             timer.setText(timerText, ScreenOptions.offText);
 
-        if (Game.deterministicMode)
-            deterministic.setText(deterministicText, ScreenOptions.onText);
+        if (Game.deterministicMode && Game.deterministic30Fps)
+            deterministic.setText(deterministicText, deterministic30);
+        else if (Game.deterministicMode)
+            deterministic.setText(deterministicText, deterministic60);
         else
             deterministic.setText(deterministicText, ScreenOptions.offText);
     }

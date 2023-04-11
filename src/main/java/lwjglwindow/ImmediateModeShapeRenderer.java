@@ -375,7 +375,7 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
         int sides = Math.max(4, (int) (radius / 4) + 5) / 2;
 
-        radius = Math.min(radius, sY / 2);
+        radius = Math.min(radius, Math.min(sX, sY) / 2);
 
         final double[] xs = {x + radius, x + sX - radius, x + sX - radius, x + radius};
         final double[] ys = {y + radius, y + radius, y + sY - radius, y + sY - radius};
@@ -730,9 +730,6 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
             return;
         }
 
-        x += width;
-        y += width;
-
         glBegin(GL_QUADS);
         glVertex2d(x, y);
         glVertex2d(x + sX - width, y);
@@ -758,7 +755,7 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
     public void drawRect(double x, double y, double sX, double sY, double width, double radius)
     {
-        if (radius < width / 6)
+        if (radius < Math.min(width / 6, Math.min(sX, sY) / 18))
         {
             drawRect(x, y, sX, sY, width);
             return;

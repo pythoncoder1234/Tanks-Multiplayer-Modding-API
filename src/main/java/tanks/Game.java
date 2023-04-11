@@ -145,6 +145,7 @@ public class Game
 	public static boolean enable3d = true;
 	public static boolean enable3dBg = true;
 	public static boolean angledView = false;
+	public static boolean xrayBullets = true;
 
 	public static boolean followingCam = false;
 	public static boolean firstPerson = false;

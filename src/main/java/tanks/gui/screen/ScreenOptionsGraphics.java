@@ -45,6 +45,11 @@ public class ScreenOptionsGraphics extends Screen
         else
             bulletTrails.setText(trailsText, ScreenOptions.offText);
 
+        if (Game.xrayBullets)
+            xrayBullets.setText("X-ray bullets: ", ScreenOptions.onText);
+        else
+            xrayBullets.setText("X-ray ullets: ", ScreenOptions.offText);
+
         if (Game.glowEnabled)
             glow.setText(glowText, ScreenOptions.onText);
         else
@@ -111,9 +116,9 @@ public class ScreenOptionsGraphics extends Screen
             Game.shadowsEnabled = false;
 
         if (!Game.shadowsEnabled)
-            shadows.setText("Fancy lighting: ", ScreenOptions.offText);
+            shadows.setText("Shadows: ", ScreenOptions.offText);
         else
-            shadows.setText("Fancy lighting: %s", (Object)("\u00A7000200000255" + Game.shadowQuality));
+            shadows.setText("Shadow quality: %s", (Object)("\u00A7000200000255" + Game.shadowQuality));
 
         if (!Game.effectsEnabled)
             effects.setText("Particle effects: ", ScreenOptions.offText);
@@ -319,7 +324,22 @@ public class ScreenOptionsGraphics extends Screen
     },
             "May fix flickering in thin edges---at the cost of performance------Requires restarting the game---to take effect");
 
-    Button previewCrusades = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
+    Button xrayBullets = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.xrayBullets = !Game.xrayBullets;
+
+            if (Game.xrayBullets)
+                xrayBullets.setText("X-ray bullets: ", ScreenOptions.onText);
+            else
+                xrayBullets.setText("X-ray bullets: ", ScreenOptions.offText);
+        }
+    },
+            "Shows indicators for bullets---hidden behind terrain");
+
+    Button previewCrusades = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -349,11 +369,9 @@ public class ScreenOptionsGraphics extends Screen
     },
             "Adds designs to the built-in tanks---which can help differentiate them");
 
-    Button window = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Window options", () -> Game.screen = new ScreenOptionsWindow());
-
     Button back = new Button(this.centerX, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptions());
 
-    Button shadows = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsShadows(), "Fancy lighting enables shadows and---allows for custom lighting in levels------Fancy lighting is quite graphically intense---and may significantly reduce framerate");
+    Button shadows = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsShadows(), "Shadows are quite graphically intense---and may significantly reduce framerate");
 
     Button effects = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsEffects(), "Particle effects may significantly---impact performance");
 
@@ -365,6 +383,7 @@ public class ScreenOptionsGraphics extends Screen
         glow.update();
         effects.update();
         tankTextures.update();
+        xrayBullets.update();
         previewCrusades.update();
 
         graphics3d.update();
@@ -372,11 +391,6 @@ public class ScreenOptionsGraphics extends Screen
         altPerspective.update();
         shadows.update();
         antialiasing.update();
-
-        if (Game.framework == Game.Framework.libgdx)
-            window.enabled = false;
-
-        window.update();
 
         back.update();
 
@@ -399,8 +413,6 @@ public class ScreenOptionsGraphics extends Screen
 
         back.draw();
 
-        window.draw();
-
         antialiasing.draw();
         shadows.draw();
         altPerspective.draw();
@@ -408,6 +420,7 @@ public class ScreenOptionsGraphics extends Screen
         graphics3d.draw();
 
         previewCrusades.draw();
+        xrayBullets.draw();
         tankTextures.draw();
         effects.draw();
         glow.draw();
