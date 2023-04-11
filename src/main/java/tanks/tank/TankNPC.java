@@ -88,6 +88,7 @@ public class TankNPC extends TankDummy implements ISyncable, IModdedTank
         this.shopItems = shop;
         this.tagName = tagName;
         this.showName = tagName != null && tagName.length() > 0;
+        this.emblem = null;
 
         if (this.showName)
             this.nameTag = new NameTag(this, 0, this.size / 7 * 5, this.size / 2, tagName, nameR, nameG, nameB);
@@ -104,6 +105,7 @@ public class TankNPC extends TankDummy implements ISyncable, IModdedTank
         this.collisionPush = false;
         this.mandatoryKill = false;
 
+        icon.emblem = null;
         icon.colorR = r;
         icon.colorG = g;
         icon.colorB = b;

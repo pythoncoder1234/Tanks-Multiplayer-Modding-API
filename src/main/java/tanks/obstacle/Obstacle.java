@@ -3,6 +3,7 @@ package tanks.obstacle;
 import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 
 public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IGameObject, IBatchRenderableObject
 {
@@ -203,9 +204,9 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 			return;
 		}
 
-		double sizeZ = (!this.enableStacking && (Game.screen instanceof ScreenGame)) ? 15 : this.stackHeight * Game.tile_size+1;
+		double sizeZ = (!this.enableStacking && (Game.screen instanceof ScreenGame || Game.screen instanceof ScreenLevelEditor)) ? 15 : this.stackHeight * Game.tile_size+1;
 
-		Drawing.drawing.setColor(r, g, b, a);
+		Drawing.drawing.setColor(r, g, b, a, 0.5);
 		Drawing.drawing.fillBox(this.posX, this.posY, this.startHeight * Game.tile_size,
 				Game.tile_size, Game.tile_size, sizeZ);
 	}
@@ -342,7 +343,11 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	public void setMetadata(String data)
 	{
 		String[] metadata = data.split("-");
+
 		this.stackHeight = Double.parseDouble(metadata[0]);
+
+		if (this.enableGroupID)
+			this.groupID = Integer.parseInt(metadata[0]);
 
 		if (metadata.length >= 2)
 			this.startHeight = Double.parseDouble(metadata[1]);

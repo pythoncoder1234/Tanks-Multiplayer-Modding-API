@@ -409,9 +409,7 @@ public class Level
 				int y = (int) (m.posY / Game.tile_size);
 
 				if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-				{
 					tankGrid[x][y] = true;
-				}
 			}
 		}
 
@@ -792,6 +790,15 @@ public class Level
 
 	public static boolean isDark()
 	{
-		return Level.currentColorR + Level.currentColorG + Level.currentColorB <= 127 * 3 || (Game.framework != Game.Framework.libgdx && currentLightIntensity <= 0.5);
+		return isDark(true);
+	}
+
+	public static boolean isDark(boolean forText)
+	{
+		double sum = Level.currentColorR + Level.currentColorVarR + Level.currentColorG + Level.currentColorVarG + Level.currentColorB + Level.currentColorVarB;
+		if (Game.framework == Game.Framework.lwjgl)
+			sum *= currentLightIntensity;
+
+		return sum <= (forText ? 90 : 75) * 3;
 	}
 }

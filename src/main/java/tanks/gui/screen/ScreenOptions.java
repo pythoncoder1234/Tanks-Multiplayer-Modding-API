@@ -5,6 +5,7 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
 import tanks.gui.Button;
+import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.tank.TankPlayerRemote;
 import tanks.translation.Translation;
@@ -103,9 +104,9 @@ public class ScreenOptions extends Screen
 
 		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Options");
 
-		if (Game.player.colorR + Game.player.colorG + Game.player.colorB >= 380 && Game.player.username.length() >= 1)
+		if (Game.player.colorR + Game.player.colorG + Game.player.colorB >= 220 * 3 && Game.player.username.length() >= 1)
 		{
-			Drawing.drawing.setColor(127, 127, 127);
+			Drawing.drawing.setColor(200, 200, 200);
 			double s = Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale;
 			Drawing.drawing.fillInterfaceRect(personalize.posX, personalize.posY + personalize.sizeY * 0.1, s, 40);
 			Drawing.drawing.fillInterfaceOval(personalize.posX - (s) / 2, personalize.posY + personalize.sizeY * 0.1, 40, 40);
@@ -203,6 +204,7 @@ public class ScreenOptions extends Screen
 			f.println("show_ip=" + Game.showIP);
 			f.println("chat_filter=" + Game.enableChatFilter);
 			f.println("auto_ready=" + Game.autoReady);
+			f.println("tps=" + Tank.updatesPerSecond);
 			f.println("anticheat=" + TankPlayerRemote.checkMotion);
 			f.println("anticheat_weak=" + TankPlayerRemote.weakTimeCheck);
 			f.println("disable_party_friendly_fire=" + Game.disablePartyFriendlyFire);
@@ -408,6 +410,9 @@ public class ScreenOptions extends Screen
 						break;
 					case "auto_ready":
 						Game.autoReady = Boolean.parseBoolean(optionLine[1]);
+						break;
+					case "tps":
+						Tank.updatesPerSecond = Integer.parseInt(optionLine[1]);
 						break;
 					case "anticheat":
 						TankPlayerRemote.checkMotion = Boolean.parseBoolean(optionLine[1]);

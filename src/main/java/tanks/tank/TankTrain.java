@@ -1,44 +1,75 @@
 package tanks.tank;
 
-import tanks.Drawing;
-import tanks.Game;
-import tanks.Movable;
+import tanks.*;
+import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.obstacle.Obstacle;
 import tanks.obstacle.ObstacleTrainTrack;
 
-public class TankTrain extends TankAIControlled
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashSet;
+
+public class TankTrain extends Tank implements IAvoidObject
 {
     public static final String[] descriptions = new String[] {"Chuga chuga chuga chuga choo choo!", "Choo Choo!", "*queue thomas the tank engine theme song*"};
-    public static final double searchDistSqd = Math.pow(50, 4);
+    public static final HashSet<TankProperty.Category> propertiesToCopy = new HashSet<>();
 
-    @TankProperty(category = TankProperty.Category.movementGeneral, id = "damage_on_collide", name = "Damage on Collide", desc = "Damage taken is calculated using the train velocity subtracted by the tank velocity")
-    public double damageOnCollide = 1.5;
+    static
+    {
+        propertiesToCopy.addAll(Arrays.asList(
+                TankProperty.Category.appearanceGeneral,
+                TankProperty.Category.appearanceEmblem,
+                TankProperty.Category.appearanceTurretBase,
+                TankProperty.Category.appearanceTurretBarrel,
+                TankProperty.Category.appearanceBody,
+                TankProperty.Category.appearanceTreads,
+                TankProperty.Category.appearanceGlow,
+                TankProperty.Category.appearanceTracks,
+                TankProperty.Category.movementGeneral
+        ));
+    }
 
+    public static final double searchDist = 200;
+
+    public float damageOnCollide = 1.5f;
     public boolean moving = true;
-    public boolean forwards;
+    public double collided = 0;
+    protected boolean firstFrame = true;
 
-    public int collided = 0;
+    public boolean turned = false;
+    public boolean rightTurn = false;
+    public int prevTurn = 0;
+    public double resultAngle = 0;
 
     public TankTrain(String name, double x, double y, double angle)
     {
-        super(name, x, y, 50, 185, 119, 14, angle, ShootAI.none);
+        super(name, x, y, 50, 185, 120, 14);
 
-        this.forwards = Math.toDegrees(angle) <= 315 && Math.toDegrees(angle) >= 45;
+        this.angle = angle;
         this.maxSpeed = 3.5;
         this.mandatoryKill = false;
+        this.enableTracks = false;
         this.mine.destroysObstacles = false;
         this.explodeOnDestroy = true;
-        this.enableBulletAvoidance = false;
-        this.enableMineAvoidance = false;
 
         this.description = descriptions[(int) (Math.random() * descriptions.length)];
+
+        if (Math.random() < 0.05)
+            this.description = "Breadloaf";
     }
 
     @Override
     public void draw()
     {
-        if (this.age <= 0)
+        super.draw();
+
+        if (firstFrame)
         {
+            firstFrame = false;
+
+            copyCustomTank();
+
             ObstacleTrainTrack o = getNearest();
             if (o == null)
                 return;
@@ -48,39 +79,143 @@ public class TankTrain extends TankAIControlled
             this.orientation = Math.toRadians(o.horizontal ? 180 : 90);
         }
 
-        super.draw();
+        if (Game.prevScreen != Game.screen && Game.screen instanceof ScreenGame)
+            copyCustomTank();
     }
 
     @Override
-    public void updateMotionAI()
+    public void update()
     {
-        ObstacleTrainTrack current = getCurrent();
+        super.update();
 
-        if (current != null && moving)
-        {
-            int a = forwards ? 1 : 0;
-            int b = forwards ? 2 : 3;
+        ObstacleTrainTrack current = getCurrentTrack();
+        moving = current != null;
 
-            if (current.connectedTo[a] != null)
-                this.setAccelerationInDirection(current.connectedTo[a].posX, current.connectedTo[a].posY, this.acceleration);
-            else if (current.connectedTo[b] != null)
-                this.setAccelerationInDirection(current.connectedTo[b].posX, current.connectedTo[b].posY, this.acceleration);
-        }
+        if (current == null || current.turn == 0 || current.turn != prevTurn)
+            turned = false;
 
         if (current == null)
+        {
+            this.setPolarMotion(this.angle, Math.max(0, this.getSpeed() - (this.friction * this.frictionModifier) * Panel.frameFrequency));
+            return;
+        }
+
+        prevTurn = current.turn;
+
+        if (turned)
+        {
+            double turn = (this.maxSpeed * Panel.frameFrequency) / 25;
+
+            if (rightTurn)
+                this.angle = Math.min(resultAngle, this.angle + turn);
+            else
+                this.angle = Math.max(resultAngle, this.angle - turn);
+        }
+        else
+            this.angle = Math.round(this.angle / (Math.PI / 2)) * (Math.PI / 2);
+
+        if (current.turn > 0 && !turned)
+        {
+            turned = true;
+            rightTurn = getTurnDir(current);
+            resultAngle = this.angle + (rightTurn ? 1 : -1) * (Math.PI / 2);
+        }
+
+        this.orientation = this.angle;
+        this.setPolarMotion(this.angle, Math.min(this.maxSpeed * this.maxSpeedModifier, this.getSpeed() + (this.acceleration * this.accelerationModifier) * Panel.frameFrequency));
+
+        if (current.turn == 0)
+        {
+            if (current.horizontal)
+                this.posY = current.posY;
+            else
+                this.posX = current.posX;
+        }
+
+        collided = Math.max(0, collided - Panel.frameFrequency);
+    }
+
+    public void copyCustomTank()
+    {
+        Level l;
+        if (Game.screen instanceof ScreenLevelEditor)
+            l = ((ScreenLevelEditor) Game.screen).level;
+        else if (Game.currentLevel != null)
+            l = Game.currentLevel;
+        else
             return;
 
-        if (current.horizontal)
-            this.posY = current.posY;
-        else
-            this.posX = current.posX;
+        TankAIControlled t = null;
+        for (TankAIControlled t1 : l.customTanks)
+        {
+            if (t1.description.startsWith("train"))
+            {
+                try
+                {
+                    String[] parts = t1.description.split("-");
+                    if (parts.length > 1 && !parts[1].equals("all") && (team == null || !parts[1].equals(team.name)))
+                        continue;
 
-        collided = Math.max(0, collided - 1);
+                    if (parts.length > 2 && parts[2].length() > 0)
+                    {
+                        this.showName = true;
+                        this.nameTag.name = parts[2].replaceAll("\\+\\+", "-");
+                    }
+
+                    if (parts.length > 5)
+                    {
+                        this.nameTag.colorR = Double.parseDouble(parts[3]);
+                        this.nameTag.colorG = Double.parseDouble(parts[4]);
+                        this.nameTag.colorB = Double.parseDouble(parts[5]);
+                    }
+
+                    t = t1;
+                    break;
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    t1.description = "Invalid format!";
+                }
+            }
+        }
+
+        if (t == null)
+            return;
+
+        try
+        {
+            for (Field f : this.getClass().getFields())
+            {
+                TankProperty p = f.getAnnotation(TankProperty.class);
+                if (p == null)
+                    continue;
+
+                if (!f.getName().equals("name") && propertiesToCopy.contains(p.category()))
+                    f.set(this, f.get(t));
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
     }
+
+    public float isDiagonal(ObstacleTrainTrack current)
+    {
+        int angle = (int) (this.angle / (Math.PI / 4) - 1);
+        int opposite = ObstacleTrainTrack.AnglePair.oppositeTurn(this, current);
+
+        return 0;
+    }
+
 
     @Override
     public void onCollidedWith(Tank t, double distSq)
     {
+        if (this.destroy)
+            return;
+
         if (collided == 0)
         {
             double relative = Math.sqrt(Math.pow((t.vX-this.vX), 2) + Math.pow((t.vY-this.vY), 2));
@@ -94,10 +229,10 @@ public class TankTrain extends TankAIControlled
         super.onCollidedWith(t, distSq);
     }
 
-    public ObstacleTrainTrack getCurrent()
+    public ObstacleTrainTrack getCurrentTrack()
     {
-        int x = (int) (this.posX / Game.tile_size);
-        int y = (int) (this.posY / Game.tile_size);
+        int x = (int) Math.round(this.posX / Game.tile_size - 0.5);
+        int y = (int) Math.round(this.posY / Game.tile_size - 0.5);
 
         if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
             return null;
@@ -119,7 +254,7 @@ public class TankTrain extends TankAIControlled
             if (o instanceof ObstacleTrainTrack)
             {
                 double dist = Movable.distanceBetween(o, this);
-                if (dist < nearest && dist < searchDistSqd)
+                if (dist < nearest && dist < searchDist)
                 {
                     nearest = dist;
                     nearestObs = (ObstacleTrainTrack) o;
@@ -128,5 +263,25 @@ public class TankTrain extends TankAIControlled
         }
 
         return nearestObs;
+    }
+
+    public boolean getTurnDir(ObstacleTrainTrack o)
+    {
+        if (o.turn == 4 || o.turn == 2)
+            return Math.abs(this.vX) > Math.abs(this.vY);
+        else
+            return Math.abs(this.vX) < Math.abs(this.vY);
+    }
+
+    @Override
+    public double getRadius()
+    {
+        return this.size * this.getSpeed();
+    }
+
+    @Override
+    public double getSeverity(double posX, double posY)
+    {
+        return 0;
     }
 }

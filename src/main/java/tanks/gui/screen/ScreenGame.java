@@ -334,7 +334,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		else if (ScreenInterlevel.fromMinigames)
 			Game.screen = new ScreenMinigames();
 		else if (ScreenInterlevel.fromSavedLevels || name != null)
-			Game.screen = new ScreenSavedLevels();
+			Game.screen = (ScreenPartyHost.isServer ? new ScreenPlaySavedLevels() : new ScreenSavedLevels());
 		else
 			Game.screen = new ScreenPlaySingleplayer();
 
@@ -610,7 +610,10 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 			for (Player p: Game.players)
 			{
-				p.hotbar.enabledItemBar = startingItems || shop || ItemBar.forceEnabled;
+				p.hotbar.enabledItemBar = startingItems || shop;
+				if (ItemBar.overrideState)
+					p.hotbar.enabledItemBar = ItemBar.enabled;
+
 				p.hotbar.enabledCoins = false;
 				p.hotbar.itemBar = new ItemBar(p);
 
@@ -904,7 +907,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 					Drawing.drawing.playSound(this.introMusic, 1f, true);
 				else if (Game.currentLevel != null && Game.currentLevel.timed)
 					Drawing.drawing.playSound("battle_timed_intro.ogg", 1f, true);
-				else if (Level.isDark())
+				else if (Level.isDark(false))
 					Drawing.drawing.playSound("battle_night_intro.ogg", 1f, true);
 				else
 					Drawing.drawing.playSound("battle_intro.ogg", 1f, true);
@@ -934,7 +937,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			{
 				if (this.paused || Game.playerTank == null || Game.playerTank.destroy)
 					this.music = "battle_paused.ogg";
-				else if (Level.isDark())
+				else if (Level.isDark(false))
 					this.music = "battle_night.ogg";
 				else
 					this.music = "battle.ogg";
@@ -1471,6 +1474,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 				m.update();
 
+				if (m instanceof IAvoidObject)
+					((IAvoidObject) m).updateAvoidance();
+
 				if (m instanceof Crate)
 					m = ((Crate) m).tank;
 
@@ -1503,6 +1509,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 			for (Obstacle o : Game.obstacles)
 			{
+				if (o instanceof IAvoidObject)
+					((IAvoidObject) o).updateAvoidance();
+
 				if (o.update)
 					o.update();
 			}
@@ -1738,7 +1747,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 									s = String.join(",", playersWon);
 
 								ScreenPartyHost.readyPlayers.clear();
-								Game.eventsOut.add(new EventLevelEndQuick(s));
+								Game.eventsOut.add(new EventLevelEnd(s));
 
 								if (Crusade.crusadeMode)
 								{
@@ -2019,7 +2028,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				}
 			}
 		}
-
 
 		this.setPerspective();
 
@@ -2525,7 +2533,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				posX -= 50;
 
 			Drawing.drawing.setInterfaceFontSize(24);
-			Drawing.drawing.drawInterfaceText(posX, posY, "Deterministic mode", true);
+
+			if (Game.deterministic30Fps)
+				Drawing.drawing.drawInterfaceText(posX, posY, "Deterministic mode (30 FPS)", true);
+			else
+				Drawing.drawing.drawInterfaceText(posX, posY, "Deterministic mode (60 FPS)", true);
 		}
 
 		if (Game.currentGame != null)

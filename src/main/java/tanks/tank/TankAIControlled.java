@@ -783,12 +783,19 @@ public class TankAIControlled extends Tank
 
 	public void updateTarget()
 	{
+		if (this.targetEnemy instanceof Mine)
+		{
+			if (this.targetEnemy.destroy)
+				this.seekPause -= ((Mine) this.targetEnemy).timer;
+			else if (Movable.distanceBetween(this, this.targetEnemy) < ((Mine) this.targetEnemy).radius * this.mineAvoidSensitivity)
+				return;
+		}
+
 		if (this.transformMimic)
 			if (this.updateTargetMimic())
 				return;
 
 		double nearestDist = Double.MAX_VALUE;
-		double nearestVisibleDist = nearestDist;
 		Movable nearest = null;
 		Movable nearestVisible = null;
 		this.hasTarget = false;
@@ -814,10 +821,7 @@ public class TankAIControlled extends Tank
 					nearestDist = dist;
 
 					if (reachable)
-					{
 						nearestVisible = m;
-						nearestVisibleDist = dist;
-					}
 				}
 			}
 		}
@@ -986,9 +990,7 @@ public class TankAIControlled extends Tank
 
 		Tank p = this;
 		if (this.getTopLevelPossessor() != null)
-		{
 			p = this.getTopLevelPossessor();
-		}
 
 		if (p instanceof TankAIControlled && ((TankAIControlled) p).transformMimic)
 		{
@@ -1224,7 +1226,7 @@ public class TankAIControlled extends Tank
 			{
 				this.mine.attemptUse(this);
 				this.seekTimer = this.seekTimerBase * 2;
-				this.seekPause = this.mine.timer;
+				this.seekPause += this.mine.timer;
 			}
 
 			this.path.removeFirst();
@@ -1622,11 +1624,11 @@ public class TankAIControlled extends Tank
 
 	public void checkAndShoot()
 	{
-		Movable m = null;
+		Movable m = this.targetEnemy;
 
 		boolean arc = BulletArc.class.isAssignableFrom(this.bullet.bulletClass);
 
-		if (this.targetEnemy != null && !arc)
+		if (this.targetEnemy != null && !(targetEnemy instanceof Mine) && !arc)
 		{
 			Ray r = new Ray(this.posX, this.posY, this.getAngleInDirection(this.targetEnemy.posX, this.targetEnemy.posY), 0, this);
 			r.moveOut(this.size / 10);
@@ -1886,21 +1888,7 @@ public class TankAIControlled extends Tank
 
 		if (!laidMine && mineFleeTimer <= 0)
 		{
-			ArrayList<IAvoidObject> avoidances = new ArrayList<>();
-
-			for (Movable m: Game.movables)
-			{
-				if (m instanceof IAvoidObject)
-					avoidances.add((IAvoidObject) m);
-			}
-
-			for (Obstacle o: Game.obstacles)
-			{
-				if (o instanceof IAvoidObject)
-					avoidances.add((IAvoidObject) o);
-			}
-
-			for (IAvoidObject o: avoidances)
+			for (IAvoidObject o: IAvoidObject.avoidances)
 			{
 				double distSq;
 
@@ -1909,7 +1897,8 @@ public class TankAIControlled extends Tank
 				else
 					distSq = Math.pow(((Obstacle) o).posX - this.posX, 2) + Math.pow(((Obstacle) o).posY - this.posY, 2);
 
-				if (distSq <= Math.pow(o.getRadius() * this.mineAvoidSensitivity, 2))
+				if (distSq <= Math.pow(o.getRadius() * this.mineAvoidSensitivity, 2) &&
+						!(o instanceof Movable && !this.team.friendlyFire && Team.isAllied(this, (Movable) o)))
 				{
 					double d = Math.sqrt(distSq);
 					nearestDist = d;
@@ -1920,6 +1909,8 @@ public class TankAIControlled extends Tank
 						nearest = o;
 					}
 				}
+				else if (o instanceof Mine && ((Mine) o).tank == this && !this.seesTargetEnemy)
+					this.targetEnemy = (Movable) o;
 			}
 		}
 

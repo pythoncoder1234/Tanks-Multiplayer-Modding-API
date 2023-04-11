@@ -860,11 +860,11 @@ public class Bullet extends Movable implements IDrawable
 	@Override
 	public void draw()
 	{
-		double glow = this.getAttributeValue(AttributeModifier.glow, 0.5);
+		double glow = this.getAttributeValue(AttributeModifier.glow, 0.3);
 
 		if (Game.glowEnabled)
 		{
-			Drawing.drawing.setColor(this.outlineColorR * glow * 2, this.outlineColorG * glow * 2, this.outlineColorB * glow * 2, 255, 1);
+			Drawing.drawing.setColor(this.outlineColorR * glow * 2, this.outlineColorG * glow * 2, this.outlineColorB * glow * 2, 255, 0.5);
 
 			double sizeMul = 1;
 			boolean shade = false;
@@ -932,7 +932,6 @@ public class Bullet extends Movable implements IDrawable
 				Drawing.drawing.fillOval(posX, posY, posZ + 1, (size + sizeModifier) * 0.6, (size + sizeModifier) * 0.6);
 			else
 				Drawing.drawing.fillOval(posX, posY, (size + sizeModifier) * 0.6, (size + sizeModifier) * 0.6);
-
 		}
 	}
 

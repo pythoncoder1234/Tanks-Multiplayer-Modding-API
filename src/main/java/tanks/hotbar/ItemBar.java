@@ -16,7 +16,8 @@ import tanks.network.event.EventSetItemBarSlot;
 
 public class ItemBar
 {
-	public static boolean forceEnabled = false;
+	public static boolean overrideState = false;
+	public static boolean enabled = false;
 
 	public static int size = 50; // The slot size.
 	public static int count_margin_right = 26; // Item number's distance from right.
@@ -67,6 +68,8 @@ public class ItemBar
 		for (Player p : Game.players)
 			p.hotbar.enabledItemBar = enabled;
 
+		ItemBar.overrideState = true;
+		ItemBar.enabled = enabled;
 		Game.eventsOut.add(new EventSetHotbar(enabled, -2));
 	}
 

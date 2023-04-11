@@ -71,15 +71,12 @@ public class EventTankUpdate extends PersonalEvent
 			{
 				TankRemote r = (TankRemote) t;
 				double iTime = Math.max(0.1, (time - r.lastUpdate) / 10.0);
-				double loopAround = Math.toRadians(180);
 
-				r.angleRate = this.angle - r.angle;
-
-				if (r.angleRate > loopAround)
-					r.angleRate -= Math.toRadians(360);
-
-				if (r.angleRate < -loopAround)
-					r.angleRate += Math.toRadians(360);
+				r.trueAngle = angle;
+				r.angleRate = angle - r.angle;
+				r.angleRate %= Math.PI * 2;
+				if (r.angleRate > Math.PI)
+					r.angleRate = r.angleRate - Math.PI * 2;
 
 				r.interpolatedOffX = this.posX - (t.posX - r.interpolatedOffX * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
 				r.interpolatedOffY = this.posY - (t.posY - r.interpolatedOffY * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);

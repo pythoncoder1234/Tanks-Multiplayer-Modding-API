@@ -37,7 +37,8 @@ public class EventSetHotbar extends PersonalEvent
         if (this.clientID != null)
             return;
 
-        ItemBar.forceEnabled = true;
+        ItemBar.overrideState = true;
+        ItemBar.enabled = this.itemBar;
         Game.player.hotbar.enabledItemBar = this.itemBar;
         Game.player.hotbar.enabledCoins = this.coins > -1;
 

@@ -402,7 +402,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
                     this.obstacleButtons.get(i).draw();
             }
 
-            if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+            if (!screenLevelEditor.mouseObstacle.isSurfaceTile && Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
             {
                 this.editStartingHeight.setText("Starting height: %.1f", screenLevelEditor.mouseObstacleStartHeight);
                 this.editStartingHeight.draw();

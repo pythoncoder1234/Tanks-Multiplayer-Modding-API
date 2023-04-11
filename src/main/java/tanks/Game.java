@@ -112,8 +112,8 @@ public class Game
 	public static double[][] tilesDepth = new double[28][18];
 
 	//Remember to change the version in android's build.gradle and ios's robovm.properties
-	public static final String version = "Tanks v1.5.0";
-	public static final String ModAPIVersion = "Mod API v1.1.2";
+	public static final String version = "Tanks v1.5.1";
+	public static final String ModAPIVersion = "Mod API v1.1.3";
 	public static final int network_protocol = 48;
 	public static boolean debug = false;
 	public static boolean traceAllRays = false;
@@ -298,7 +298,7 @@ public class Game
 		NetworkEventMap.register(EventPlayerChat.class);
 		NetworkEventMap.register(EventLoadLevel.class);
 		NetworkEventMap.register(EventEnterLevel.class);
-		NetworkEventMap.register(EventLevelEndQuick.class);
+		NetworkEventMap.register(EventLevelEnd.class);
 		NetworkEventMap.register(EventLevelEndQuick.class);
 		NetworkEventMap.register(EventReturnToLobby.class);
 		NetworkEventMap.register(EventBeginCrusade.class);
@@ -966,7 +966,7 @@ public class Game
 
 		Game.currentGame = null;
 		Game.eventListeners.clear();
-		ItemBar.forceEnabled = false;
+		ItemBar.overrideState = false;
 		ScreenInterlevel.fromMinigames = false;
 		SyncedFieldMap.mapIDs.clear();
 	}
@@ -1295,6 +1295,7 @@ public class Game
 
 	public static void silentCleanUp()
 	{
+		IAvoidObject.avoidances.clear();
 		obstacles.clear();
 		tracks.clear();
 		movables.clear();

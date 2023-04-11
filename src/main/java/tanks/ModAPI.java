@@ -56,6 +56,7 @@ public class ModAPI
         NetworkEventMap.register(EventChangeBackgroundColor.class);
         NetworkEventMap.register(EventChangeNPCMessage.class);
         NetworkEventMap.register(EventClearMenuGroup.class);
+        NetworkEventMap.register(EventClearMovables.class);
         NetworkEventMap.register(EventClearNPCShop.class);
         NetworkEventMap.register(EventCustomLevelEndCondition.class);
         NetworkEventMap.register(EventDisableMinimap.class);

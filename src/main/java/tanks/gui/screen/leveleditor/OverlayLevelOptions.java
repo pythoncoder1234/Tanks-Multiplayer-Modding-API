@@ -37,14 +37,10 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
             if (levelName.inputText.length() > 0 && !Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + input + ".tanks").exists())
             {
                 if (file.exists())
-                {
                     file.renameTo(Game.homedir + Game.levelDir + "/" + input + ".tanks");
-                }
 
                 while (file.exists())
-                {
                     file.delete();
-                }
 
                 screenLevelEditor.name = input + ".tanks";
 
@@ -55,11 +51,11 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
                 levelName.inputText =  screenLevelEditor.name.split("\\.")[0].replace("_", " ");
             }
 
-        }
-                ,  screenLevelEditor.name.split("\\.")[0].replace("_", " "));
+        },  screenLevelEditor.name.split("\\.")[0].replace("_", " "));
 
         levelName.maxChars = 18;
         levelName.enableCaps = true;
+        screenLevelEditor.optionsEdited = true;
 
         lightingOptions.enabled = Game.framework != Game.Framework.libgdx;
     }

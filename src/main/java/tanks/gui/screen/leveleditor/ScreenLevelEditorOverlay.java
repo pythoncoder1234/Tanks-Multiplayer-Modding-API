@@ -15,8 +15,6 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
 
     public ScreenLevelEditorOverlay(Screen previous, ScreenLevelEditor screenLevelEditor)
     {
-        this.allowClose = false;
-
         this.previous = previous;
         this.screenLevelEditor = screenLevelEditor;
 
@@ -66,6 +64,8 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
             screenLevelEditor.clickCooldown = 20;
             screenLevelEditor.paused = false;
         }
+
+        allowClose = screenLevelEditor.undoActions.isEmpty() && !screenLevelEditor.optionsEdited;
     }
 
     @Override

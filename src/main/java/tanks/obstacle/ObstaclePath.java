@@ -21,6 +21,8 @@ public class ObstaclePath extends Obstacle
         this.bulletCollision = false;
         this.checkForObjects = true;
         this.enableStacking = false;
+        this.isSurfaceTile = true;
+        this.enableGroupID = true;
 
         updateColor();
 
@@ -31,7 +33,7 @@ public class ObstaclePath extends Obstacle
     @Override
     public void onObjectEntryLocal(Movable m)
     {
-        if (Game.effectsEnabled && !ScreenGame.finished && m instanceof Tank)
+        if (this.groupID == 0 && Game.effectsEnabled && !ScreenGame.finished && m instanceof Tank)
         {
             double speed = Math.sqrt((Math.pow(m.vX, 2) + Math.pow(m.vY, 2)));
 
@@ -63,6 +65,8 @@ public class ObstaclePath extends Obstacle
     @Override
     public void draw()
     {
+        this.groupID %= 2;
+
         if (!redrawn)
             updateColor();
 
@@ -78,15 +82,23 @@ public class ObstaclePath extends Obstacle
     {
         double frac = Obstacle.draw_size / Game.tile_size;
 
-        if (frac < 1 || extra != 0)
+        if (this.groupID == 0)
         {
-            Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-            Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * frac + extra);
+            if (frac < 1 || extra != 0)
+            {
+                Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
+                Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * frac + extra);
+            }
+            else
+            {
+                Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
+                Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d + extra);
+            }
         }
-        else
+        else if (this.groupID == 1)
         {
-            Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
-            Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d + extra);
+            Drawing.drawing.setColor(50, 50, 50);
+            Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, 12 + extra, this.getOptionsByte(12 + extra));
         }
     }
 
@@ -106,11 +118,17 @@ public class ObstaclePath extends Obstacle
 
     public double getTileHeight()
     {
+        if (this.groupID >= 1)
+            return 10;
+
         return Game.tilesDepth[(int) (this.posX / 50)][(int) (this.posY / 50)];
     }
 
     public double getGroundHeight()
     {
+        if (this.groupID >= 1)
+            return 10;
+
         return Game.tilesDepth[(int) (this.posX / 50)][(int) (this.posY / 50)];
     }
 }

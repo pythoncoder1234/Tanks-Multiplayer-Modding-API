@@ -1,8 +1,13 @@
+
 package tanks.obstacle;
 
 import basewindow.Model;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.tank.TankTrain;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static tanks.Game.dirX;
 import static tanks.Game.dirY;
@@ -27,8 +32,8 @@ public class ObstacleTrainTrack extends Obstacle
 
         this.tankCollision = false;
         this.bulletCollision = false;
+        this.destructible = false;
         this.enableStacking = false;
-        this.isSurfaceTile = true;
 
         for (int i = 0; i < 5; i++)
         {
@@ -50,10 +55,10 @@ public class ObstacleTrainTrack extends Obstacle
         if (turn > 0)
         {
             Drawing.drawing.setColor(176, 111, 14);
-            Drawing.drawing.drawModel(turnTrackWood, this.posX, this.posY, 5, 50, 50, 40, Math.PI / 2 * (turn - 1));
+            Drawing.drawing.drawModel(turnTrackWood, this.posX, this.posY, 5 + startHeight * 50, 50, 50, 40, Math.PI / 2 * (turn - 1));
 
             Drawing.drawing.setColor(192, 192, 192);
-            Drawing.drawing.drawModel(turnTrackRail, this.posX, this.posY, 10, 50, 50, 50, Math.PI / 2 * (turn - 1));
+            Drawing.drawing.drawModel(turnTrackRail, this.posX, this.posY, 10 + startHeight * 50, 50, 50, 50, Math.PI / 2 * (turn - 1));
         }
         else if (!Game.enable3d)
         {
@@ -95,6 +100,7 @@ public class ObstacleTrainTrack extends Obstacle
         d = Game.fancyTerrain ? 5 : 0;
 
         Drawing.drawing.setColor(r, g, b);
+
         Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
 
         if (turn > 0)
@@ -104,13 +110,13 @@ public class ObstacleTrainTrack extends Obstacle
         double offY = this.horizontal ? 15 : 0;
 
         Drawing.drawing.setColor(192, 192, 192);
-        Drawing.drawing.fillBox(this, this.posX + offX, this.posY + offY, d, offY * 3 + 5, offX * 3 + 5, 10);
-        Drawing.drawing.fillBox(this, this.posX - offX, this.posY - offY, d, offY * 3 + 5, offX * 3 + 5, 10);
+        Drawing.drawing.fillBox(this, this.posX + offX, this.posY + offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
+        Drawing.drawing.fillBox(this, this.posX - offX, this.posY - offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
 
         for (int i = -1; i <= 1; i++)
         {
             Drawing.drawing.setColor(this.stackColorR[i + 1], this.stackColorG[i + 1], this.stackColorB[i + 1]);
-            Drawing.drawing.fillBox(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d, offX * 2.86 + 7, offY * 2.86 + 7, 6);
+            Drawing.drawing.fillBox(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d + startHeight * 50, offX * 2.86 + 7, offY * 2.86 + 7, 6);
         }
     }
     public void setOrientation()
@@ -126,13 +132,17 @@ public class ObstacleTrainTrack extends Obstacle
             if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY || !(Game.obstacleMap[x][y] instanceof ObstacleTrainTrack))
                 continue;
 
-            ObstacleTrainTrack o = ((ObstacleTrainTrack) Game.obstacleMap[x][y]);
-            setObstacleOrientation(o, dirX[i], dirY[i]);
+            setObstacleOrientation(((ObstacleTrainTrack) Game.obstacleMap[x][y]), dirX[i], dirY[i]);
         }
+
+        this.updateTurn();
     }
 
     public void setObstacleOrientation(ObstacleTrainTrack o, int dxi, int dyi)
     {
+        if (o.turn > 0 && o.connectedX() == 1 && o.connectedY() == 1)
+            return;
+
         if (dxi != 0)
         {
             if (o.connectedY() > 1)
@@ -146,8 +156,7 @@ public class ObstacleTrainTrack extends Obstacle
             this.connectedTo[2 - dxi] = o;
             o.connectedTo[2 + dxi] = this;
 
-            o.setTurn(dxi, true);
-            this.setTurn(-dxi, true);
+            o.updateTurn();
         }
         else
         {
@@ -162,60 +171,19 @@ public class ObstacleTrainTrack extends Obstacle
             this.connectedTo[1 + dyi] = o;
             o.connectedTo[1 - dyi] = this;
 
-            o.setTurn(dyi, false);
-            this.setTurn(-dyi, false);
+            o.updateTurn();
         }
     }
 
-    public void setTurn(int direction, boolean x)
+    public void updateTurn()
     {
-        int num;
+        this.turn = 0;
 
-        if (x)
-        {
-            if (this.connectedY() != 1)
-                return;
+        Integer i = AnglePair.get(this);
+        if (i == null)
+            return;
 
-            if (this.connectedTo[0] != null)
-            {
-                if (direction == -1)
-                    num = 4;
-                else
-                    num = 3;
-            }
-            else
-            {
-                if (direction == -1)
-                    num = 1;
-                else
-                    num = 2;
-            }
-        }
-        else
-        {
-            if (this.connectedX() != 1)
-                return;
-
-            if (this.connectedTo[1] != null)
-            {
-                if (direction == -1)
-                    num = 4;
-                else
-                    num = 1;
-            }
-            else
-            {
-                if (direction == -1)
-                    num = 2;
-                else
-                    num = 3;
-            }
-        }
-
-        if (this.connectedY() == 1)
-            this.turn = num;
-        else
-            this.turn = 0;
+        this.turn = i;
     }
 
     public int connectedX()
@@ -265,5 +233,91 @@ public class ObstacleTrainTrack extends Obstacle
         colorChanged = false;
 
         return super.colorChanged() || r;
+    }
+
+    @Override
+    public double getTileHeight()
+    {
+        return 0;
+    }
+
+    @Override
+    public double getGroundHeight()
+    {
+        return 12;
+    }
+
+
+    public static class AnglePair
+    {
+        private static final HashMap<AnglePair, Integer> pairs = new HashMap<>();
+        public int a, b;
+
+        static
+        {
+            pairs.put(new AnglePair(1, 2), 1);
+            pairs.put(new AnglePair(2, 3), 2);
+            pairs.put(new AnglePair(0, 3), 3);
+            pairs.put(new AnglePair(0, 1), 4);
+        }
+
+        private AnglePair(int a, int b)
+        {
+            this.a = a;
+            this.b = b;
+        }
+
+        public static int oppositeTurn(TankTrain t, ObstacleTrainTrack o)
+        {
+            int tankTurn = (int) Math.round(t.angle / (Math.PI / 2));
+
+            for (Map.Entry<AnglePair, Integer> e : pairs.entrySet())
+            {
+                if (e.getValue() == o.turn)
+                {
+                    AnglePair p = e.getKey();
+                    return tankTurn == p.a ? p.b : p.a;
+                }
+            }
+
+            return tankTurn;
+        }
+
+        public static Integer get(ObstacleTrainTrack o)
+        {
+            int a = -1, b = -1;
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (o.connectedTo[i] != null)
+                {
+                    if (a == -1)
+                        a = i;
+                    else if (b == -1)
+                        b = i;
+                    else
+                        break;
+                }
+            }
+
+            return pairs.get(new AnglePair(a, b));
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj instanceof AnglePair)
+            {
+                AnglePair p = ((AnglePair) obj);
+                return (a == p.a && b == p.b) || (a == p.b && b == p.a);
+            }
+
+            return super.equals(obj);
+        }
+
+        public int hashCode()
+        {
+            return a * b;
+        }
     }
 }

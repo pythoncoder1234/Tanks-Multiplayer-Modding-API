@@ -51,9 +51,6 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	public boolean depthTest = true;
 
-	public boolean collisionPush = true;
-	public boolean invulnerable = false;
-
 	public boolean disabled = false;
 	public boolean inControlOfMotion = true;
 	public boolean positionLock = false;
@@ -75,6 +72,9 @@ public abstract class Tank extends Movable implements ISolidObject
 	@TankProperty(category = general, id = "base_health", name = "Hitpoints", desc = "The default bullet does one hitpoint of damage")
 	public double baseHealth = 1;
 	public double health = 1;
+
+	@TankProperty(category = general, id = "invulnerable", name = "Invincible")
+	public boolean invulnerable = false;
 
 	@TankProperty(category = general, id = "targetable", name = "Should be targeted")
 	public boolean targetable = true;
@@ -117,7 +117,7 @@ public abstract class Tank extends Movable implements ISolidObject
 	public double colorB;
 
 	@TankProperty(category = appearanceGlow, id = "glow_intensity", name = "Aura intensity")
-	public double glowIntensity = 1;
+	public double glowIntensity = 0.8;
 	@TankProperty(category = appearanceGlow, id = "glow_size", name = "Aura size")
 	public double glowSize = 4;
 	@TankProperty(category = appearanceGlow, id = "light_intensity", name = "Light intensity")
@@ -125,7 +125,7 @@ public abstract class Tank extends Movable implements ISolidObject
 	@TankProperty(category = appearanceGlow, id = "light_size", name = "Light size")
 	public double lightSize = 0;
 	@TankProperty(category = appearanceGlow, id = "luminance", name = "Tank luminance", desc = "How bright the tank will be in dark lighting. At 0, the tank will be shaded like terrain by lighting. At 1, the tank will always be fully bright.")
-	public double luminance = 0.5;
+	public double luminance = 0.1;
 
 	/** Important: this option only is useful for the tank editor. Secondary color will be treated independently even if disabled. */
 	@TankProperty(category = appearanceTurretBarrel, id = "enable_color2", name = "Custom color", miscType = TankProperty.MiscType.color)
@@ -190,6 +190,10 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	public double hitboxSize = 0.95;
 
+	/** Used for custom tanks, see /music/tank for built-in tanks */
+	@TankProperty(category = general, id = "music", name = "Music tracks", miscType = TankProperty.MiscType.music)
+	public HashSet<String> musicTracks = new HashSet<>();
+
 	@TankProperty(category = general, id = "explode_on_destroy", name = "Explosive", desc="If set, the tank will explode when destroyed")
 	public boolean explodeOnDestroy = false;
 
@@ -197,9 +201,8 @@ public abstract class Tank extends Movable implements ISolidObject
 	@TankProperty(category = general, id = "mandatory_kill", name = "Must be destroyed", desc="Whether the tank needs to be destroyed to clear the level")
 	public boolean mandatoryKill = true;
 
-	/** Used for custom tanks, see /music/tank for built-in tanks */
-	@TankProperty(category = general, id = "music", name = "Music tracks", miscType = TankProperty.MiscType.music)
-	public HashSet<String> musicTracks = new HashSet<>();
+	@TankProperty(category = general, id = "collision", name = "Pushed during Collision")
+	public boolean collisionPush = true;
 
 	public boolean[][] hiddenPoints = new boolean[3][3];
 	public boolean hidden = false;
@@ -341,79 +344,68 @@ public abstract class Tank extends Movable implements ISolidObject
 			hasCollided = true;
 		}
 
-		double rect = Math.round(this.size / 25);
-		for (double x = -rect; x <= rect; x++)
+		for (Obstacle o : Game.obstacles)
 		{
-			for (double y = -rect; y <= rect; y++)
-			{
-				int ix = (int) Math.round(posX / 50 - 0.5 + x);
-				int iy = (int) Math.round(posY / 50 - 0.5 + y);
-
-				if (ix < 0 || ix >= Game.currentSizeX || iy < 0 || iy >= Game.currentSizeY)
-					continue;
-
-				Obstacle o = Game.obstacleMap[ix][iy];
-				if (o == null)
-					continue;
+			if (o == null)
+				continue;
 
 //				o.drawDot = true;
-				boolean bouncy = o.bouncy;
+			boolean bouncy = o.bouncy;
 
-				if ((!o.tankCollision && !o.checkForObjects) || o.startHeight > 1)
+			if ((!o.tankCollision && !o.checkForObjects) || o.startHeight > 1)
+				continue;
+
+			double horizontalDist = Math.abs(this.posX - o.posX);
+			double verticalDist = Math.abs(this.posY - o.posY);
+
+			double distX = this.posX - o.posX;
+			double distY = this.posY - o.posY;
+
+			double bound = this.size / 2 + Game.tile_size / 2;
+
+			if (horizontalDist < bound && verticalDist < bound)
+			{
+				if (o.checkForObjects)
+					o.onObjectEntry(this);
+
+				if (!o.tankCollision)
 					continue;
 
-				double horizontalDist = Math.abs(this.posX - o.posX);
-				double verticalDist = Math.abs(this.posY - o.posY);
-
-				double distX = this.posX - o.posX;
-				double distY = this.posY - o.posY;
-
-				double bound = this.size / 2 + Game.tile_size / 2;
-
-				if (horizontalDist < bound && verticalDist < bound)
+				if (!o.hasLeftNeighbor() && distX <= 0 && distX >= -bound && horizontalDist >= verticalDist)
 				{
-					if (o.checkForObjects)
-						o.onObjectEntry(this);
-
-					if (!o.tankCollision)
-						continue;
-
-					if (!o.hasLeftNeighbor() && distX <= 0 && distX >= -bound && horizontalDist >= verticalDist)
-					{
-						hasCollided = true;
-						if (bouncy)
-							this.vX = -this.vX;
-						else
-							this.vX = 0;
-						this.posX += horizontalDist - bound;
-					}
-					else if (!o.hasUpperNeighbor() && distY <= 0 && distY >= -bound && horizontalDist <= verticalDist)
-					{
-						hasCollided = true;
-						if (bouncy)
-							this.vY = -this.vY;
-						else
-							this.vY = 0;
-						this.posY += verticalDist - bound;
-					}
-					else if (!o.hasRightNeighbor() && distX >= 0 && distX <= bound && horizontalDist >= verticalDist)
-					{
-						hasCollided = true;
-						if (bouncy)
-							this.vX = -this.vX;
-						else
-							this.vX = 0;
-						this.posX -= horizontalDist - bound;
-					}
-					else if (!o.hasLowerNeighbor() && distY >= 0 && distY <= bound && horizontalDist <= verticalDist)
-					{
-						hasCollided = true;
-						if (bouncy)
-							this.vY = -this.vY;
-						else
-							this.vY = 0;
-						this.posY -= verticalDist - bound;
-					}
+					hasCollided = true;
+					if (bouncy)
+						this.vX = -this.vX;
+					else
+						this.vX = 0;
+					this.posX += horizontalDist - bound;
+				}
+				else if (!o.hasUpperNeighbor() && distY <= 0 && distY >= -bound && horizontalDist <= verticalDist)
+				{
+					hasCollided = true;
+					if (bouncy)
+						this.vY = -this.vY;
+					else
+						this.vY = 0;
+					this.posY += verticalDist - bound;
+				}
+				else if (!o.hasRightNeighbor() && distX >= 0 && distX <= bound && horizontalDist >= verticalDist)
+				{
+					hasCollided = true;
+					if (bouncy)
+						this.vX = -this.vX;
+					else
+						this.vX = 0;
+					this.posX -= horizontalDist - bound;
+				}
+				else if (!o.hasLowerNeighbor() && distY >= 0 && distY <= bound && horizontalDist <= verticalDist)
+				{
+					hasCollided = true;
+					if (bouncy)
+						this.vY = -this.vY;
+					else
+						this.vY = 0;
+					this.posY -= verticalDist - bound;
 				}
 			}
 		}

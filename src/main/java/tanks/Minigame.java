@@ -21,6 +21,9 @@ public abstract class Minigame
     /** Forcibly disable the minimap. Useful for games like hide and seek */
     public boolean forceDisableMinimap = false;
 
+    /** If enabled, will ask the client side to load up the minigame, not just the server. */
+    public boolean enableRemote = false;
+
     public boolean enableKillMessages = false;
     public boolean hideSpeedrunTimer = false;
 
@@ -46,7 +49,7 @@ public abstract class Minigame
         ModAPI.fixedMenus.clear();
         ScreenInterlevel.fromMinigames = true;
 
-        if (!ScreenPartyLobby.isClient)
+        if (!ScreenPartyLobby.isClient && enableRemote)
             Game.eventsOut.add(new EventMinigameStart(this.name));
 
         Game.screen.splitTiles = flashBackground;

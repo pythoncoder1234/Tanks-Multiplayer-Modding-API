@@ -7,7 +7,6 @@ import tanks.gui.Button;
 import tanks.gui.ButtonList;
 import tanks.gui.screen.*;
 import tanks.hotbar.item.Item;
-import tanks.network.event.INetworkEvent;
 import tanks.obstacle.Obstacle;
 import tanks.obstacle.ObstacleUnknown;
 import tanks.registry.RegistryObstacle;
@@ -47,6 +46,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	public int mouseObstacleGroup = 0;
 	public boolean paused = false;
 	public boolean objectMenu = false;
+	public boolean optionsEdited = false;
 
 	public double clickCooldown = 0;
 	public ArrayList<Team> teams = new ArrayList<>();
@@ -66,7 +66,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	public double selectX2;
 	public double selectY2;
 
-	public enum SymmetryType {none, flipHorizontal, flipVertical, flipBoth, flip8, rot180, rot90};
+	public enum SymmetryType {none, flipHorizontal, flipVertical, flipBoth, flip8, rot180, rot90}
 	public SymmetryType symmetryType = SymmetryType.none;
 	public double symmetryX1;
 	public double symmetryY1;
@@ -100,7 +100,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	public HashSet<String> tankMusics = new HashSet<>();
 
 	public ArrayList<Object> clipboard = new ArrayList<>();
-	public HashMap<Double, Obstacle>[][] grid = new HashMap[Game.currentSizeX][Game.currentSizeY];
+	public HashMap<Float, Obstacle>[][] grid = new HashMap[Game.currentSizeX][Game.currentSizeY];
 
 	public double fontBrightness = 0;
 
@@ -280,8 +280,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		this.music = "battle_editor.ogg";
 		this.musicID = "editor";
 
-		this.allowClose = false;
-
 		if (Game.game.window.touchscreen)
 			controlsSizeMultiplier = 1.0;
 
@@ -414,6 +412,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	@Override
 	public void update()
 	{
+		allowClose = this.undoActions.isEmpty() && !optionsEdited;
+
 		if (Level.isDark())
 			this.fontBrightness = 255;
 		else
@@ -1491,7 +1491,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 					if (!skip)
 					{
-						if (!mouseObstacle.isSurfaceTile && mouseObstacleStartHeight == 0 || currentPlaceable != Placeable.obstacle)
+						if ((!mouseObstacle.isSurfaceTile && mouseObstacleStartHeight == 0) || currentPlaceable != Placeable.obstacle)
 						{
 							Obstacle o = Game.obstacleMap[(int) (mx / 50)][(int) (my / 50)];
 							if (o != null)
@@ -1502,7 +1502,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 									{
 										if (o.tankCollision || mouseObstacle.tankCollision || o.getClass() == mouseObstacle.getClass())
 										{
-											if (mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight <= o.stackHeight + o.startHeight)
+											if (mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight < o.stackHeight + o.startHeight)
 												skip = true;
 										}
 									}
@@ -1526,7 +1526,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 									if (!validRight)
 									{
 										if (((o.tankCollision || mouseObstacle.tankCollision || o.getClass() == mouseObstacle.getClass()) &&
-												o.startHeight <= mouseObstacleStartHeight && mouseObstacleStartHeight <= o.stackHeight + o.startHeight) ||
+												(!mouseObstacle.isSurfaceTile || o.startHeight <= mouseObstacleStartHeight && mouseObstacleStartHeight <= o.stackHeight + o.startHeight)) ||
 												(mouseObstacle.isSurfaceTile && o.isSurfaceTile))
 											skip = true;
 									}
@@ -1744,7 +1744,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 	int endX, endY;
 
-	public void compress1D(int x, int y, double layer)
+	public void compress1D(int x, int y, float layer)
 	{
 		Obstacle compare = grid[x][y].get(layer);
 		compare.removed = true;
@@ -1840,9 +1840,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					grid[x][y] = new HashMap<>();
 
 				if (!o.enableGroupID)
-					grid[x][y].put(o.startHeight, o);
+					grid[x][y].put((float) o.startHeight, o);
 				else
-					grid[x][y].put((double) o.groupID, o);
+					grid[x][y].put((float) Math.pow(o.startHeight, o.groupID), o);
 			}
 		}
 
@@ -1853,7 +1853,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				if (this.grid[x][y] == null)
 					continue;
 
-				for (double layer: this.grid[x][y].keySet())
+				for (float layer: this.grid[x][y].keySet())
 				{
 					Obstacle o = this.grid[x][y].get(layer);
 
@@ -1861,10 +1861,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					if (o == null || o.removed)
 						continue;
 
-					if (!o.enableGroupID)
-						compress1D(x, y, o.startHeight);
-					else
-						compress1D(x, y, o.groupID);
+					compress1D(x, y, layer);
 
 					if (endX > 0)
 						level.append(x).append("...").append(endX-1).append("-").append(y);
@@ -2117,7 +2114,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		{
 			if (eraseMode && !selectMode && !changeCameraMode)
 			{
-				Drawing.drawing.setColor(255, 0, 0, 64);
+				Drawing.drawing.setColor(255, 0, 0, 64, 0.3);
 
 				if (Game.enable3d)
 				{
@@ -2131,7 +2128,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			}
 			else if (pasteMode && !changeCameraMode)
 			{
-				Drawing.drawing.setColor(255, 255, 255, 127);
+				Drawing.drawing.setColor(255, 255, 255, 127, 0.3);
 				Drawing.drawing.drawImage("icons/paste.png", mouseObstacle.posX, mouseObstacle.posY, Game.tile_size, Game.tile_size);
 
 				for (Object o: this.clipboard)
@@ -2139,7 +2136,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					if (o instanceof Obstacle)
 					{
 						Obstacle ob = (Obstacle) o;
-						Drawing.drawing.setColor(ob.colorR, ob.colorG, ob.colorB, 64);
+						Drawing.drawing.setColor(ob.colorR, ob.colorG, ob.colorB, 64, 0.5);
 						Drawing.drawing.fillRect(ob.posX + mouseTank.posX, ob.posY + mouseTank.posY, /*0,*/ Game.tile_size, Game.tile_size/*, ((Obstacle) o).stackHeight * Game.tile_size, (byte) 64*/);
 					}
 					else if (o instanceof Tank)
@@ -2185,7 +2182,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		}
 
 		double extra = Math.sin(System.currentTimeMillis() * Math.PI / 1000.0) * 25;
-		Drawing.drawing.setColor(230 + extra, 230 + extra, 230 + extra, 128);
+		Drawing.drawing.setColor(230 + extra, 230 + extra, 230 + extra, 128, 0.5);
 
 		if (selectedTiles != null)
 		{
@@ -2236,9 +2233,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		if ((selectMode || symmetrySelectMode) && !changeCameraMode && !pasteMode && !this.paused)
 		{
 			if (!selectInverted)
-				Drawing.drawing.setColor(255, 255, 255, 127);
+				Drawing.drawing.setColor(255, 255, 255, 127, 0.3);
 			else
-				Drawing.drawing.setColor(0, 0, 0, 127);
+				Drawing.drawing.setColor(0, 0, 0, 127, 0.3);
 
 			if (!selectHeld)
 			{
@@ -2466,16 +2463,13 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			playerCount += ScreenPartyHost.server.connections.size();
 
 		ArrayList<Integer> availablePlayerSpawns = new ArrayList<>();
-		ArrayList<INetworkEvent> playerEvents = new ArrayList<>();
 
 		for (int i = 0; i < playerCount; i++)
 		{
 			if (availablePlayerSpawns.size() == 0)
 			{
 				for (int j = 0; j < this.spawns.size(); j++)
-				{
 					availablePlayerSpawns.add(j);
-				}
 			}
 
 			int spawn = availablePlayerSpawns.remove((int) (Math.random() * availablePlayerSpawns.size()));
@@ -2500,11 +2494,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				tank.team = team;
 				Game.movables.add(tank);
 			}
-		}
-
-		for (INetworkEvent e: playerEvents)
-		{
-			e.execute();
 		}
 
 		for (int i = 0; i < Game.movables.size(); i++)

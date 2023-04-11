@@ -50,10 +50,15 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
 
     public double interpolatedOffX = 0;
     public double interpolatedOffY = 0;
+    public double angleRate = 0;
     public double interpolatedProgress = interpolationTime;
+
+    public boolean action1 = false;
+    public boolean action2 = false;
 
     public double interpolatedPosX = this.posX;
     public double interpolatedPosY = this.posY;
+    public double trueAngle = -1;
 
     public TankPlayerRemote(double x, double y, double angle, Player p)
     {
@@ -81,6 +86,12 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         this.bullet.updateCooldown(reload);
         this.mine.updateCooldown(reload);
 
+        if (action1 && !(Game.currentGame != null && !Game.currentGame.enableShooting) && !this.disabled)
+            this.shoot();
+
+        if (action2 && !(Game.currentGame != null && !Game.currentGame.enableLayingMines) && !this.disabled)
+            this.layMine();
+
         Hotbar h = this.player.hotbar;
         if (h.enabledItemBar)
         {
@@ -100,6 +111,8 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         this.recoil = false;
         this.dXSinceFrame = 0;
         this.dYSinceFrame = 0;
+
+        this.angle += angleRate / interpolationTime * Panel.frameFrequency;
 
         if (this.hasCollided)
         {
@@ -283,24 +296,28 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             this.interpolatedProgress = 0;
             this.interpolationTime = iTime;
 
+            this.action1 = action1;
+            this.action2 = action2;
+
+            this.angleRate = angle - this.angle;
+            this.angleRate %= Math.PI * 2;
+            if (this.angleRate > Math.PI)
+                this.angleRate = this.angleRate - Math.PI * 2;
+
+            this.angleRate /= 6;
+
             this.posX = x;
             this.posY = y;
             this.vX = vX;
             this.vY = vY;
-            this.angle = angle;
             this.mouseX = mX;
             this.mouseY = mY;
+            this.trueAngle = angle;
 
             this.lastPosX = x;
             this.lastPosY = y;
             this.lastVX = vX;
             this.lastVY = vY;
-
-            if (action1 && !(Game.currentGame != null && !Game.currentGame.enableShooting) && !this.disabled)
-                this.shoot();
-
-            if (action2 && !(Game.currentGame != null && !Game.currentGame.enableLayingMines) && !this.disabled)
-                this.layMine();
         }
     }
 
@@ -358,6 +375,9 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         if (Game.bulletLocked || this.destroy)
             return;
 
+        double prevAngle = this.angle;
+        this.angle = this.trueAngle;
+
         if (this.player.hotbar.enabledItemBar)
         {
             if (this.player.hotbar.itemBar.useItem(false))
@@ -365,6 +385,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         }
 
         this.bullet.attemptUse(this);
+        this.angle = prevAngle;
     }
 
     public void layMine()

@@ -68,7 +68,7 @@ public class Arcade extends Minigame
         //this.flashBackground = true;
         this.hideSpeedrunTimer = true;
         this.endCondition = EndCondition.neverEnd;
-        this.endCondition.winSound = "lose.ogg";
+        this.enableRemote = true;
     }
 
     public void start()

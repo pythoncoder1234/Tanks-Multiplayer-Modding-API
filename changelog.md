@@ -1,5 +1,24 @@
 Older Changelogs
 ---
+
+**Mod API v1.1.2**
+- Updated to Tanks 1.5.0
+- Removed ModLevel and renamed ModGame to Minigame
+- Fields can now be synced across the network, which means you can change it without sending an event. Read the JavaDoc on the `ISyncable` and `SyncedFieldMap` classes.
+- Added synced fields to the text and scoreboard. To use them, set their `syncEnabled` property to true.
+- Added animations! These can change the zoom, position, and opacity of text or shapes.
+- Scoreboards are now sorted, and their sorting can be customized.
+- `TextWithStyling`: Displays text with styling. All fields are synced.
+- `EndCondition`: Override to change the condition for teams or players to win.
+- `EndText`: Override to change the text shown on `ScreenInterlevel`
+- `EventListener`: Listens for network events, such as `EventShootBullet` for bullet firing.
+- `MusicState`: Changes the music that is currently being played on the current `Game.screen`.
+- `IModdedTank`: Implement to give the tank a custom creation network event.
+- Movables now have a `CustomPropertiesMap` in which you can store data in each movable.
+- Bug fixes and other minor improvements
+
+<br>
+
 **Mod API v1.1.1**
 - Mapmaking mode: Run with the `mapmaking` launch argument or enable the feature in debug menu!
 - Gives access to hidden obstacles:
@@ -15,6 +34,8 @@ Older Changelogs
 - Bug fixes and other minor improvements
 - `getSeverity()` in `IAvoidObject` now takes a `Tank` parameter (to fix, replace `posX` with `t.posX`)
 - `Game.tileDrawables` removed, you can use `Game.obstacleMap[x][y] != null` instead
+
+<br>
 
 **Mod API v1.1.1b**
 - Shift click `Block Height` in the level editor for something cool ;D

@@ -57,7 +57,12 @@ public class EventTankControllerUpdateS extends EventTankUpdate
 
                 r.interpolatedOffX = this.posX - (t.posX - r.interpolatedOffX * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
                 r.interpolatedOffY = this.posY - (t.posY - r.interpolatedOffY * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
-                r.angleRate = this.angle - (t.angle - r.angleRate * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
+
+                r.angleRate = angle - r.angle;
+                r.angleRate %= Math.PI * 2;
+                if (r.angleRate > Math.PI)
+                    r.angleRate = r.angleRate - Math.PI * 2;
+
                 r.interpolatedProgress = 0;
                 r.interpolationTime = iTime;
                 r.lastUpdate = time;
@@ -67,8 +72,6 @@ public class EventTankControllerUpdateS extends EventTankUpdate
             t.posY = this.posY;
             t.vX = this.vX;
             t.vY = this.vY;
-
-            t.angle = this.angle;
         }
     }
 }

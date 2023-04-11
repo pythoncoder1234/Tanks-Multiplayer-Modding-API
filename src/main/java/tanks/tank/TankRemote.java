@@ -24,6 +24,8 @@ public class TankRemote extends Tank
 	public double interpolatedPosX = this.posX;
 	public double interpolatedPosY = this.posY;
 
+	public double trueAngle = -1;
+
 	public TankRemote(String name, double x, double y, double angle, Team team, double size, double ts, double tl, double r, double g, double b, double lives, double baselives)
 	{
 		super(name, x, y, size, r, g, b);

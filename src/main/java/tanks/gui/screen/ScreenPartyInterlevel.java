@@ -75,11 +75,11 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
 
     Button quitHigherPos = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Back to party", () ->
     {
+        Game.reset();
         Game.resetTiles();
         Game.screen = ScreenPartyHost.activeScreen;
         ScreenGame.versus = false;
         ScreenInterlevel.fromSavedLevels = false;
-        ScreenInterlevel.fromMinigames = false;
     }
     );
 
@@ -131,8 +131,6 @@ public class ScreenPartyInterlevel extends Screen implements IDarkScreen
                 getFireworkArray().add(f);
             }
         }
-
-        Game.reset();
 
         save.posX = Drawing.drawing.interfaceSizeX - Drawing.drawing.interfaceScaleZoom * 40;
         save.posY = Drawing.drawing.interfaceSizeY - 50 - Drawing.drawing.interfaceScaleZoom * 40;

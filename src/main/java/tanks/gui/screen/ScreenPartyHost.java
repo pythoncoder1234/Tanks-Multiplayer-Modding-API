@@ -79,10 +79,7 @@ public class ScreenPartyHost extends Screen
     },
             "Fight battles in an order,---and see how long you can survive!");
 
-    Button minigames = new Button(this.centerX + 190, this.centerY - 70, this.objWidth, this.objHeight, "Minigames", () ->
-    {
-        Game.screen = new ScreenMinigames();
-    },
+    Button minigames = new Button(this.centerX + 190, this.centerY - 70, this.objWidth, this.objHeight, "Minigames", () -> Game.screen = new ScreenMinigames(),
             "Play Tanks in new ways!");
 
     Button myLevels = new Button(this.centerX + 190, this.centerY - 10, this.objWidth, this.objHeight, "My levels", () -> Game.screen = new ScreenPlaySavedLevels(),
