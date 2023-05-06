@@ -1,6 +1,7 @@
 package tanks.gui.screen;
 
 import basewindow.BaseFile;
+import basewindow.InputCodes;
 import tanks.*;
 import tanks.gui.Button;
 import tanks.gui.Selector;
@@ -27,6 +28,8 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
 
     public long musicStartTime;
     public double age;
+    public double finishedAge;
+    public boolean selectorAnimStarted = false;
     public boolean musicStarted = false;
 
     public long lastEntryTime = System.currentTimeMillis() + 500;
@@ -184,6 +187,8 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
             this.itemEntriesShown = this.items.size() + 1;
             this.miscEntriesShown = this.misc.size() + 1;
             this.wizardFinished = true;
+            this.selectorAnimStarted = true;
+            this.finishedAge = -9999;
 
             this.age = 12;
         }
@@ -222,7 +227,7 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
         changePlayer = new Selector(this.centerX + 200, 80, this.objWidth, this.objHeight, "Player", playerNames, () ->
         {
             Game.screen = new ScreenCrusadeStats(crusade, playerObjects[changePlayer.selectedOption], false);
-            ((ScreenCrusadeStats)Game.screen).view = view;
+            ((ScreenCrusadeStats) Game.screen).view = view;
         });
 
         changePlayer.selectedOption = us;
@@ -601,10 +606,10 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
         if (onlyRecord)
             Panel.darkness = Math.min(Panel.darkness + Panel.frameFrequency * 3, 191);
 
+        this.age += Panel.frameFrequency;
+
         if (!musicStarted && !onlyRecord)
         {
-            this.age += Panel.frameFrequency;
-
             if (this.age >= this.musicStartTime / 10.0)
             {
                 musicStarted = true;
@@ -884,12 +889,29 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
             bottomBarTimer = 0;
         }
 
+        if (wizardFinished && !selectorAnimStarted)
+        {
+            finishedAge = age;
+            selectorAnimStarted = true;
+        }
+
         Drawing.drawing.setColor(255, 255, 255);
+
+        if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_R) && Game.debug)
+        {
+            Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_R);
+            finishedAge = age;
+        }
 
         double offset = 0;
 
         if ((ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && wizardFinished)
-            offset = -200;
+        {
+            offset = (1 - Math.cos(Math.min((age - finishedAge) / 20, Math.PI))) / 2;
+            changePlayer.posX = Panel.windowWidth + this.objWidth / 2 + offset * (this.centerX - Panel.windowWidth - this.objWidth / 2 + 200);
+
+            offset *= -200;
+        }
 
         Drawing.drawing.setInterfaceFontSize(this.titleSize * 1.2);
 
@@ -919,9 +941,7 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
         }
 
         if ((ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && this.wizardFinished)
-        {
             changePlayer.draw();
-        }
 
         if (this.view == View.tanks)
         {
@@ -1548,7 +1568,7 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
             double l1 = levels_1;
             double l2 = levels_2;
             double l3 = levels_3;
-            double l4 = levels_4;
+            double l4 = levels_4 - 50;
 
             if (!respawns)
             {
@@ -1584,7 +1604,7 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
             {
                 double o2 = (1 - this.screen.recordDisplayFrac) * -50;
 
-                drawStatistic(this.getXOffset() + Game.screen.centerX + l2 + 52 + o2, this.yPos, SpeedrunTimer.getTime(this.bestTime) + "", 1 - bestTimeRank, 255, 255, 255, a * a2, 24, true);
+                drawStatistic(this.getXOffset() + Game.screen.centerX + l2 + 52 + o2, this.yPos, SpeedrunTimer.getTime(this.bestTime) + "", 1 - bestTimeRank, 255, 255, 255, a * a2, 24, false);
 
                 if (!screen.onlyRecord)
                 {
@@ -1612,9 +1632,7 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
             }
             else
             {
-                double o2 = (this.screen.recordDisplayFrac) * -50;
-
-                drawStatistic(this.getXOffset() + Game.screen.centerX + l2 + o2, this.yPos, this.level.attempts + "", 1 - triesRank, r, g, b, a * a2, 24);
+                drawStatistic(this.getXOffset() + Game.screen.centerX + l2, this.yPos, this.level.attempts > 0 ? this.level.attempts + "" : "-", 1 - triesRank, r, g, b, a * a2, 24);
 
                 if (respawns)
                 {
@@ -1624,13 +1642,13 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
                         Drawing.drawing.drawInterfaceText(this.getXOffset() + Game.screen.centerX + l3, this.yPos, "-", false);
                     }
                     else
-                        drawStatistic(this.getXOffset() + Game.screen.centerX + l3 + 52 + o2, this.yPos, SpeedrunTimer.getTime(this.level.bestTime), 1 - clearRank, r, g, b, a * a2, 24, true);
+                        drawStatistic(this.getXOffset() + Game.screen.centerX + l3 + 52, this.yPos, SpeedrunTimer.getTime(this.level.bestTime), 1 - clearRank, r, g, b, a * a2, 24, true);
                 }
             }
 
             if (!screen.onlyRecord)
             {
-                drawStatistic(this.getXOffset() + Game.screen.centerX + l4 + 52, this.yPos, SpeedrunTimer.getTime(this.level.totalTime), 1 - timeRank, 255, 255, 255, a, 24, true);
+                drawStatistic(this.getXOffset() + Game.screen.centerX + l4 + 52, this.yPos, this.level.totalTime > 0 ? SpeedrunTimer.getTime(this.level.totalTime) : "-", 1 - timeRank, 255, 255, 255, a, 24, false);
                 Drawing.drawing.setInterfaceFontSize(24);
             }
         }

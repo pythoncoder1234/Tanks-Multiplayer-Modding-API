@@ -10,14 +10,14 @@ import tanks.network.NetworkUtils;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class EventShowCrusadeStats extends PersonalEvent
+public class EventSendCrusadeStats extends PersonalEvent
 {
     public String name;
     public String levels;
     public String stats;
     public String crusade;
 
-    public EventShowCrusadeStats()
+    public EventSendCrusadeStats()
     {
         if (ScreenPartyLobby.isClient)
             return;
@@ -28,12 +28,9 @@ public class EventShowCrusadeStats extends PersonalEvent
         StringBuilder l = new StringBuilder();
 
         for (Crusade.LevelPerformance p: Crusade.currentCrusade.performances)
-        {
             l.append(p.toString()).append("\n");
-        }
 
         this.levels = l.toString();
-
 
         StringBuilder s = new StringBuilder();
 
@@ -63,9 +60,7 @@ public class EventShowCrusadeStats extends PersonalEvent
         String[] levels = this.levels.split("\n");
 
         for (String level: levels)
-        {
             Player.parseLevelPerformances(Crusade.currentCrusade.performances, level);
-        }
 
         String[] players = this.stats.split("\n");
 

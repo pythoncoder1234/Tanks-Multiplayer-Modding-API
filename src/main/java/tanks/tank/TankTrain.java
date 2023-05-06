@@ -12,7 +12,7 @@ import java.util.HashSet;
 
 public class TankTrain extends Tank implements IAvoidObject
 {
-    public static final String[] descriptions = new String[] {"Chuga chuga chuga chuga choo choo!", "Choo Choo!", "*queue thomas the tank engine theme song*"};
+    public static final String[] descriptions = new String[] {"Chuga chuga chuga chuga choo choo!", "Choo Choo!", "*queue thomas the tank engine theme song*", "To the nearest rail it goes!"};
     public static final HashSet<TankProperty.Category> propertiesToCopy = new HashSet<>();
 
     static

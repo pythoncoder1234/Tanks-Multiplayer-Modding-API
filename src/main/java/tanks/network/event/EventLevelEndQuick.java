@@ -5,16 +5,14 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
 import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenInterlevel;
 import tanks.network.NetworkUtils;
 
 public class EventLevelEndQuick extends PersonalEvent
 {
     public String winningTeams;
 
-    public EventLevelEndQuick()
-    {
-
-    }
+    public EventLevelEndQuick() {}
 
     public EventLevelEndQuick(String winners)
     {
@@ -32,13 +30,13 @@ public class EventLevelEndQuick extends PersonalEvent
         if (Game.listContains(Game.clientID.toString(), teams) || (Game.playerTank != null && Game.playerTank.team != null && Game.listContains(Game.playerTank.team.name, teams)))
         {
             Panel.win = true;
-            Panel.winlose = "Victory!";
+            ScreenInterlevel.title = "Victory!";
             Drawing.drawing.playSound("win.ogg", 1.0f, true);
         }
         else
         {
             Panel.win = false;
-            Panel.winlose = "You were destroyed!";
+            ScreenInterlevel.title = "You were destroyed!";
             Drawing.drawing.playSound("lose.ogg", 1.0f, true);
         }
 

@@ -44,9 +44,7 @@ public class Panel
 
 	public static boolean forceRefreshMusic;
 
-	public static String winlose = "";
 	public static boolean win = false;
-	public static boolean levelPassed = false;
 
 	public static double darkness = 0;
 
@@ -362,13 +360,18 @@ public class Panel
 
 		synchronized (Game.eventsIn)
 		{
-			for (int i = 0; i < Game.eventsIn.size(); i++)
+			try
 			{
-				if (!(Game.eventsIn.get(i) instanceof IOnlineServerEvent))
-					Game.eventsIn.get(i).execute();
+				for (int i = 0; i < Game.eventsIn.size(); i++)
+				{
+					if (!(Game.eventsIn.get(i) instanceof IOnlineServerEvent))
+						Game.eventsIn.get(i).execute();
+				}
 			}
-
-			Game.eventsIn.clear();
+			finally
+			{
+				Game.eventsIn.clear();
+			}
 		}
 
 		for (int i = 0; i < Game.game.heightGrid.length; i++)

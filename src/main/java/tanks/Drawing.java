@@ -1663,9 +1663,9 @@ public class Drawing
 		StringBuilder l = new StringBuilder();
 
 		boolean first = true;
-		for (String s : msg.split(" "))
+		for (String s : msg.split("[ |\n]"))
 		{
-			if (s.equals("\n"))
+			if (s.equals(""))
 			{
 				lines.add(l.toString());
 				l = new StringBuilder();

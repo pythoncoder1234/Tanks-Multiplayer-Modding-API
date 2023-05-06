@@ -661,8 +661,12 @@ public class TankAIControlled extends Tank
 		this.colorR = ((this.baseColorR + 255) / 2) * (1 - frac) + frac * this.baseColorR;
 		this.colorG = ((this.baseColorG + 255) / 2) * (1 - frac) + frac * this.baseColorG;
 		this.colorB = ((this.baseColorB + 255) / 2) * (1 - frac) + frac * this.baseColorB;
-		Game.eventsOut.add(new EventTankUpdateColor(this));
-		Game.eventsOut.add(new EventTankCharge(this.networkID, frac));
+
+		if (Tank.shouldUpdate)
+		{
+			Game.eventsOut.add(new EventTankUpdateColor(this));
+			Game.eventsOut.add(new EventTankCharge(this.networkID, frac));
+		}
 
 		if (Math.random() * this.lastCooldown * Game.effectMultiplier > cooldown && Game.effectsEnabled)
 		{

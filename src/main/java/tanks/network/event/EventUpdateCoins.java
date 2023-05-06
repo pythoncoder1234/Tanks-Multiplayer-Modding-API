@@ -41,8 +41,6 @@ public class EventUpdateCoins extends PersonalEvent
     public void execute()
     {
         if (this.clientID == null && this.playerID.equals(Game.clientID))
-        {
             Game.player.hotbar.coins = coins;
-        }
     }
 }

@@ -21,6 +21,7 @@ import java.util.Objects;
 
 public class ModAPI
 {
+    public static boolean sendEvents = true;
     public static ArrayList<FixedMenu> fixedMenus = new ArrayList<>();
     public static HashMap<Double, FixedMenu> ids = new HashMap<>();
     public static ArrayList<FixedMenu> removeMenus = new ArrayList<>();
@@ -48,7 +49,7 @@ public class ModAPI
 
         NetworkEventMap.register(EventAddCustomMovable.class);
         NetworkEventMap.register(EventAddCustomShape.class);
-        NetworkEventMap.register(EventAddTankNPC.class);
+        NetworkEventMap.register(EventCreateTankNPC.class);
         NetworkEventMap.register(EventAddNPCShopItem.class);
         NetworkEventMap.register(EventAddObstacle.class);
         NetworkEventMap.register(EventAddObstacleText.class);
@@ -83,7 +84,9 @@ public class ModAPI
 
         EventSkipCountdown e = new EventSkipCountdown();
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     /**
@@ -167,7 +170,9 @@ public class ModAPI
 
         EventSetLevelTimer e = new EventSetLevelTimer(seconds);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     public static void setScreenMusic(String music)
@@ -177,7 +182,9 @@ public class ModAPI
 
         EventSetMusic e = new EventSetMusic(music);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     public static void setScreenMusic(MusicState state)
@@ -187,7 +194,9 @@ public class ModAPI
 
         EventSetMusic e = new EventSetMusic(state);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     public static void sendChatMessage(String message)
@@ -197,7 +206,9 @@ public class ModAPI
 
         EventServerChat e = new EventServerChat(message);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     public static void sendChatMessage(String message, int colorR, int colorG, int colorB)
@@ -212,20 +223,26 @@ public class ModAPI
 
         EventServerChat e = new EventServerChat(message, r1, g1, b1, r2, g2, b2);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     public static void clearMenuGroup()
     {
         EventClearMenuGroup e = new EventClearMenuGroup();
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     public static void displayText(FixedText text)
     {
-        Game.eventsOut.add(new EventDisplayText(text));
         ModAPI.fixedMenus.add(text);
+
+        if (sendEvents)
+            Game.eventsOut.add(new EventDisplayText(text));
     }
 
 
@@ -285,7 +302,7 @@ public class ModAPI
     {
         Game.removeMovables.add(t);
 
-        for (int attemptNo = 0; attemptNo < 100; attemptNo++)
+        for (int attemptNo = 0; attemptNo < 10; attemptNo++)
         {
             int spawnIndex = (int) (Math.random() * Game.currentLevel.playerSpawnsX.size());
 
@@ -360,7 +377,9 @@ public class ModAPI
     {
         EventSetObstacle e = new EventSetObstacle(x, y, registryName, stackHeight, startHeight);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     /** Fills a rectangular area with obstacles. */
@@ -380,7 +399,9 @@ public class ModAPI
     {
         EventFillObstacle e = new EventFillObstacle(startX, startY, endX, endY, registryName, stackHeight, startHeight);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 
     /** Places a tree, centered on a specified tile.
@@ -422,7 +443,9 @@ public class ModAPI
     public static void addTextObstacle(double x, double y, String text, long duration)
     {
         EventAddObstacleText e = new EventAddObstacleText((int) (Math.random() * Integer.MAX_VALUE), text, x, y, Drawing.drawing.currentColorR, Drawing.drawing.currentColorG, Drawing.drawing.currentColorB, duration);
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
         e.execute();
     }
 
@@ -458,6 +481,8 @@ public class ModAPI
     {
         EventChangeBackgroundColor e = new EventChangeBackgroundColor(r, g, b, noiseR, noiseG, noiseB);
         e.execute();
-        Game.eventsOut.add(e);
+
+        if (sendEvents)
+            Game.eventsOut.add(e);
     }
 }

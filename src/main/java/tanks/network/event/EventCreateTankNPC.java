@@ -5,13 +5,13 @@ import tanks.Game;
 import tanks.tank.Tank;
 import tanks.tank.TankNPC;
 
-public class EventAddTankNPC extends EventTankCreate
+public class EventCreateTankNPC extends EventTankCreate
 {
     public TankNPC npc;
 
-    public EventAddTankNPC() {}
+    public EventCreateTankNPC() {}
 
-    public EventAddTankNPC(Tank t)
+    public EventCreateTankNPC(Tank t)
     {
         super(t);
         npc = ((TankNPC) t);

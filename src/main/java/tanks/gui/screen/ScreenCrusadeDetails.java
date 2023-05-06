@@ -146,10 +146,14 @@ public class ScreenCrusadeDetails extends Screen
         {
             if (!c.started)
             {
-                begin.posY -= this.objYSpace * 2;
+                begin.posY -= this.objYSpace;
+                if (!ScreenPartyHost.isServer)
+                    begin.posY -= this.objYSpace;
+
                 edit.posY -= this.objYSpace;
                 delete.posY -= this.objYSpace;
                 back.posY -= this.objYSpace;
+                back2.posY -= this.objYSpace;
             }
             else
                 sizeY += 2;

@@ -7,10 +7,7 @@ import tanks.hotbar.item.Item;
 import tanks.tank.Tank;
 import tanks.tank.Turret;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 public class Player
 {
@@ -144,6 +141,22 @@ public class Player
         }
 
         return null;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return this.clientID.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof Player))
+            return super.equals(obj);
+
+        Player p = ((Player) obj);
+        return Objects.equals(this.clientID, p.clientID);
     }
 
     public static void parseStringIntHashMap(HashMap<String, Integer> map, String str)

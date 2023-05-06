@@ -94,10 +94,7 @@ public abstract class Minigame
 
     public void loadInterlevelScreen()
     {
-        if (ScreenPartyHost.isServer)
-            Game.screen = new ScreenPartyInterlevel();
-        else
-            Game.screen = new ScreenInterlevel();
+        Game.screen = new ScreenInterlevel();
     }
 
     /**

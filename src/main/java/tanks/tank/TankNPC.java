@@ -27,12 +27,12 @@ import java.util.Objects;
 
 import static tanks.gui.screen.ScreenGame.shopOffset;
 
-public class TankNPC extends TankDummy implements ISyncable, IModdedTank
+public class TankNPC extends TankDummy implements ISyncable
 {
     public SyncedFieldMap map = new SyncedFieldMap();
 
     public static final String shopCommand = "/shop";
-    public static final InputBindingGroup select = new InputBindingGroup("viewNPC", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_E));
+    public static final InputBindingGroup select = new InputBindingGroup("view_npc", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_E));
 
     public String npcName;
     public MessageList messages = null;
@@ -49,7 +49,6 @@ public class TankNPC extends TankDummy implements ISyncable, IModdedTank
     public int messageNum = 0;
     public double counter = 0;
 
-    public final TankDummy icon = new TankDummy("icon", 200, 60, ModAPI.right);
     public NPCMessage messageDisplay;
 
     public TankNPC(String name, int x, int y, double angle, MessageList messageList, double r, double g, double b)
@@ -104,14 +103,6 @@ public class TankNPC extends TankDummy implements ISyncable, IModdedTank
         this.targetable = false;
         this.collisionPush = false;
         this.mandatoryKill = false;
-
-        icon.emblem = null;
-        icon.colorR = r;
-        icon.colorG = g;
-        icon.colorB = b;
-        icon.secondaryColorR = Turret.calculateSecondaryColor(this.colorR);
-        icon.secondaryColorG = Turret.calculateSecondaryColor(this.colorG);
-        icon.secondaryColorB = Turret.calculateSecondaryColor(this.colorB);
 
         this.messageDisplay = new NPCMessage(this);
     }
@@ -331,15 +322,15 @@ public class TankNPC extends TankDummy implements ISyncable, IModdedTank
     }
 
     @Override
-    public void addFieldsToSync()
+    public void sendCreateEvent()
     {
-        map.putAll("colorR", "colorG", "colorB");
+        Game.eventsOut.add(new EventCreateTankNPC(this));
     }
 
     @Override
-    public Class<? extends EventTankCreate> getCreateEvent()
+    public void addFieldsToSync()
     {
-        return EventAddTankNPC.class;
+        map.putAll("colorR", "colorG", "colorB");
     }
 
     public static class MessageList

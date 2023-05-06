@@ -1,6 +1,16 @@
 Older Changelogs
 ---
 
+**Mod API v1.1.3**
+- Updated to Tanks 1.5.1
+- Added an option to fix the number of network events tanks send every second
+- `ItemBar.setEnabled`: sets the state of the item bar for all players.
+- Added the `enableRemote` variable into `Minigame` to determine whether the client side should launch the minigame as well.
+- Tanks now shoot their mines
+- Fixed multiple multiplayer bugs
+
+<br>
+
 **Mod API v1.1.2**
 - Updated to Tanks 1.5.0
 - Removed ModLevel and renamed ModGame to Minigame

@@ -31,7 +31,12 @@ public class NPCMessage extends FixedMenu
         Drawing.drawing.setColor(175, 96, 26, 200);
         Drawing.drawing.drawInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY * 0.2, Math.max(1300, Game.game.window.absoluteWidth * 0.8), Drawing.drawing.interfaceSizeY / 3, 10);
 
-        tank.icon.drawForInterface(Math.min(150, (Drawing.drawing.interfaceSizeX - Game.game.window.absoluteWidth) / 2 + 300), Drawing.drawing.interfaceSizeY * 0.125, 1.75);
+        double prevAngle = tank.angle;
+        tank.angle = 0;
+        tank.orientation = 0;
+        tank.drawForInterface(Math.min(150, (Drawing.drawing.interfaceSizeX - Game.game.window.absoluteWidth) / 2 + 300), Drawing.drawing.interfaceSizeY * 0.125, 1.75);
+        tank.angle = prevAngle;
+        tank.orientation = prevAngle;
 
         Drawing.drawing.setFontSize(24);
         Drawing.drawing.setColor(255, 255, 255);

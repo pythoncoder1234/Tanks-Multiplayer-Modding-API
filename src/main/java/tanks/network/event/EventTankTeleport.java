@@ -96,9 +96,7 @@ public class EventTankTeleport extends PersonalEvent
 			Obstacle o = Game.obstacles.get(i);
 
 			if (o instanceof ObstacleTeleporter && ((o.posX == this.iX && o.posY == this.iY) || (o.posX == this.dX && o.posY == this.dY)))
-			{
-				((ObstacleTeleporter)o).cooldown = 500;
-			}
+				((ObstacleTeleporter) o).cooldown = 400 + ObstacleTeleporter.exitCooldown;
 		}
 	}
 

@@ -41,8 +41,6 @@ public class EventUpdateRemainingLives extends PersonalEvent
     public void execute()
     {
         if (clientID == null && playerID.equals(Game.clientID))
-        {
             Game.player.remainingLives = lives;
-        }
     }
 }

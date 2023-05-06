@@ -9,6 +9,7 @@ import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemMine;
+import tanks.network.event.EventCreateTank;
 import tanks.network.event.EventTankAddAttributeModifier;
 import tanks.network.event.EventTankUpdate;
 import tanks.network.event.EventTankUpdateHealth;
@@ -125,7 +126,7 @@ public abstract class Tank extends Movable implements ISolidObject
 	@TankProperty(category = appearanceGlow, id = "light_size", name = "Light size")
 	public double lightSize = 0;
 	@TankProperty(category = appearanceGlow, id = "luminance", name = "Tank luminance", desc = "How bright the tank will be in dark lighting. At 0, the tank will be shaded like terrain by lighting. At 1, the tank will always be fully bright.")
-	public double luminance = 0.1;
+	public double luminance = 0.5;
 
 	/** Important: this option only is useful for the tank editor. Secondary color will be treated independently even if disabled. */
 	@TankProperty(category = appearanceTurretBarrel, id = "enable_color2", name = "Custom color", miscType = TankProperty.MiscType.color)
@@ -603,7 +604,7 @@ public abstract class Tank extends Movable implements ISolidObject
 		}
 
 		if (!this.isRemote && this.standardUpdateEvent && shouldUpdate && ScreenPartyHost.isServer)
-			Game.eventsOut.add(new EventTankUpdate(this));
+			sendUpdateEvent();
 
 		this.canHide = true;
 		for (int i = 0; i < this.canHidePoints.length; i++)
@@ -1100,7 +1101,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		for (Movable m: Game.movables)
 		{
-			if (m instanceof Tank && !Team.isAllied(m, this) && m != this && !((Tank) m).hidden && !m.destroy)
+			if (m instanceof TankAIControlled && !((TankAIControlled) m).isSupportTank() && !Team.isAllied(m, this) && m != this && !((Tank) m).hidden && !m.destroy)
 			{
 				double boundedX = Math.min(Math.max(this.posX, Drawing.drawing.interfaceSizeX * 0.4),
 						Game.currentSizeX * Game.tile_size - Drawing.drawing.interfaceSizeX * 0.4);
@@ -1135,6 +1136,18 @@ public abstract class Tank extends Movable implements ISolidObject
 		}
 
 		return Math.max(nearest, farthestInSight);
+	}
+
+	/** Override this method if both the server and clients support a custom creation event for your modded tank. */
+	public void sendCreateEvent()
+	{
+		Game.eventsOut.add(new EventCreateTank(this));
+	}
+
+	/** Override this method if both the server and clients support a custom update event for your modded tank. */
+	public void sendUpdateEvent()
+	{
+		Game.eventsOut.add(new EventTankUpdate(this));
 	}
 
 	public double getAutoZoom()

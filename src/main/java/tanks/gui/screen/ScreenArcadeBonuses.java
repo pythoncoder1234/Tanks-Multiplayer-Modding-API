@@ -7,10 +7,12 @@ import tanks.Panel;
 import tanks.gui.Firework;
 import tanks.minigames.Arcade;
 import tanks.network.event.EventArcadeBonuses;
-import tanks.tank.Tank;
 import tanks.translation.Translation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class ScreenArcadeBonuses extends Screen implements IDarkScreen
 {
@@ -268,13 +270,10 @@ public class ScreenArcadeBonuses extends Screen implements IDarkScreen
 
         if (age >= firstBonusTime + interBonusTime * 5 && this.getFireworkArray().size() == 0)
         {
-            Panel.winlose = Translation.translate("You scored %d points!", score);
+            ScreenInterlevel.title = Translation.translate("You scored %d points!", score);
             Panel.win = true;
 
-            if (ScreenPartyHost.isServer || ScreenPartyLobby.isClient)
-                Game.screen = new ScreenPartyInterlevel();
-            else
-                Game.screen = new ScreenInterlevel();
+            Game.screen = new ScreenInterlevel();
         }
     }
 

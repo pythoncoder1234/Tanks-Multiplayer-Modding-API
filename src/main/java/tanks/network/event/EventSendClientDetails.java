@@ -148,7 +148,7 @@ public class EventSendClientDetails extends PersonalEvent implements IServerThre
 		s.sendEvent(new EventAnnounceConnection(new ConnectedPlayer(Game.clientID, Game.player.username), true));
 
 		if (Crusade.currentCrusade != null)
-			s.sendEvent(new EventBeginCrusade());
+			s.sendEvent(new EventBeginCrusade(Crusade.currentCrusade));
 
 		Game.eventsIn.add(new EventPlaySound("join.ogg", 1.0f, 1.0f));
 		

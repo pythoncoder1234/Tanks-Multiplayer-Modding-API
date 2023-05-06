@@ -1,11 +1,11 @@
 package tanks;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public abstract class EndCondition
 {
-    public ArrayList<Team> aliveTeams;
-    public ArrayList<Team> fullyAliveTeams;
+    public HashSet<Team> aliveTeams;
+    public HashSet<Team> fullyAliveTeams;
     public String winSound = "win.ogg";
     public String loseSound = "lose.ogg";
 
@@ -26,7 +26,7 @@ public abstract class EndCondition
             if (aliveTeams == null || aliveTeams.isEmpty())
                 return false;
 
-            return aliveTeams.get(0).name.equals(p.clientID.toString());
+            return aliveTeams.iterator().next().name.equals(p.clientID.toString());
         }
     };
 

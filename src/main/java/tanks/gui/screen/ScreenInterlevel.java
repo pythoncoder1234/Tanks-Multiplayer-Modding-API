@@ -16,6 +16,9 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 	public static boolean fromSavedLevels = false;
 	public static boolean fromMinigames = false;
 	public static boolean tutorial = false;
+	
+	public static String title = "You're not supposed to see this. If you see this, good for you.";
+	public static String subtitle = null;
 
 	public boolean showCrusadeResultsNow = false;
 
@@ -31,6 +34,14 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		Level level = new Level(Game.currentLevelString);
 		level.loadLevel();
 		Game.screen = new ScreenGame();
+	}
+	);
+
+	Button next = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "Continue", () ->
+	{
+		Game.resetTiles();
+		Game.screen = new ScreenPartyLobby();
+		ScreenGame.versus = false;
 	}
 	);
 
@@ -136,14 +147,23 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 	}
 	);
 
-	Button quit = new Button(this.centerX, this.centerY + this.objYSpace * 1, this.objWidth, this.objHeight, "Quit to title", Game::exitToTitle
-	);
+	Button quit = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, ScreenPartyHost.isServer ? "Quit to party" : "Quit to title", () ->
+	{
+		if (ScreenPartyHost.isServer)
+		{
+			Game.reset();
+			Game.cleanUp();
+			Game.screen = ScreenPartyHost.activeScreen;
+		}
+		else
+			Game.exitToTitle();
+	});
 
 	Button back = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Back to my levels", () ->
 	{
 		Game.cleanUp();
 		System.gc();
-		Game.screen = new ScreenPlaySavedLevels();
+		Game.screen = ScreenPartyHost.isServer ? new ScreenPlaySavedLevels() : new ScreenSavedLevels();
 		fromSavedLevels = false;
 	}
 	);
@@ -190,12 +210,81 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 			Crusade.currentCrusade.replay = false;
 		}
 
-		Crusade.currentCrusade.crusadePlayers.get(Game.player).saveCrusade();
-		Crusade.crusadeMode = false;
-		Crusade.currentCrusade = null;
-		Game.exitToTitle();
+		if (ScreenPartyHost.isServer)
+		{
+			Crusade.currentCrusade.quit();
+			Game.reset();
+			Game.cleanUp();
+			Game.screen = ScreenPartyHost.activeScreen;
+		}
+		else
+		{
+			Crusade.currentCrusade.crusadePlayers.get(Game.player).saveCrusade();
+			Crusade.crusadeMode = false;
+			Crusade.currentCrusade = null;
+			Game.exitToTitle();
+		}
 	}
 			, "Your crusade progress will be saved.");
+
+	public ScreenInterlevel()
+	{
+		if (Game.followingCam)
+			Game.game.window.setCursorPos(Panel.windowWidth / 2, Panel.windowHeight / 2);
+
+		Game.player.hotbar.percentHidden = 100;
+
+		save.image = "icons/save.png";
+
+		save.imageSizeX = this.objHeight;
+		save.imageSizeY = this.objHeight;
+
+		if (ScreenPartyHost.isServer || ScreenPartyLobby.isClient)
+			save.posY -= this.objYSpace * 2;
+
+		this.musicID = "interlevel";
+
+		if (Panel.win)
+		{
+			//Drawing.drawing.playSound("win.ogg");
+			this.music = "win_music.ogg";
+
+			if (Crusade.crusadeMode && Crusade.currentCrusade.win)
+				this.music = "win_crusade.ogg";
+
+			if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks)
+			{
+				this.nextLevel.posY += this.objYSpace / 2;
+				this.quitCrusade.posY -= this.objYSpace / 2;
+			}
+		}
+		else
+		{
+			//Drawing.drawing.playSound("lose.ogg");
+			this.music = "lose_music.ogg";
+
+			if (!(Crusade.crusadeMode && Crusade.currentCrusade.replay))
+				quitCrusade.posY -= this.objYSpace / 2;
+
+			//if (Crusade.crusadeMode && Crusade.currentCrusade.lose)
+			//	this.music = "lose_crusade.ogg";
+		}
+
+		if (Panel.win && Game.effectsEnabled)
+		{
+			for (int i = 0; i < 5; i++)
+			{
+				Firework f = new Firework(Firework.FireworkType.rocket, (Math.random() * 0.6 + 0.2) * Drawing.drawing.interfaceSizeX, Drawing.drawing.interfaceSizeY, getFireworkArray());
+				f.setRandomColor();
+				f.setVelocity();
+				getFireworkArray().add(f);
+			}
+		}
+
+		if (Crusade.crusadeMode)
+			if (Crusade.currentCrusade.lose || Crusade.currentCrusade.win)
+				this.allowClose = false;
+	}
 
 	@Override
 	public void update()
@@ -208,7 +297,16 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		if (showCrusadeResultsNow)
 			this.quitCrusadeEnd.function.run();
 
-		if (tutorialInitial)
+		if (ScreenPartyLobby.isClient)
+		{
+			if (!skip)
+				next.update();
+			else
+				quitCrusadeEnd.update();
+
+			skip = true;
+		}
+		else if (tutorialInitial)
 		{
 			skip = true;
 			if (Panel.win)
@@ -271,73 +369,6 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		}
 	}
 
-	public ScreenInterlevel()
-	{
-		if (Game.followingCam)
-			Game.game.window.setCursorPos(Panel.windowWidth / 2, Panel.windowHeight / 2);
-
-		Game.player.hotbar.percentHidden = 100;
-
-		save.image = "icons/save.png";
-
-		save.imageSizeX = this.objHeight;
-		save.imageSizeY = this.objHeight;
-
-		if (Crusade.crusadeMode)
-			Crusade.currentCrusade.levelFinished(Panel.win);
-
-		this.musicID = "interlevel";
-
-		if (Panel.win)
-		{
-			//Drawing.drawing.playSound("win.ogg");
-			this.music = "win_music.ogg";
-
-			if (Crusade.crusadeMode && Crusade.currentCrusade.win)
-				this.music = "win_crusade.ogg";
-
-			if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks)
-			{
-				this.nextLevel.posY += this.objYSpace / 2;
-				this.quitCrusade.posY -= this.objYSpace / 2;
-			}
-		}
-		else
-		{
-			//Drawing.drawing.playSound("lose.ogg");
-			this.music = "lose_music.ogg";
-
-			if (!(Crusade.crusadeMode && Crusade.currentCrusade.replay))
-				quitCrusade.posY -= this.objYSpace / 2;
-
-			//if (Crusade.crusadeMode && Crusade.currentCrusade.lose)
-			//	this.music = "lose_crusade.ogg";
-		}
-
-		if (Panel.win && Game.effectsEnabled)
-		{
-			for (int i = 0; i < 5; i++)
-			{
-				Firework f = new Firework(Firework.FireworkType.rocket, (Math.random() * 0.6 + 0.2) * Drawing.drawing.interfaceSizeX, Drawing.drawing.interfaceSizeY, getFireworkArray());
-				f.setRandomColor();
-				f.setVelocity();
-				getFireworkArray().add(f);
-			}
-		}
-
-		if (Crusade.crusadeMode)
-			if (Crusade.currentCrusade.lose || Crusade.currentCrusade.win)
-				this.allowClose = false;
-	}
-
-	@Override
-	public void onAttemptClose()
-	{
-		if (Crusade.crusadeMode)
-			if (Crusade.currentCrusade.lose || Crusade.currentCrusade.win)
-				this.showCrusadeResultsNow = true;
-	}
-
 	@Override
 	public void draw()
 	{
@@ -361,16 +392,12 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 			}
 
 			for (int i = 0; i < getFireworkArray().size(); i++)
-			{
 				fireworks.get(i).drawUpdate(fireworks, getOtherFireworkArray());
-			}
 
 			if (Game.glowEnabled)
 			{
 				for (int i = 0; i < getFireworkArray().size(); i++)
-				{
 					fireworks.get(i).drawGlow();
-				}
 			}
 
 			//A fix to some glitchiness on ios
@@ -381,12 +408,18 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 			odd = !odd;
 		}
 
-		boolean skip = false;
-		if (Crusade.crusadeMode)
-			if (Crusade.currentCrusade.lose || Crusade.currentCrusade.win)
-				skip = true;
+		boolean skip = Crusade.crusadeMode && (Crusade.currentCrusade.lose || Crusade.currentCrusade.win);
 
-		if (tutorialInitial)
+		if (ScreenPartyLobby.isClient)
+		{
+			if (!skip)
+				next.draw();
+			else
+				quitCrusadeEnd.draw();
+
+			skip = true;
+		}
+		else if (tutorialInitial)
 		{
 			skip = true;
 			if (Panel.win)
@@ -451,7 +484,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		if (Game.showSpeedrunTimer)
 			SpeedrunTimer.draw();
 
-		if ((Panel.win && Game.effectsEnabled) || Level.isDark())
+		if ((Panel.win && Game.effectsEnabled) || Level.isDark(true))
 			Drawing.drawing.setColor(255, 255, 255);
 		else
 			Drawing.drawing.setColor(0, 0, 0);
@@ -463,7 +496,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 			if (Panel.win)
 				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace, "Congratulations! You are now ready to play!");
 			else
-				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace, Panel.winlose);
+				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace, title);
 		}
 		else if (Crusade.crusadeMode)
 		{
@@ -472,12 +505,15 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 			else if (Crusade.currentCrusade.lose)
 				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 19 / 6, "Game over!");
 			else
-				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 19 / 6, Panel.winlose);
+				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 19 / 6, title);
 		}
 		else
-				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, Panel.winlose);
+			Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, title);
 
 		Drawing.drawing.setInterfaceFontSize(this.textSize);
+
+		if (subtitle != null && subtitle.length() > 0)
+			Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace, subtitle);
 
 		if (Crusade.crusadeMode)
 		{
@@ -490,12 +526,20 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 				if (Drawing.drawing.interfaceScaleZoom > 1)
 					frac = 23.0 / 6;
 
-				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * frac, "You gained a life for clearing Battle %d!", (Crusade.currentCrusade.currentLevel + 1));
+				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * frac, "You gained a life for clearing Battle %d!", (Crusade.currentCrusade.currentLevel + (!ScreenPartyLobby.isClient ? 1 : 0)));
 			}
 		}
 
 		if (Panel.win && Game.effectsEnabled)
 			Panel.darkness = Math.min(Panel.darkness + Panel.frameFrequency * 1.5, 191);
+	}
+
+	@Override
+	public void onAttemptClose()
+	{
+		if (Crusade.crusadeMode)
+			if (Crusade.currentCrusade.lose || Crusade.currentCrusade.win)
+				this.showCrusadeResultsNow = true;
 	}
 
 	public ArrayList<Firework> getFireworkArray()

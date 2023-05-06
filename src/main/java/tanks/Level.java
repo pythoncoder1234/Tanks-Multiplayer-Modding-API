@@ -795,7 +795,8 @@ public class Level
 
 	public static boolean isDark(boolean forText)
 	{
-		double sum = Level.currentColorR + Level.currentColorVarR + Level.currentColorG + Level.currentColorVarG + Level.currentColorB + Level.currentColorVarB;
+		double sum = Level.currentColorR + Level.currentColorVarR / 2 + Level.currentColorG + Level.currentColorVarG / 2
+				+ Level.currentColorB + Level.currentColorVarB / 2;
 		if (Game.framework == Game.Framework.lwjgl)
 			sum *= currentLightIntensity;
 

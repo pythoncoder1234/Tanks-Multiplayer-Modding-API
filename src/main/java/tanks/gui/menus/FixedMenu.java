@@ -93,6 +93,12 @@ public abstract class FixedMenu implements ISyncable, IDrawable
         }
     }
 
+    public void addFieldsToSync()
+    {
+        if (syncEnabled)
+            map.putAllSupportedFields();
+    }
+
     public void update()
     {
         if (age <= 0 && syncEnabled)

@@ -34,8 +34,6 @@ public class EventArcadeEnd extends PersonalEvent
     public void execute()
     {
         if (clientID == null && Game.currentGame instanceof Arcade)
-        {
             ((Arcade) Game.currentGame).survivedFrenzy = win;
-        }
     }
 }

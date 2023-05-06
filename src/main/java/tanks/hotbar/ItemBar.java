@@ -226,13 +226,13 @@ public class ItemBar
 			}
 		}
 
-		if (Game.game.window.validScrollUp)
+		if (Game.game.window.validScrollUp && !ScreenGame.fcZoomPressed)
 		{
 			this.setItem(((this.selected - 1) + this.slots.length) % this.slots.length);
 			Game.game.window.validScrollUp = false;
 		}
 
-		if (Game.game.window.validScrollDown)
+		if (Game.game.window.validScrollDown && !ScreenGame.fcZoomPressed)
 		{
 			this.setItem(((this.selected + 1) + this.slots.length) % this.slots.length);
 			Game.game.window.validScrollDown = false;

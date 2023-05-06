@@ -22,20 +22,21 @@ To create a custom game or level, the source code is needed.
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?cid=1E1C6A69D73A57B9&resid=1E1C6A69D73A57B9%21137&authkey=ADdTf1tNjapWfT8).
+You can download the JAR file [here](https://onedrive.live.com/download?cid=1E1C6A69D73A57B9&resid=1E1C6A69D73A57B9%21156&authkey=AJK5DlKvt3PfOJc).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
 New Features:
 ---
 
-**Mod API v1.1.3**
-- Updated to Tanks 1.5.1
-- Added an option to fix the number of network events tanks send every second
-- `ItemBar.setEnabled`: sets the state of the item bar for all players.
-- Added the `enableRemote` variable into `Minigame` to determine whether the client side should launch the minigame as well.
-- Tanks now shoot their mines
-- Fixed multiple multiplayer bugs
+**Mod API v1.1.4**:
+- Revamped multiplayer crusades
+- Fixed multiplayer crusade bugs
+- Lowered third person turning sensitivity
+- Added zoom controls to first and third person (press c and scroll)
+- :train:
+- Added two methods to `Tank`s: `sendCreateEvent()` and `sendUpdateEvent()`.
+- Removed `IModdedTank`
 
 
 [Older Changelogs](changelog.md)

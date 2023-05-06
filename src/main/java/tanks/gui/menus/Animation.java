@@ -186,6 +186,7 @@ public abstract class Animation
         public void init(FixedMenu menu)
         {
             super.init(menu);
+            this.changeTo = menu.styling.colorA;
         }
 
         public Properties apply(Properties p)

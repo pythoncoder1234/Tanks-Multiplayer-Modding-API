@@ -4,9 +4,12 @@ import basewindow.InputCodes;
 import tanks.Game;
 import tanks.Minigame;
 import tanks.ModAPI;
+import tanks.Movable;
 import tanks.gui.menus.FixedText;
 import tanks.gui.menus.Scoreboard;
 import tanks.hotbar.item.Item;
+import tanks.tank.TankMedic;
+import tanks.tank.TankModels;
 import tanks.tank.TankNPC;
 
 public class TeamDeathmatch extends Minigame
@@ -15,7 +18,7 @@ public class TeamDeathmatch extends Minigame
     public static final String[] items = new String[] {
         "Sniper Rifle,bullet_fire_trail.png,5,0,1,100,bullet,normal,fire_and_smoke,12.0,1,1.0,3,50.0,10.0,1.0,false,0.0,1,30.0",
         "Shield,shield.png,20,0,1,100,shield,1.0,5.0,100.0",
-        "Mega bullet,bullet_large.png,3,0,2,20,bullet,normal,trail,4.25,3,1.0,5,100.0,25.0,4.0,true,0.0,1,30.0"
+        "Mega bullet,bullet_large.png,3,0,2,20,bullet,normal,trail,3.25,3,1.0,5,100.0,25.0,4.0,true,0.0,1,30.0"
     };
 
     public Scoreboard scoreboard;
@@ -40,6 +43,18 @@ public class TeamDeathmatch extends Minigame
         scoreboard.title.fontSize = 22;
         shopNPC = new TankNPC("npc", 42, 13, Math.PI / 2, new TankNPC.MessageList("Use this shop at your own risk!", TankNPC.shopCommand), "Shop", 0, 255, 0);
         shopNPC.shopItems.addAll(Game.currentLevel.shop);
+
+        for (Movable m : Game.movables)
+        {
+            if (m instanceof TankMedic)
+            {
+                TankMedic t = (TankMedic) m;
+                t.health = 2;
+                t.baseHealth = 2;
+                t.baseModel = TankModels.fixed.base;
+                t.colorModel = TankModels.fixed.color;
+            }
+        }
 
         for (String s : items)
             shopNPC.shopItems.add(Item.parseItem(null, s));

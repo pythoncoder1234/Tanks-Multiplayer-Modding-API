@@ -12,6 +12,9 @@ import java.util.ArrayList;
  */
 public class ObstacleTeleporter extends Obstacle
 {
+	/** The teleporter cooldown time after a tank exits it. */
+	public static int exitCooldown = 100;
+
 	public double cooldown;
 	public double brightness = 1;
 
@@ -144,9 +147,7 @@ public class ObstacleTeleporter extends Obstacle
 						{
 							Obstacle o = Game.obstacles.get(j);
 							if (o instanceof ObstacleTeleporter && o != this && o.groupID == this.groupID && ((ObstacleTeleporter) o).cooldown <= 0)
-							{
 								teleporters.add((ObstacleTeleporter) o);
-							}
 						}
 					}
 				}
@@ -159,8 +160,8 @@ public class ObstacleTeleporter extends Obstacle
 				int i = (int) (Math.random() * teleporters.size());
 
 				ObstacleTeleporter o = teleporters.get(i);
-				o.cooldown = 500;
-				this.cooldown = 500;
+				o.cooldown = 400 + ObstacleTeleporter.exitCooldown;
+				this.cooldown = 400 + ObstacleTeleporter.exitCooldown;
 				Game.movables.add(new TeleporterOrb(t.posX, t.posY, this.posX, this.posY, o.posX, o.posY, t));
 			}
 		}

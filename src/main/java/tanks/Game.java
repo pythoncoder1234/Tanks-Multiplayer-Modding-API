@@ -25,8 +25,8 @@ import tanks.hotbar.item.ItemMine;
 import tanks.hotbar.item.ItemShield;
 import tanks.minigames.Arcade;
 import tanks.network.*;
-import tanks.network.event.*;
 import tanks.network.event.EventSetMusic;
+import tanks.network.event.*;
 import tanks.network.event.online.*;
 import tanks.obstacle.*;
 import tanks.registry.*;
@@ -37,7 +37,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class Game
@@ -113,7 +112,7 @@ public class Game
 
 	//Remember to change the version in android's build.gradle and ios's robovm.properties
 	public static final String version = "Tanks v1.5.1";
-	public static final String ModAPIVersion = "Mod API v1.1.3";
+	public static final String ModAPIVersion = "Mod API v1.1.4";
 	public static final int network_protocol = 48;
 	public static boolean debug = false;
 	public static boolean traceAllRays = false;
@@ -125,7 +124,7 @@ public class Game
 	public static final boolean cinematic = false;
 	public static boolean recordMode = false;
 
-	public static String lastVersion = "Tanks v0";
+	public static String lastVersion = Game.version;
 
 	public static int port = 8080;
 
@@ -296,6 +295,7 @@ public class Game
 		NetworkEventMap.register(EventAnnounceConnection.class);
 		NetworkEventMap.register(EventSyncField.class);
 		NetworkEventMap.register(EventChat.class);
+		NetworkEventMap.register(EventCreateTank.class);
 		NetworkEventMap.register(EventPlayerChat.class);
 		NetworkEventMap.register(EventLoadLevel.class);
 		NetworkEventMap.register(EventEnterLevel.class);
@@ -303,8 +303,7 @@ public class Game
 		NetworkEventMap.register(EventLevelEndQuick.class);
 		NetworkEventMap.register(EventReturnToLobby.class);
 		NetworkEventMap.register(EventBeginCrusade.class);
-		NetworkEventMap.register(EventReturnToCrusade.class);
-		NetworkEventMap.register(EventShowCrusadeStats.class);
+		NetworkEventMap.register(EventSendCrusadeStats.class);
 		NetworkEventMap.register(EventLoadCrusadeHotbar.class);
 		NetworkEventMap.register(EventSetupHotbar.class);
 		NetworkEventMap.register(EventAddShopItem.class);
@@ -314,6 +313,7 @@ public class Game
 		NetworkEventMap.register(EventSetItemBarSlot.class);
 		NetworkEventMap.register(EventLoadItemBarSlot.class);
 		NetworkEventMap.register(EventUpdateCoins.class);
+		NetworkEventMap.register(EventUpdateLevelTime.class);
 		NetworkEventMap.register(EventPlayerReady.class);
 		NetworkEventMap.register(EventPlayerAutoReady.class);
 		NetworkEventMap.register(EventPlayerAutoReadyConfirm.class);
@@ -506,7 +506,7 @@ public class Game
 		registerObstacle(ObstacleHill.class, "hill", true);
 		registerObstacle(ObstaclePath.class, "path", true);
 		registerObstacle(ObstacleMud.class, "mud");
-//		registerObstacle(ObstacleTrainTrack.class, "track", true);
+		registerObstacle(ObstacleTrainTrack.class, "track");
 		registerObstacle(ObstacleWater.class, "water", true);
 		registerObstacle(ObstacleSand.class, "sand", true);
 		registerObstacle(ObstacleIce.class, "ice");
@@ -541,7 +541,7 @@ public class Game
 		registerTank(TankSalmon.class, "salmon", 1.0 / 10);
 		registerTank(TankLightPink.class, "lightpink", 1.0 / 10);
 		registerTank(TankBoss.class, "boss", 1.0 / 40, true);
-//		registerTank(TankTrain.class, "train", 0, true);
+		registerTank(TankTrain.class, "train", 0, true);
 
 		registerBullet(Bullet.class, Bullet.bullet_name, "bullet_normal.png");
 		registerBullet(BulletFlame.class, BulletFlame.bullet_name, "bullet_flame.png");
@@ -587,45 +587,31 @@ public class Game
 
 		BaseFile extensionRegistryFile = game.fileManager.getFile(homedir + extensionRegistryPath);
 		if (!extensionRegistryFile.exists())
-		{
 			extensionRegistry.initRegistry();
-		}
 
 		BaseFile levelsFile = game.fileManager.getFile(homedir + levelDir);
 		if (!levelsFile.exists())
-		{
 			levelsFile.mkdirs();
-		}
 
 		BaseFile crusadesFile = game.fileManager.getFile(homedir + crusadeDir);
 		if (!crusadesFile.exists())
-		{
 			crusadesFile.mkdirs();
-		}
 
 		BaseFile savedCrusadesProgressFile = game.fileManager.getFile(homedir + savedCrusadePath + "/internal");
 		if (!savedCrusadesProgressFile.exists())
-		{
 			savedCrusadesProgressFile.mkdirs();
-		}
 
 		BaseFile itemsFile = game.fileManager.getFile(homedir + itemDir);
 		if (!itemsFile.exists())
-		{
 			itemsFile.mkdirs();
-		}
 
 		BaseFile tanksFile = game.fileManager.getFile(homedir + tankDir);
 		if (!tanksFile.exists())
-		{
 			tanksFile.mkdirs();
-		}
 
 		BaseFile extensionsFile = game.fileManager.getFile(homedir + extensionDir);
 		if (!extensionsFile.exists())
-		{
 			extensionsFile.mkdirs();
-		}
 
 		BaseFile uuidFile = game.fileManager.getFile(homedir + uuidPath);
 		if (!uuidFile.exists())
@@ -825,25 +811,7 @@ public class Game
 
 		tank.registerNetworkID();
 		Game.movables.add(tank);
-
-		EventTankCreate e = new EventTankCreate(tank);
-		if (tank instanceof IModdedTank)
-		{
-			try
-			{
-				e = ((IModdedTank) tank).getCreateEvent().getConstructor(Tank.class).newInstance(tank);
-			}
-			catch (NoSuchMethodException ex)
-			{
-				throw new RuntimeException("No matching constructor found for event: " + ((IModdedTank) tank).getCreateEvent());
-			}
-			catch (InvocationTargetException | InstantiationException | IllegalAccessException ex)
-			{
-				throw new RuntimeException("Tank creation network event failed:\n" + ex);
-			}
-		}
-
-		Game.eventsOut.add(e);
+		tank.sendCreateEvent();
 	}
 
 	/**
@@ -969,6 +937,7 @@ public class Game
 		Game.eventListeners.clear();
 		ItemBar.overrideState = false;
 		ScreenInterlevel.fromMinigames = false;
+		ObstacleTeleporter.exitCooldown = 100;
 		SyncedFieldMap.mapIDs.clear();
 	}
 
@@ -977,12 +946,7 @@ public class Game
 		silentCleanUp();
 
 		if (Game.currentGame == null)
-		{
-			if (ScreenPartyHost.isServer)
-				screen = new ScreenPartyInterlevel();
-			else
-				screen = new ScreenInterlevel();
-		}
+			screen = new ScreenInterlevel();
 		else
 			Game.currentGame.loadInterlevelScreen();
 	}
@@ -1310,10 +1274,13 @@ public class Game
 
 		resetNetworkIDs();
 
-		Game.player.hotbar.coins = 0;
-		Game.player.hotbar.enabledCoins = false;
-		Game.player.hotbar.itemBar = new ItemBar(Game.player);
-		Game.player.hotbar.enabledItemBar = false;
+		if (!Crusade.crusadeMode)
+		{
+			Game.player.hotbar.coins = 0;
+			Game.player.hotbar.enabledCoins = false;
+			Game.player.hotbar.itemBar = new ItemBar(Game.player);
+			Game.player.hotbar.enabledItemBar = false;
+		}
 
 		//if (Game.game.window != null)
 		//	Game.game.window.setShowCursor(false);

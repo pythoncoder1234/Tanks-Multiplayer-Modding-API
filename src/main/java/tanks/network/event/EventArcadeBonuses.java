@@ -3,6 +3,7 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
 import tanks.gui.screen.ScreenArcadeBonuses;
+import tanks.minigames.Arcade;
 import tanks.network.NetworkUtils;
 
 public class EventArcadeBonuses extends PersonalEvent
@@ -59,7 +60,10 @@ public class EventArcadeBonuses extends PersonalEvent
     {
         if (clientID == null)
         {
-            Game.screen = new ScreenArcadeBonuses(bonus1, bonus2, bonus3);
+            Arcade a = (Arcade) Game.currentGame;
+            a.bonus1 = bonus1;
+            a.bonus2 = bonus2;
+            a.bonus3 = bonus3;
         }
     }
 }

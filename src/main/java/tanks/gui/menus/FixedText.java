@@ -22,6 +22,8 @@ public class FixedText extends FixedMenu
     public boolean shadowEffect = true;
     public Animation[] textChangeAnimation = null;
 
+    public boolean end = false;
+
     protected boolean firstFrame = true;
     protected String prevText;
 
@@ -32,9 +34,14 @@ public class FixedText extends FixedMenu
 
     public FixedText(double x, double y, String text, double r, double g, double b, double fontSize, Animation... animations)
     {
+        this(x, y, new TextWithStyling(text, r, g, b, 255, fontSize), animations);
+    }
+
+    public FixedText(double x, double y, TextWithStyling styling, Animation... animations)
+    {
         this.posX = x;
         this.posY = y;
-        this.styling = new TextWithStyling(text, r, g, b, 255, fontSize);
+        this.styling = styling;
 
         if (animations.length > 0)
         {
@@ -55,12 +62,24 @@ public class FixedText extends FixedMenu
     public FixedText(types location, String text, double duration, double r, double g, double b, Animation... animations)
     {
         this(location, text, duration, r, g, b, 24, animations);
+
+        if (location == types.title)
+            this.styling.fontSize = 50;
+        else if (location == types.subtitle)
+            this.styling.fontSize = 30;
+        else if (location == types.actionbar)
+            this.styling.fontSize = 20;
     }
 
     public FixedText(types location, String text, double duration, double r, double g, double b, double fontSize, Animation... animations)
     {
+        this(location, new TextWithStyling(text, r, g, b, 255, fontSize), duration, animations);
+    }
+
+    public FixedText(types location, TextWithStyling styling, double duration, Animation... animations)
+    {
         this.location = location;
-        this.styling = new TextWithStyling(text, r, g, b, 255, 24);
+        this.styling = styling;
         this.duration = duration;
 
         if (animations.length > 0)
@@ -135,7 +154,7 @@ public class FixedText extends FixedMenu
         if (this.textChangeAnimation != null && !this.styling.text.equals(this.prevText))
             Collections.addAll(this.animations, this.textChangeAnimation);
 
-        if (duration > 0 && age >= duration - fadeDuration)
+        if (end || (duration > 0 && age >= duration - fadeDuration))
         {
             if (!fadeOutEffect)
             {
@@ -157,18 +176,24 @@ public class FixedText extends FixedMenu
         {
             case title:
                 this.posX = Panel.windowWidth / 2;
-                this.posY = Panel.windowHeight / 2 - 50;
-                this.styling.fontSize = 50;
+                this.posY = Panel.windowHeight / 2 - Drawing.drawing.statsHeight;
                 break;
             case subtitle:
                 this.posX = Panel.windowWidth / 2;
-                this.posY = Panel.windowHeight / 2;
-                this.styling.fontSize = 30;
+                this.posY = Panel.windowHeight / 2 - Drawing.drawing.statsHeight + this.styling.fontSize + 10;
+
+                for (FixedMenu m : ModAPI.fixedMenus)
+                {
+                    if (m instanceof FixedText && ((FixedText) m).location == types.title)
+                    {
+                        m.posY -= this.styling.fontSize / 4;
+                        break;
+                    }
+                }
                 break;
             case actionbar:
                 this.posX = Panel.windowWidth / 2;
                 this.posY = Panel.windowHeight - (this.hasItems ? 190 - Game.player.hotbar.percentHidden * 0.9 : 100);
-                this.styling.fontSize = 20;
                 break;
             case topLeft:
                 double[] pos = ModAPI.topCoords(true);
@@ -189,7 +214,23 @@ public class FixedText extends FixedMenu
         this.sizeY = this.styling.fontSize / 36;
     }
 
-    public FixedText add()
+    public FixedText remove()
+    {
+        end = true;
+        return this;
+    }
+
+    public FixedText remove(boolean instant)
+    {
+        if (instant)
+            ModAPI.removeMenus.add(this);
+        else
+            end = true;
+
+        return this;
+    }
+
+    public FixedText display()
     {
         ModAPI.displayText(this);
         return this;

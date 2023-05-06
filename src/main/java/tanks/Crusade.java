@@ -1,5 +1,6 @@
 package tanks;
 import basewindow.BaseFile;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.network.event.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
@@ -18,12 +19,13 @@ public class Crusade
 	public static boolean crusadeMode = false;
 
 	public boolean disableFriendlyFire = false;
+	public boolean remote = false;
 
 	public boolean retry = false;
 	public boolean replay = false;
 
 	public boolean win = false;
-	public boolean lose = false;
+ 	public boolean lose = false;
 
 	public boolean lifeGained = false;
 
@@ -45,6 +47,8 @@ public class Crusade
 			this.tanks = new ArrayList<>();
 		}
 	}
+
+	public int levelSize;
 
 	public ArrayList<CrusadeLevel> levels = new ArrayList<>();
 	public HashSet<Integer> livingTankIDs = new HashSet<>();
@@ -76,6 +80,14 @@ public class Crusade
 	public boolean respawnTanks = true;
 
 	public String description = null;
+
+	/** Remote crusade constructor */
+	public Crusade(int levelSize, int bonusLifeFrequency)
+	{
+		this.remote = true;
+		this.levelSize = levelSize;
+		this.bonusLifeFrequency = bonusLifeFrequency;
+	}
 
 	public Crusade(ArrayList<String> levelArray, String name, String file)
 	{
@@ -208,15 +220,13 @@ public class Crusade
 			String s = tankOccurrences.get(t);
 			String[] lvls = s.substring(1, s.length() - 1).split(", ");
 			for (String l: lvls)
-			{
 				this.levels.get(Integer.parseInt(l)).tanks.add(t);
-			}
 		}
 
 		for (int j = 0; j < Game.players.size(); j++)
-		{
 			Game.players.get(j).remainingLives = this.startingLives;
-		}
+
+		this.levelSize = this.levels.size();
 	}
 
 	public void begin()
@@ -234,7 +244,7 @@ public class Crusade
 		disconnectedPlayers.clear();
 		livingTankIDs.clear();
 
-		Game.eventsOut.add(new EventBeginCrusade());
+		Game.eventsOut.add(new EventBeginCrusade(this));
 
 		this.timePassed = 0;
 		this.started = true;
@@ -346,7 +356,7 @@ public class Crusade
 		}
 		else
 		{
-			if (this.currentLevel >= levels.size() - 1)
+			if (this.currentLevel >= levelSize - 1)
 			{
 				this.win = true;
 			}
@@ -359,16 +369,14 @@ public class Crusade
 					this.lifeGained = true;
 
 					for (Player player : Game.players)
-					{
 						player.remainingLives++;
-					}
 				}
 			}
 		}
 
 		try
 		{
-			if (!ScreenPartyHost.isServer)
+			if (!ScreenPartyHost.isServer && !ScreenPartyLobby.isClient)
 				this.crusadePlayers.get(Game.player).saveCrusade();
 			else
 			{
@@ -421,10 +429,9 @@ public class Crusade
 	public ArrayList<Item> getShop() 
 	{
 		ArrayList<Item> shop = new ArrayList<>();
-		
-		for (int i = 0; i < this.crusadeItems.size(); i++)
+
+		for (Item item : this.crusadeItems)
 		{
-			Item item = this.crusadeItems.get(i);
 			if (item.levelUnlock <= this.currentLevel)
 				shop.add(item);
 		}
@@ -520,7 +527,9 @@ public class Crusade
 		}
 
 		this.saveHotbars();
-		this.levelFinished(win);
+
+		if (Game.screen instanceof ScreenGame && !ScreenGame.finishedQuick)
+			this.levelFinished(win);
 
 		if (saveLevel > currentLevel)
 			this.retry = false;

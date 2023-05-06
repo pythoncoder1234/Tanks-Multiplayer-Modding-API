@@ -155,9 +155,7 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 			languages.update();
 
 			if (Drawing.drawing.interfaceScaleZoom == 1)
-			{
 				takeControl.update();
-			}
 
 			if (Game.debug)
 				debug.update();

@@ -590,7 +590,7 @@ public class Bullet extends Movable implements IDrawable
 	@Override
 	public void update()
 	{
-		if (!this.isRemote && (this.vX != this.lastVX || this.vY != this.lastVY))
+		if (!this.isRemote && (Math.abs(this.vX - this.lastVX) > 0.1 || Math.abs(this.vY - this.lastVY) > 0.1))
 			Game.eventsOut.add(new EventBulletUpdate(this));
 
 		super.update();
@@ -647,9 +647,7 @@ public class Bullet extends Movable implements IDrawable
 			}
 
 			if (this.destroyTimer <= 0 && Game.effectsEnabled)
-			{
 				this.addDestroyEffect();
-			}
 
 			this.destroyTimer += Panel.frameFrequency;
 			this.vX = 0;

@@ -84,10 +84,12 @@ public class ScreenAddSavedTank extends Screen implements IConditionalOverlayScr
         int rows = objectButtonRows;
         int cols = objectButtonCols;
 
+        int invalid = 0;
+
         int count = Game.registryTank.tankEntries.size();
         for (int i = 0; i < count; i++)
         {
-            int index = i % (rows * cols);
+            int index = (i-invalid) % (rows * cols);
             double x = this.centerX - 450 + 100 * (index % cols);
             double y = this.centerY - 100 + 100 * ((index / cols) % rows);
 
@@ -114,7 +116,10 @@ public class ScreenAddSavedTank extends Screen implements IConditionalOverlayScr
                     }
                 }
                 else
+                {
+                    invalid++;
                     continue;
+                }
             }
 
             final TankAIControlled tt = t;
@@ -184,6 +189,8 @@ public class ScreenAddSavedTank extends Screen implements IConditionalOverlayScr
         }
 
         Collections.sort(files);
+
+        count -= invalid;
 
         if (tankScreen instanceof OverlayObjectMenu)
         {

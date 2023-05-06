@@ -14,6 +14,8 @@ import static tanks.Game.dirY;
 
 public class ObstacleTrainTrack extends Obstacle
 {
+    public static final String[] descriptions = new String[] {"Train track!!!", "An essential for all trains.", "One stick and six iron."};
+
     public static final Model turnTrackWood = Drawing.drawing.createModel("/models/obstacletrack/wood/");
     public static final Model turnTrackRail = Drawing.drawing.createModel("/models/obstacletrack/rail/");
 
@@ -42,7 +44,7 @@ public class ObstacleTrainTrack extends Obstacle
             this.stackColorB[i] = 14 - Math.random() * 5;
         }
 
-        this.description = "A train track, put trains on it!";
+        this.description = descriptions[(int) (Math.random() * descriptions.length)];
     }
 
     @Override
@@ -289,7 +291,7 @@ public class ObstacleTrainTrack extends Obstacle
 
             for (int i = 0; i < 4; i++)
             {
-                if (o.connectedTo[i] != null)
+                if (exists(o.connectedTo[i]))
                 {
                     if (a == -1)
                         a = i;
