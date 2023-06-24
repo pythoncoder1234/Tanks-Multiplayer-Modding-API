@@ -28,7 +28,6 @@ public class Minecraft extends Minigame {
     public Minecraft() {
         this.name = "Minecraft";
         this.description = "EXTREMELY DEMANDING LEVEL!" +
-                "---Having a graphics card is recommended." +
                 "---Size: 100x100" +
                 "---Amount of tanks: a lot" +
                 "---Play in first person, enable shadows.";
