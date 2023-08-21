@@ -43,6 +43,6 @@ public interface IAvoidObject
         if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
             return false;
 
-        return Game.obstacleMap[x][y] == o;
+        return Game.obstacleGrid[x][y] == o;
     }
 }

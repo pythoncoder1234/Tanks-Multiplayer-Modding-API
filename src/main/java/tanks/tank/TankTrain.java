@@ -237,7 +237,7 @@ public class TankTrain extends Tank implements IAvoidObject
         if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
             return null;
 
-        Obstacle o = Game.obstacleMap[x][y];
+        Obstacle o = Game.obstacleGrid[x][y];
         if (!(o instanceof ObstacleTrainTrack))
             return null;
 

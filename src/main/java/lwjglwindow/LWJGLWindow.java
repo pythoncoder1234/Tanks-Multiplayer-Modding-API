@@ -391,17 +391,37 @@ public class LWJGLWindow extends BaseWindow
 
 		if (constrainMouse)
 		{
-			if (absoluteMouseX < 0)
-				setCursorPos(0, absoluteMouseY);
+			boolean constrained = true;
 
-			if (absoluteMouseY < 0)
-				setCursorPos(absoluteMouseX, 0);
+			if (!moveMouseToOtherSide)
+			{
+				if (absoluteMouseX < 0)
+					setCursorPos(0, absoluteMouseY);
+				else if (absoluteMouseY < 0)
+					setCursorPos(absoluteMouseX, 0);
+				else if (absoluteMouseX > absoluteWidth)
+					setCursorPos(absoluteWidth, absoluteMouseY);
+				else if (absoluteMouseY > absoluteHeight)
+					setCursorPos(absoluteMouseX, absoluteHeight);
+				else
+					constrained = false;
+			}
+			else
+			{
+				if (absoluteMouseX < 0)
+					setCursorPos(absoluteWidth, absoluteMouseY);
+				else if (absoluteMouseY < 0)
+					setCursorPos(absoluteMouseX, absoluteHeight);
+				else if (absoluteMouseX > absoluteWidth)
+					setCursorPos(0, absoluteMouseY);
+				else if (absoluteMouseY > absoluteHeight)
+					setCursorPos(absoluteMouseX, 0);
+				else
+					constrained = false;
+			}
 
-			if (absoluteMouseX > absoluteWidth)
-				setCursorPos(absoluteWidth, absoluteMouseY);
-
-			if (absoluteMouseY > absoluteHeight)
-				setCursorPos(absoluteMouseX, absoluteHeight);
+			if (constrained)
+				windowHandler.onMouseConstrain();
 
 			glfwSetWindowSizeLimits(window, (int) absoluteWidth, (int) absoluteHeight, (int) absoluteWidth, (int) absoluteHeight);
 		}

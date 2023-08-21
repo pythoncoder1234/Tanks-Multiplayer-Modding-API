@@ -8,7 +8,7 @@ import tanks.gui.TextBoxSlider;
 import tanks.tank.TankPlayer;
 import tanks.tank.Turret;
 
-public class ScreenOptionsPlayerColor extends Screen
+public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 {
     TankPlayer preview = new TankPlayer(Drawing.drawing.sizeX / 2, Drawing.drawing.sizeY / 2 - 315 * Drawing.drawing.interfaceScaleZoom, 0);
 
@@ -189,13 +189,13 @@ public class ScreenOptionsPlayerColor extends Screen
             this.chroma.posY -= this.objYSpace / 2;
         }
 
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
     }
 
     @Override
     public void update()
     {
+        super.update();
+
         colorRed.update();
         colorGreen.update();
         colorBlue.update();

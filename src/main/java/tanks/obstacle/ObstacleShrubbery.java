@@ -4,10 +4,10 @@ import tanks.*;
 import tanks.bullet.BulletAir;
 import tanks.bullet.BulletFlame;
 import tanks.bullet.BulletInstant;
-import tanks.network.event.EventObstacleShrubberyBurn;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.IOverlayScreen;
 import tanks.gui.screen.ScreenGame;
+import tanks.network.event.EventObstacleShrubberyBurn;
 import tanks.tank.Tank;
 
 public class ObstacleShrubbery extends Obstacle
@@ -69,8 +69,8 @@ public class ObstacleShrubbery extends Obstacle
 
 		if (!Game.game.window.shapeRenderer.supportsBatching)
 		{
-			if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
-				this.height = 127;
+			if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || (Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).playing))
+                this.height = 127;
 		}
 
 		if (Game.enable3d)
@@ -110,11 +110,11 @@ public class ObstacleShrubbery extends Obstacle
 			{
 				for (int y = -1; y <= 1; y++)
 				{
-					((Tank) m).canHidePoints[x + 1][y + 1] = ((Tank) m).canHidePoints[x + 1][y + 1] ||
-							this.isInside(m.posX + ((Tank) m).size * 0.5 * x, m.posY + ((Tank) m).size * 0.5 * x);
+                    ((Tank) m).canHidePoints[x + 1][y + 1] = ((Tank) m).canHidePoints[x + 1][y + 1] ||
+                            this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x);
 
-					((Tank) m).hiddenPoints[x + 1][y + 1] = ((Tank) m).hiddenPoints[x + 1][y + 1] ||
-							(this.height >= 255 && this.isInside(m.posX + ((Tank) m).size * 0.5 * x, m.posY + ((Tank) m).size * 0.5 * x));
+                    ((Tank) m).hiddenPoints[x + 1][y + 1] = ((Tank) m).hiddenPoints[x + 1][y + 1] ||
+                            (this.height >= 255 && this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x));
 				}
 			}
 		}

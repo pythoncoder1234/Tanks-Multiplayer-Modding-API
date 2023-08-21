@@ -6,12 +6,10 @@ import tanks.Panel;
 import tanks.gui.Button;
 import tanks.gui.TextBoxSlider;
 
-public class ScreenOptionsSound extends Screen
+public class ScreenOptionsSound extends ScreenOptionsOverlay
 {
     public ScreenOptionsSound()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         musicVolume.allowLetters = false;
         musicVolume.allowSpaces = false;
@@ -79,6 +77,8 @@ public class ScreenOptionsSound extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         soundVolume.update();
         musicVolume.update();
 

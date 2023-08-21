@@ -18,8 +18,6 @@ public class ScreenChangelog extends Screen
     {
         super(350, 40, 380, 60);
 
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         this.next.image = "icons/forward.png";
         this.next.imageSizeX = 25;

@@ -1,11 +1,28 @@
 package tanks;
 
-import tanks.gui.screen.*;
+import tanks.gui.screen.Screen;
+import tanks.gui.screen.ScreenInterlevel;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.network.EventMinigameStart;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.tank.TankPlayerRemote;
 
+/**
+ * The base class you extend to create modded minigames.<br><br>
+ * <p>
+ * To create your own minigame, create a class that extends this <code>Minigame</code>
+ * class and register it in {@link ModAPI#registerGames()}. You can test it by going to
+ * Singleplayer -> Minigames -> the class name of your minigame.<br><br>
+ * <p>
+ * The default <code>Minigame</code> class does nothing, so implement functions such as {@link #start()}.
+ * <br><br>
+ * <p>
+ * You can look at {@link tanks.minigames.TeamDeathmatch TeamDeathmatch} for reference.
+ *
+ * @see tanks.minigames.TeamDeathmatch TeamDeathmatch
+ * @see ModAPI#loadLevel(String) ModAPI.loadLevel(levelString)
+ */
 public abstract class Minigame
 {
     public Level level;
@@ -15,13 +32,20 @@ public abstract class Minigame
 
     public EndCondition endCondition = EndCondition.defaultEndCondition;
 
-    /** The amount of coins one gets from killing players. */
+    /**
+     * The amount of coins one gets from killing players.
+     */
     public int playerKillCoins = 0;
 
-    /** Forcibly disable the minimap. Useful for games like hide and seek */
+    /**
+     * Forcibly disable the minimap. Useful for games like hide and seek
+     */
     public boolean forceDisableMinimap = false;
 
-    /** If enabled, will ask the client side to load up the minigame, not just the server. */
+    /**
+     * If enabled, will ask the client side to load up the minigame, not just the server.
+     * If the client does not have the minigame installed, nothing will happen.
+     */
     public boolean enableRemote = false;
 
     public boolean enableKillMessages = false;
@@ -30,6 +54,9 @@ public abstract class Minigame
     public boolean enableShooting = true;
     public boolean enableLayingMines = true;
 
+    /**
+     * Unfinished feature by Aehmttw
+     */
     public boolean flashBackground = false;
 
     /** Whether the minigame is remote. You can also use <code>ScreenPartyLobby.isClient</code>. */
@@ -44,6 +71,7 @@ public abstract class Minigame
         }
     }
 
+    /** Initialize the minigame here. Make sure to call <code>super.start()</code>! */
     public void start()
     {
         ModAPI.fixedMenus.clear();

@@ -22,8 +22,6 @@ public class ScreenResetControls extends Screen
 
     public ScreenResetControls()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
     }
 
     @Override

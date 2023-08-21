@@ -5,15 +5,28 @@ import tanks.Game;
 import tanks.Panel;
 import tanks.gui.Button;
 
-public class ScreenOptionsMisc extends Screen
+public class ScreenOptionsMisc extends ScreenOptionsOverlay
 {
     public static final String autostartText = "Autostart: ";
     public static final String fullStatsText = "Stats animations: ";
     public static final String pauseText = "Pause on defocus: ";
 
-    Button speedrunOptions = new Button(this.centerX, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "Speedrunning options", () -> Game.screen = new ScreenOptionsSpeedrun());
+    Button speedrunOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY - this.objYSpace * 1.25, this.objWidth, this.objHeight, "Speedrunning options", () -> Game.screen = new ScreenOptionsSpeedrun());
 
-    Button autostart = new Button(this.centerX, this.centerY - this.objYSpace * 0.5, this.objWidth, this.objHeight, "", new Runnable()
+    Button extensionOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY - this.objYSpace * 0.25, this.objWidth, this.objHeight, "Extension options", () -> Game.screen = new ScreenOptionsExtensions());
+
+    @Override
+    public void update()
+    {
+        super.update();
+
+        back.update();
+        speedrunOptions.update();
+        extensionOptions.update();
+        pauseOnDefocus.update();
+        fullStats.update();
+        autostart.update();
+    }    Button autostart = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -28,7 +41,22 @@ public class ScreenOptionsMisc extends Screen
     },
             "When enabled, levels will---start playing automatically---4 seconds after they are---loaded (if the play button---isn't clicked earlier)");
 
-    Button fullStats = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "", new Runnable()
+    @Override
+    public void draw()
+    {
+        this.drawDefaultBackground();
+
+        back.draw();
+        speedrunOptions.draw();
+        extensionOptions.draw();
+        pauseOnDefocus.draw();
+        fullStats.draw();
+        autostart.draw();
+
+        Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Miscellaneous options");
+    }    Button fullStats = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -43,7 +71,7 @@ public class ScreenOptionsMisc extends Screen
     },
             "When off, skips directly to the summary tab---of the crusade end stats screen");
 
-    Button pauseOnDefocus = new Button(this.centerX, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
+    Button pauseOnDefocus = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -61,8 +89,6 @@ public class ScreenOptionsMisc extends Screen
 
     public ScreenOptionsMisc()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         if (Game.autostart)
             autostart.setText(autostartText, ScreenOptions.onText);
@@ -80,29 +106,7 @@ public class ScreenOptionsMisc extends Screen
             pauseOnDefocus.setText(pauseText, ScreenOptions.offText);
     }
 
-    @Override
-    public void update()
-    {
-        back.update();
-        speedrunOptions.update();
-        pauseOnDefocus.update();
-        fullStats.update();
-        autostart.update();
-    }
 
-    @Override
-    public void draw()
-    {
-        this.drawDefaultBackground();
 
-        back.draw();
-        speedrunOptions.draw();
-        pauseOnDefocus.draw();
-        fullStats.draw();
-        autostart.draw();
 
-        Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Miscellaneous options");
-    }
 }

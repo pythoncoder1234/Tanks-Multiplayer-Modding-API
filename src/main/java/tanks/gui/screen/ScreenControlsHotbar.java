@@ -2,10 +2,9 @@ package tanks.gui.screen;
 
 import tanks.Drawing;
 import tanks.Game;
-import tanks.gui.Button;
 import tanks.gui.InputSelector;
 
-public class ScreenControlsHotbar extends Screen
+public class ScreenControlsHotbar extends ScreenOptionsOverlay
 {
     InputSelector hotbarToggle = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 270, 700, 40, "Toggle hotbar visibility", Game.game.input.hotbarToggle);
     InputSelector hotbar1 = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 180, 700, 40, "Item slot 1", Game.game.input.hotbar1);
@@ -15,15 +14,11 @@ public class ScreenControlsHotbar extends Screen
     InputSelector hotbar5 = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 180, 700, 40, "Item slot 5", Game.game.input.hotbar5);
     InputSelector hotbarDeselect = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 270, 700, 40, "Deselect item slot", Game.game.input.hotbarDeselect);
 
-    public ScreenControlsHotbar()
-    {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-    }
-
     @Override
     public void update()
     {
+        super.update();
+
         hotbarToggle.update();
         hotbar1.update();
         hotbar2.update();

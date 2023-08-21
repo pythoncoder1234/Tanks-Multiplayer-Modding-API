@@ -8,9 +8,7 @@ public class ScreenUsernameInvalid extends Screen
 {
 	public ScreenUsernameInvalid()
 	{
-		this.music = "menu_options.ogg";
-		this.musicID = "menu";
-	}
+    }
 
 	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Ok", () ->
 	{

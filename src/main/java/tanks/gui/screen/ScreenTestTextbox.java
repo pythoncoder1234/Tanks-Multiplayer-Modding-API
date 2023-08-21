@@ -5,36 +5,30 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 import tanks.gui.UUIDTextBox;
-import tanks.network.SteamNetworkHandler;
 
-public class ScreenTestTextbox extends Screen
+public class ScreenTestTextbox extends ScreenOptionsOverlay
 {
     public ScreenTestTextbox()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-
         box.allowAll = true;
         box.enableCaps = true;
     }
 
-    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenDebug()
+    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "Back", () -> Game.screen = prevScreen
     );
 
     TextBox box = new TextBox(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 60, 700, 40, "Text box", () ->
-    {
-
-    }, "");
+    {}, "");
 
     UUIDTextBox uuidBox = new UUIDTextBox(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 60, 700, 40, "UUID box", () ->
-    {
-
-    }, "");
+    {}, "");
 
 
     @Override
     public void update()
     {
+        super.update();
+
         back.update();
         box.update();
         uuidBox.update();

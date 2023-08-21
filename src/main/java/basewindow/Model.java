@@ -74,7 +74,7 @@ public class Model implements IModel
                 }
             }
 
-            if (s.startsWith("col "))
+            if (s.startsWith("col ") || s.startsWith("Kd "))
             {
                 if (current != null)
                 {

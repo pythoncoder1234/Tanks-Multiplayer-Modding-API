@@ -2,10 +2,15 @@ package tanks.obstacle;
 
 import basewindow.IBatchRenderableObject;
 import tanks.*;
-import tanks.gui.screen.ScreenGame;
+import tanks.editorselector.GroupIdSelector;
+import tanks.editorselector.HeightSelector;
+import tanks.editorselector.LevelEditorSelector;
+import tanks.editorselector.RotationSelector;
+import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
+import tanks.tank.TankAIControlled;
 
-public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IGameObject, IBatchRenderableObject
+public class Obstacle extends GameObject implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IBatchRenderableObject
 {
 	public static final int default_max_height = 8;
 
@@ -25,6 +30,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public boolean enableStacking = true;
 	public double stackHeight = 1;
+	public double startHeight = 0;
 
 	public boolean enableGroupID = false;
 	public int groupID = 0;
@@ -43,14 +49,25 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	 */
 	public boolean batchDraw = true;
 
+	/**
+	 * If set to true, the obstacle (if batch rendered) will be redrawn.
+	 */
+	public boolean colorChanged = false;
+
 	public double posX;
 	public double posY;
-	public double startHeight = 0;
 	public double colorR;
 	public double colorG;
 	public double colorB;
 	public double colorA = 255;
 	public double glow = 0;
+
+	public boolean enableTeams = false;
+	public Team team;
+	public String teamName;
+
+	public boolean enableRotation = false;
+	public double rotation;
 
 	public double[] stackColorR = new double[default_max_height];
 	public double[] stackColorG = new double[default_max_height];
@@ -77,8 +94,10 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 	public double baseGroundHeight;
 
-	/** Used for debugging purposes. Set this variable to true to draw a dot above this obstacle. */
-	public boolean drawDot = false;
+	/**
+	 * Used for debugging purposes.
+	 */
+	public boolean drawOutline = false;
 
 	public Obstacle(String name, double posX, double posY)
 	{
@@ -112,11 +131,32 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	@Override
 	public void draw()
 	{
-		if (this.drawDot)
+		if (this.teamName != null)
 		{
-			this.drawDot = false;
-			Drawing.drawing.setColor(69, 69, 69);
-			Drawing.drawing.fillForcedBox(posX, posY, 50, 30, 30, 10, (byte) 0);
+			if (Game.currentLevel != null)
+			{
+				for (Team t : Game.currentLevel.teamsList)
+				{
+					if (t.name.equals(this.teamName))
+						this.team = t;
+				}
+			}
+			else if (Game.screen instanceof ScreenLevelEditor)
+			{
+				for (Team t : ((ScreenLevelEditor) Game.screen).level.teamsList)
+				{
+					if (t.name.equals(this.teamName))
+						this.team = t;
+				}
+			}
+
+			this.teamName = null;
+		}
+
+		if (this.drawOutline)
+		{
+			this.drawOutline = false;
+			this.draw3dOutline(255, 255, 255);
 		}
 
 		if (this.stackHeight <= 0)
@@ -128,9 +168,9 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 
 		if (Game.enable3d)
 		{
-			for (int i = 0; i < Math.min(this.stackHeight, default_max_height); i++)
+			for (int i = 0; i < Math.min(this.stackHeight, 100); i++)
 			{
-				int in = default_max_height - 1 - i;
+				int in = i % default_max_height;
 				drawing.setColor(this.stackColorR[in], this.stackColorG[in], this.stackColorB[in], this.colorA, this.glow);
 
 				byte option = 0;
@@ -140,7 +180,7 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 					if (i > 0)
 						option += 1;
 
-					if (i < Math.min(this.stackHeight, default_max_height) - 1)
+					if (i < Math.min(this.stackHeight, 100) - 1)
 						option += 2;
 				}
 
@@ -168,6 +208,12 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 		}
 		else
 			drawing.fillRect(this, this.posX, this.posY, draw_size, draw_size);
+
+		if (this.enableTeams && this.team != null)
+		{
+			Drawing.drawing.setFontSize(20);
+			Drawing.drawing.drawText(this.posX, this.posY + 35, this.team.name);
+		}
 	}
 
 	public void drawOutline()
@@ -204,11 +250,13 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 			return;
 		}
 
-		double sizeZ = (!this.enableStacking && (Game.screen instanceof ScreenGame || Game.screen instanceof ScreenLevelEditor)) ? 15 : this.stackHeight * Game.tile_size+1;
+		double sizeZ = this.stackHeight * Game.tile_size;
+		if (!this.enableStacking)
+			sizeZ = Game.screen instanceof ILevelPreviewScreen ? 15 : 50;
 
 		Drawing.drawing.setColor(r, g, b, a, 0.5);
-		Drawing.drawing.fillBox(this.posX, this.posY, this.startHeight * Game.tile_size,
-				Game.tile_size, Game.tile_size, sizeZ);
+		Drawing.drawing.fillBox(this, this.posX, this.posY, this.startHeight * Game.tile_size,
+				Game.tile_size + 1, Game.tile_size + 1, sizeZ + 1, this.getOptionsByte(this.getTileHeight()));
 	}
 
 	@Override
@@ -263,15 +311,6 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	public void reactToHit(double bx, double by)
 	{
 
-	}
-
-	/** The tank will try to find an alternate route that is less than this amount of tiles farther. */
-	public int unfavorability()
-	{
-		if (this.destructible)
-			return 20;
-
-		return 0;
 	}
 
 	public boolean hasNeighbor(int ox, int oy, boolean unbreakable)
@@ -333,24 +372,86 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 		int x = (int) (this.posX / Game.tile_size);
 		int y = (int) (this.posY / Game.tile_size);
 
+		boolean collision = this.startHeight < 1 && (this.tankCollision || this.bulletCollision);
+
 		if (this.isSurfaceTile)
 			this.startHeight = -1;
 
-		if (x >= 0 && x < Game.obstacleMap.length && y >= 0 && y < Game.obstacleMap[0].length && (this.startHeight == 0 || Game.obstacleMap[x][y] == null))
-			Game.obstacleMap[x][y] = this;
+		if (x >= 0 && x < Game.obstacleGrid.length && y >= 0 && y < Game.obstacleGrid[0].length)
+		{
+			if (collision || Game.obstacleGrid[x][y] == null)
+				Game.obstacleGrid[x][y] = this;
+
+			if (this.isSurfaceTile)
+				Game.surfaceTileGrid[x][y] = this;
+		}
 	}
 
-	public void setMetadata(String data)
+	public String getMetadata()
 	{
-		String[] metadata = data.split("-");
+		StringBuilder s = new StringBuilder();
 
-		this.stackHeight = Double.parseDouble(metadata[0]);
+		if (this.enableStacking)
+			s.append(this.stackHeight).append("-");
 
-		if (this.enableGroupID)
-			this.groupID = Integer.parseInt(metadata[0]);
+		if (this.enableTeams)
+			s.append(this.team.name).append("-");
 
-		if (metadata.length >= 2)
-			this.startHeight = Double.parseDouble(metadata[1]);
+		if (this.enableRotation)
+			s.append((int) (this.rotation / Math.PI * 2)).append("-");
+
+		this.forAllSelectors(c -> s.append(c.getMetadata()).append("-"));
+
+		if (this.startHeight > 0)
+			s.append(this.startHeight).append("-");
+
+		if (s.toString().endsWith("-"))
+			return s.substring(0, s.length() - 1);
+
+		return s.toString();
+	}
+
+	public void setMetadata(String s)
+	{
+		String[] metadata = s.split("-");
+
+		int index = 0;
+		int i = 0;
+
+		for (String s1 : metadata)
+		{
+			if (this.enableStacking && index == 0)
+				this.stackHeight = Double.parseDouble(s1);
+			else if (index == 0)
+				index++;
+
+			if (this.enableTeams && index == 1)
+				this.teamName = s1;
+			else if (index == 1)
+				index++;
+
+			if (this.enableRotation && index == 2)
+				this.rotation = Integer.parseInt(s1);
+			else if (index == 2)
+				index++;
+
+			if (index >= 3)
+			{
+				if (index < 3 + this.selectorCount())
+				{
+					int j = index - 3;
+					LevelEditorSelector sel = this.selectors.get(j);
+					sel.setMetadata(metadata[i]);
+					sel.syncProperties(this);
+				}
+				else if (index == 3 + this.selectorCount())
+					this.startHeight = Double.parseDouble(metadata[i]);
+				else
+					break;
+			}
+
+			i++;
+		}
 	}
 
 	public static double[] getRandomColor()
@@ -424,13 +525,23 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 		return this.stackHeight * Game.tile_size;
 	}
 
-
 	/**
 	 * Returns height of tile in terms of where objects like mines or treads should be drawn on top of it
-	 * */
+	 */
 	public double getGroundHeight()
 	{
 		return -1000;
+	}
+
+	/**
+	 * The "cost" of the block during pathfinding
+	 */
+	public int unfavorability(TankAIControlled t)
+	{
+		if (this.destructible)
+			return 10;
+		else
+			return 0;
 	}
 
 	public byte getOptionsByte(double h)
@@ -561,7 +672,22 @@ public class Obstacle implements IDrawableForInterface, ISolidObject, IDrawableW
 	@Override
 	public boolean colorChanged()
 	{
-		return this.removed;
+		boolean b = colorChanged;
+		colorChanged = false;
+
+		return this.removed || b;
+	}
+
+	public void registerSelectors()
+	{
+		if (this.enableStacking)
+			this.registerSelector(new HeightSelector());
+
+		if (this.enableRotation)
+			this.registerSelector(new RotationSelector<Obstacle>());
+
+		if (this.enableGroupID)
+			this.registerSelector(new GroupIdSelector());
 	}
 
 	public boolean wasRedrawn()

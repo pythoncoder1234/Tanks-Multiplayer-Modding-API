@@ -4,6 +4,7 @@ import basewindow.IModel;
 import basewindow.InputCodes;
 import basewindow.InputPoint;
 import tanks.*;
+import tanks.gui.input.InputBindingGroup;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenInfo;
 import tanks.gui.screen.ScreenPartyHost;
@@ -14,8 +15,9 @@ import java.util.ArrayList;
 
 public class Button implements IDrawable, ITrigger
 {
-	public Runnable function;
-	public double posX;
+    public Runnable function;
+    public InputBindingGroup keybind;
+    public double posX;
 	public double posY;
 	public double sizeX;
 	public double sizeY;
@@ -254,29 +256,41 @@ public class Button implements IDrawable, ITrigger
 				drawing.setColor(255, 255, 255);
 				drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
 			}
-		}
-	}
+        }
+    }
 
-	@Override
-	public void setPosition(double x, double y)
-	{
-		this.posX = x;
-		this.posY = y;
-	}
+    @Override
+    public void setPosition(double x, double y)
+    {
+        this.posX = x;
+        this.posY = y;
+    }
 
-	public void update()
-	{
-		this.justPressed = false;
+    @Override
+    public void updateKeybind()
+    {
+        if (this.keybind != null && this.keybind.isValid())
+        {
+            this.keybind.invalidate();
+            this.function.run();
+        }
+    }
 
-		if (!Game.game.window.touchscreen)
-		{
-			double mx = Drawing.drawing.getInterfaceMouseX();
-			double my = Drawing.drawing.getInterfaceMouseY();
+    public void update()
+    {
+        this.justPressed = false;
 
-			boolean handled = checkMouse(mx, my, Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1));
+        this.updateKeybind();
 
-			if (handled)
-				Game.game.window.validPressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
+        if (!Game.game.window.touchscreen)
+        {
+            double mx = Drawing.drawing.getInterfaceMouseX();
+            double my = Drawing.drawing.getInterfaceMouseY();
+
+            boolean handled = checkMouse(mx, my, Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1));
+
+            if (handled)
+                Game.game.window.validPressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
 		}
 		else
 		{

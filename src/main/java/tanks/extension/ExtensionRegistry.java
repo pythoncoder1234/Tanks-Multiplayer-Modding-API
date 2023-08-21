@@ -2,18 +2,13 @@ package tanks.extension;
 
 import basewindow.BaseFile;
 import tanks.Game;
-import tanks.obstacle.Obstacle;
-import tanks.obstacle.ObstacleUnknown;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Scanner;
 import java.util.jar.JarFile;
 
@@ -43,8 +38,8 @@ public class ExtensionRegistry
 
 					String[] extensionLine = line.split(",");
 
-					if (extensionLine[0].charAt(0) == '#')
-						continue;
+					if (extensionLine[0].startsWith("#"))
+                        continue;
 
 					if (extensionLine.length > 1)
 						loadExtension(extensionLine[0], extensionLine[1]);
@@ -66,9 +61,7 @@ public class ExtensionRegistry
 					ArrayList<String> files = Game.game.fileManager.getFile(Game.homedir + Game.extensionDir).getSubfiles();
 
 					for (String file : files)
-					{
 						loadExtension(file.substring(file.replace("\\", "/").lastIndexOf("/") + 1), null);
-					}
 				}
 			}
 			catch (Exception e)
@@ -108,46 +101,61 @@ public class ExtensionRegistry
 						this.extensions.add(e);
 					}
 					catch (Exception e)
-					{
-						System.err.println("Failed to load extension " + jar);
-						e.printStackTrace();
-					}
-				}
-			}
-			catch (Exception ignored) { }
-		}
-	}
+                    {
+                        System.err.println("Failed to load extension " + jar);
+                        e.printStackTrace();
+                    }
+                }
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+    }
 
-	public void initRegistry()
-	{
-		String path = Game.homedir + Game.extensionRegistryPath;
+    public void saveRegistry()
+    {
+        saveRegistry(null);
+    }
 
-		try 
-		{
-			Game.game.fileManager.getFile(path).create();
+    public void saveRegistry(ArrayList<String> lines)
+    {
+        String path = Game.homedir + Game.extensionRegistryPath;
 
-			BaseFile f = Game.game.fileManager.getFile(path);
-			f.startWriting();
-			f.println("# Warning!");
-			f.println("# 1. Loading Tanks extensions can potentially break the game or infect your computer with a virus.");
-			f.println("# Please be careful of what you download and add as an extension.");
-			f.println("# 2. To enable loading extensions from this file, set enable-extensions in options.txt to true");
-			f.println("# ");
-			f.println("# This is the Extension Registry file!");
-			f.println("# A registry entry is a line in the file");
-			f.println("# A line is composed of 2 things: jar name, and class");
-			f.println("# ");
-			f.println("# To create an extension, import the 'Tanks' jar into a java project,");
-			f.println("# write a class extending Extension, add your code to the setUp() method,");
-			f.println("# and export as a jar file.");
-			f.println("# ");
-			f.println("# To load an extension, put the jar file inside the \"extensions\" folder,");
-			f.println("# Then, add a line to the end of this file as shown below");
-			f.println("# MyExtension.jar,com.potato.MyExtension'");
-			f.println("# (Extensions will be loaded in the order listed here)");
+        try
+        {
+            BaseFile f = Game.game.fileManager.getFile(path);
 
-			f.stopWriting();
-		} 
+            if (!f.exists())
+                f.create();
+
+            f.startWriting();
+            f.println("# Warning!");
+            f.println("# 1. Loading Tanks extensions can potentially break the game or infect your computer with a virus.");
+            f.println("# Please be careful of what you download and add as an extension.");
+            f.println("# 2. To enable loading extensions from this file, set enable-extensions in options.txt to true");
+            f.println("# ");
+            f.println("# This is the Extension Registry file!");
+            f.println("# A registry entry is a line in the file");
+            f.println("# A line is composed of 2 things: jar name, and class");
+            f.println("# ");
+            f.println("# To create an extension, import the 'Tanks' jar into a java project,");
+            f.println("# write a class extending Extension, add your code to the setUp() method,");
+            f.println("# and export as a jar file.");
+            f.println("# ");
+            f.println("# To load an extension, put the jar file inside the \"extensions\" folder,");
+            f.println("# Then, add a line to the end of this file as shown below");
+            f.println("# MyExtension.jar,com.potato.MyExtension'");
+            f.println("# (Extensions will be loaded in the order listed here)");
+
+            if (lines != null)
+            {
+                for (String line : lines)
+                    f.println(line);
+            }
+
+            f.stopWriting();
+        }
 		catch (Exception e)
 		{
 			Game.exitToCrash(e);

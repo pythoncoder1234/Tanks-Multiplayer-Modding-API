@@ -4,10 +4,9 @@ import tanks.Game;
 import tanks.Movable;
 import tanks.Panel;
 import tanks.bullet.Bullet;
-import tanks.network.event.EventLayMine;
-import tanks.network.event.EventObstacleDestroy;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
+import tanks.network.event.EventObstacleDestroy;
 import tanks.tank.*;
 
 public class ObstacleExplosive extends Obstacle implements IAvoidObject
@@ -22,6 +21,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
 
         this.draggable = false;
         this.destructible = true;
+        this.allowBounce = false;
         this.colorR = 255;
         this.colorG = Math.random() * 40 + 80;
         this.colorB = 0;
@@ -112,7 +112,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
     @Override
     public double getRadius()
     {
-        return Mine.mine_radius * ((this.stackHeight - 1) / 2 + 1);
+        return Math.min(Mine.mine_radius * 1.5, Mine.mine_radius * ((this.stackHeight - 1) / 2 + 1));
     }
 
     @Override

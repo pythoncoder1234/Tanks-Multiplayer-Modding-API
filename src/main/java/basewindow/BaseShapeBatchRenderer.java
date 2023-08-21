@@ -22,6 +22,12 @@ public abstract class BaseShapeBatchRenderer
 
     public abstract void fillBox(IBatchRenderableObject o, double x, double y, double z, double sX, double sY, double sZ, byte options);
 
+    public abstract void fillPolygon(IBatchRenderableObject o, double... params);
+
+    public abstract void fillPolygon(double z, double sZ, IBatchRenderableObject o, double... params);
+
+    public abstract void fillPolygon(double z, double sZ, IBatchRenderableObject o, byte options, double... params);
+
     public void setPosition(double x, double y, double z)
     {
         this.posX = x;

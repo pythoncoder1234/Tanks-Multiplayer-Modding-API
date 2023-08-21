@@ -1,8 +1,8 @@
 package tanks.gui.screen;
 
 import tanks.*;
-import tanks.network.event.online.EventUploadLevel;
 import tanks.gui.Button;
+import tanks.network.event.online.EventUploadLevel;
 import tanks.obstacle.Obstacle;
 import tanks.tank.TankSpawnMarker;
 
@@ -68,6 +68,9 @@ public class ScreenPreviewUploadLevel extends Screen implements ILevelPreviewScr
                 Obstacle o = Game.obstacles.get(i);
 
                 o.postOverride();
+
+                if (o.startHeight > Game.tile_size)
+                    continue;
 
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);

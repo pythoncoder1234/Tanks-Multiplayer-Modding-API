@@ -87,11 +87,11 @@ public class OverlayEditLevelStartingItems extends ScreenLevelEditorOverlay impl
 
         startingItemsList.reorderBehavior = (i, j) ->
         {
-            screenLevelEditor.level.startingItems.add(j, screenLevelEditor.level.startingItems.remove((int)i));
-            ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.startingItems, startingItemsList, true);
+            editor.level.startingItems.add(j, editor.level.startingItems.remove((int) i));
+            ScreenLevelEditor.refreshItemButtons(editor.level.startingItems, startingItemsList, true);
         };
 
-        ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.startingItems, startingItemsList, true);
+        ScreenLevelEditor.refreshItemButtons(editor.level.startingItems, startingItemsList, true);
     }
 
     public void update()
@@ -111,7 +111,7 @@ public class OverlayEditLevelStartingItems extends ScreenLevelEditorOverlay impl
         if (Game.screen != this)
             return;
 
-        Drawing.drawing.setColor(screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness);
+        Drawing.drawing.setColor(editor.fontBrightness, editor.fontBrightness, editor.fontBrightness);
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 270, "Starting items");
         this.startingItemsList.draw();
@@ -129,7 +129,7 @@ public class OverlayEditLevelStartingItems extends ScreenLevelEditorOverlay impl
     @Override
     public void addItem(Item i)
     {
-        screenLevelEditor.level.startingItems.add(i);
+        editor.level.startingItems.add(i);
 
         ScreenEditItem s = new ScreenEditItem(i, this, true, true);
         s.drawBehindScreen = true;
@@ -139,14 +139,14 @@ public class OverlayEditLevelStartingItems extends ScreenLevelEditorOverlay impl
     @Override
     public void removeItem(Item i)
     {
-        screenLevelEditor.level.startingItems.remove(i);
-        ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.startingItems, this.startingItemsList, true);
+        editor.level.startingItems.remove(i);
+        ScreenLevelEditor.refreshItemButtons(editor.level.startingItems, this.startingItemsList, true);
     }
 
     @Override
     public void refreshItems()
     {
-        ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.startingItems, this.startingItemsList, true);
+        ScreenLevelEditor.refreshItemButtons(editor.level.startingItems, this.startingItemsList, true);
     }
 
 }

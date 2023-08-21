@@ -21,15 +21,15 @@ import tanks.network.NetworkUtils;
 import tanks.network.SyncedFieldMap;
 import tanks.network.event.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 import static tanks.gui.screen.ScreenGame.shopOffset;
 
 public class TankNPC extends TankDummy implements ISyncable
 {
     public SyncedFieldMap map = new SyncedFieldMap();
+
+    public static TankNPC focusedNPC = null;
 
     public static final String shopCommand = "/shop";
     public static final InputBindingGroup select = new InputBindingGroup("view_npc", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_E));
@@ -78,7 +78,7 @@ public class TankNPC extends TankDummy implements ISyncable
 
     public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, double nameR, double nameG, double nameB, ArrayList<Item> shop)
     {
-        super("npc", x, y * 50 + 25, angle);
+        super("npc", x * 50 + 25, y * 50 + 25, angle);
 
         if (messageList != null && messageList.size() > 0)
             this.messages = messageList;
@@ -175,12 +175,12 @@ public class TankNPC extends TankDummy implements ISyncable
     {
         super.update();
 
-        playerNear = ModAPI.withinRange((this.posX - 25) / 50, (this.posY - 25) / 50, 3).contains(Game.playerTank);
+        playerNear = false;
+        List<Map.Entry<Tank, Double>> tanksNear = ModAPI.withinRange(Game.playerTank.posX, Game.playerTank.posY, 150, false);
+        if (tanksNear.size() > 1)   // first element will always be the player tank itself
+            playerNear = tanksNear.get(1).getKey().equals(this);
 
-        if (((ScreenGame) Game.screen).npcShopScreen && !playerNear)
-            ((ScreenGame) Game.screen).npcShopScreen = false;
-
-        if (!overrideDisplayState)
+        if (!overrideDisplayState && (focusedNPC == null || focusedNPC == this))
         {
             if (playerNear && select.isValid())
             {
@@ -188,6 +188,8 @@ public class TankNPC extends TankDummy implements ISyncable
                 if (!isChatting)
                 {
                     isChatting = true;
+                    focusedNPC = this;
+                    messageNum = 0;
 
                     if (!ModAPI.fixedMenus.contains(this.messageDisplay))
                         ModAPI.fixedMenus.add(this.messageDisplay);
@@ -197,6 +199,7 @@ public class TankNPC extends TankDummy implements ISyncable
                 else if (messageNum == messages.size() - 1)
                 {
                     isChatting = false;
+                    focusedNPC = null;
                     messageNum = 0;
                 }
                 else if (this.currentLine.length() < messages.get(messageNum).length())
@@ -211,14 +214,20 @@ public class TankNPC extends TankDummy implements ISyncable
             }
 
             if (isChatting && playerNear)
+            {
                 draw = true;
+            }
             else
             {
                 isChatting = false;
+                focusedNPC = null;
                 draw = false;
                 messageNum = 0;
             }
         }
+
+        if (((ScreenGame) Game.screen).npcShopScreen && !playerNear && (focusedNPC == null || focusedNPC == this))
+            ((ScreenGame) Game.screen).npcShopScreen = false;
 
         if (this.draw && (!((ScreenGame) Game.screen).paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && this.messages != null && this.messages.get(messageNum) != null)
         {
@@ -227,9 +236,9 @@ public class TankNPC extends TankDummy implements ISyncable
                 if (this.currentLine.length() < this.messages.get(messageNum).length())
                     this.currentLine += this.messages.get(messageNum).charAt(this.currentLine.length());
 
-                this.counter = 3;
+                this.counter = 0.5;
             }
-            this.counter -= Panel.frameFrequency * 4;
+            this.counter -= Panel.frameFrequency;
         }
     }
 
@@ -318,6 +327,7 @@ public class TankNPC extends TankDummy implements ISyncable
             return;
         }
 
+        ((ScreenGame) Game.screen).npcShopScreen = false;
         this.currentLine = String.valueOf(this.messages.get(messageNum).charAt(0));
     }
 

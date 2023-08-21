@@ -1,6 +1,15 @@
 Older Changelogs
 ---
 
+**Mod API v1.1.4**:
+- Revamped multiplayer crusades
+- Fixed multiplayer crusade bugs
+- Lowered third person turning sensitivity
+- Added zoom controls to first and third person (press c and scroll)
+- :train:
+- Added two methods to `Tank`s: `sendCreateEvent()` and `sendUpdateEvent()`.
+- Removed `IModdedTank`
+
 **Mod API v1.1.3**
 - Updated to Tanks 1.5.1
 - Added an option to fix the number of network events tanks send every second
@@ -17,7 +26,7 @@ Older Changelogs
 - Fields can now be synced across the network, which means you can change it without sending an event. Read the JavaDoc on the `ISyncable` and `SyncedFieldMap` classes.
 - Added synced fields to the text and scoreboard. To use them, set their `syncEnabled` property to true.
 - Added animations! These can change the zoom, position, and opacity of text or shapes.
-- Scoreboards are now sorted, and their sorting can be customized.
+- Scoreboards are now sorted, and their SortOrder can be customized.
 - `TextWithStyling`: Displays text with styling. All fields are synced.
 - `EndCondition`: Override to change the condition for teams or players to win.
 - `EndText`: Override to change the text shown on `ScreenInterlevel`

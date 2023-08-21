@@ -3,7 +3,6 @@ package tanks.gui;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.IDrawableForInterface;
-import tanks.tank.TankProperty;
 import tanks.translation.Translation;
 
 import java.util.ArrayList;
@@ -11,7 +10,8 @@ import java.util.ArrayList;
 public class ButtonObject extends Button
 {
 	public IDrawableForInterface object;
-	public boolean tempDisableHover = false;
+    public Runnable drawObjectForInterface = () -> object.drawForInterface(this.posX, this.posY);
+    public boolean tempDisableHover = false;
 	public Runnable drawBeforeTooltip = null;
 	
 	public ButtonObject(IDrawableForInterface d, double x, double y, double sX, double sY, Runnable f)
@@ -68,8 +68,8 @@ public class ButtonObject extends Button
 	public void draw()
 	{
 		Drawing drawing = Drawing.drawing;
-		
-		this.object.drawForInterface(this.posX, this.posY);
+
+        this.drawObjectForInterface.run();
 		
 		if (!enabled)
 			drawing.setColor(this.disabledColR, this.disabledColG, this.disabledColB, 127);	

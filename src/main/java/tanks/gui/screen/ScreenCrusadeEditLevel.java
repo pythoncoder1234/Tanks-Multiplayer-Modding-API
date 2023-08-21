@@ -280,6 +280,9 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
 
                 o.postOverride();
 
+                if (o.startHeight > Game.tile_size)
+                    continue;
+
                 int x = (int) (o.posX / Game.tile_size);
                 int y = (int) (o.posY / Game.tile_size);
 

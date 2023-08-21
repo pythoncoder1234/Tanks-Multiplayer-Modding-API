@@ -4,7 +4,7 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 
-public class ScreenDebug extends Screen
+public class ScreenDebug extends ScreenOptionsOverlay
 {
     public String traceText = "Trace rays: ";
     public String firstPersonText = "First person: ";
@@ -12,11 +12,20 @@ public class ScreenDebug extends Screen
     public String tankIDsText = "Show tank IDs: ";
     public String invulnerableText = "Invulnerable: ";
 
+    Button back = new Button(this.centerX, this.centerY + 210, this.objWidth, this.objHeight, "Back", () ->
+    {
+        if (game != null)
+        {
+            game.screenshotMode = false;
+            Game.screen = game;
+        }
+        else
+            Game.screen = new ScreenTitle();
+    });
+    Button test = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "Test stuff", () -> Game.screen = new ScreenTestDebug());
+
     public ScreenDebug()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-
         if (Game.traceAllRays)
             traceAllRays.setText(traceText, ScreenOptions.onText);
         else
@@ -42,28 +51,12 @@ public class ScreenDebug extends Screen
         else
             invulnerable.setText(invulnerableText, ScreenOptions.offText);
 
+        glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
         tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
         allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
     }
-
-    Button back = new Button(this.centerX, this.centerY + 210, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenTitle()
-    );
-
-    Button keyboardTest = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "Test keyboard", () -> Game.screen = new ScreenTestKeyboard()
-    );
-
-    Button textboxTest = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "Test text boxes", () -> Game.screen = new ScreenTestTextbox()
-    );
-
-    Button modelTest = new Button(this.centerX - this.objXSpace, this.centerY, this.objWidth, this.objHeight, "Test models", () -> Game.screen = new ScreenTestModel(Drawing.drawing.createModel("/models/tankcamoflauge/base/"))
-    );
-
-    Button fontTest = new Button(this.centerX - this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Test fonts", () -> Game.screen = new ScreenTestFonts()
-    );
-
-    Button shapeTest = new Button(this.centerX - this.objXSpace, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "Test shapes", () -> Game.screen = new ScreenTestShapes());
 
     Button traceAllRays = new Button(this.centerX, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
     {
@@ -121,7 +114,24 @@ public class ScreenDebug extends Screen
         }
     });
 
-    Button invulnerable = new Button(this.centerX, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    @Override
+    public void update()
+    {
+        super.update();
+
+        test.update();
+        traceAllRays.update();
+        followingCam.update();
+        firstPerson.update();
+        invulnerable.update();
+        glipping.update();
+        tankIDs.update();
+        tankHitboxes.update();
+        obstacleHitboxes.update();
+        pathfinding.update();
+        allNums.update();
+        back.update();
+    }    Button invulnerable = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -132,6 +142,36 @@ public class ScreenDebug extends Screen
                 invulnerable.setText(invulnerableText, ScreenOptions.onText);
             else
                 invulnerable.setText(invulnerableText, ScreenOptions.offText);
+        }
+    });
+
+    @Override
+    public void draw()
+    {
+        this.drawDefaultBackground();
+        Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.setColor(brightness, brightness, brightness);
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 210, "Debug menu");
+
+        test.draw();
+        firstPerson.draw();
+        followingCam.draw();
+        traceAllRays.draw();
+        allNums.draw();
+        obstacleHitboxes.draw();
+        tankHitboxes.draw();
+        pathfinding.draw();
+        tankIDs.draw();
+        glipping.draw();
+        invulnerable.draw();
+        back.draw();
+    }    Button glipping = new Button(this.centerX - this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.game.window.allowGlipping = !Game.game.window.allowGlipping;
+            glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
         }
     });
 
@@ -176,48 +216,7 @@ public class ScreenDebug extends Screen
         }
     });
 
-    @Override
-    public void update()
-    {
-        keyboardTest.update();
-        textboxTest.update();
-        modelTest.update();
-        fontTest.update();
-        shapeTest.update();
-        traceAllRays.update();
-        followingCam.update();
-        firstPerson.update();
-        invulnerable.update();
-        tankIDs.update();
-        tankHitboxes.update();
-        obstacleHitboxes.update();
-        pathfinding.update();
-        allNums.update();
-        back.update();
-    }
 
-    @Override
-    public void draw()
-    {
-        this.drawDefaultBackground();
-        Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 210, "Debug menu");
 
-        firstPerson.draw();
-        followingCam.draw();
-        modelTest.draw();
-        keyboardTest.draw();
-        textboxTest.draw();
-        shapeTest.draw();
-        traceAllRays.draw();
-        allNums.draw();
-        obstacleHitboxes.draw();
-        tankHitboxes.draw();
-        pathfinding.draw();
-        tankIDs.draw();
-        invulnerable.draw();
-        fontTest.draw();
-        back.draw();
-    }
+
 }

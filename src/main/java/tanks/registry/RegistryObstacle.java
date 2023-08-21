@@ -3,7 +3,6 @@ package tanks.registry;
 import tanks.obstacle.Obstacle;
 import tanks.obstacle.ObstacleUnknown;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class RegistryObstacle 
@@ -52,13 +51,15 @@ public class RegistryObstacle
 		{
 			try 
 			{
-				return obstacle.getConstructor(String.class, double.class, double.class).newInstance(this.name, x, y);
-			}
-			catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) 
-			{
-				e.printStackTrace();
-				return null;
-			}
+                Obstacle o = obstacle.getConstructor(String.class, double.class, double.class).newInstance(this.name, x, y);
+                o.registerSelectors();
+                return o;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
 		}
 
 		public static ObstacleEntry getUnknownEntry()

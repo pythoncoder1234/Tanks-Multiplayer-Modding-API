@@ -177,25 +177,31 @@ public class InputSelector implements IDrawable, ITrigger
 				drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
 				drawing.drawTooltip(this.hoverText);
 			}
-			else
-			{
-				drawing.setColor(0, 150, 255);
-				drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
-				drawing.setColor(255, 255, 255);
-				drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
-			}
-		}
-	}
+            else
+            {
+                drawing.setColor(0, 150, 255);
+                drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
+                drawing.setColor(255, 255, 255);
+                drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
+            }
+        }
+    }
 
-	@Override
-	public void setPosition(double x, double y)
-	{
-		this.posX = x;
-		this.posY = y;
-	}
+    @Override
+    public void updateKeybind()
+    {
 
-	public void update()
-	{
+    }
+
+    @Override
+    public void setPosition(double x, double y)
+    {
+        this.posX = x;
+        this.posY = y;
+    }
+
+    public void update()
+    {
 		this.justPressed = false;
 
 		if (!Game.game.window.touchscreen)

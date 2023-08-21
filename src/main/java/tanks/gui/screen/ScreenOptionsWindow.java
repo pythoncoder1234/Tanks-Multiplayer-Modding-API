@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 
-public class ScreenOptionsWindow extends Screen
+public class ScreenOptionsWindow extends ScreenOptionsOverlay
 {
     public static ScreenOverlayControls overlay = new ScreenOverlayControls();
 
@@ -23,15 +23,14 @@ public class ScreenOptionsWindow extends Screen
 
     public ScreenOptionsWindow()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-
         width = new TextBox(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace / 4, Drawing.drawing.interfaceSizeY / 2 - this.objYSpace, this.objWidth / 2, this.objHeight, "Width", () ->
         {
             if (width.inputText.length() <= 2)
                 width.inputText = (int) Game.game.window.absoluteWidth + "";
             else
                 Game.game.window.setResolution(Integer.parseInt(width.inputText), (int) Game.game.window.absoluteHeight);
+
+            Drawing.drawing.forceRedrawTerrain();
         }
                 , "");
 
@@ -47,6 +46,8 @@ public class ScreenOptionsWindow extends Screen
                 height.inputText = (int) Game.game.window.absoluteWidth + "";
             else
                 Game.game.window.setResolution((int) Game.game.window.absoluteWidth, Integer.parseInt(height.inputText));
+
+            Drawing.drawing.forceRedrawTerrain();
         }
                 , "");
 
@@ -75,6 +76,8 @@ public class ScreenOptionsWindow extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         back.update();
         fullscreen.update();
         width.update();
@@ -91,7 +94,6 @@ public class ScreenOptionsWindow extends Screen
     @Override
     public void draw()
     {
-        Drawing.drawing.forceRedrawTerrain();
         this.drawDefaultBackground();
         back.draw();
         maxFPS.draw();

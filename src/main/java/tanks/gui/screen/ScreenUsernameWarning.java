@@ -8,9 +8,7 @@ public class ScreenUsernameWarning extends Screen
 {
 	public ScreenUsernameWarning()
 	{
-		this.music = "menu_options.ogg";
-		this.musicID = "menu";
-	}
+    }
 
 	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Ok", () -> Game.screen = new ScreenOptionsMultiplayer()
 	);

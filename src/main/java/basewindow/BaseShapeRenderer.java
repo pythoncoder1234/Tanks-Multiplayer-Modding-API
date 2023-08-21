@@ -38,6 +38,8 @@ public abstract class BaseShapeRenderer
 
     public abstract void fillRect(double x, double y, double sX, double sY, double radius);
 
+    public abstract void fillPolygon(double... params);
+
     public abstract void fillBox(double x, double y, double z, double sX, double sY, double sZ, String texture);
 
     public abstract void fillBox(double x, double y, double z, double sX, double sY, double sZ, byte options, String texture);

@@ -3,6 +3,7 @@ package tanks.network;
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
 import tanks.Minigame;
+import tanks.Panel;
 import tanks.network.event.PersonalEvent;
 
 public class EventMinigameStart extends PersonalEvent
@@ -35,7 +36,10 @@ public class EventMinigameStart extends PersonalEvent
         {
             Class<? extends Minigame> cls = Game.registryMinigame.getEntry(this.name);
             if (cls == null)
+            {
+                Panel.currentNotification = new Panel.Notification("Warning: minigame '" + this.name + "' was not found in the registry.\nMinigame loading will be skipped.", 500);
                 return;
+            }
 
             Game.currentGame = cls.getConstructor().newInstance();
             Game.currentGame.start();

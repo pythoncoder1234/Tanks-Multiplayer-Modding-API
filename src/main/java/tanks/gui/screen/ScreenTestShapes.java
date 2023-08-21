@@ -5,20 +5,14 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBoxSlider;
 
-public class ScreenTestShapes extends Screen
+public class ScreenTestShapes extends ScreenOptionsOverlay
 {
     public double length = 200;
     public double width = 200;
     public double borderRadius = 20;
     public double borderWidth = 50;
 
-    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenDebug());
-
-    public ScreenTestShapes()
-    {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-    }
+    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", () -> Game.screen = prevScreen);
 
     TextBoxSlider shapeLength = new TextBoxSlider(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "Length", new Runnable()
     {
@@ -59,6 +53,8 @@ public class ScreenTestShapes extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         shapeLength.update();
         shapeWidth.update();
         radius.update();

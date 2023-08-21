@@ -9,40 +9,41 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
-public abstract class Item implements IGameObject
+public abstract class Item extends GameObject
 {
-	public static ArrayList<String> icons = new ArrayList<>(Arrays.asList("item.png", "bullet_normal.png", "bullet_mini.png", "bullet_large.png", "bullet_fire.png", "bullet_fire_trail.png", "bullet_dark_fire.png", "bullet_flame.png",
-			"bullet_laser.png", "bullet_healing.png", "bullet_electric.png", "bullet_freeze.png", "bullet_arc.png", "bullet_explosive.png", "bullet_boost.png", "bullet_air.png", "bullet_homing.png",
-			"mine.png",
-			"shield.png", "shield_gold.png"));
+    public static ArrayList<String> icons = new ArrayList<>(Arrays.asList("item.png", "bullet_normal.png", "bullet_mini.png", "bullet_large.png", "bullet_fire.png", "bullet_fire_trail.png", "bullet_dark_fire.png", "bullet_flame.png",
+            "bullet_laser.png", "bullet_healing.png", "bullet_electric.png", "bullet_freeze.png", "bullet_arc.png", "bullet_explosive.png", "bullet_boost.png", "bullet_air.png", "bullet_homing.png",
+            "mine.png",
+            "shield.png", "shield_gold.png"));
 
-	// Items like bullets and mines can hit enemies, so this will be shown on the stats screen
-	public boolean supportsHits = false;
+    // Items like bullets and mines can hit enemies, so this will be shown on the stats screen
+    public boolean supportsHits = false;
 
-	public boolean isConsumable;
+    public boolean isConsumable;
 	public int levelUnlock;
 	public int price;
-	public int maxStackSize = 100;
-	public int stackSize = 1;
-	public boolean unlimitedStack = false;
-	public boolean inUse = false;
-	public String name = System.currentTimeMillis() + "";
-	public String icon;
-	public LinkedHashMap<String, UIProperty> properties = new LinkedHashMap<>();
+    public int maxStackSize = 100;
+    public int stackSize = 1;
+    public boolean unlimitedStack = false;
+    public boolean inUse = false;
+    public String name = System.currentTimeMillis() + "";
+    public String icon;
+    public LinkedHashMap<String, UIProperty> properties = new LinkedHashMap<>();
 
-	public boolean destroy = false;
-	public double cooldown = 0;
-	
-	public boolean rightClick;
+    public boolean destroy = false;
+    public double cooldown = 0;
+    public double cooldownBase = 0;
 
-	public Player player;
+    public boolean rightClick;
 
-	public boolean usable()
-	{
-		return this.usable(this.getUser());
-	}
+    public Player player;
 
-	public abstract boolean usable(Tank t);
+    public boolean usable()
+    {
+        return this.usable(this.getUser());
+    }
+
+    public abstract boolean usable(Tank t);
 
 	public void use()
 	{
@@ -130,19 +131,7 @@ public abstract class Item implements IGameObject
 	public void attemptUse(Tank t)
 	{
 		if (this.usable(t))
-		{
 			use(t);
-
-			/*for (FixedMenu m : ModAPI.menuGroup)
-			{
-				if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.items_used)) {
-					if (!((Scoreboard) m).teamPoints.isEmpty())
-						((Scoreboard) m).addTeamScore(this.player.tank.team, 1);
-					else
-						((Scoreboard) m).addPlayerScore(this.player, 1);
-				}
-			} TODO*/
-		}
 	}
 
 	public abstract void fromString(String s);
@@ -207,7 +196,9 @@ public abstract class Item implements IGameObject
 	public Tank getUser()
 	{
 		if (this.player == null)
-			return null;
+        {
+            return null;
+        }
 		else if (this.player == Game.player)
 		{
 			return Game.playerTank;
@@ -217,9 +208,7 @@ public abstract class Item implements IGameObject
 			for (Movable m: Game.movables)
 			{
 				if (m instanceof TankPlayerRemote && ((TankPlayerRemote) m).player.clientID.equals(this.player.clientID))
-				{
 					return (Tank) m;
-				}
 			}
 		}
 

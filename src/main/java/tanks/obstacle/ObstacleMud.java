@@ -3,6 +3,7 @@ package tanks.obstacle;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Tank;
+import tanks.tank.TankAIControlled;
 
 public class ObstacleMud extends Obstacle
 {
@@ -150,7 +151,7 @@ public class ObstacleMud extends Obstacle
         return 0;
     }
 
-    public int unfavorability()
+    public int unfavorability(TankAIControlled t)
     {
         return 3;
     }

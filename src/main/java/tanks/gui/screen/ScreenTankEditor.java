@@ -1154,7 +1154,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     ArrayList<TankAIControlled> tanks = new ArrayList<>();
 
                     if (this.tankScreen instanceof OverlayObjectMenu)
-                        tanks = ((OverlayObjectMenu) this.tankScreen).screenLevelEditor.level.customTanks;
+                        tanks = ((OverlayObjectMenu) this.tankScreen).editor.level.customTanks;
 
                     this.resetLayout();
 
@@ -1347,7 +1347,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
             ArrayList<TankAIControlled> tanks = new ArrayList<>();
 
             if (this.tankScreen instanceof OverlayObjectMenu)
-                tanks = ((OverlayObjectMenu) this.tankScreen).screenLevelEditor.level.customTanks;
+                tanks = ((OverlayObjectMenu) this.tankScreen).editor.level.customTanks;
 
             ScreenSelectorTank screen = new ScreenSelectorTank("Select spawned tank", b.tank, Game.screen, tanks, (t) ->
             {
@@ -1459,7 +1459,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
     public void updateMusic()
     {
-        ((ScreenLevelEditorOverlay) tankScreen).screenLevelEditor.updateMusic(false);
+        ((ScreenLevelEditorOverlay) tankScreen).editor.updateMusic(false);
 
         this.prevTankMusics.clear();
         this.prevTankMusics.addAll(this.tankMusics);

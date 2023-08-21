@@ -1,7 +1,6 @@
 package tanks.generator;
 
 import tanks.Game;
-import tanks.Level;
 import tanks.gui.screen.ScreenPartyHost;
 
 import java.util.ArrayList;

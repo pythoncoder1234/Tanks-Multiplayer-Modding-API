@@ -5,12 +5,10 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBoxSlider;
 
-public class ScreenOptionsFramerate extends Screen
+public class ScreenOptionsFramerate extends ScreenOptionsOverlay
 {
     public ScreenOptionsFramerate()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         maxFPS.allowLetters = false;
         maxFPS.allowSpaces = false;
@@ -88,6 +86,8 @@ public class ScreenOptionsFramerate extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         vsync.update();
         unlimited.update();
 

@@ -5,6 +5,7 @@ import tanks.bullet.Bullet;
 import tanks.gui.screen.*;
 import tanks.network.event.EventObstacleSnowMelt;
 import tanks.tank.Tank;
+import tanks.tank.TankAIControlled;
 
 public class ObstacleSnow extends Obstacle
 {
@@ -111,14 +112,10 @@ public class ObstacleSnow extends Obstacle
                 this.visualDepth = Math.min(this.visualDepth + Panel.frameFrequency / 255, 1);
 
             if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
-            {
                 this.visualDepth = 0.5;
-            }
 
             if (ScreenGame.finishedQuick && Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !((ScreenGame) Game.screen).paused))
-            {
                 this.visualDepth = Math.max(0.5, this.visualDepth - Panel.frameFrequency / 127);
-            }
         }
 
         this.colorR = this.baseColorR * (this.depth + 4) / 5;
@@ -167,11 +164,6 @@ public class ObstacleSnow extends Obstacle
         }
     }
 
-    public int unfavorability()
-    {
-        return 3;
-    }
-
     public byte getOptionsByte(double h)
     {
         return 0;
@@ -192,5 +184,10 @@ public class ObstacleSnow extends Obstacle
         this.previousFinalHeight = this.finalHeight;
 
         return r || super.positionChanged();
+    }
+
+    public int unfavorability(TankAIControlled t)
+    {
+        return 3;
     }
 }

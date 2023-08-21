@@ -8,6 +8,7 @@ import tanks.gui.menus.FixedText;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
+import tanks.minigames.GameMap;
 import tanks.minigames.TeamDeathmatch;
 import tanks.network.EventMinigameStart;
 import tanks.network.NetworkEventMap;
@@ -15,37 +16,39 @@ import tanks.network.event.*;
 import tanks.tank.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class ModAPI
 {
     public static boolean sendEvents = true;
+
+    // Directions in radians in terms of tank (the model is rotated 90 degrees)
+    public static final double up = Math.toRadians(-90);
+    static ArrayList<Runnable> resetFunc = new ArrayList<>();
+
     public static ArrayList<FixedMenu> fixedMenus = new ArrayList<>();
     public static HashMap<Double, FixedMenu> ids = new HashMap<>();
     public static ArrayList<FixedMenu> removeMenus = new ArrayList<>();
 
-    // Directions in radians in terms of tank
-    public static final double up = Math.toRadians(-90);
+    /**
+     * To add a new mod, add {@code Game.registerMinigame(yourMod.class)} to this function. Of course, type the name of your mod instead of "yourMod".<br><br>
+     * You can also use other functions here, like the {@code ModAPI.printLevelString(levelPath)) function.<br><br>
+     * However, keep in mind that this will only be called on the first frame of the game launch.
+     */
+    public static void registerGames()
+    {
+        Game.registerMinigame(TeamDeathmatch.class);
+        Game.registerMinigame(GameMap.class);
+    }
     public static final double down = Math.toRadians(90);
     public static final double left = Math.toRadians(180);
     public static final double right = Math.toRadians(0);
 
-    /**
-     * To add a new mod, add {@code registerMod(yourMod.class)} to this function. Of course, type the name of your mod instead of "yourMod".<br><br>
-     * You can also use other functions here, like the {@code ModAPI.printLevelString(levelPath)) function.<br><br>
-     * However, keep in mind that this will only be called on the first frame of the game launch.
-     */
-    public static void registerMods()
-    {
-        Game.registerMinigame(TeamDeathmatch.class);
-//        Game.registerMinigame(GameMap.class);
-    }
-
     public static void setUp()
     {
-        registerMods();
+        registerGames();
 
         NetworkEventMap.register(EventAddCustomMovable.class);
         NetworkEventMap.register(EventAddCustomShape.class);
@@ -76,7 +79,14 @@ public class ModAPI
         fixedText = Game.game.window.fontRenderer;
     }
 
-    /** Skips the countdown before a level starts. */
+    public static void registerResetFunction(Runnable r)
+    {
+        resetFunc.add(r);
+    }
+
+    /**
+     * Skips the countdown before a level starts.
+     */
     public static void skipCountdown()
     {
         if (!(Game.screen instanceof ScreenGame))
@@ -90,21 +100,29 @@ public class ModAPI
     }
 
     /**
-     * Returns the level or crusade string of a level file.
+     * Returns the level string of a level file.
      */
     public static String getLevelString(String levelName)
     {
-        return getLevelString(levelName, false);
+        return getInternalLevelString(Game.homedir + Game.levelDir + "/" + levelName.replace(' ', '_') + ".tanks", false);
     }
 
     /**
-     * Returns (or prints) the level or crusade string of a level file.
+     * Returns the level or crusade string of a .tanks file.
      */
-    public static String getLevelString(String levelName, boolean print)
+    public static String getInternalLevelString(String filePath)
+    {
+        return getInternalLevelString(filePath, false);
+    }
+
+    /**
+     * Returns (and prints, if the <code>print</code> parameter is set to <code>true</code>) the level or crusade string of a .tanks file.
+     */
+    public static String getInternalLevelString(String filePath, boolean print)
     {
         StringBuilder levelString = new StringBuilder();
 
-        BaseFile level = Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + levelName.replace(' ', '_') + ".tanks");
+        BaseFile level = Game.game.fileManager.getFile(filePath);
         try
         {
             level.startReading();
@@ -126,8 +144,17 @@ public class ModAPI
 
         catch (IOException e)
         {
-            throw new RuntimeException("Level \"" + levelName + "\" not found");
+            throw new RuntimeException("Level \"" + filePath + "\" not found");
         }
+    }
+
+    /**
+     * <b>WIP Function</b><br>
+     * Respawns a player in one of its team's spawn points.
+     */
+    public static void respawnPlayer(Player p)
+    {
+        respawnPlayer(p.tank);
     }
 
 
@@ -262,11 +289,12 @@ public class ModAPI
         TankModels.tank.turretBase.draw(x, y, size, size, angle);
     }
 
-    /**
-     * Tests if any Tank is within range of an area (in tiles)
-     *
-     * @return an ArrayList of Tanks
-     */
+    public static double distanceBetween(double x, double y, Tank t)
+    {
+        return Math.sqrt((t.posX - x) * (t.posX - x) + (t.posY - y) * (t.posY - y));
+    }
+
+    @Deprecated
     public static ArrayList<Tank> withinRange(double x, double y, double size)
     {
         ArrayList<Tank> output = new ArrayList<>();
@@ -286,18 +314,67 @@ public class ModAPI
     }
 
     /**
-     *  <b>WIP Function</b><br>
-     *  Respawns a player in one of its team's spawn points.
-     *  */
-    public static void respawnPlayer(Player p)
+     * Tests if any {@link Tank} is within the radius of an area (in pixels).
+     * Sorted in ascending order, by distance.
+     *
+     * @return A list of map entries. The key returns the <code>Tank</code>,
+     * and the value returns the distance from the location of the xy coordinates.
+     * @see Map.Entry#getKey()
+     * @see Map.Entry#getValue()
+     */
+    public static List<Map.Entry<Tank, Double>> withinRange(double x, double y, double radius, boolean isTileCoords)
     {
-        respawnPlayer(p.tank);
+        if (isTileCoords)
+        {
+            x *= 50;
+            y *= 50;
+            radius *= 50;
+        }
+
+        return withinRange(x, y, radius, SortOrder.ascending);
     }
 
     /**
-     *  <b>WIP Function</b><br>
-     *  Respawns a player in one of its team's spawn points.
-     *  */
+     * Tests if any {@link Tank} is within the radius of an area (in pixels).
+     * Sorted by distance, and sorting order is determined by the <code>sortOrder</code> parameter.
+     *
+     * @return A list of map entries. The key returns the <code>Tank</code>,
+     * and the value returns the distance from the location of the xy coordinates.
+     * @see Map.Entry#getKey()
+     * @see Map.Entry#getValue()
+     */
+    public static List<Map.Entry<Tank, Double>> withinRange(double x, double y, double radius, SortOrder sortOrder)
+    {
+        LinkedHashMap<Tank, Double> tanks = new LinkedHashMap<>();
+
+        for (Movable m : Game.movables)
+        {
+            if (m instanceof Tank)
+            {
+                Tank t = (Tank) m;
+                double distance = (t.posX - x) * (t.posX - x) + (t.posY - y) * (t.posY - y);
+
+                if (distance <= radius * radius)
+                    tanks.put(t, distance);
+            }
+        }
+
+        if (sortOrder != SortOrder.none)
+        {
+            Comparator<Map.Entry<Tank, Double>> comparator = Map.Entry.comparingByValue();
+            if (sortOrder == SortOrder.descending)
+                comparator = comparator.reversed();
+
+            return tanks.entrySet().stream().sorted(comparator).collect(Collectors.toList());
+        }
+        else
+            return new ArrayList<>(tanks.entrySet());
+    }
+
+    /**
+     * <b>WIP Function</b><br>
+     * Respawns a player in one of its team's spawn points.
+     */
     public static void respawnPlayer(Tank t)
     {
         Game.removeMovables.add(t);
@@ -320,6 +397,22 @@ public class ModAPI
 
             break;
         }
+    }
+
+    /**
+     * Load a level from a level string.
+     *
+     * @see #getInternalLevelString(String) ModAPI.getInternalLevelString(filePath)
+     */
+    public static Level loadLevel(String levelString)
+    {
+        Level l = new Level(levelString);
+        loadLevel(l, false);
+
+        if (Game.currentGame != null)
+            Game.currentGame.level = l;
+
+        return l;
     }
 
     public static Crate spawnTankCrate(Tank t)
@@ -460,16 +553,8 @@ public class ModAPI
         loadLevel(l, false);
     }
 
-    public static Level loadLevel(String levelString)
-    {
-        Level l = new Level(levelString);
-        loadLevel(l, false);
-
-        if (Game.currentGame != null)
-            Game.currentGame.level = l;
-
-        return l;
-    }
+    public enum SortOrder
+    {ascending, descending, none}
 
     /** Change the color of a level background. */
     public static void changeBackgroundColor(int r, int g, int b)

@@ -5,7 +5,10 @@ import java.util.UUID;
 
 public class AttributeModifier
 {
-	public enum Operation {add, multiply}
+    /**
+     * Causes objects to spawn a particle trail of embers
+     */
+    public static final Type ember_effect = new Type("effect");
 	
 	/**An unique name for the modifier, to prevent double effects*/
 	public String name = UUID.randomUUID().toString();
@@ -47,36 +50,46 @@ public class AttributeModifier
 	public static final Type bullet_boost = new Type("bullet_boost");
 	/** Changes glow of an object */
 	public static final Type glow = new Type("glow");
-	/** Causes objects to spawn a particle trail of embers */
-	public static final Type ember_effect = new Type("effect");
-	/** When applied to a tank, its bullets will have their speed modified */
-	public static final Type bullet_speed = new Type("bullet_speed");
-	/** When applied to a tank, its cooldown will change accordingly */
-	public static final Type reload = new Type("reload");
-	/** When applied to a tank, its bullet recoil will change accordingly */
-	public static final Type recoil = new Type("recoil");
-	/** When applied to a tank, its will show a green shield indicating health was added via a heal ray */
-	public static final Type healray = new Type("healray");
+    /** When applied to a tank, its bullets will have their speed modified */
+    public static final Type bullet_speed = new Type("bullet_speed");
+    /** When applied to a tank, its cooldown will change accordingly*/
+    public static final Type reload = new Type("reload");
+    /** When applied to a tank, its bullet recoil will change accordingly */
+    public static final Type recoil = new Type("recoil");
+    /** When applied to a tank, its will show a green shield indicating health was added via a heal ray*/
+    public static final Type healray = new Type("healray");
+    /** When applied to a tank, it affects how quickly the tank floats to the surface*/
+    public static final Type buoyancy = new Type("buoyancy");
 
-	public static class Type
+	public void update()
 	{
-		public String name;
+		this.age += Panel.frameFrequency;
 
-		public Type(String name)
-		{
-			this.name = name;
-			attributeModifierTypes.put(name, this);
-		}
+		if (this.duration > 0 && this.age >= this.duration)
+            this.expired = true;
+    }
 
-		public boolean equals(Type other)
-		{
-			return this.name.equals(other.name);
-		}
+    public double getValue(double in)
+    {
+        double val;
 
-		public boolean equals(String other)
-		{
-			return this.name.equals(other);
-		}
+        if (this.expired)
+            return in;
+        else if (this.age < this.warmupAge)
+            val = this.value * this.age / this.warmupAge;
+        else if (this.age < this.deteriorationAge || this.deteriorationAge <= 0)
+            val = this.value;
+        else
+            val = this.value * (this.duration - this.age) / (this.duration - this.deteriorationAge);
+
+        if (this.effect == Operation.set)
+            return val;
+        else if (this.effect == Operation.add)
+            return in + val;
+        else if (this.effect == Operation.multiply)
+			return in * (val + 1);
+		else
+			return in;
 	}
 	
 	public AttributeModifier(Type type, Operation op, double amount)
@@ -92,34 +105,28 @@ public class AttributeModifier
 		this.name = name;
 	}
 	
-	public void update()
-	{
-		this.age += Panel.frameFrequency;
-	
-		if (this.duration > 0 && this.age >= this.duration)
-			this.expired = true;
-	}
-	
-	public double getValue(double in)
-	{
-		double val;
-		
-		if (this.expired)
-			return in;
-		else if (this.age < this.warmupAge)
-			val = this.value * this.age / this.warmupAge;
-		else if (this.age < this.deteriorationAge || this.deteriorationAge <= 0)
-			val = this.value;
-		else
-			val = this.value * (this.duration - this.age) / (this.duration - this.deteriorationAge);
-		
-		if (this.effect == Operation.add)
-			return in + val;
-		else if (this.effect == Operation.multiply)
-			return in * (val + 1);
-		else
-			return in;
-			
+	public enum Operation
+    {add, multiply, set}
+
+    public static class Type
+    {
+        public String name;
+
+        public Type(String name)
+        {
+            this.name = name;
+            attributeModifierTypes.put(name, this);
+        }
+
+		public boolean equals(Type other)
+		{
+			return this.name.equals(other.name);
+		}
+
+		public boolean equals(String other)
+		{
+			return this.name.equals(other);
+		}
 	}
 	
 }

@@ -3,6 +3,7 @@ package tanks.gui;
 import basewindow.InputCodes;
 import basewindow.InputPoint;
 import tanks.*;
+import tanks.gui.input.InputBindingGroup;
 import tanks.gui.screen.ScreenInfo;
 import tanks.translation.Translation;
 
@@ -10,17 +11,19 @@ import java.util.ArrayList;
 
 public class TextBox implements IDrawable, ITrigger
 {
-	public Runnable function;
-	public double posX;
-	public double posY;
-	public double sizeX;
-	public double sizeY;
+    public Runnable function;
+    public InputBindingGroup keybind;
 
-	public String rawLabelText;
-	public String labelText;
-	public String translatedLabelText;
+    public double posX;
+    public double posY;
+    public double sizeX;
+    public double sizeY;
 
-	public String previousInputText;
+    public String rawLabelText;
+    public String labelText;
+    public String translatedLabelText;
+
+    public String previousInputText;
 	public String inputText;
 
 	public boolean enableHover = false;
@@ -242,25 +245,35 @@ public class TextBox implements IDrawable, ITrigger
 		}
 
 		if (selected && Game.game.window.touchscreen)
-		{
-			drawing.setColor(255, 255, 255);
-			drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
-			drawing.drawInterfaceImage("icons/paste.png", this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
+        {
+            drawing.setColor(255, 255, 255);
+            drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
+            drawing.drawInterfaceImage("icons/paste.png", this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
 
-			drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
-			drawing.drawInterfaceImage("icons/copy.png", this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
-		}
-	}
+            drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
+            drawing.drawInterfaceImage("icons/copy.png", this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
+        }
+    }
 
-	public void drawInput()
-	{
-		double size = this.sizeY * 0.6;
-		if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale > this.sizeX - 80)
-			Drawing.drawing.setInterfaceFontSize(size * (this.sizeX - 80) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale));
+    @Override
+    public void updateKeybind()
+    {
+        if (this.keybind != null && this.keybind.isValid())
+        {
+            this.keybind.invalidate();
+            this.select();
+        }
+    }
 
-		if (selected)
-			Drawing.drawing.drawInterfaceText(posX, posY, inputText + "\u00a7127127127255_");
-		else
+    public void drawInput()
+    {
+        double size = this.sizeY * 0.6;
+        if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale > this.sizeX - 80)
+            Drawing.drawing.setInterfaceFontSize(size * (this.sizeX - 80) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale));
+
+        if (selected)
+            Drawing.drawing.drawInterfaceText(posX, posY, inputText + "\u00a7127127127255_");
+        else
 			Drawing.drawing.drawInterfaceText(posX, posY, inputText);
 	}
 
@@ -377,20 +390,8 @@ public class TextBox implements IDrawable, ITrigger
 			}
 			else if (!selected)
 			{
-				handled = true;
-				selected = true;
-				this.previousInputText = this.inputText;
-
-				TextBox prev = Panel.selectedTextBox;
-
-				Panel.selectedTextBox = this;
-
-				if (prev != null)
-					prev.submit();
-
-				Drawing.drawing.playVibration("click");
-				Drawing.drawing.playSound("bounce.ogg", 0.5f, 0.7f);
-				Game.game.window.getRawTextKeys().clear();
+                handled = true;
+                this.select();
 			}
 		}
 
@@ -419,24 +420,41 @@ public class TextBox implements IDrawable, ITrigger
 			}
 		}
 
-		if (Game.game.window.touchscreen)
-		{
-			sizeX -= 20;
-			sizeY -= 20;
-		}
+        if (Game.game.window.touchscreen)
+        {
+            sizeX -= 20;
+            sizeY -= 20;
+        }
 
-		return handled;
-	}
+        return handled;
+    }
 
-	public void clear()
-	{
-		Drawing.drawing.playVibration("click");
-		Drawing.drawing.playSound("bounce.ogg", 0.25f, 0.7f);
-		this.inputText = "";
-	}
+    public void select()
+    {
+        selected = true;
+        this.previousInputText = this.inputText;
 
-	public void checkDeselect(double mx, double my, boolean valid)
-	{
+        TextBox prev = Panel.selectedTextBox;
+
+        Panel.selectedTextBox = this;
+
+        if (prev != null)
+            prev.submit();
+
+        Drawing.drawing.playVibration("click");
+        Drawing.drawing.playSound("bounce.ogg", 0.5f, 0.7f);
+        Game.game.window.getRawTextKeys().clear();
+    }
+
+    public void clear()
+    {
+        Drawing.drawing.playVibration("click");
+        Drawing.drawing.playSound("bounce.ogg", 0.25f, 0.7f);
+        this.inputText = "";
+    }
+
+    public void checkDeselect(double mx, double my, boolean valid)
+    {
 		if (Game.game.window.touchscreen)
 		{
 			sizeX += 20;

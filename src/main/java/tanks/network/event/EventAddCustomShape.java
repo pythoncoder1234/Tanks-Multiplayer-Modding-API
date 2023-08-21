@@ -45,8 +45,8 @@ public class EventAddCustomShape extends EventAddFixedMenu
         super.read(b);
 
         this.type = CustomShape.types.valueOf(NetworkUtils.readString(b));
-        this.sizeX = b.readInt();
-        this.sizeY = b.readInt();
+        this.sizeX = b.readDouble();
+        this.sizeY = b.readDouble();
     }
 
     @Override

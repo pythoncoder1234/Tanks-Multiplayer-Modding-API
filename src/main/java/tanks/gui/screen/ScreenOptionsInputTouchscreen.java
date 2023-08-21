@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.tank.TankPlayer;
 
-public class ScreenOptionsInputTouchscreen extends Screen
+public class ScreenOptionsInputTouchscreen extends ScreenOptionsOverlay
 {
     public static final String vibrationsText = "Vibrations: ";
     public static final String mobileText = "Mobile joystick: ";
@@ -111,8 +111,6 @@ public class ScreenOptionsInputTouchscreen extends Screen
 
     public ScreenOptionsInputTouchscreen()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         vibrations.enabled = Game.game.window.vibrationsEnabled;
 
@@ -155,6 +153,8 @@ public class ScreenOptionsInputTouchscreen extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         back.update();
         dualJoysticks.update();
         mobile.update();

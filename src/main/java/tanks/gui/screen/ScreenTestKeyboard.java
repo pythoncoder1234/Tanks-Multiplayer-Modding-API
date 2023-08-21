@@ -4,20 +4,15 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 
-public class ScreenTestKeyboard extends Screen
+public class ScreenTestKeyboard extends ScreenOptionsOverlay
 {
-    public ScreenTestKeyboard()
-    {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-    }
-
-    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenDebug()
+    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "Back", () -> Game.screen = prevScreen
     );
 
     @Override
     public void update()
     {
+        super.update();
         back.update();
     }
 

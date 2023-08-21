@@ -2,10 +2,9 @@ package tanks.gui.screen;
 
 import tanks.Drawing;
 import tanks.Game;
-import tanks.gui.Button;
 import tanks.gui.InputSelector;
 
-public class ScreenControlsGame extends Screen
+public class ScreenControlsGame extends ScreenOptionsOverlay
 {
     InputSelector pause = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 180, 700, 40, "Pause", Game.game.input.pause);
     InputSelector play = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 90, 700, 40, "Play", Game.game.input.play);
@@ -15,13 +14,13 @@ public class ScreenControlsGame extends Screen
 
     public ScreenControlsGame()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
     }
 
     @Override
     public void update()
     {
+        super.update();
+
         pause.update();
         play.update();
         chat.update();

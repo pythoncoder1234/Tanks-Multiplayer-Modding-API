@@ -8,28 +8,28 @@ import tanks.obstacle.Obstacle;
 
 public class OverlayBlockHeight extends ScreenLevelEditorOverlay
 {
-    public Button increaseHeight = new Button(this.centerX + 100, this.centerY, 60, 60, "+", () -> screenLevelEditor.mouseObstacleHeight += 0.5);
+    public Button increaseHeight = new Button(this.centerX + 100, this.centerY, 60, 60, "+", () -> editor.mouseObstacle.stackHeight += 0.5);
 
-    public Button decreaseHeight = new Button(this.centerX - 100, this.centerY, 60, 60, "-", () -> screenLevelEditor.mouseObstacleHeight -= 0.5);
+    public Button decreaseHeight = new Button(this.centerX - 100, this.centerY, 60, 60, "-", () -> editor.mouseObstacle.stackHeight -= 0.5);
 
     public Button back = new Button(this.centerX, this.centerY + 300, 350, 40, "Done", this::escape);
 
     public Button staggering = new Button(this.centerX + 200, this.centerY, 60, 60, "", () ->
     {
-        if (!screenLevelEditor.stagger)
+        if (!editor.stagger)
         {
-            screenLevelEditor.mouseObstacleHeight = Math.max(screenLevelEditor.mouseObstacleHeight, 1);
-            screenLevelEditor.stagger = true;
+            editor.mouseObstacle.stackHeight = Math.max(editor.mouseObstacle.stackHeight, 1);
+            editor.stagger = true;
         }
-        else if (!screenLevelEditor.oddStagger)
+        else if (!editor.oddStagger)
         {
-            screenLevelEditor.mouseObstacleHeight = Math.max(screenLevelEditor.mouseObstacleHeight, 1);
-            screenLevelEditor.oddStagger = true;
+            editor.mouseObstacle.stackHeight = Math.max(editor.mouseObstacle.stackHeight, 1);
+            editor.oddStagger = true;
         }
         else
         {
-            screenLevelEditor.oddStagger = false;
-            screenLevelEditor.stagger = false;
+            editor.oddStagger = false;
+            editor.stagger = false;
         }
     }, " --- "
     );
@@ -45,22 +45,22 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
 
     public void update()
     {
-        this.increaseHeight.enabled = screenLevelEditor.mouseObstacleHeight < Obstacle.default_max_height / (Game.debug ? 1 : 2.);
-        this.decreaseHeight.enabled = screenLevelEditor.mouseObstacleHeight > 0.5;
+        this.increaseHeight.enabled = editor.mouseObstacle.stackHeight < Obstacle.default_max_height / (Game.debug ? 1 : 2.);
+        this.decreaseHeight.enabled = editor.mouseObstacle.stackHeight > 0.5;
 
-        if (screenLevelEditor.stagger)
-            this.decreaseHeight.enabled = screenLevelEditor.mouseObstacleHeight > 1;
+        if (editor.stagger)
+            this.decreaseHeight.enabled = editor.mouseObstacle.stackHeight > 1;
 
         this.increaseHeight.update();
         this.decreaseHeight.update();
         this.staggering.update();
 
-        if (!screenLevelEditor.stagger)
+        if (!editor.stagger)
         {
             this.staggering.image = "icons/nostagger.png";
             this.staggering.setHoverText("Blocks will all be placed---with the same height");
         }
-        else if (screenLevelEditor.oddStagger)
+        else if (editor.oddStagger)
         {
             this.staggering.image = "icons/oddstagger.png";
             this.staggering.setHoverText("Every other block on the grid---will be half a block shorter");
@@ -79,7 +79,7 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
     public void draw()
     {
         super.draw();
-        Drawing.drawing.setColor(screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness);
+        Drawing.drawing.setColor(editor.fontBrightness, editor.fontBrightness, editor.fontBrightness);
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, "Block height");
 
@@ -89,7 +89,7 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
 
         Drawing.drawing.setColor(255, 255, 255);
         Drawing.drawing.setInterfaceFontSize(36);
-        Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, screenLevelEditor.mouseObstacleHeight + "");
+        Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, editor.mouseObstacle.stackHeight + "");
 
         this.increaseHeight.draw();
         this.decreaseHeight.draw();

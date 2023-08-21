@@ -7,7 +7,7 @@ import tanks.gui.TextBox;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayerRemote;
 
-public class ScreenOptionsPartyHost extends Screen
+public class ScreenOptionsPartyHost extends ScreenOptionsOverlay
 {
     public static final String anticheatText = "Anticheat: ";
     public static final String disableFriendlyFireText = "Friendly fire: ";
@@ -101,8 +101,6 @@ public class ScreenOptionsPartyHost extends Screen
 
     public ScreenOptionsPartyHost()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         if (!TankPlayerRemote.checkMotion)
             anticheat.setText(anticheatText, ScreenOptions.offText);
@@ -133,6 +131,8 @@ public class ScreenOptionsPartyHost extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         back.update();
         timer.update();
         tps.update();

@@ -4,6 +4,7 @@ import basewindow.IModel;
 import basewindow.InputCodes;
 import basewindow.InputPoint;
 import tanks.*;
+import tanks.gui.input.InputBindingGroup;
 import tanks.gui.screen.ScreenInfo;
 import tanks.gui.screen.ScreenSelector;
 import tanks.translation.Translation;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 public class Selector implements IDrawable, ITrigger
 {
     public Runnable function;
+    public InputBindingGroup keybind;
     public double posX;
     public double posY;
     public double sizeX;
@@ -216,6 +218,16 @@ public class Selector implements IDrawable, ITrigger
         {
             Drawing.drawing.setColor(255, 255, 255);
             Drawing.drawing.drawInterfaceModel2D(models[selectedOption], this.posX - this.sizeX / 2 + this.sizeY / 2 + 10, this.posY, 0, this.sizeY, this.sizeY, this.sizeY);
+        }
+    }
+
+    @Override
+    public void updateKeybind()
+    {
+        if (this.keybind != null && this.keybind.isValid())
+        {
+            this.keybind.invalidate();
+            this.setScreen();
         }
     }
 

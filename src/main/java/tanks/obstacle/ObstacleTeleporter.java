@@ -1,6 +1,7 @@
 package tanks.obstacle;
 
 import tanks.*;
+import tanks.editorselector.LevelEditorSelector;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Tank;
 import tanks.tank.TeleporterOrb;
@@ -113,9 +114,9 @@ public class ObstacleTeleporter extends Obstacle
 	{
 		Drawing.drawing.setColor(127, 127, 127);
 		Drawing.drawing.fillInterfaceOval(x, y, draw_size, draw_size);
-		Drawing.drawing.setColor(0, 127, 127);
+		Drawing.drawing.setColor(this.colorR / 2, this.colorG / 2, this.colorB / 2);
 		Drawing.drawing.fillInterfaceOval(x, y, draw_size * 5 / 8, draw_size * 5 / 8);
-		Drawing.drawing.setColor(0, 255, 255);
+		Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
 		Drawing.drawing.fillInterfaceOval(x, y, draw_size / 2, draw_size / 2);
 	}
 
@@ -131,7 +132,7 @@ public class ObstacleTeleporter extends Obstacle
 			{
 				Movable m = Game.movables.get(i);
 
-				if (m instanceof Tank && ((Tank) m).targetable && Movable.distanceBetween(this, m) < ((Tank) m).size)
+				if (m instanceof Tank && ((Tank) m).targetable && Movable.distanceBetween(this, m) < m.size)
 				{
 					t = (Tank) m;
 
@@ -168,10 +169,8 @@ public class ObstacleTeleporter extends Obstacle
 	}
 
 	@Override
-	public void setMetadata(String s)
+	public void onPropertySet(LevelEditorSelector<?> s)
 	{
-		this.groupID = (int) Double.parseDouble(s);
-
 		double[] col = getColorFromID(this.groupID);
 		this.colorR = col[0];
 		this.colorG = col[1];

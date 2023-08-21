@@ -25,7 +25,6 @@ public class ItemBullet extends Item
 	public int bounces = 1;
 	public double damage = 1;
 	public int maxLiveBullets = 5;
-	public double cooldownBase = 20;
 	public double size = Bullet.bullet_size;
 	public double recoil = 1.0;
 	public boolean heavy = false;

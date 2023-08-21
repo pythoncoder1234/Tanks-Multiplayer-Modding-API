@@ -41,7 +41,7 @@ public class NPCMessage extends FixedMenu
         Drawing.drawing.setFontSize(24);
         Drawing.drawing.setColor(255, 255, 255);
 
-        ArrayList<String> lines = Drawing.drawing.wrapText(this.currentLine, Drawing.drawing.interfaceSizeX - 250, 24);
+        ArrayList<String> lines = Drawing.drawing.wrapText(this.currentLine, Math.max(1300, Game.game.window.absoluteWidth * 0.8) - 800, 24);
         for (int i = 0; i < lines.size(); i++)
             Drawing.drawing.drawUncenteredInterfaceText(250, Drawing.drawing.interfaceSizeY * 0.1 + 40 * (i - 1.5) + 50, lines.get(i));
     }

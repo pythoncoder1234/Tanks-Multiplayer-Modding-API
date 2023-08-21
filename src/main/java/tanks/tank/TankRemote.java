@@ -103,21 +103,24 @@ public class TankRemote extends Tank
 	@Override
 	public void update()
 	{
-		this.interpolatedProgress = Math.min(this.interpolatedProgress + Panel.frameFrequency, this.interpolationTime);
+        this.interpolatedProgress = Math.min(this.interpolatedProgress + Panel.frameFrequency, this.interpolationTime);
 
-		this.posX = this.posX - this.interpolatedOffX * (interpolationTime - interpolatedProgress) / interpolationTime;
-		this.posY = this.posY - this.interpolatedOffY * (interpolationTime - interpolatedProgress) / interpolationTime;
-		this.angle += angleRate / interpolationTime * Panel.frameFrequency;
+        this.posX = this.posX - this.interpolatedOffX * (interpolationTime - interpolatedProgress) / interpolationTime;
+        this.posY = this.posY - this.interpolatedOffY * (interpolationTime - interpolatedProgress) / interpolationTime;
+        this.angle += angleRate / interpolationTime * Panel.frameFrequency;
 
-		this.localAge += Panel.frameFrequency;
-		super.update();
+        if (this.interpolatedProgress >= this.interpolationTime)
+            this.angle = this.trueAngle;
 
-		this.interpolatedPosX = this.posX;
-		this.interpolatedPosY = this.posY;
+        this.localAge += Panel.frameFrequency;
+        super.update();
 
-		this.posX = this.posX + this.interpolatedOffX * (interpolationTime - interpolatedProgress) / interpolationTime;
-		this.posY = this.posY + this.interpolatedOffY * (interpolationTime - interpolatedProgress) / interpolationTime;
-	}
+        this.interpolatedPosX = this.posX;
+        this.interpolatedPosY = this.posY;
+
+        this.posX = this.posX + this.interpolatedOffX * (interpolationTime - interpolatedProgress) / interpolationTime;
+        this.posY = this.posY + this.interpolatedOffY * (interpolationTime - interpolatedProgress) / interpolationTime;
+    }
 
 	@Override
 	public void draw()

@@ -2,8 +2,8 @@ package tanks.tank;
 
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.network.event.*;
-import tanks.gui.menus.*;
+import tanks.gui.menus.FixedMenu;
+import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.ItemBar;
@@ -11,6 +11,7 @@ import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemEmpty;
 import tanks.hotbar.item.ItemMine;
+import tanks.network.event.*;
 
 public class TankPlayerRemote extends Tank implements IServerPlayerTank
 {
@@ -98,9 +99,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             for (Item i: h.itemBar.slots)
             {
                 if (i != null && !(i instanceof ItemEmpty))
-                {
                     i.updateCooldown(reload);
-                }
             }
         }
 
@@ -113,6 +112,9 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         this.dYSinceFrame = 0;
 
         this.angle += angleRate / interpolationTime * Panel.frameFrequency;
+
+        if (this.interpolatedProgress >= this.interpolationTime)
+            this.angle = this.trueAngle;
 
         if (this.hasCollided)
         {

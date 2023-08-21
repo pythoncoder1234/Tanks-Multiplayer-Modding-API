@@ -21,4 +21,10 @@ public class EmptySpace implements IDrawable, ITrigger
     {
 
     }
+
+    @Override
+    public void updateKeybind()
+    {
+
+    }
 }

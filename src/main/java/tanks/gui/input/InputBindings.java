@@ -30,6 +30,7 @@ public class InputBindings
     public InputBindingGroup zoomIn = new InputBindingGroup("game.zoomIn", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_EQUAL));
     public InputBindingGroup zoomOut = new InputBindingGroup("game.zoomOut", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_MINUS));
     public InputBindingGroup zoomAuto = new InputBindingGroup("game.zoomAuto", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_O));
+    public InputBindingGroup freecam = new InputBindingGroup("game.freecam", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_N));
     public InputBindingGroup chat = new InputBindingGroup("game.chat", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_T));
     public InputBindingGroup hidePause = new InputBindingGroup("game.hidePauseMenu", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F1));
     public InputBindingGroup fullscreen = new InputBindingGroup("game.fullscreen", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F11), new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_F10));
@@ -42,11 +43,11 @@ public class InputBindings
     public InputBindingGroup minimapDecreaseScale = new InputBindingGroup("minimap.decreaseScale", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_LEFT_BRACKET));
     public InputBindingGroup minimapChangeType = new InputBindingGroup("minimap.changeType", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_P));
     public InputBindingGroup minimapChangeTheme = new InputBindingGroup("minimap.changeTheme", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_L));
-    public InputBindingGroup minimapPanUp = new InputBindingGroup("minimap.panup", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_KP_8));
-    public InputBindingGroup minimapPanDown = new InputBindingGroup("minimap.pandown", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_KP_2));
-    public InputBindingGroup minimapPanLeft = new InputBindingGroup("minimap.panleft", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_KP_4));
-    public InputBindingGroup minimapPanRight = new InputBindingGroup("minimap.panright", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_KP_6));
-    public InputBindingGroup minimapRecenter = new InputBindingGroup("minimap.recenter", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_KP_0), new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_0));
+    public InputBindingGroup minimapPanUp = new InputBindingGroup("minimap.panup", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_I));
+    public InputBindingGroup minimapPanDown = new InputBindingGroup("minimap.pandown", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_J));
+    public InputBindingGroup minimapPanLeft = new InputBindingGroup("minimap.panleft", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_K));
+    public InputBindingGroup minimapPanRight = new InputBindingGroup("minimap.panright", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_L));
+    public InputBindingGroup minimapRecenter = new InputBindingGroup("minimap.recenter", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_SEMICOLON), new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_0));
 
     public InputBindingGroup editorPause = new InputBindingGroup("editor.pause", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_ESCAPE));
     public InputBindingGroup editorObjectMenu = new InputBindingGroup("editor.objects", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_SPACE));

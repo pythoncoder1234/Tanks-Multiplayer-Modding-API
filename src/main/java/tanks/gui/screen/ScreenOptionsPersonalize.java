@@ -5,17 +5,25 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 
-public class ScreenOptionsPersonalize extends Screen
+public class ScreenOptionsPersonalize extends ScreenOptionsOverlay
 {
-	public boolean fromMultiplayer;
+    public boolean fromMultiplayer;
 
-	TextBox username = new TextBox(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "Username", new Runnable()
-	{
-		@Override
-		public void run()
-		{
-			Game.player.username = username.inputText;
-			username.inputText = Game.player.username + "";
+	@Override
+	public void update()
+    {
+        super.update();
+
+        back.update();
+        username.update();
+        color.update();
+    }    TextBox username = new TextBox(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "Username", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.player.username = username.inputText;
+            username.inputText = Game.player.username + "";
 
 			if (!Game.player.username.equals(Game.chatFilter.filterChat(Game.player.username)))
 				Game.screen = new ScreenUsernameWarning();
@@ -38,9 +46,6 @@ public class ScreenOptionsPersonalize extends Screen
 
 	public ScreenOptionsPersonalize()
 	{
-		this.music = "menu_options.ogg";
-		this.musicID = "menu";
-
 		username.enableCaps = true;
 		username.enableSpaces = false;
 	}
@@ -51,13 +56,7 @@ public class ScreenOptionsPersonalize extends Screen
 		this.fromMultiplayer = fromMultiplayer;
 	}
 	
-	@Override
-	public void update() 
-	{
-		back.update();
-		username.update();
-		color.update();
-	}
+
 
 	@Override
 	public void draw()

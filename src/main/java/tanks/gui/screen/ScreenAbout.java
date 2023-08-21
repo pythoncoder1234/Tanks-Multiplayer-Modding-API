@@ -97,6 +97,9 @@ public class ScreenAbout extends Screen
 
     public ScreenAbout()
     {
+        this.music = "menu_2.ogg";
+        this.musicID = "menu";
+
         double imgsize = 25 * Drawing.drawing.interfaceScaleZoom;
 
         this.link.image = "icons/link.png";
@@ -124,8 +127,6 @@ public class ScreenAbout extends Screen
         this.privacy.imageSizeY = imgsize;
         this.privacy.imageXOffset = 145 * this.privacy.sizeX / 350;
 
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
     }
 
     @Override

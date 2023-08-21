@@ -59,6 +59,11 @@ public class FixedText extends FixedMenu
         this(location, text, 0, 255, 255, 255);
     }
 
+    public FixedText(types location, String text, double duration)
+    {
+        this(location, text, duration, 255, 255, 255);
+    }
+
     public FixedText(types location, String text, double duration, double r, double g, double b, Animation... animations)
     {
         this(location, text, duration, r, g, b, 24, animations);
@@ -69,6 +74,9 @@ public class FixedText extends FixedMenu
             this.styling.fontSize = 30;
         else if (location == types.actionbar)
             this.styling.fontSize = 20;
+
+        if (location == types.actionbar)
+            this.shadowEffect = false;
     }
 
     public FixedText(types location, String text, double duration, double r, double g, double b, double fontSize, Animation... animations)
@@ -91,6 +99,9 @@ public class FixedText extends FixedMenu
 
         this.sizeX = this.styling.fontSize / 36;
         this.sizeY = this.styling.fontSize / 36;
+
+        if (location == types.actionbar)
+            this.shadowEffect = false;
     }
 
     @Override
@@ -100,14 +111,14 @@ public class FixedText extends FixedMenu
         {
             firstFrame = false;
             this.prevText = this.styling.text;
-
             this.fadeOutEffect = !this.fadeOutEffect;
-            setLocation();
+            this.hasItems = Game.player.hotbar.enabledItemBar;
 
             if (this.fadeInEffect)
                 this.animations.add(new Animation.FadeIn(fadeDuration));
         }
 
+        setLocation();
         this.updateAnimations();
 
         double x = ModAPI.fixedText.getStringSizeX(this.sizeX, this.styling.text) / 2;

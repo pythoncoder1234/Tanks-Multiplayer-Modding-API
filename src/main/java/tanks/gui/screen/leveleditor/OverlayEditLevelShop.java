@@ -87,11 +87,11 @@ public class OverlayEditLevelShop extends ScreenLevelEditorOverlay implements II
 
         shopList.reorderBehavior = (i, j) ->
         {
-            screenLevelEditor.level.shop.add(j, screenLevelEditor.level.shop.remove((int)i));
-            ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.shop, shopList, false);
+            editor.level.shop.add(j, editor.level.shop.remove((int) i));
+            ScreenLevelEditor.refreshItemButtons(editor.level.shop, shopList, false);
         };
 
-        ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.shop, shopList, false);
+        ScreenLevelEditor.refreshItemButtons(editor.level.shop, shopList, false);
     }
 
     public void update()
@@ -111,7 +111,7 @@ public class OverlayEditLevelShop extends ScreenLevelEditorOverlay implements II
         if (Game.screen != this)
             return;
 
-        Drawing.drawing.setColor(screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness);
+        Drawing.drawing.setColor(editor.fontBrightness, editor.fontBrightness, editor.fontBrightness);
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 270, "Shop items");
         this.shopList.draw();
@@ -129,7 +129,7 @@ public class OverlayEditLevelShop extends ScreenLevelEditorOverlay implements II
     @Override
     public void addItem(Item i)
     {
-        screenLevelEditor.level.shop.add(i);
+        editor.level.shop.add(i);
 
         ScreenEditItem s = new ScreenEditItem(i, this, false, true);
         s.drawBehindScreen = true;
@@ -139,14 +139,14 @@ public class OverlayEditLevelShop extends ScreenLevelEditorOverlay implements II
     @Override
     public void removeItem(Item i)
     {
-        screenLevelEditor.level.shop.remove(i);
-        ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.shop, this.shopList, false);
+        editor.level.shop.remove(i);
+        ScreenLevelEditor.refreshItemButtons(editor.level.shop, this.shopList, false);
     }
 
     @Override
     public void refreshItems()
     {
-        ScreenLevelEditor.refreshItemButtons(screenLevelEditor.level.shop, this.shopList, false);
+        ScreenLevelEditor.refreshItemButtons(editor.level.shop, this.shopList, false);
     }
 
 }

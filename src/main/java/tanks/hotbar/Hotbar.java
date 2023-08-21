@@ -3,8 +3,7 @@ package tanks.hotbar;
 import tanks.*;
 import tanks.gui.Button;
 import tanks.gui.screen.ScreenGame;
-import tanks.hotbar.item.ItemBullet;
-import tanks.hotbar.item.ItemMine;
+import tanks.hotbar.item.*;
 import tanks.obstacle.Obstacle;
 import tanks.tank.Tank;
 import tanks.tank.TankModels;
@@ -69,31 +68,33 @@ public class Hotbar
 
 	public void draw()
 	{
-		if (Game.game.window.touchscreen)
-		{
-			Drawing.drawing.setColor(255, 255, 255, 64);
+        if (Game.game.window.touchscreen)
+        {
+            Drawing.drawing.setColor(255, 255, 255, 64);
 
-			if (!this.persistent)
-				Drawing.drawing.drawInterfaceImage("icons/widearrow.png", Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY - 12, 64, 16);
-			else
-				Drawing.drawing.drawInterfaceImage("icons/widearrow.png", Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY - 12, 64, -16);
-		}
+            if (!this.persistent)
+                Drawing.drawing.drawInterfaceImage("icons/widearrow.png", Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY - 12, 64, 16);
+            else
+                Drawing.drawing.drawInterfaceImage("icons/widearrow.png", Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY - 12, 64, -16);
+        }
 
-		if (this.enabledItemBar)
-			this.itemBar.draw();
+        double a = (100 - this.percentHidden) * 2.55;
 
-		if (this.enabledHealthBar)
-		{
-			int x = (int) ((Drawing.drawing.interfaceSizeX / 2));
-			int y = (int) (Drawing.drawing.interfaceSizeY - 25 + percentHidden - verticalOffset);
+        if (this.enabledItemBar)
+            this.itemBar.draw();
 
-			Drawing.drawing.setColor(0, 0, 0, 128 * (100 - this.percentHidden) / 100.0);
+        if (this.enabledHealthBar)
+        {
+            int x = (int) ((Drawing.drawing.interfaceSizeX / 2));
+            int y = (int) (Drawing.drawing.interfaceSizeY - 25 + percentHidden - verticalOffset);
+
+            Drawing.drawing.setColor(0, 0, 0, 128 * (100 - this.percentHidden) / 100.0);
 
 			if (Level.isDark())
 				Drawing.drawing.setColor(255, 255, 255, 128 * (100 - this.percentHidden) / 100.0);
 
-			Drawing.drawing.fillInterfaceRect(x, y, 350, 5);
-			Drawing.drawing.setColor(255, 128, 0, (100 - this.percentHidden) * 2.55);
+            Drawing.drawing.fillInterfaceRect(x, y, 350, 5);
+            Drawing.drawing.setColor(255, 128, 0, a);
 
 			double lives = 0;
 			int shields = 0;
@@ -114,12 +115,12 @@ public class Hotbar
 
 			if (shields > 0)
 			{
-				Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
-				Drawing.drawing.fillInterfaceOval(x - 175, y, 18, 18);
+                Drawing.drawing.setColor(255, 0, 0, a);
+                Drawing.drawing.fillInterfaceOval(x - 175, y, 18, 18);
 				//Drawing.drawing.drawImage("shield.png", x - 175, y + 1, 14, 14);
-				Drawing.drawing.setInterfaceFontSize(12);
-				Drawing.drawing.setColor(255, 255, 255, (100 - this.percentHidden) * 2.55);
-				Drawing.drawing.drawInterfaceText(x - 175, y, shields + "");
+                Drawing.drawing.setInterfaceFontSize(12);
+                Drawing.drawing.setColor(255, 255, 255, a);
+                Drawing.drawing.drawInterfaceText(x - 175, y, shields + "");
 			}
 		/*	else
 			{
@@ -138,83 +139,126 @@ public class Hotbar
 			if (Level.isDark())
 				Drawing.drawing.setColor(255, 255, 255, 128 * (100 - this.percentHidden) / 100.0);
 
-			Drawing.drawing.fillInterfaceRect(x, y, 350, 5);
+            Drawing.drawing.fillInterfaceRect(x, y, 350, 5);
 
-			int live = 1;
-			int max = 1;
-			double cooldownFrac = 0;
+            int live = 1;
+            int max = 1;
+            double cooldownFrac = 0;
 
-			ItemBullet ib = null;
-			if (Game.playerTank != null && !Game.playerTank.destroy)
-				ib = Game.playerTank.bullet;
+            ItemBullet ib = null;
+            if (Game.playerTank != null && !Game.playerTank.destroy)
+                ib = Game.playerTank.bullet;
 
-			if (this.enabledItemBar && this.itemBar.selected != -1 && this.itemBar.slots[this.itemBar.selected] instanceof ItemBullet)
-				ib = (ItemBullet) this.itemBar.slots[this.itemBar.selected];
+            if (this.enabledItemBar && this.itemBar.selected != -1)
+            {
+                Item i = this.itemBar.slots[this.itemBar.selected];
+                if (i instanceof ItemBullet)
+                    ib = (ItemBullet) i;
+            }
 
-			if (ib != null)
-			{
-				live = ib.liveBullets;
-				max = ib.maxLiveBullets;
-				cooldownFrac = ib.cooldown / ib.cooldownBase;
-			}
+            if (ib != null)
+            {
+                live = ib.liveBullets;
+                max = ib.maxLiveBullets;
+                cooldownFrac = ib.cooldown / ib.cooldownBase;
+            }
 
-			double ammo = live * 1.0 / max;
-			double ammo2 = (live - cooldownFrac) / max;
+            int uses = 0;
+            int rcMax = 0;
+            boolean isMine = true;
+            double rcCooldownFrac = 0;
 
+            if (Game.playerTank != null && !Game.playerTank.destroy)
+            {
+                Item i = null;
 
-			if (max <= 0)
-				ammo = 0;
+                if (this.enabledItemBar && this.itemBar.selected != -1)
+                    i = this.itemBar.slots[this.itemBar.selected];
 
-			Drawing.drawing.setColor(0, 255, 255, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, 1 - ammo2));
+                if (i == null || i instanceof ItemEmpty || i instanceof ItemBullet)
+                    i = Game.playerTank.mine;
 
-			Drawing.drawing.setColor(0, 200, 255, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, 1 - ammo);
+                isMine = i instanceof ItemMine;
 
-			Drawing.drawing.setColor(0, 255, 255, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, Math.max(0, -ammo2 * max)));
+                if (i instanceof ItemMine)
+                {
+                    uses = ((ItemMine) i).maxLiveMines - ((ItemMine) i).liveMines;
+                    rcMax = ((ItemMine) i).maxLiveMines;
+                }
+                else if (i instanceof ItemShield)
+                {
+                    uses = (int) ((((ItemShield) i).max - Game.playerTank.health) / ((ItemShield) i).amount);
+                    rcMax = (int) (((ItemShield) i).max / ((ItemShield) i).amount);
+                }
 
-			Drawing.drawing.setColor(0, 0, 0, 128 * (100 - this.percentHidden) / 100.0);
+                rcCooldownFrac = Math.max(0, (i.cooldown - 20) / (i.cooldownBase - 20));
+            }
 
-			for (int i = 1; i < max; i++)
-			{
-				double frac = i * 1.0 / max;
-				Drawing.drawing.fillInterfaceRect(x - 175 + frac * 350, y, 2, 5);
-			}
+            double ammo = live * 1.0 / max;
+            double ammo2 = (live - cooldownFrac) / max;
 
-			if (Game.playerTank != null && !Game.playerTank.destroy)
-			{
-				int mines = Game.playerTank.mine.maxLiveMines - Game.playerTank.mine.liveMines;
+            if (max <= 0)
+                ammo = 0;
 
-				if (this.enabledItemBar && this.itemBar.selected != -1 && this.itemBar.slots[this.itemBar.selected] instanceof ItemMine)
-				{
-					ItemMine im = (ItemMine) this.itemBar.slots[this.itemBar.selected];
-					mines = im.maxLiveMines - im.liveMines;
-				}
+            Drawing.drawing.setColor(0, 255, 255, a);
+            Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, 1 - ammo2));
 
-				if (mines > 0)
-				{
-					Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
-					Drawing.drawing.fillInterfaceOval(x + 175, y, 18, 18);
+            Drawing.drawing.setColor(0, 200, 255, a);
+            Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, 1 - ammo);
 
-					Drawing.drawing.setColor(255, 255, 0, (100 - this.percentHidden) * 2.55);
-					Drawing.drawing.fillInterfaceOval(x + 175, y, 14, 14);
+            Drawing.drawing.setColor(0, 255, 255, a);
+            Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, Math.max(0, -ammo2 * max)));
 
-					Drawing.drawing.setInterfaceFontSize(12);
-					Drawing.drawing.setColor(0, 0, 0, (100 - this.percentHidden) * 2.55);
+            Drawing.drawing.setColor(0, 0, 0, 128 * (100 - this.percentHidden) / 100.0);
 
-					Drawing.drawing.drawInterfaceText(x + 175, y, mines + "");
-				}
-			}
-		}
+            for (int i = 1; i < Math.min(50, max); i++)
+            {
+                double frac = i * 1.0 / max;
+                Drawing.drawing.fillInterfaceRect(x - 175 + frac * 350, y, 2, 5);
+            }
+
+            if (isMine)
+            {
+                if (uses > 0 || rcMax == 0)
+                    Drawing.drawing.setColor(0, 150, 255, a);
+                else
+                    Drawing.drawing.setColor(255, 0, 0);
+
+                Drawing.drawing.fillInterfaceOval(x + 175, y, 18, 18);
+
+                Drawing.drawing.setColor(255, 255, 0, a);
+                Drawing.drawing.fillInterfaceOval(x + 175, y, 14, 14);
+
+                if (rcCooldownFrac > 0)
+                {
+                    Drawing.drawing.setColor(255, 0, 0);
+
+                    for (double p = -Math.PI; p <= rcCooldownFrac * 2 * Math.PI - Math.PI; p += 0.2)
+                        Drawing.drawing.fillInterfaceOval(x + 175 + Math.sin(-p) * 8, y + Math.cos(-p) * 8, 2, 2);
+                }
+            }
+            else
+            {
+                double frac = 1.5 - rcCooldownFrac / 2;
+                Drawing.drawing.setColor(frac * 128 + 127, frac * 255, frac * 255, a);
+                Drawing.drawing.drawInterfaceImage("shield.png", x + 175, y, 25, 25);
+            }
+
+            if (rcMax > 0)
+            {
+                Drawing.drawing.setInterfaceFontSize(12);
+                Drawing.drawing.setColor(uses > 0 ? 0 : 255, 0, 0, a);
+                Drawing.drawing.drawInterfaceText(x + 175, y, uses + "");
+            }
+        }
 
 		if (this.enabledCoins)
 		{
-			Drawing.drawing.setInterfaceFontSize(18);
-			Drawing.drawing.setColor(0, 0, 0, (100 - this.percentHidden) * 2.55);
+            Drawing.drawing.setInterfaceFontSize(18);
+            Drawing.drawing.setColor(0, 0, 0, a);
 
 			if (Level.isDark())
-				Drawing.drawing.setColor(255, 255, 255, (100 - this.percentHidden) * 2.55);
+                Drawing.drawing.setColor(255, 255, 255, a);
 
 			Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY - 100 + percentHidden - verticalOffset, "Coins: %d", coins);
 		}
@@ -232,21 +276,21 @@ public class Hotbar
 			int x = (int) ((Drawing.drawing.interfaceSizeX / 2) - 210);
 			int y = (int) (Drawing.drawing.interfaceSizeY - 17.5 + percentHidden - verticalOffset);
 
-			Drawing.drawing.setColor(159, 32, 32, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.drawInterfaceModel(TankModels.tank.base, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
+            Drawing.drawing.setColor(159, 32, 32, a);
+            Drawing.drawing.drawInterfaceModel(TankModels.tank.base, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
 
-			Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.drawInterfaceModel(TankModels.tank.color, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
+            Drawing.drawing.setColor(255, 0, 0, a);
+            Drawing.drawing.drawInterfaceModel(TankModels.tank.color, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
 
-			Drawing.drawing.setColor(159, 32, 32, (100 - this.percentHidden) * 2.55);
+            Drawing.drawing.setColor(159, 32, 32, a);
 
 			Drawing.drawing.drawInterfaceModel(TankModels.tank.turret, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
 
-			Drawing.drawing.setColor(207, 16, 16, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.drawInterfaceModel(TankModels.tank.turretBase, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
+            Drawing.drawing.setColor(207, 16, 16, a);
+            Drawing.drawing.drawInterfaceModel(TankModels.tank.turretBase, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);
 
-			Drawing.drawing.setColor(255, 0, 0, (100 - this.percentHidden) * 2.55);
-			Drawing.drawing.setInterfaceFontSize(24);
+            Drawing.drawing.setColor(255, 0, 0, a);
+            Drawing.drawing.setInterfaceFontSize(24);
 			Drawing.drawing.drawInterfaceText(x - 20, y, "" + count, true);
 		}
 

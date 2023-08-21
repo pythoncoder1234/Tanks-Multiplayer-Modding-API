@@ -10,6 +10,7 @@ import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
 import tanks.network.Client;
 import tanks.network.ClientHandler;
+import tanks.network.EventMinigameStart;
 import tanks.network.MessageReader;
 import tanks.network.event.EventBeginLevelCountdown;
 import tanks.network.event.EventPing;
@@ -23,7 +24,8 @@ import java.util.Arrays;
 
 public class Panel
 {
-	public static boolean onlinePaused;
+    public static boolean onlinePaused;
+    public static Notification currentNotification;
 
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
@@ -226,21 +228,24 @@ public class Panel
 	}
 
 	public void update()
-	{
-		if (firstFrame)
-			this.setUp();
+    {
+        if (firstFrame)
+            this.setUp();
 
-		firstFrame = false;
+        firstFrame = false;
 
-		Game.prevScreen = Game.screen;
-		Obstacle.lastDrawSize = Obstacle.draw_size;
+        if (ScreenPartyHost.isServer && Game.game.window.validPressedKeys.contains(InputCodes.KEY_E))
+            Game.eventsOut.add(new EventMinigameStart("hi aisdfalsdi"));
 
-		if (!started && (Game.game.window.validPressedKeys.contains(InputCodes.KEY_F) || !Game.cinematic))
-		{
-			started = true;
-			this.startTime = System.currentTimeMillis() + splash_duration;
+        Game.prevScreen = Game.screen;
+        Obstacle.lastDrawSize = Obstacle.draw_size;
+
+        if (!started && (Game.game.window.validPressedKeys.contains(InputCodes.KEY_F) || !Game.cinematic))
+        {
+            started = true;
+            this.startTime = System.currentTimeMillis() + splash_duration;
 //			Drawing.drawing.playSound("splash_jingle.ogg");
-		}
+        }
 
 		if (!started)
 			this.startTime = System.currentTimeMillis();
@@ -415,25 +420,51 @@ public class Panel
 					Game.removePlayer(ScreenPartyHost.disconnectedPlayers.get(i));
 				}
 
-				if (ScreenPartyHost.readyPlayers.size() >= ScreenPartyHost.includedPlayers.size() && Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).cancelCountdown)
-				{
-					Game.eventsOut.add(new EventBeginLevelCountdown());
-					((ScreenGame) Game.screen).cancelCountdown = false;
-				}
+                if (ScreenPartyHost.readyPlayers.size() >= ScreenPartyHost.includedPlayers.size() && Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).cancelCountdown)
+                {
+                    Game.eventsOut.add(new EventBeginLevelCountdown());
+                    ((ScreenGame) Game.screen).cancelCountdown = false;
+                }
 
-				ScreenPartyHost.disconnectedPlayers.clear();
-			}
-		}
+                ScreenPartyHost.disconnectedPlayers.clear();
+            }
+        }
 
-		if (Game.player.hotbar.coins < 0)
-			Game.player.hotbar.coins = 0;
+        if (!Interval.gameIntervals.isEmpty())
+        {
+            ArrayList<String> removeIntervals = new ArrayList<>();
+            for (Interval i : Interval.gameIntervals.values())
+            {
+                if (i.run())
+                    removeIntervals.add(i.name);
+            }
 
-		if (!(Game.screen instanceof ScreenInfo))
-		{
-			if (!(Game.screen instanceof ScreenGame) || Panel.zoomTarget < 0 ||
-					((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null)) || !((ScreenGame) Game.screen).playing)
-				this.zoomTimer -= 0.02 * Panel.frameFrequency;
-		}
+            for (String i : removeIntervals)
+                Interval.gameIntervals.remove(i);
+        }
+
+        if (!Interval.levelIntervals.isEmpty())
+        {
+            ArrayList<String> removeIntervals = new ArrayList<>();
+            for (Interval i : Interval.levelIntervals.values())
+            {
+                if (i.run())
+                    removeIntervals.add(i.name);
+            }
+
+            for (String i : removeIntervals)
+                Interval.levelIntervals.remove(i);
+        }
+
+        if (Game.player.hotbar.coins < 0)
+            Game.player.hotbar.coins = 0;
+
+        if (!(Game.screen instanceof ScreenInfo))
+        {
+            if (!(Game.screen instanceof ScreenGame) || Panel.zoomTarget < 0 ||
+                    ((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null)) || !((ScreenGame) Game.screen).playing)
+                this.zoomTimer -= 0.02 * Panel.frameFrequency;
+        }
 
 		if (((Game.playerTank != null && !Game.playerTank.destroy) || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).spectatingTank != null)) && !ScreenGame.finished
 				&& (Drawing.drawing.unzoomedScale < Drawing.drawing.interfaceScale || Game.followingCam)
@@ -782,25 +813,28 @@ public class Panel
 				frames = 0;
 			}
 
-			lastFrameSec = time;
-			frames++;
-			ageFrames++;
-		}
+            lastFrameSec = time;
+            frames++;
+            ageFrames++;
+        }
 
-		if (onlinePaused)
-			this.onlineOverlay.draw();
-		else
-			Game.screen.draw();
+        if (onlinePaused)
+            this.onlineOverlay.draw();
+        else
+            Game.screen.draw();
 
-		ScreenOverlayChat.draw(!(Game.screen instanceof IHiddenChatboxScreen));
+        if (currentNotification != null)
+            currentNotification.draw();
 
-		if (!(Game.screen instanceof ScreenExit))
-			this.drawBar();
+        ScreenOverlayChat.draw(!(Game.screen instanceof IHiddenChatboxScreen));
 
-		if (Game.screen.showDefaultMouse)
-			this.drawMouseTarget();
+        if (!(Game.screen instanceof ScreenExit))
+            this.drawBar();
 
-		Drawing.drawing.setColor(0, 0, 0, 0);
+        if (Game.screen.showDefaultMouse)
+            this.drawMouseTarget();
+
+        Drawing.drawing.setColor(0, 0, 0, 0);
 		Drawing.drawing.fillInterfaceRect(0, 0, 0, 0);
 
 		Game.screen.drawPostMouse();
@@ -1090,14 +1124,54 @@ public class Panel
 			col[0] = 255 * ((l - 40) / 40.0);
 			col[1] = 255;
 		}
-		else if (l <= 160)
-		{
-			col[0] = 255;
-			col[1] = 255 * (1 - (l - 80) / 80.0);
-		}
-		else
-			col[0] = 255;
+        else if (l <= 160)
+        {
+            col[0] = 255;
+            col[1] = 255 * (1 - (l - 80) / 80.0);
+        }
+        else
+            col[0] = 255;
 
-		return col;
-	}
+        return col;
+    }
+
+    public static class Notification
+    {
+        public ArrayList<String> text;
+        public int duration;
+
+        protected double age = 0;
+
+        public Notification(String text, int duration)
+        {
+            this.text = Drawing.drawing.wrapText(text, 300, 16);
+            this.duration = duration;
+        }
+
+        public void draw()
+        {
+            this.age += Panel.frameFrequency;
+
+            if (this.age > this.duration)
+                Panel.currentNotification = null;
+
+            double linesHeight = Math.max(4, this.text.size()) * 20;
+            double x = Drawing.drawing.interfaceSizeX - 320;
+            double y = Drawing.drawing.interfaceSizeY - Drawing.drawing.statsHeight - linesHeight - 80;
+
+            Drawing.drawing.setColor(0, 0, 0, 128);
+            Drawing.drawing.drawPopup(x + 158, y + linesHeight / 2, 315, linesHeight + 10, 10, 5);
+            Drawing.drawing.setInterfaceFontSize(14);
+
+            for (int i = 0; i < this.text.size(); i++)
+                Drawing.drawing.drawUncenteredInterfaceText(x + 50, y + i * 20 + 12, this.text.get(i));
+
+            Drawing.drawing.setColor(0, 150, 255);
+            Drawing.drawing.fillOval(x + 27, y + 25, 25, 25);
+
+            Drawing.drawing.setColor(255, 255, 255);
+            Drawing.drawing.setInterfaceFontSize(16);
+            Drawing.drawing.drawInterfaceText(x + 27, y + 25, "!");
+        }
+    }
 }

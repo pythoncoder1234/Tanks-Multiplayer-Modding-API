@@ -8,9 +8,14 @@ import tanks.network.event.EventScoreboardUpdateScore;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A scoreboard that displays a list of players and their scores, as well as the name of the objective.<br>
+ * Highly customizable, and most variable names are self-explanatory.
+ */
 public class Scoreboard extends FixedMenu
 {
     public enum SortOrder {ascending, descending}
+
     public enum SortBy {name, score}
 
     public TextWithStyling title = new TextWithStyling("Scoreboard", 255, 255, 0, 255, 24);
@@ -38,6 +43,7 @@ public class Scoreboard extends FixedMenu
         setSorting(SortBy.score, SortOrder.ascending);
     }
 
+    /** The <code>isPlayer</code> variable is used so the constructor does not clash with the constructor below, and does nothing. */
     public Scoreboard(String objectiveName, objectiveTypes objectiveType, ArrayList<Player> players, boolean isPlayer)
     {
         this.title.text = objectiveName;

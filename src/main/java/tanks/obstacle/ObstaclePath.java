@@ -118,17 +118,11 @@ public class ObstaclePath extends Obstacle
 
     public double getTileHeight()
     {
-        if (this.groupID >= 1)
-            return 10;
-
-        return Game.tilesDepth[(int) (this.posX / 50)][(int) (this.posY / 50)];
+        return getGroundHeight();
     }
 
     public double getGroundHeight()
     {
-        if (this.groupID >= 1)
-            return 10;
-
-        return Game.tilesDepth[(int) (this.posX / 50)][(int) (this.posY / 50)];
+        return Game.sampleTerrainGroundHeight(this.posX, this.posY);
     }
 }

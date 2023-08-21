@@ -4,7 +4,7 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 
-public class ScreenOptionsGraphics extends Screen
+public class ScreenOptionsGraphics extends ScreenOptionsOverlay
 {
     public static final String terrainText = "Terrain: ";
     public static final String trailsText = "Bullet trails: ";
@@ -27,9 +27,6 @@ public class ScreenOptionsGraphics extends Screen
 
     public ScreenOptionsGraphics()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-
         if (Game.fancyTerrain)
             terrain.setText(terrainText, fancyText);
         else
@@ -48,7 +45,7 @@ public class ScreenOptionsGraphics extends Screen
         if (Game.xrayBullets)
             xrayBullets.setText("X-ray bullets: ", ScreenOptions.onText);
         else
-            xrayBullets.setText("X-ray ullets: ", ScreenOptions.offText);
+            xrayBullets.setText("X-ray bullets: ", ScreenOptions.offText);
 
         if (Game.glowEnabled)
             glow.setText(glowText, ScreenOptions.onText);
@@ -157,7 +154,38 @@ public class ScreenOptionsGraphics extends Screen
         }
     }
 
-    Button terrain = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
+    @Override
+    public void update()
+    {
+        super.update();
+
+        terrain.update();
+        bulletTrails.update();
+        glow.update();
+        effects.update();
+        tankTextures.update();
+        xrayBullets.update();
+        previewCrusades.update();
+
+        graphics3d.update();
+        ground3d.update();
+        altPerspective.update();
+        shadows.update();
+        antialiasing.update();
+
+        back.update();
+
+        if (Game.antialiasing != Game.game.window.antialiasingEnabled)
+        {
+            antialiasing.unselectedColG = 238;
+            antialiasing.unselectedColB = 220;
+        }
+        else
+        {
+            antialiasing.unselectedColG = 255;
+            antialiasing.unselectedColB = 255;
+        }
+    }    Button terrain = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -171,13 +199,41 @@ public class ScreenOptionsGraphics extends Screen
 
             update3dGroundButton();
 
-            Game.resetTiles();
+            if (Game.currentLevel == null)
+                Game.resetTiles();
+            else
+                Game.currentLevel.reloadTiles();
+
             Drawing.drawing.forceRedrawTerrain();
         }
     },
-            "Fancy terrain enables varied block---and ground colors------May impact performance on larger levels");
+            "Fancy terrain enables varied block and---ground colors------May impact performance on large levels");
 
-    Button bulletTrails = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
+    @Override
+    public void draw()
+    {
+        this.drawDefaultBackground();
+
+        back.draw();
+
+        previewCrusades.draw();
+        antialiasing.draw();
+        shadows.draw();
+        altPerspective.draw();
+        ground3d.draw();
+        graphics3d.draw();
+
+        xrayBullets.draw();
+        tankTextures.draw();
+        effects.draw();
+        glow.draw();
+        bulletTrails.draw();
+        terrain.draw();
+
+        Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Graphics options");
+    }    Button bulletTrails = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -202,7 +258,7 @@ public class ScreenOptionsGraphics extends Screen
             else
                 bulletTrails.setText(trailsText, ScreenOptions.offText);
         }
-    }, "Bullet trails show the paths of bullets------Fancy bullet trails enable some extra particle---effects for certain bullet types");
+    }, "Bullet trails show the paths of bullets------Fancy bullet trails enable some extra---particle effects for certain bullet types");
 
     Button glow = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 0.5, this.objWidth, this.objHeight, "", new Runnable()
     {
@@ -233,7 +289,11 @@ public class ScreenOptionsGraphics extends Screen
 
             update3dGroundButton();
 
-            Game.resetTiles();
+            if (Game.currentLevel == null)
+                Game.resetTiles();
+            else
+                Game.currentLevel.reloadTiles();
+
             Drawing.drawing.forceRedrawTerrain();
         }
     },
@@ -251,7 +311,11 @@ public class ScreenOptionsGraphics extends Screen
             else
                 ground3d.setText(ground3dText, ScreenOptions.offText);
 
-            Game.resetTiles();
+            if (Game.currentLevel == null)
+                Game.resetTiles();
+            else
+                Game.currentLevel.reloadTiles();
+
             Drawing.drawing.forceRedrawTerrain();
         }
     },
@@ -317,7 +381,7 @@ public class ScreenOptionsGraphics extends Screen
                 antialiasing.setText(antialiasingText, ScreenOptions.onText);
 
             if (Game.antialiasing != Game.game.window.antialiasingEnabled)
-                Game.screen = new ScreenAntialiasingWarning();
+                Game.screen = new ScreenOptionWarning(new ScreenOptionsGraphics(), "Antialiasing will be %s", Game.antialiasing + "");
 
             ScreenOptions.saveOptions(Game.homedir);
         }
@@ -375,60 +439,7 @@ public class ScreenOptionsGraphics extends Screen
 
     Button effects = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsEffects(), "Particle effects may significantly---impact performance");
 
-    @Override
-    public void update()
-    {
-        terrain.update();
-        bulletTrails.update();
-        glow.update();
-        effects.update();
-        tankTextures.update();
-        xrayBullets.update();
-        previewCrusades.update();
 
-        graphics3d.update();
-        ground3d.update();
-        altPerspective.update();
-        shadows.update();
-        antialiasing.update();
 
-        back.update();
 
-        if (Game.antialiasing != Game.game.window.antialiasingEnabled)
-        {
-            antialiasing.unselectedColG = 238;
-            antialiasing.unselectedColB = 220;
-        }
-        else
-        {
-            antialiasing.unselectedColG = 255;
-            antialiasing.unselectedColB = 255;
-        }
-    }
-
-    @Override
-    public void draw()
-    {
-        this.drawDefaultBackground();
-
-        back.draw();
-
-        antialiasing.draw();
-        shadows.draw();
-        altPerspective.draw();
-        ground3d.draw();
-        graphics3d.draw();
-
-        previewCrusades.draw();
-        xrayBullets.draw();
-        tankTextures.draw();
-        effects.draw();
-        glow.draw();
-        bulletTrails.draw();
-        terrain.draw();
-
-        Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Graphics options");
-    }
 }

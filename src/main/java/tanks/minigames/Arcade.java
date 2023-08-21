@@ -3,10 +3,12 @@ package tanks.minigames;
 import basewindow.InputCodes;
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.gui.screen.*;
+import tanks.gui.screen.IDarkScreen;
+import tanks.gui.screen.ScreenArcadeBonuses;
+import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.ItemBar;
 import tanks.hotbar.item.Item;
-import tanks.hotbar.item.ItemShield;
 import tanks.network.event.*;
 import tanks.obstacle.Obstacle;
 import tanks.registry.RegistryTank;
@@ -163,9 +165,6 @@ public class Arcade extends Minigame
         {
             Item i = Item.parseItem(Game.player, itemsMap.get(tankItemsMap.get(target.name)).toString());
             i.stackSize *= target.coinValue / 2.;
-
-            if (i instanceof ItemShield)
-                i.stackSize /= 2;
 
             ItemDrop d = new ItemDrop(target.posX, target.posY, i);
             d.registerNetworkID();

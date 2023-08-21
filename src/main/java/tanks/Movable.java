@@ -9,26 +9,32 @@ import tanks.network.event.EventStatusEffectEnd;
 import tanks.obstacle.Obstacle;
 import tanks.tank.NameTag;
 import tanks.tank.Tank;
+import tanks.tank.TankProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public abstract class Movable implements IDrawableForInterface, IGameObject
+import static tanks.tank.TankProperty.Category.appearanceGeneral;
+
+public abstract class Movable extends GameObject implements IDrawableForInterface
 {
-	public double posX;
-	public double posY;
-	public double posZ = 0;
+    public double posX;
+    public double posY;
+    public double posZ = 0;
 
-	public double lastPosX;
-	public double lastPosY;
-	public double lastPosZ = 0;
+    @TankProperty(category = appearanceGeneral, id = "size", name = "Tank size")
+    public double size;
 
-	public double vX;
-	public double vY;
-	public double vZ = 0;
+    public double lastPosX;
+    public double lastPosY;
+    public double lastPosZ = 0;
 
-	public double lastFinalVX;
+    public double vX;
+    public double vY;
+    public double vZ = 0;
+
+    public double lastFinalVX;
 	public double lastFinalVY;
 	public double lastFinalVZ;
 
@@ -301,11 +307,13 @@ public abstract class Movable implements IDrawableForInterface, IGameObject
 	}
 
 	public void drawTeam()
-	{
-		Drawing.drawing.setFontSize(20);
-		if (this.team != null)
-			Drawing.drawing.drawText(this.posX, this.posY + 35, this.team.name);
-	}
+    {
+        if (this.team == null)
+            return;
+
+        Drawing.drawing.setFontSize(20);
+        Drawing.drawing.drawText(this.posX, this.posY + 35, this.team.name);
+    }
 
 
 	public void addAttribute(AttributeModifier m)
@@ -394,18 +402,18 @@ public abstract class Movable implements IDrawableForInterface, IGameObject
 	}
 
 	public double getAttributeValue(AttributeModifier.Type type, double value)
-	{
-		for (AttributeModifier a : attributes)
-		{
-			if (!a.expired && a.type.equals(type))
-				value = a.getValue(value);
-		}
+    {
+        for (AttributeModifier a : attributes)
+        {
+            if (!a.expired && a.type.equals(type))
+                value = a.getValue(value);
+        }
 
-		for (StatusEffect s : this.statusEffects.keySet())
-			value = this.statusEffects.get(s).getValue(value, type);
+        for (StatusEffect.Instance i : this.statusEffects.values())
+            value = i.getValue(value, type);
 
-		return value;
-	}
+        return value;
+    }
 
 	public AttributeModifier getAttribute(AttributeModifier.Type type)
 	{

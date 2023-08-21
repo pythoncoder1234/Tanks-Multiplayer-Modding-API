@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBoxSlider;
 
-public class ScreenOptionsEffects extends Screen
+public class ScreenOptionsEffects extends ScreenOptionsOverlay
 {
     public static final String effectsText = "Particle effects: ";
 
@@ -43,8 +43,6 @@ public class ScreenOptionsEffects extends Screen
 
     public ScreenOptionsEffects()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         effectMultiplier.allowLetters = false;
         effectMultiplier.allowSpaces = false;
@@ -67,6 +65,8 @@ public class ScreenOptionsEffects extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         effectMultiplier.update();
         effects.update();
         back.update();

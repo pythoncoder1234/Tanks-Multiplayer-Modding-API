@@ -22,8 +22,6 @@ public class TeleporterOrb extends Movable
 	public double maxAge = 200;
 	public double endAge = 300;
 
-	public double size;
-
 	public TeleporterOrb(double x, double y, double iX, double iY, double destX, double destY, Tank t)
 	{
 		super(x, y);

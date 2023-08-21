@@ -235,28 +235,28 @@ public abstract class Screen implements IBatchRenderableObject
 					if (i > 0)
 						extra = Math.max(extra, -Game.game.heightGrid[i - 1][j]);
 
-					if (j > 0)
-						extra = Math.max(extra, -Game.game.heightGrid[i][j - 1]);
+                    if (j > 0)
+                        extra = Math.max(extra, -Game.game.heightGrid[i][j - 1]);
 
-					if (i < Game.currentSizeX - 1)
-						extra = Math.max(extra, -Game.game.heightGrid[i + 1][j]);
+                    if (i < Game.currentSizeX - 1)
+                        extra = Math.max(extra, -Game.game.heightGrid[i + 1][j]);
 
-					if (j < Game.currentSizeY - 1)
-						extra = Math.max(extra, -Game.game.heightGrid[i][j + 1]);
+                    if (j < Game.currentSizeY - 1)
+                        extra = Math.max(extra, -Game.game.heightGrid[i][j + 1]);
 
 
-					Obstacle current = Game.obstacleMap[i][j];
-					if (current != null && current.startHeight <= 0 && current.replaceTiles && inBounds)
-					{
-						current.drawTile(getFlashCol(Game.tilesR[i][j], i, j), getFlashCol(Game.tilesG[i][j], i, j), getFlashCol(Game.tilesB[i][j], i, j), z1, extra);
-					}
-					else
-					{
-						if (extra != 0)
-							o = 1;
+                    Obstacle current = Game.obstacleGrid != null ? Game.obstacleGrid[i][j] : null;
+                    if ((this instanceof ILevelPreviewScreen || this instanceof IPartyGameScreen) && (current != null && current.startHeight <= 0 && current.replaceTiles && inBounds))
+                    {
+                        current.drawTile(getFlashCol(Game.tilesR[i][j], i, j), getFlashCol(Game.tilesG[i][j], i, j), getFlashCol(Game.tilesB[i][j], i, j), z1, extra);
+                    }
+                    else
+                    {
+                        if (extra != 0)
+                            o = 1;
 
-						if (size < 1)
-							Drawing.drawing.fillBox(bo,
+                        if (size < 1)
+                            Drawing.drawing.fillBox(bo,
 									(i1 + 0.5) / Game.bgResMultiplier * Game.tile_size,
 									(j1 + 0.5) / Game.bgResMultiplier * Game.tile_size,
 									Math.max(0, 2000 - size * 2000 * (1 + Game.tilesDepth[i][j] / 10)) - Game.tile_size + z1,
@@ -324,25 +324,30 @@ public abstract class Screen implements IBatchRenderableObject
 		return Drawing.drawing.unzoomedScale;
 	}
 
-	public void setupLayoutParameters()
-	{
+    public void setupLayoutParameters()
+    {
 
-	}
+    }
 
-	public void onAttemptClose()
-	{
+    public void onAttemptClose()
+    {
 
-	}
+    }
 
-	public boolean positionChanged()
-	{
-		boolean r = false;
+    public void onMouseConstrain()
+    {
 
-		if (Game.prevObstacles.size() != Game.obstacles.size())
-			r = true;
-		else
-		{
-			for (Obstacle o: Game.obstacles)
+    }
+
+    public boolean positionChanged()
+    {
+        boolean r = false;
+
+        if (Game.prevObstacles.size() != Game.obstacles.size())
+            r = true;
+        else
+        {
+            for (Obstacle o : Game.obstacles)
 			{
 				if (!Game.prevObstacles.contains(o))
 				{

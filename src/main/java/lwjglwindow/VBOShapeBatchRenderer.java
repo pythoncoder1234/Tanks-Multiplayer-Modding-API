@@ -522,6 +522,74 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         }
     }
 
+    @Override
+    public void fillPolygon(IBatchRenderableObject o, double... params)
+    {
+        fillPolygon(0, 0, o, params);
+    }
+
+    @Override
+    public void fillPolygon(double z, double sZ, IBatchRenderableObject o, double... params)
+    {
+        fillPolygon(z, sZ, o, (byte) 0, params);
+    }
+
+    @Override
+    public void fillPolygon(double z, double sZ, IBatchRenderableObject o, byte options, double... params)
+    {
+        if (o.wasRedrawn())
+            return;
+
+        if (this.window.shadowsEnabled && !this.window.drawingShadow)
+            return;
+
+        float z0 = (float) z;
+        float z1 = (float) (z + sZ);
+
+        float r1 = (float) this.colorR;
+        float g1 = (float) this.colorG;
+        float b1 = (float) this.colorB;
+        float a = (float) this.colorA;
+        float g = (float) this.colorGlow;
+
+        this.setWorkingColor(r1, g1, b1, a, g);
+
+        for (int i = 0; i < params.length - 2; i += 2)
+        {
+            if ((options >> i) % 2 != 0)
+                continue;
+
+            float x0 = (float) params[i];
+            float y0 = (float) params[i + 1];
+            float x1 = (float) params[i + 2];
+            float y1 = (float) params[i + 3];
+
+            this.addPoint(o, x0, y0, z0);
+            this.addPoint(o, x0, y0, z1);
+            this.addPoint(o, x1, y1, z1);
+
+            this.addPoint(o, x0, y0, z0);
+            this.addPoint(o, x1, y1, z0);
+            this.addPoint(o, x1, y1, z1);
+        }
+
+        for (int i = 2; i < params.length; i += 2)
+        {
+            float x = (float) params[i];
+            float y = (float) params[i + 1];
+
+            this.addPoint(o, x, y, z1);
+        }
+
+        for (int i = 2; i < params.length; i += 2)
+        {
+            float x = (float) params[i];
+            float y = (float) params[i + 1];
+
+            this.addPoint(o, x, y, z0);
+        }
+    }
+
     public void initializeVBO()
     {
         this.vertVBO = this.window.createVBO();

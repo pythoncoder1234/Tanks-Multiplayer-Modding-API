@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.InputSelector;
 
-public class ScreenControlsEditor extends Screen
+public class ScreenControlsEditor extends ScreenOptionsOverlay
 {
     public static int page = 0;
     public static final int page_count = 6;
@@ -56,8 +56,6 @@ public class ScreenControlsEditor extends Screen
 
     public ScreenControlsEditor()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         next.enabled = page < page_count - 1;
         previous.enabled = page > 0;
@@ -76,6 +74,8 @@ public class ScreenControlsEditor extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         if (page == 0)
         {
             pause.update();

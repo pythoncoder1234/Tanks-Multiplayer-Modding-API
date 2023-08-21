@@ -390,6 +390,17 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
         glEnd();
     }
 
+    public void fillPolygon(double... params)
+    {
+        glBegin(GL_TRIANGLE_FAN);
+
+        for (int i = 0; i < params.length; i += 2)
+            glVertex2d(params[i], params[i + 1]);
+
+        glEnd();
+    }
+
+
     public void fillBox(double x, double y, double z, double sX, double sY, double sZ, String texture)
     {
         fillBox(x, y, z, sX, sY, sZ, (byte) 0, texture);

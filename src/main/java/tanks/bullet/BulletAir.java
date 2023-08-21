@@ -4,9 +4,9 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.Movable;
 import tanks.Panel;
-import tanks.network.event.EventBulletUpdate;
-import tanks.network.event.EventTankControllerAddVelocity;
 import tanks.hotbar.item.ItemBullet;
+import tanks.network.event.EventTankControllerAddVelocity;
+import tanks.tank.Mine;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayerRemote;
 
@@ -60,14 +60,14 @@ public class BulletAir extends Bullet
     @Override
     public void collidedWithObject(Movable o)
     {
-        if (!(o instanceof Tank || o instanceof Bullet))
+        if (!(o instanceof Tank || o instanceof Bullet || o instanceof Mine))
             return;
 
         double mul = 10.0;
 
         if (o instanceof Bullet)
             mul = 400 / Math.pow(((Bullet) o).size, 2);
-        else
+        else if (o instanceof Tank)
             mul *= Game.tile_size * Game.tile_size / Math.pow(((Tank) o).size, 2);
 
         double f = Math.pow(this.frameDamageMultipler, 2);

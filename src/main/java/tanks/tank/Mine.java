@@ -7,6 +7,7 @@ import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemMine;
 import tanks.network.event.EventMineChangeTimer;
 import tanks.network.event.EventMineRemove;
+import tanks.obstacle.Obstacle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +18,6 @@ public class Mine extends Movable implements IAvoidObject
     public static double mine_radius = Game.tile_size * 2.5;
 
     public double timer;
-    public double size = mine_size;
     public double outlineColorR;
     public double outlineColorG;
     public double outlineColorB;
@@ -26,6 +26,9 @@ public class Mine extends Movable implements IAvoidObject
     public double triggeredTimer = 50;
     public double damage = 2;
     public boolean destroysObstacles = true;
+
+    public boolean enableCollision = true;
+    public double frictionModifier = 1;
 
     public double radius = mine_radius;
     public Tank tank;
@@ -43,9 +46,8 @@ public class Mine extends Movable implements IAvoidObject
     {
         super(x, y);
 
-        if (t != null)
-            this.posZ = t.posZ;
-
+        this.posZ = t.posZ;
+        this.size = mine_size;
         this.timer = timer;
         this.drawLevel = 2;
         tank = t;
@@ -53,9 +55,7 @@ public class Mine extends Movable implements IAvoidObject
         this.item = item;
 
         if (!ScreenPartyLobby.isClient)
-        {
             this.item.liveMines++;
-        }
 
         this.team = t.team;
         double[] outlineCol = Team.getObjectColor(t.colorR, t.colorG, t.colorB, t);
@@ -156,7 +156,7 @@ public class Mine extends Movable implements IAvoidObject
         if ((this.timer <= 0 || destroy) && !ScreenPartyLobby.isClient)
             this.explode();
 
-        int beepTime = ((int)this.timer / 10);
+        int beepTime = ((int) this.timer / 10);
         if (this.timer <= 150 && beepTime % 2 == 1 && this.lastBeep != beepTime && this.tank == Game.playerTank)
         {
             Drawing.drawing.playSound("beep.ogg", 1f, 0.25f);
@@ -165,9 +165,15 @@ public class Mine extends Movable implements IAvoidObject
 
         super.update();
 
+        this.vX *= Math.pow(0.95, frictionModifier * Panel.frameFrequency);
+        this.vY *= Math.pow(0.95, frictionModifier * Panel.frameFrequency);
+
+        if (this.enableCollision)
+            checkCollision();
+
         boolean enemyNear = false;
         boolean allyNear = false;
-        for (Movable m: Game.movables)
+        for (Movable m : Game.movables)
         {
             if (Math.pow(Math.abs(m.posX - this.posX), 2) + Math.pow(Math.abs(m.posY - this.posY), 2) < Math.pow(radius, 2))
             {
@@ -186,6 +192,80 @@ public class Mine extends Movable implements IAvoidObject
             this.timer = this.triggeredTimer;
             Game.eventsOut.add(new EventMineChangeTimer(this));
         }
+    }
+
+    public void checkCollision()
+    {
+        double t = Game.tile_size;
+
+        int x1 = (int) Math.min(Math.max(0, this.posX / t - this.size / t / 2 - 1), Game.currentSizeX);
+        int y1 = (int) Math.min(Math.max(0, this.posY / t - this.size / t / 2 - 1), Game.currentSizeY);
+        int x2 = (int) Math.min(Math.max(0, this.posX / t + this.size / t / 2 + 1), Game.currentSizeX);
+        int y2 = (int) Math.min(Math.max(0, this.posY / t + this.size / t / 2 + 1), Game.currentSizeY);
+
+        for (int x = x1; x < x2; x++)
+        {
+            for (int y = y1; y < y2; y++)
+            {
+                checkCollisionWith(Game.obstacleGrid[x][y]);
+                checkCollisionWith(Game.surfaceTileGrid[x][y]);
+            }
+        }
+    }
+
+    public void checkCollisionWith(Obstacle o)
+    {
+        if (o == null)
+            return;
+
+        double horizontalDist = Math.abs(this.posX - o.posX);
+        double verticalDist = Math.abs(this.posY - o.posY);
+
+        double distX = this.posX - o.posX;
+        double distY = this.posY - o.posY;
+
+        double bound = this.size / 2 + Game.tile_size / 2;
+
+        if (horizontalDist < bound && verticalDist < bound)
+        {
+            if (o.checkForObjects)
+                o.onObjectEntry(this);
+
+            if (!o.bulletCollision)
+                return;
+
+            if (!o.hasLeftNeighbor() && distX <= 0 && distX >= -bound && horizontalDist >= verticalDist)
+            {
+                this.vX = -this.vX;
+                this.posX += horizontalDist - bound;
+            }
+            else if (!o.hasUpperNeighbor() && distY <= 0 && distY >= -bound && horizontalDist <= verticalDist)
+            {
+                this.vY = -this.vY;
+                this.posY += verticalDist - bound;
+            }
+            else if (!o.hasRightNeighbor() && distX >= 0 && distX <= bound && horizontalDist >= verticalDist)
+            {
+                this.vX = -this.vX;
+                this.posX -= horizontalDist - bound;
+            }
+            else if (!o.hasLowerNeighbor() && distY >= 0 && distY <= bound && horizontalDist <= verticalDist)
+            {
+                this.vY = -this.vY;
+                this.posY -= verticalDist - bound;
+            }
+
+            if (!o.bouncy)
+            {
+                this.vX *= 0.3;
+                this.vY *= 0.3;
+            }
+        }
+    }
+
+    public void onCollidedWith(Obstacle o)
+    {
+        this.explode();
     }
 
     public void explode()
@@ -208,7 +288,7 @@ public class Mine extends Movable implements IAvoidObject
     @Override
     public double getRadius()
     {
-        return this.radius;
+        return Math.min(Mine.mine_radius * 1.5, this.radius);
     }
 
     @Override

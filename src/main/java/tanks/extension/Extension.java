@@ -18,13 +18,15 @@ public class Extension
         this.name = name;
     }
 
-    // Register things like tanks, obstacles, items, or network events here
+    /**
+     * Register things like tanks, obstacles, items, or network events here
+     */
     public void setUp()
     {
 
     }
 
-    // Use the methods below like registerImage to register resources your extension uses
+    /** Use the methods below like registerImage to register resources your extension uses */
     public void loadResources()
     {
 

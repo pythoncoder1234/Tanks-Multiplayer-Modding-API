@@ -2,10 +2,10 @@ package tanks.obstacle;
 
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
-import tanks.tank.IAvoidObject;
+import tanks.tank.Mine;
 import tanks.tank.Tank;
 
-public class ObstacleWater extends Obstacle implements IAvoidObject
+public class ObstacleWater extends ObstacleLiquid
 {
     public static final int drownTime = 4000;
 
@@ -55,6 +55,11 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
     @Override
     public void onObjectEntry(Movable m)
     {
+        super.onObjectEntry(m);
+
+        if (m instanceof Mine)
+            ((Mine) m).destroysObstacles = false;
+
         if (m instanceof Tank)
         {
             Tank t = (Tank) m;
@@ -71,8 +76,9 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
                 p.put("drown", drown);
                 p.put("last_water_enter", System.currentTimeMillis());
 
+                StatusEffect.damage.attributeModifiers[0].value = 0.1;
                 if (drown > drownTime)
-                    t.addStatusEffect(StatusEffect.drown_damage, 0, 0, 10);
+                    t.addStatusEffect(StatusEffect.damage, 0, 0, 10);
             }
             else
             {
@@ -80,39 +86,8 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
                 if (lastEnter != null && System.currentTimeMillis() - lastEnter > 1000)
                     p.put("drown", 0D);
             }
-
-            int vx = (int) t.vX;
-            int vy = (int) t.vY;
-
-            int[] dx = {-vx, vx, 0, 0};
-            int[] dy = {0, 0, -vy, vy};
-
-            boolean floatUp = false;
-
-            for (int i = 0; i < dx.length; i++)
-            {
-                int x = (int) (t.posX / 50 - 0.5 + dx[i]);
-                int y = (int) (t.posY / 50 - 0.5 + dy[i]);
-
-                if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
-                    continue;
-
-                floatUp = shouldFloat(x, y, t) || shouldFloat(x + dy[i], y + dx[i], t);
-                if (floatUp) break;
-            }
-
-            if (!floatUp && t.posZ > -this.stackHeight * Game.tile_size)
-                t.posZ -= Panel.frameFrequency * 0.75;
-            else if (floatUp && t.posZ < 0)
-                t.posZ += Panel.frameFrequency * 0.75;
-
-            t.disabled = t.posZ < 1.25 * -Game.tile_size;
-            t.targetable = !t.disabled;
         }
-
-        this.onObjectEntryLocal(m);
     }
-
 
     @Override
     public void onObjectEntryLocal(Movable m)
@@ -192,32 +167,6 @@ public class ObstacleWater extends Obstacle implements IAvoidObject
     public void drawTile(double r, double g, double b, double d, double extra)
     {
         Drawing.drawing.setColor(r, g, b);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -Game.tile_size * this.stackHeight, Game.tile_size, Game.tile_size, -extra);
-    }
-
-    protected boolean shouldFloat(int testX, int testY, Tank t)
-    {
-        Obstacle o = Game.obstacleMap[Math.min(Math.max(testX, 0), Game.currentSizeX - 1)][Math.min(Math.max(testY, 0), Game.currentSizeY - 1)];
-        return !(o instanceof ObstacleWater) || t.posZ <= -o.stackHeight * 50;
-    }
-
-    public double getTileHeight()
-    {
-        return -this.stackHeight * Game.tile_size;
-    }
-
-    public double getGroundHeight()
-    {
-        return -this.stackHeight * Game.tile_size;
-    }
-
-    public double getRadius()
-    {
-        return Game.tile_size;
-    }
-
-    public double getSeverity(double x, double y)
-    {
-        return 0;
+        Drawing.drawing.fillBox(this, this.posX, this.posY, -Game.tile_size * this.stackHeight + d, Game.tile_size, Game.tile_size, -extra);
     }
 }

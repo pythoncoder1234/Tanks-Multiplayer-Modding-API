@@ -1,8 +1,10 @@
 package tanks;
 
 import basewindow.IWindowHandler;
-import tanks.gui.screen.*;
-import tanks.translation.Translation;
+import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenOptions;
+import tanks.gui.screen.ScreenPartyHost;
+import tanks.gui.screen.ScreenPartyLobby;
 
 public class GameWindowHandler implements IWindowHandler
 {
@@ -34,14 +36,19 @@ public class GameWindowHandler implements IWindowHandler
 		try
 		{
 			if (Crusade.currentCrusade != null && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient && Game.screen instanceof ScreenGame)
-			{
-				Crusade.currentCrusade.quit();
-			}
-		}
-		catch (Exception e)
-		{
-			Game.exitToCrash(e);
-		}
-	}
+            {
+                Crusade.currentCrusade.quit();
+            }
+        }
+        catch (Exception e)
+        {
+            Game.exitToCrash(e);
+        }
+    }
 
+    @Override
+    public void onMouseConstrain()
+    {
+        Game.screen.onMouseConstrain();
+    }
 }

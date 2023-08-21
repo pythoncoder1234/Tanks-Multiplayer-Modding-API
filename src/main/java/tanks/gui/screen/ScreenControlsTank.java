@@ -2,13 +2,10 @@ package tanks.gui.screen;
 
 import tanks.Drawing;
 import tanks.Game;
-import tanks.gui.Button;
 import tanks.gui.InputSelector;
 
-public class ScreenControlsTank extends Screen
+public class ScreenControlsTank extends ScreenOptionsOverlay
 {
-
-
     InputSelector moveUp = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 270, 700, 40, "Move up", Game.game.input.moveUp);
     InputSelector moveDown = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 180, 700, 40, "Move down", Game.game.input.moveDown);
     InputSelector moveLeft = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 90, 700, 40, "Move left", Game.game.input.moveLeft);
@@ -17,15 +14,11 @@ public class ScreenControlsTank extends Screen
     InputSelector mine = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 180, 700, 40, "Lay mine", Game.game.input.mine);
     InputSelector aim = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 270, 700, 40, "Trace aim", Game.game.input.aim);
 
-    public ScreenControlsTank()
-    {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-    }
-
     @Override
     public void update()
     {
+        super.update();
+
         moveUp.update();
         moveDown.update();
         moveLeft.update();

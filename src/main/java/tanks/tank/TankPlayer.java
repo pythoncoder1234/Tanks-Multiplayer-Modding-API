@@ -2,12 +2,14 @@ package tanks.tank;
 
 import basewindow.InputCodes;
 import basewindow.InputPoint;
+import basewindow.Model;
 import tanks.*;
 import tanks.bullet.Bullet;
 import tanks.bullet.BulletElectric;
 import tanks.gui.Button;
 import tanks.gui.Joystick;
-import tanks.gui.menus.*;
+import tanks.gui.menus.FixedMenu;
+import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenTitle;
 import tanks.hotbar.Hotbar;
@@ -20,15 +22,17 @@ import tanks.network.event.EventShootBullet;
  */
 public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerTank
 {
-	public static ItemBullet default_bullet;
-	public static ItemMine default_mine;
+    public static Model sunglassesModel;
 
-	public static Joystick controlStick;
-	public static Joystick shootStick;
-	public static Button mineButton;
+    public static ItemBullet default_bullet;
+    public static ItemMine default_mine;
 
-	public static boolean controlStickSnap = false;
-	public static boolean controlStickMobile = true;
+    public static Joystick controlStick;
+    public static Joystick shootStick;
+    public static Button mineButton;
+
+    public static boolean controlStickSnap = false;
+    public static boolean controlStickMobile = true;
 
 	public Player player = Game.player;
 	public static boolean enableDestroyCheat = false;
@@ -51,17 +55,21 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	public double mouseY;
 
 	public TankPlayer(double x, double y, double angle)
-	{
-		super("player", x, y, Game.tile_size, 0, 150, 255);
-		this.angle = angle;
-		this.orientation = angle;
-		this.player.tank = this;
+    {
+        super("player", x, y, Game.tile_size, 0, 150, 255);
 
-		this.colorR = Game.player.colorR;
-		this.colorG = Game.player.colorG;
-		this.colorB = Game.player.colorB;
-		this.secondaryColorR = Game.player.turretColorR;
-		this.secondaryColorG = Game.player.turretColorG;
+        if (sunglassesModel == null)
+            sunglassesModel = Drawing.drawing.createModel("/models/sunglasses/");
+
+        this.angle = angle;
+        this.orientation = angle;
+        this.player.tank = this;
+
+        this.colorR = Game.player.colorR;
+        this.colorG = Game.player.colorG;
+        this.colorB = Game.player.colorB;
+        this.secondaryColorR = Game.player.turretColorR;
+        this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
 
 		if (enableDestroyCheat)
@@ -81,26 +89,50 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		}
 	}
 
-	public void setDefaultColor()
-	{
-		this.colorR = 0;
-		this.colorG = 150;
-		this.colorB = 255;
-		this.secondaryColorR = Turret.calculateSecondaryColor(this.colorR);
-		this.secondaryColorG = Turret.calculateSecondaryColor(this.colorG);
-		this.secondaryColorB = Turret.calculateSecondaryColor(this.colorB);
-	}
+    public void setDefaultColor()
+    {
+        this.colorR = 0;
+        this.colorG = 150;
+        this.colorB = 255;
+        this.secondaryColorR = Turret.calculateSecondaryColor(this.colorR);
+        this.secondaryColorG = Turret.calculateSecondaryColor(this.colorG);
+        this.secondaryColorB = Turret.calculateSecondaryColor(this.colorB);
+    }
 
-	@Override
-	public void update()
-	{
-		boolean up = Game.game.input.moveUp.isPressed();
-		boolean down = Game.game.input.moveDown.isPressed();
-		boolean left = Game.game.input.moveLeft.isPressed();
-		boolean right = Game.game.input.moveRight.isPressed();
-		boolean trace = Game.game.input.aim.isPressed();
+    @Override
+    public void postInitSelectors()
+    {
+        super.postInitSelectors();
 
-		boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
+        this.teamSelector.id = "player_team";
+        this.teamSelector.defaultTeamIndex = 0;
+
+        if (!this.teamSelector.modified)
+            this.teamSelector.setChoice(0);
+    }
+
+    @Override
+    public void draw()
+    {
+        super.draw();
+
+        if (!Game.angledView && !Game.followingCam)
+            return;
+
+        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
+    }
+
+    @Override
+    public void update()
+    {
+        boolean up = Game.game.input.moveUp.isPressed();
+        boolean down = Game.game.input.moveDown.isPressed();
+        boolean left = Game.game.input.moveLeft.isPressed();
+        boolean right = Game.game.input.moveRight.isPressed();
+        boolean trace = Game.game.input.aim.isPressed();
+
+        boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
 
 		if (Game.game.input.aim.isValid())
 		{
@@ -141,26 +173,29 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			}
 		}
 		else if (this.inControlOfMotion)
-		{
-			double acceleration = this.acceleration * this.accelerationModifier;
-			double maxVelocity = this.maxSpeed * this.maxSpeedModifier;
+        {
+            double acceleration = this.acceleration * this.accelerationModifier;
+            double maxVelocity = this.maxSpeed * this.maxSpeedModifier;
 
-			double x = 0;
-			double y = 0;
+            double x = 0;
+            double y = 0;
 
-			double a = -1;
+            double a = -1;
 
-			if (left)
-				x -= 1;
+            if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam))
+            {
+                if (left)
+                    x -= 1;
 
-			if (right)
-				x += 1;
+                if (right)
+                    x += 1;
 
-			if (up)
-				y -= 1;
+                if (up)
+                    y -= 1;
 
-			if (down)
-				y += 1;
+                if (down)
+                    y += 1;
+            }
 
 			if (x == 1 && y == 0)
 				a = 0;
@@ -350,27 +385,31 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 					}
 				}
 
-				this.prevDistSq = distSq;
-			}
-		}
-		else if (!Game.followingCam)
-		{
-			this.mouseX = Drawing.drawing.getMouseX();
-			this.mouseY = Drawing.drawing.getMouseY();
-			this.angle = this.getAngleInDirection(this.mouseX, this.mouseY);
-		}
+                this.prevDistSq = distSq;
+            }
+        }
+        else if (!Game.followingCam)
+        {
+            this.mouseX = Drawing.drawing.getMouseX();
+            this.mouseY = Drawing.drawing.getMouseY();
+            this.angle = this.getAngleInDirection(this.mouseX, this.mouseY);
+        }
 
-		if (shoot && this.getItem(false).cooldown <= 0 && !this.disabled)
-			this.shoot();
 
-		if (mine && this.getItem(true).cooldown <= 0 && !this.disabled)
-			this.layMine();
+        if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam))
+        {
+            if (shoot && this.getItem(false).cooldown <= 0 && !this.disabled)
+                this.shoot();
 
-		if ((trace || lockTrace) && !Game.bulletLocked && !this.disabled && (Game.screen instanceof ScreenGame || Game.screen instanceof ScreenTitle))
-		{
-			double range = -1;
+            if (mine && this.getItem(true).cooldown <= 0 && !this.disabled)
+                this.layMine();
+        }
 
-			Ray r = new Ray(this.posX, this.posY, this.angle, 1, this);
+        if ((trace || lockTrace) && !Game.bulletLocked && !this.disabled && (Game.screen instanceof ScreenGame || Game.screen instanceof ScreenTitle))
+        {
+            double range = -1;
+
+            Ray r = new Ray(this.posX, this.posY, this.angle, 1, this);
 
 			if (h.enabledItemBar && h.itemBar.selected >= 0)
 			{

@@ -18,7 +18,7 @@ public class Minimap extends FixedMenu
     public boolean centered = true;
     public boolean forceDisabled;
 
-    public static float scale = 1.5f;
+    public static float scale = 1f;
     public static float panSpeed = 50;
     public static int posOffsetX = 0;
     public static int posOffsetY = 0;
@@ -70,8 +70,8 @@ public class Minimap extends FixedMenu
         {
             for (int gridY = 0; gridY < Game.currentSizeY; gridY++)
             {
-                Obstacle o = Game.obstacleMap[gridX][gridY];
-                if (o == null)
+                Obstacle o = Game.obstacleGrid[gridX][gridY];
+                if (o == null || o.startHeight >= 1)
                     continue;
 
                 double x;
@@ -126,7 +126,7 @@ public class Minimap extends FixedMenu
 
             if ((posX < x && x < posX + sizeX) && (posY + 30 < y && y < posY + (sizeY - 30)))
             {
-                if (m instanceof Tank && !m.destroy && ((Tank) m).mandatoryKill)
+                if (m instanceof Tank && !m.destroy)
                 {
                     Tank t = (Tank) m;
 
@@ -149,13 +149,13 @@ public class Minimap extends FixedMenu
                     }
                     else
                     {
-                        ModAPI.fixedShapes.fillOval(x, y, 8 * (t.size / 50), 8 * (t.size / 50));
+                        ModAPI.fixedShapes.fillOval(x, y, 6 * (t.size / 50) * scale, 6 * (t.size / 50) * scale);
 
                         if (t.emblem != null)
                         {
                             double size = t.size / 650;
                             Drawing.drawing.setColor(t.emblemR, t.emblemG, t.emblemB, colA);
-                            ModAPI.fixedShapes.drawImage(x + size * 20, y + size * 20, size, size, "/images/" + t.emblem, true);
+                            ModAPI.fixedShapes.drawImage(x + size * 20, y + size * 20, size * scale, size * scale, "/images/" + t.emblem, true);
                         }
                     }
                 }

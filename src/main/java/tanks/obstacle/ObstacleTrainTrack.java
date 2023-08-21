@@ -79,18 +79,18 @@ public class ObstacleTrainTrack extends Obstacle
         }
     }
 
-    @Override
-    public void drawForInterface(double x, double y)
+    public static boolean exists(Obstacle o)
     {
-        for (int i = -2; i <= 2; i++)
-        {
-            Drawing.drawing.setColor(this.stackColorR[i + 2], this.stackColorG[i + 2], this.stackColorB[i + 2]);
-            Drawing.drawing.fillInterfaceRect(x + 15 * i, y, 7, 50);
-        }
+        if (o == null)
+            return false;
 
-        Drawing.drawing.setColor(192, 192, 192);
-        Drawing.drawing.fillInterfaceRect(x, y + 15, 80, 7);
-        Drawing.drawing.fillInterfaceRect(x, y - 15, 80, 7);
+        int x = (int) (o.posX / Game.tile_size);
+        int y = (int) (o.posY / Game.tile_size);
+
+        if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
+            return false;
+
+        return Game.obstacleGrid[x][y] == o;
     }
 
     @Override
@@ -121,23 +121,21 @@ public class ObstacleTrainTrack extends Obstacle
             Drawing.drawing.fillBox(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d + startHeight * 50, offX * 2.86 + 7, offY * 2.86 + 7, 6);
         }
     }
-    public void setOrientation()
+
+    @Override
+    public void drawForInterface(double x, double y)
     {
-        firstFrame = false;
-        this.colorChanged = turn > 0;
+        double sizeMult = draw_size / Game.tile_size;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = -2; i <= 2; i++)
         {
-            int x = (int) (posX / 50) + dirX[i];
-            int y = (int) (posY / 50) + dirY[i];
-
-            if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY || !(Game.obstacleMap[x][y] instanceof ObstacleTrainTrack))
-                continue;
-
-            setObstacleOrientation(((ObstacleTrainTrack) Game.obstacleMap[x][y]), dirX[i], dirY[i]);
+            Drawing.drawing.setColor(this.stackColorR[i + 2], this.stackColorG[i + 2], this.stackColorB[i + 2]);
+            Drawing.drawing.fillInterfaceRect(x + 15 * i * sizeMult, y, 7 * sizeMult, 50 * sizeMult);
         }
 
-        this.updateTurn();
+        Drawing.drawing.setColor(192, 192, 192);
+        Drawing.drawing.fillInterfaceRect(x, y + 15 * sizeMult, 80 * sizeMult, 7 * sizeMult);
+        Drawing.drawing.fillInterfaceRect(x, y - 15 * sizeMult, 80 * sizeMult, 7 * sizeMult);
     }
 
     public void setObstacleOrientation(ObstacleTrainTrack o, int dxi, int dyi)
@@ -214,18 +212,23 @@ public class ObstacleTrainTrack extends Obstacle
         return cnt;
     }
 
-    public static boolean exists(Obstacle o)
+    public void setOrientation()
     {
-        if (o == null)
-            return false;
+        firstFrame = false;
+        this.colorChanged = turn > 0;
 
-        int x = (int) (o.posX / Game.tile_size);
-        int y = (int) (o.posY / Game.tile_size);
+        for (int i = 0; i < 4; i++)
+        {
+            int x = (int) (posX / 50) + dirX[i];
+            int y = (int) (posY / 50) + dirY[i];
 
-        if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
-            return false;
+            if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY || !(Game.obstacleGrid[x][y] instanceof ObstacleTrainTrack))
+                continue;
 
-        return Game.obstacleMap[x][y] == o;
+            setObstacleOrientation(((ObstacleTrainTrack) Game.obstacleGrid[x][y]), dirX[i], dirY[i]);
+        }
+
+        this.updateTurn();
     }
 
     @Override

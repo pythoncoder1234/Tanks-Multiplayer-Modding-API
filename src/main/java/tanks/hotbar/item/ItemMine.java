@@ -17,7 +17,6 @@ public class ItemMine extends Item
     public double radius;
     public double damage;
     public int maxLiveMines;
-    public double cooldownBase;
     public double size;
     public boolean destroysObstacles;
 

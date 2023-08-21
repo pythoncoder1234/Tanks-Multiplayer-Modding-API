@@ -3,19 +3,27 @@ package tanks.gui.screen;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
-import tanks.gui.TextBox;
 
-public class ScreenOptionsMultiplayer extends Screen
+public class ScreenOptionsMultiplayer extends ScreenOptionsOverlay
 {
-	public static final String chatFilterText = "Chat filter: ";
-	public static final String autoReadyText = "Auto ready: ";
-	public static final String anticheatText = "Anticheat: ";
+    public static final String chatFilterText = "Chat filter: ";
+    public static final String autoReadyText = "Auto ready: ";
+    public static final String anticheatText = "Anticheat: ";
 
-	public static final String weakText = "\u00A7200100000255weak";
-	public static final String strongText = "\u00A7000200000255strong";
+    public static final String weakText = "\u00A7200100000255weak";
+    public static final String strongText = "\u00A7000200000255strong";
 
-	Button chatFilter = new Button(this.centerX, this.centerY + this.objYSpace * 0, this.objWidth, this.objHeight, "", new Runnable()
-	{
+	@Override
+	public void update()
+    {
+        super.update();
+
+        chatFilter.update();
+        back.update();
+        hostOptions.update();
+        autoReady.update();
+    }    Button chatFilter = new Button(this.centerX, this.centerY + this.objYSpace * 0, this.objWidth, this.objHeight, "", new Runnable()
+    {
 		@Override
 		public void run() 
 		{
@@ -52,9 +60,6 @@ public class ScreenOptionsMultiplayer extends Screen
 	
 	public ScreenOptionsMultiplayer()
 	{
-		this.music = "menu_options.ogg";
-		this.musicID = "menu";
-
 		if (Game.enableChatFilter)
 			chatFilter.setText(chatFilterText, ScreenOptions.onText);
 		else
@@ -66,14 +71,7 @@ public class ScreenOptionsMultiplayer extends Screen
 			autoReady.setText(autoReadyText, ScreenOptions.offText);
 	}
 	
-	@Override
-	public void update() 
-	{
-		chatFilter.update();
-		back.update();
-		hostOptions.update();
-		autoReady.update();
-	}
+
 
 	@Override
 	public void draw()
@@ -88,5 +86,4 @@ public class ScreenOptionsMultiplayer extends Screen
 		Drawing.drawing.setColor(0, 0, 0);
 		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Multiplayer options");
 	}
-
 }

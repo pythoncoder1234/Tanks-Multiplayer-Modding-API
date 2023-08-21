@@ -2,14 +2,13 @@ package tanks;
 
 import basewindow.BaseFile;
 import tanks.bullet.Bullet;
-import tanks.gui.screen.ScreenCrashed;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.ScreenOutOfMemory;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.ItemBar;
 import tanks.hotbar.item.Item;
-import tanks.tank.*;
+import tanks.tank.Explosion;
 import tanks.tank.Tank;
+import tanks.tank.TankPlayer;
 
 import java.util.HashMap;
 
@@ -60,12 +59,12 @@ public class CrusadePlayer
         }
     }
 
-    public void addItemUse(IGameObject i)
+    public void addItemUse(GameObject i)
     {
         this.addItemStat(this.itemUses, i);
     }
 
-    public void addItemHit(IGameObject i)
+    public void addItemHit(GameObject i)
     {
         this.addItemStat(this.itemHits, i);
     }
@@ -90,7 +89,7 @@ public class CrusadePlayer
         return n;
     }
 
-    public void addItemStat(HashMap<String, Integer> stat, IGameObject i)
+    public void addItemStat(HashMap<String, Integer> stat, GameObject i)
     {
         Item item;
 

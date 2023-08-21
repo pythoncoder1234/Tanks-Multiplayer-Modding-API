@@ -9,25 +9,31 @@ import java.util.Date;
 import java.util.Properties;
 
 public class ScreenFailedToLoadLevel extends Screen
-{	
+{
 	public String lvl;
 	public Screen screen;
 	public String path;
 	public int hashcode;
 
+    Button deleteLevel = new Button(this.centerX, this.centerY + 240, this.objWidth, this.objHeight, "Delete level", () -> Game.screen = new ScreenConfirmDelete(lvl));
+    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 300, this.objWidth, this.objHeight, "Back", () -> Game.screen = screen);
+
 	public ScreenFailedToLoadLevel(String name, String contents, Exception e, Screen s)
-	{
-		super(350, 40, 380, 60);
+    {
+        super(350, 40, 380, 60);
 
-		this.lvl = name.substring(name.replace("\\", "/").lastIndexOf("/") + 1);
-		Game.currentSizeX = 28;
-		Game.currentSizeY = 18;
-		this.screen = s;
-		Game.resetTiles();
-		Game.cleanUp();
-		e.printStackTrace();
+        this.music = s.music;
+        this.musicID = s.musicID;
 
-		hashcode = contents.hashCode();
+        this.lvl = name.substring(name.replace("\\", "/").lastIndexOf("/") + 1);
+        Game.currentSizeX = 28;
+        Game.currentSizeY = 18;
+        this.screen = s;
+        Game.resetTiles();
+        Game.cleanUp();
+        e.printStackTrace();
+
+        hashcode = contents.hashCode();
 
 		try
 		{
@@ -49,47 +55,42 @@ public class ScreenFailedToLoadLevel extends Screen
 				f.println("at " + el.toString());
 			}
 
-			f.println("\nSystem properties:");
-			Properties p = System.getProperties();
-			for (Object o: p.keySet())
-				f.println(o + ": " + p.get(o));
+            f.println("\nSystem properties:");
+            Properties p = System.getProperties();
+            for (Object o : p.keySet())
+                f.println(o + ": " + p.get(o));
 
-			f.stopWriting();
-		}
-		catch (Exception ex) {ex.printStackTrace();}
-	}
+            f.stopWriting();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+    }
 
-	Button quit = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 300, this.objWidth, this.objHeight, "Back", new Runnable()
-	{
-		@Override
-		public void run() 
-		{
-			Game.screen = screen;
-		}
-	}
-			);
+    @Override
+    public void update()
+    {
+        back.update();
+        deleteLevel.update();
+    }
 
-	@Override
-	public void update() 
-	{
-		quit.update();
-	}
+    @Override
+    public void draw()
+    {
+        this.drawDefaultBackground();
+        back.draw();
+        deleteLevel.draw();
 
-	@Override
-	public void draw() 
-	{
-		this.drawDefaultBackground();
-		quit.draw();
+        Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 150, "Tanks failed to load the level!");
 
-		Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 150, "Tanks failed to load the level!");
-
-		if (!ScreenPartyLobby.isClient || Game.connectedToOnline)
-		{
-			Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 90, "This could be caused by a glitch in the editor,");
-			Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 60, "or by corruption of the level file.");
-			Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, "If you manually modified the level file, please undo your changes.");
-			Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 30, "If this is not the case, please report the error!");
-			Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 90, "Check the report file for more information: ");
+        if (!ScreenPartyLobby.isClient || Game.connectedToOnline)
+        {
+            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 90, "This could be caused by a glitch in the editor,");
+            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 60, "or by corruption of the level file.");
+            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, "If you manually modified the level file, please undo your changes.");
+            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 30, "If this is not the case, please report the error!");
+            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 90, "Check the report file for more information: ");
 			Drawing.drawing.drawInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 120, Game.homedir.replace("\\", "/") + Game.crashesPath + lvl + "-" + hashcode + ".crash");
 		}
 		else

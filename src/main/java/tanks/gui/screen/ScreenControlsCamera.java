@@ -4,7 +4,7 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.InputSelector;
 
-public class ScreenControlsCamera extends Screen
+public class ScreenControlsCamera extends ScreenOptionsOverlay
 {
     InputSelector toggleZoom = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 225, 700, 40, "Toggle zoom", Game.game.input.zoom);
     InputSelector zoomIn = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 135, 700, 40, "Zoom in", Game.game.input.zoomIn);
@@ -14,15 +14,11 @@ public class ScreenControlsCamera extends Screen
     InputSelector cameraPitch = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 225, 700, 40, "Camera tilt", Game.game.input.tilt);
     InputSelector cameraZoom = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 315, 700, 40, "Camera zoom", Game.game.input.fcZoom);
 
-    public ScreenControlsCamera()
-    {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-    }
-
     @Override
     public void update()
     {
+        super.update();
+
         toggleZoom.update();
         zoomIn.update();
         zoomOut.update();

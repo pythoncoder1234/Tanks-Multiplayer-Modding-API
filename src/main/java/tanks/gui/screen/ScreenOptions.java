@@ -15,29 +15,32 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ScreenOptions extends Screen
+public class ScreenOptions extends ScreenOptionsOverlay
 {
-	public static final String onText = "\u00A7000200000255on";
-	public static final String offText = "\u00A7200000000255off";
-	public static ArrayList<String> extraOptions = new ArrayList<>();
+    public static final String onText = "\u00A7000200000255on";
+    public static final String offText = "\u00A7200000000255off";
+    public static ArrayList<String> extraOptions = new ArrayList<>();
 
-	TankPlayer preview = new TankPlayer(0, 0, 0);
+    TankPlayer preview = new TankPlayer(0, 0, 0);
+	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Back", () ->
+    {
+        saveOptions(Game.homedir);
 
-	public ScreenOptions()
-	{
-		this.music = "menu_options.ogg";
-		this.musicID = "menu";
+        if (game != null)
+        {
+            game.screenshotMode = false;
+            Game.screen = game;
+        }
+        else
+            Game.screen = new ScreenTitle();
+    }
+	);
 
-		if (!Game.game.window.soundsEnabled)
+    public ScreenOptions()
+    {
+        if (!Game.game.window.soundsEnabled)
 			soundOptions.enabled = false;
 	}
-
-	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Back", () ->
-	{
-		saveOptions(Game.homedir);
-		Game.screen = new ScreenTitle();
-	}
-	);
 
 
 	Button multiplayerOptions = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Multiplayer options", () -> Game.screen = new ScreenOptionsMultiplayer()
@@ -66,69 +69,110 @@ public class ScreenOptions extends Screen
 
 	Button extensionOptions = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Extension options", () -> Game.screen = new ScreenOptionsExtensions());
 
-	@Override
-	public void update()
-	{
-		soundOptions.update();
-		miscOptions.update();
-		windowOptions.update();
+	public static void saveOptions(String homedir)
+    {
+        String path = homedir + Game.optionsPath;
 
-		graphicsOptions.update();
-		inputOptions.update();
-		multiplayerOptions.update();
-		personalize.update();
+        try
+        {
+            boolean fullscreen = Game.game.fullscreen;
 
-		back.update();
-	}
+            if (Game.game.window != null)
+                fullscreen = Game.game.window.fullscreen;
 
-	@Override
-	public void draw()
-	{
-		this.drawDefaultBackground();
+            BaseFile f = Game.game.fileManager.getFile(path);
+            f.startWriting();
+            f.println("# This file stores game settings that you have set");
+            f.println("username=" + Game.player.username);
+            f.println("fancy_terrain=" + Game.fancyTerrain);
+            f.println("effects=" + Game.effectsEnabled);
+            f.println("effect_multiplier=" + (int) Math.round(Game.effectMultiplier * 100));
+            f.println("bullet_trails=" + Game.bulletTrails);
+            f.println("fancy_bullet_trails=" + Game.fancyBulletTrails);
+            f.println("glow=" + Game.glowEnabled);
+            f.println("3d=" + Game.enable3d);
+            f.println("3d_ground=" + Game.enable3dBg);
+            f.println("shadows_enabled=" + Game.shadowsEnabled);
+            f.println("shadow_quality=" + Game.shadowQuality);
+            f.println("vsync=" + Game.vsync);
+            f.println("max_fps=" + Game.maxFPS);
+            f.println("antialiasing=" + Game.antialiasing);
+            f.println("perspective=" + ScreenOptionsGraphics.viewNum);
+            f.println("bullet_indicator=" + Game.xrayBullets);
+            f.println("preview_crusades=" + Game.previewCrusades);
+            f.println("tank_textures=" + Game.tankTextures);
+            f.println("mouse_target=" + Panel.showMouseTarget);
+            f.println("mouse_target_height=" + Panel.showMouseTargetHeight);
+            f.println("pause_on_lost_focus=" + Panel.pauseOnDefocus);
+            f.println("constrain_mouse=" + Game.constrainMouse);
+            f.println("fullscreen=" + fullscreen);
+            f.println("vibrations=" + Game.enableVibrations);
+            f.println("mobile_joystick=" + TankPlayer.controlStickMobile);
+            f.println("snap_joystick=" + TankPlayer.controlStickSnap);
+            f.println("dual_joystick=" + TankPlayer.shootStickEnabled);
+            f.println("sound=" + Game.soundsEnabled);
+            f.println("sound_volume=" + Game.soundVolume);
+            f.println("music=" + Game.musicEnabled);
+            f.println("music_volume=" + Game.musicVolume);
+            f.println("auto_start=" + Game.autostart);
+            f.println("full_stats=" + Game.fullStats);
+            f.println("timer=" + Game.showSpeedrunTimer);
+            f.println("deterministic=" + Game.deterministicMode);
+            f.println("warn_before_closing=" + Game.warnBeforeClosing);
+            f.println("info_bar=" + Drawing.drawing.enableStats);
+            f.println("port=" + Game.port);
+            f.println("last_party=" + Game.lastParty);
+            f.println("last_online_server=" + Game.lastOnlineServer);
+            f.println("show_ip=" + Game.showIP);
+            f.println("chat_filter=" + Game.enableChatFilter);
+            f.println("auto_ready=" + Game.autoReady);
+            f.println("tps=" + Tank.updatesPerSecond);
+            f.println("anticheat=" + TankPlayerRemote.checkMotion);
+            f.println("anticheat_weak=" + TankPlayerRemote.weakTimeCheck);
+            f.println("disable_party_friendly_fire=" + Game.disablePartyFriendlyFire);
+            f.println("party_countdown=" + Game.partyStartTime);
+            f.println("tank_secondary_color=" + Game.player.enableSecondaryColor);
+            f.println("tank_red=" + Game.player.colorR);
+            f.println("tank_green=" + Game.player.colorG);
+            f.println("tank_blue=" + Game.player.colorB);
+            f.println("tank_red_2=" + Game.player.turretColorR);
+            f.println("tank_green_2=" + Game.player.turretColorG);
+            f.println("tank_blue_2=" + Game.player.turretColorB);
 
-		back.draw();
-		multiplayerOptions.draw();
-		inputOptions.draw();
-		graphicsOptions.draw();
-		windowOptions.draw();
-		miscOptions.draw();
-		soundOptions.draw();
-		personalize.draw();
+            if (Game.player.chromaaa)
+                f.println("cHrOmA=true");
 
-		Drawing.drawing.setInterfaceFontSize(this.titleSize);
-		Drawing.drawing.setColor(0, 0, 0);
+            f.println("translation=" + (Translation.currentTranslation == null ? "null" : Translation.currentTranslation.fileName));
+            f.println("last_version=" + Game.lastVersion);
+            f.println("enable_extensions=" + Game.enableExtensions);
+            f.println("auto_load_extensions=" + Game.autoLoadExtensions);
 
-		if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale > personalize.sizeX - 240)
-			Drawing.drawing.setInterfaceFontSize(this.titleSize * (personalize.sizeX - 240) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale));
+            for (String s : extraOptions)
+                f.println(s);
 
-		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Options");
+            f.stopWriting();
+        }
+        catch (FileNotFoundException e)
+        {
+            Game.exitToCrash(e);
+        }
 
-		if (Game.player.colorR + Game.player.colorG + Game.player.colorB >= 220 * 3 && Game.player.username.length() >= 1)
-		{
-			Drawing.drawing.setColor(200, 200, 200);
-			double s = Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale;
-			Drawing.drawing.fillInterfaceRect(personalize.posX, personalize.posY + personalize.sizeY * 0.1, s, 40);
-			Drawing.drawing.fillInterfaceOval(personalize.posX - (s) / 2, personalize.posY + personalize.sizeY * 0.1, 40, 40);
-			Drawing.drawing.fillInterfaceOval(personalize.posX + (s) / 2, personalize.posY + personalize.sizeY * 0.1, 40, 40);
-		}
+        if (ScreenOptionsExtensions.modified)
+            saveExtensions();
+    }
 
-		preview.drawForInterface(personalize.posX - personalize.sizeX / 2 + personalize.sizeY * 0.7, personalize.posY, 1);
+    public static void saveExtensions()
+    {
+        ScreenOptionsExtensions.modified = false;
+        ArrayList<String> arr = new ArrayList<>();
+        for (int i = 0; i < ScreenOptionsExtensions.extensionNames.size(); i++)
+        {
+            if (ScreenOptionsExtensions.selectedExtensions[i])
+                arr.add(ScreenOptionsExtensions.extensionNames.get(i));
+        }
 
-		Drawing.drawing.setColor(Game.player.turretColorR, Game.player.turretColorG, Game.player.turretColorB);
-		Drawing.drawing.drawInterfaceText(personalize.posX + 2, personalize.posY + personalize.sizeY * 0.1 + 2, Game.player.username);
-		Drawing.drawing.setColor(Game.player.colorR, Game.player.colorG, Game.player.colorB);
-		Drawing.drawing.drawInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, Game.player.username);
-
-		if (Game.player.username.length() < 1)
-		{
-			Drawing.drawing.setColor(127, 127, 127);
-			Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, "Pick a username...");
-		}
-
-		Drawing.drawing.setInterfaceFontSize(this.titleSize * 0.65);
-		Drawing.drawing.setColor(80, 80, 80);
-		Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY - personalize.sizeY * 0.3, "My profile");
-	}
+        Game.extensionRegistry.saveRegistry(arr);
+    }
 
 	public static void initOptions(String homedir)
 	{
@@ -140,110 +184,21 @@ public class ScreenOptions extends Screen
 		}
 		catch (IOException e)
 		{
-			Game.logger.println (new Date().toString() + " (syserr) file permissions are broken! cannot initialize options file.");
+			Game.logger.println (new Date() + " (syserr) file permissions are broken! cannot initialize options file.");
 			System.exit(1);
 		}
 
 		saveOptions(homedir);
 	}
 
-	public static void saveOptions(String homedir)
-	{
-		String path = homedir + Game.optionsPath;
+    public static void loadOptions(String homedir)
+    {
+        String path = homedir + Game.optionsPath;
 
-		try
-		{
-			boolean fullscreen = Game.game.fullscreen;
-
-			if (Game.game.window != null)
-				fullscreen = Game.game.window.fullscreen;
-
-			BaseFile f = Game.game.fileManager.getFile(path);
-			f.startWriting();
-			f.println("# This file stores game settings that you have set");
-			f.println("username=" + Game.player.username);
-			f.println("fancy_terrain=" + Game.fancyTerrain);
-			f.println("effects=" + Game.effectsEnabled);
-			f.println("effect_multiplier=" + (int) Math.round(Game.effectMultiplier * 100));
-			f.println("bullet_trails=" + Game.bulletTrails);
-			f.println("fancy_bullet_trails=" + Game.fancyBulletTrails);
-			f.println("glow=" + Game.glowEnabled);
-			f.println("3d=" + Game.enable3d);
-			f.println("3d_ground=" + Game.enable3dBg);
-			f.println("shadows_enabled=" + Game.shadowsEnabled);
-			f.println("shadow_quality=" + Game.shadowQuality);
-			f.println("vsync=" + Game.vsync);
-			f.println("max_fps=" + Game.maxFPS);
-			f.println("antialiasing=" + Game.antialiasing);
-			f.println("perspective=" + ScreenOptionsGraphics.viewNum);
-			f.println("bullet_indicator=" + Game.xrayBullets);
-			f.println("preview_crusades=" + Game.previewCrusades);
-			f.println("tank_textures=" + Game.tankTextures);
-			f.println("mouse_target=" + Panel.showMouseTarget);
-			f.println("mouse_target_height=" + Panel.showMouseTargetHeight);
-			f.println("pause_on_lost_focus=" + Panel.pauseOnDefocus);
-			f.println("constrain_mouse=" + Game.constrainMouse);
-			f.println("fullscreen=" + fullscreen);
-			f.println("vibrations=" + Game.enableVibrations);
-			f.println("mobile_joystick=" + TankPlayer.controlStickMobile);
-			f.println("snap_joystick=" + TankPlayer.controlStickSnap);
-			f.println("dual_joystick=" + TankPlayer.shootStickEnabled);
-			f.println("sound=" + Game.soundsEnabled);
-			f.println("sound_volume=" + Game.soundVolume);
-			f.println("music=" + Game.musicEnabled);
-			f.println("music_volume=" + Game.musicVolume);
-			f.println("auto_start=" + Game.autostart);
-			f.println("full_stats=" + Game.fullStats);
-			f.println("timer=" + Game.showSpeedrunTimer);
-			f.println("deterministic=" + Game.deterministicMode);
-			f.println("warn_before_closing=" + Game.warnBeforeClosing);
-			f.println("info_bar=" + Drawing.drawing.enableStats);
-			f.println("port=" + Game.port);
-			f.println("last_party=" + Game.lastParty);
-			f.println("last_online_server=" + Game.lastOnlineServer);
-			f.println("show_ip=" + Game.showIP);
-			f.println("chat_filter=" + Game.enableChatFilter);
-			f.println("auto_ready=" + Game.autoReady);
-			f.println("tps=" + Tank.updatesPerSecond);
-			f.println("anticheat=" + TankPlayerRemote.checkMotion);
-			f.println("anticheat_weak=" + TankPlayerRemote.weakTimeCheck);
-			f.println("disable_party_friendly_fire=" + Game.disablePartyFriendlyFire);
-			f.println("party_countdown=" + Game.partyStartTime);
-			f.println("tank_secondary_color=" + Game.player.enableSecondaryColor);
-			f.println("tank_red=" + Game.player.colorR);
-			f.println("tank_green=" + Game.player.colorG);
-			f.println("tank_blue=" + Game.player.colorB);
-			f.println("tank_red_2=" + Game.player.turretColorR);
-			f.println("tank_green_2=" + Game.player.turretColorG);
-			f.println("tank_blue_2=" + Game.player.turretColorB);
-
-			if (Game.player.chromaaa)
-				f.println("cHrOmA=true");
-
-			f.println("translation=" + (Translation.currentTranslation == null ? "null" : Translation.currentTranslation.fileName));
-			f.println("last_version=" + Game.lastVersion);
-			f.println("enable_extensions=" + Game.enableExtensions);
-			f.println("auto_load_extensions=" + Game.autoLoadExtensions);
-
-			for (String s : extraOptions)
-				f.println(s);
-
-			f.stopWriting();
-		}
-		catch (FileNotFoundException e)
-		{
-			Game.exitToCrash(e);
-		}
-	}
-
-	public static void loadOptions(String homedir)
-	{
-		String path = homedir + Game.optionsPath;
-
-		try
-		{
-			BaseFile f = Game.game.fileManager.getFile(path);
-			f.startReading();
+        try
+        {
+            BaseFile f = Game.game.fileManager.getFile(path);
+            f.startReading();
 			while (f.hasNextLine())
 			{
 				String line = f.nextLine();
@@ -496,5 +451,71 @@ public class ScreenOptions extends Screen
 			Game.logger.println (new Date().toString() + " (syswarn) options file is nonexistent or broken, using default:");
 			e.printStackTrace(Game.logger);
 		}
+	}
+
+	@Override
+	public void update()
+    {
+        super.update();
+
+        soundOptions.update();
+        miscOptions.update();
+        windowOptions.update();
+
+        graphicsOptions.update();
+        inputOptions.update();
+        multiplayerOptions.update();
+        personalize.update();
+
+        back.update();
+	}
+
+	@Override
+	public void draw()
+	{
+		this.drawDefaultBackground();
+
+		back.draw();
+		multiplayerOptions.draw();
+		inputOptions.draw();
+		graphicsOptions.draw();
+		windowOptions.draw();
+		miscOptions.draw();
+		soundOptions.draw();
+		personalize.draw();
+
+        Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.setColor(brightness, brightness, brightness);
+
+		if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale > personalize.sizeX - 240)
+			Drawing.drawing.setInterfaceFontSize(this.titleSize * (personalize.sizeX - 240) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale));
+
+		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Options");
+
+		if (Game.player.colorR + Game.player.colorG + Game.player.colorB >= 220 * 3 && Game.player.username.length() >= 1)
+		{
+			Drawing.drawing.setColor(200, 200, 200);
+			double s = Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale;
+			Drawing.drawing.fillInterfaceRect(personalize.posX, personalize.posY + personalize.sizeY * 0.1, s, 40);
+			Drawing.drawing.fillInterfaceOval(personalize.posX - (s) / 2, personalize.posY + personalize.sizeY * 0.1, 40, 40);
+			Drawing.drawing.fillInterfaceOval(personalize.posX + (s) / 2, personalize.posY + personalize.sizeY * 0.1, 40, 40);
+		}
+
+		preview.drawForInterface(personalize.posX - personalize.sizeX / 2 + personalize.sizeY * 0.7, personalize.posY, 1);
+
+		Drawing.drawing.setColor(Game.player.turretColorR, Game.player.turretColorG, Game.player.turretColorB);
+		Drawing.drawing.drawInterfaceText(personalize.posX + 2, personalize.posY + personalize.sizeY * 0.1 + 2, Game.player.username);
+		Drawing.drawing.setColor(Game.player.colorR, Game.player.colorG, Game.player.colorB);
+		Drawing.drawing.drawInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, Game.player.username);
+
+		if (Game.player.username.length() < 1)
+		{
+			Drawing.drawing.setColor(127, 127, 127);
+			Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, "Pick a username...");
+		}
+
+		Drawing.drawing.setInterfaceFontSize(this.titleSize * 0.65);
+		Drawing.drawing.setColor(80, 80, 80);
+		Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY - personalize.sizeY * 0.3, "My profile");
 	}
 }

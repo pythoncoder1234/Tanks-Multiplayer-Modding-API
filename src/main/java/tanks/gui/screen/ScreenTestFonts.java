@@ -4,9 +4,9 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 
-public class ScreenTestFonts extends Screen
+public class ScreenTestFonts extends ScreenOptionsOverlay
 {
-    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenDebug()
+    Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 150, this.objWidth, this.objHeight, "Back", () -> Game.screen = prevScreen
     );
 
     public String boxText = "Draw box: ";
@@ -27,8 +27,6 @@ public class ScreenTestFonts extends Screen
 
     public ScreenTestFonts()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         if (Game.game.window.fontRenderer.drawBox)
             box.setText(boxText, ScreenOptions.onText);
@@ -39,6 +37,8 @@ public class ScreenTestFonts extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         back.update();
         box.update();
     }

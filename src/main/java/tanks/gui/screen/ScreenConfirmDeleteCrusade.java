@@ -53,6 +53,7 @@ public class ScreenConfirmDeleteCrusade extends Screen
         if (previous.background != null)
         {
             previous.background.draw();
+            Drawing.drawing.setColor(0, 0, 0, 128);
             Drawing.drawing.drawPopup(this.centerX, this.centerY, Drawing.drawing.interfaceSizeX * 0.7, this.objYSpace * 9, 20, 10);
         }
         else

@@ -59,7 +59,7 @@ public class OverlayEditTeam extends ScreenLevelEditorOverlay
         @Override
         public void run()
         {
-            screenLevelEditor.teams.remove(team);
+            editor.teams.remove(team);
 
             for (Movable m: Game.movables)
             {
@@ -88,7 +88,7 @@ public class OverlayEditTeam extends ScreenLevelEditorOverlay
 
     public Button teamColor = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "Team color", () ->
         {
-            Game.screen = new OverlayEditTeamColor(Game.screen, screenLevelEditor, team);
+            Game.screen = new OverlayEditTeamColor(Game.screen, editor, team);
         }
     );
 
@@ -113,7 +113,7 @@ public class OverlayEditTeam extends ScreenLevelEditorOverlay
         teamFriendlyFire.draw();
 
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.setColor(screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness);
+        Drawing.drawing.setColor(editor.fontBrightness, editor.fontBrightness, editor.fontBrightness);
         Drawing.drawing.drawInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, this.team.name);
     }
 }

@@ -32,6 +32,7 @@ public abstract class BaseWindow
     public double absoluteMouseY;
 
     public boolean constrainMouse;
+    public boolean moveMouseToOtherSide = false;
 
     public double colorR;
     public double colorG;
@@ -109,6 +110,7 @@ public abstract class BaseWindow
     public ModelPart.ShapeDrawer shapeDrawer;
 
     public boolean focused = true;
+    public boolean allowGlipping = false;
 
     // capsLock and numLock do not work on mac (glfw limitation) :(
     public boolean shift = false;
@@ -173,7 +175,7 @@ public abstract class BaseWindow
         //frameFrequency = Math.max(0, totalFrequency / frameFrequencies.size());
         frameFrequency = freq;
 
-        if (frameFrequency > frameFreqThreshold)
+        if (frameFrequency > frameFreqThreshold && !allowGlipping)
             frameFrequency = 100 / 60.;
     }
 

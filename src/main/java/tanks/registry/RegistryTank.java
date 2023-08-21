@@ -5,23 +5,22 @@ import tanks.hotbar.item.ItemBullet;
 import tanks.tank.Tank;
 import tanks.tank.TankUnknown;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-public class RegistryTank 
+public class RegistryTank
 {
-	public HashMap<String, HashSet<String>> tankMusics = new HashMap<>();
+    public HashMap<String, HashSet<String>> tankMusics = new HashMap<>();
 
-	public ArrayList<TankEntry> tankEntries = new ArrayList<>();
-	protected double maxTankWeight = 0;
+    public ArrayList<TankEntry> tankEntries = new ArrayList<>();
+    protected double maxTankWeight = 0;
 
-	public static class TankEntry
-	{
-		public final Class<? extends Tank> tank;
-		public final String name;
+    public static class TankEntry
+    {
+        public final Class<? extends Tank> tank;
+        public final String name;
 		public final double weight;
 
 		protected double startWeight;
@@ -70,19 +69,19 @@ public class RegistryTank
 
 		public Tank getTank(double x, double y, double a)
 		{
-			try 
-			{
-				Constructor<? extends Tank> c = tank.getConstructor(String.class, double.class, double.class, double.class);
-				Tank t = c.newInstance(this.name, x, y, a);
-				t.fromRegistry = true;
-				t.bullet.className = ItemBullet.classMap2.get(t.bullet.bulletClass);
-				t.musicTracks = Game.registryTank.tankMusics.get(this.name);
+			try
+            {
+                Tank t = tank.getConstructor(String.class, double.class, double.class, double.class).newInstance(this.name, x, y, a);
+                t.registerSelectors();
+                t.fromRegistry = true;
+                t.bullet.className = ItemBullet.classMap2.get(t.bullet.bulletClass);
+                t.musicTracks = Game.registryTank.tankMusics.get(this.name);
 
-				if (t.musicTracks == null)
-					t.musicTracks = new HashSet<>();
+                if (t.musicTracks == null)
+                    t.musicTracks = new HashSet<>();
 
-				return t;
-			}
+                return t;
+            }
 			catch (Exception e)
 			{
 				Game.exitToCrash(e);

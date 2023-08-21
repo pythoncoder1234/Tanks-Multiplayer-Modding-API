@@ -35,7 +35,6 @@ public class Bullet extends Movable implements IDrawable
 	public boolean playPopSound = true;
 	public boolean playBounceSound = true;
 	public double age = 0;
-	public double size;
 	public boolean canBeCanceled = true;
 	public boolean moveOut = true;
 
@@ -363,7 +362,6 @@ public class Bullet extends Movable implements IDrawable
 
 		boolean bouncy = false;
 		boolean allowBounce = true;
-
 		boolean collided = false;
 
 		double prevX = this.posX;
@@ -371,99 +369,37 @@ public class Bullet extends Movable implements IDrawable
 
 		if (this.obstacleCollision)
 		{
-			for (int i = 0; i < Game.obstacles.size(); i++)
-			{
-				Obstacle o = Game.obstacles.get(i);
+            double t = Game.tile_size;
 
-				if ((!o.bulletCollision && !o.checkForObjects) || o.startHeight > 1)
-					continue;
+            int x1 = (int) Math.min(Math.max(0, (this.posX - this.size / 2) / t - 1), Game.currentSizeX - 1);
+            int y1 = (int) Math.min(Math.max(0, (this.posY - this.size / 2) / t - 1), Game.currentSizeY - 1);
+            int x2 = (int) Math.min(Math.max(0, (this.posX + this.size / 2) / t + 1), Game.currentSizeX - 1);
+            int y2 = (int) Math.min(Math.max(0, (this.posY + this.size / 2) / t + 1), Game.currentSizeY - 1);
 
-				double dx = this.posX - o.posX;
-				double dy = this.posY - o.posY;
+            int output = 0;
 
-				double horizontalDist = Math.abs(dx);
-				double verticalDist = Math.abs(dy);
+            for (int x = x1; x <= x2; x++)
+            {
+                for (int y = y1; y <= y2; y++)
+                {
+                    output = output | checkCollisionWith(Game.obstacleGrid[x][y]);
+                    output = output | checkCollisionWith(Game.surfaceTileGrid[x][y]);
+                }
+            }
 
-				double s = this.size;
+            bouncy = (output & 1) > 0;
+            allowBounce = (output & 2) == 0;
+            collided = (output & 4) > 0;
 
-				if (useCustomWallCollision)
-					s = this.wallCollisionSize;
+            if (this.posX + this.size / 2 > Drawing.drawing.sizeX)
+            {
+                collided = true;
+                this.posX = Drawing.drawing.sizeX - this.size / 2 - (this.posX + this.size / 2 - Drawing.drawing.sizeX);
+                this.vX = -Math.abs(this.vX);
 
-				double bound = s / 2 + Game.tile_size / 2;
-
-				if (horizontalDist < bound && verticalDist < bound)
-				{
-					if (o.checkForObjects)
-						o.onObjectEntry(this);
-
-					if (!o.bulletCollision)
-						continue;
-
-					boolean left = o.hasLeftNeighbor();
-					boolean right = o.hasRightNeighbor();
-					boolean up = o.hasUpperNeighbor();
-					boolean down = o.hasLowerNeighbor();
-
-					if (left && dx <= 0)
-						horizontalDist = 0;
-
-					if (right && dx >= 0)
-						horizontalDist = 0;
-
-					if (up && dy <= 0)
-						verticalDist = 0;
-
-					if (down && dy >= 0)
-						verticalDist = 0;
-
-					bouncy = o.bouncy;
-					allowBounce = o.allowBounce;
-					collided = true;
-
-					if (!left && dx <= 0 && dx > 0 - bound && horizontalDist > verticalDist)
-					{
-						this.posX += 2 * (horizontalDist - bound);
-						this.vX = -Math.abs(this.vX);
-
-						this.collisionX = this.posX - (horizontalDist - bound);
-						this.collisionY = this.posY - (horizontalDist - bound) / vX * vY;
-					}
-					else if (!up && dy <= 0 && dy > 0 - bound && horizontalDist < verticalDist)
-					{
-						this.posY += 2 * (verticalDist - bound);
-						this.vY = -Math.abs(this.vY);
-
-						this.collisionX = this.posX - (verticalDist - bound) / vY * vX;
-						this.collisionY = this.posY - (verticalDist - bound);
-					}
-					else if (!right && dx >= 0 && dx < bound && horizontalDist > verticalDist)
-					{
-						this.posX -= 2 * (horizontalDist - bound);
-						this.vX = Math.abs(this.vX);
-
-						this.collisionX = this.posX + (horizontalDist - bound);
-						this.collisionY = this.posY + (horizontalDist - bound) / vX * vY;
-					}
-					else if (!down && dy >= 0 && dy < bound && horizontalDist < verticalDist)
-					{
-						this.posY -= 2 * (verticalDist - bound);
-						this.vY = Math.abs(this.vY);
-
-						this.collisionX = this.posX + (verticalDist - bound) / vY * vX;
-						this.collisionY = this.posY + (verticalDist - bound);
-					}
-				}
-			}
-
-			if (this.posX + this.size / 2 > Drawing.drawing.sizeX)
-			{
-				collided = true;
-				this.posX = Drawing.drawing.sizeX - this.size / 2 - (this.posX + this.size / 2 - Drawing.drawing.sizeX);
-				this.vX = -Math.abs(this.vX);
-
-				this.collisionX = this.posX - (this.posX + this.size / 2 - Drawing.drawing.sizeX);
-				this.collisionY = this.posY - (this.posX + this.size / 2 - Drawing.drawing.sizeX) / vX * vY;
-			}
+                this.collisionX = this.posX - (this.posX + this.size / 2 - Drawing.drawing.sizeX);
+                this.collisionY = this.posY - (this.posX + this.size / 2 - Drawing.drawing.sizeX) / vX * vY;
+            }
 			if (this.posX - this.size / 2 < 0)
 			{
 				collided = true;
@@ -504,19 +440,21 @@ public class Bullet extends Movable implements IDrawable
 
 		boolean collidedWithTank = false;
 		for (int i = 0; i < Game.movables.size(); i++)
-		{
-			Movable o = Game.movables.get(i);
+        {
+            Movable o = Game.movables.get(i);
+            if (o.posZ > 25 || o.posZ < -Tank.disabledZ)
+                continue;
 
-			if (o instanceof Tank && !o.destroy)
-			{
-				double horizontalDist = Math.abs(this.posX - o.posX);
-				double verticalDist = Math.abs(this.posY - o.posY);
+            if (o instanceof Tank && !o.destroy)
+            {
+                double horizontalDist = Math.abs(this.posX - o.posX);
+                double verticalDist = Math.abs(this.posY - o.posY);
 
-				Tank t = ((Tank) o);
+                Tank t = ((Tank) o);
 
-				double bound = this.size / 2 + t.size * t.hitboxSize / 2;
+                double bound = this.size / 2 + t.size * t.hitboxSize / 2;
 
-				if (horizontalDist < bound && verticalDist < bound && t.size > 0)
+                if (horizontalDist < bound && verticalDist < bound && t.size > 0)
 				{
 					this.collisionX = this.posX;
 					this.collisionY = this.posY;
@@ -570,25 +508,110 @@ public class Bullet extends Movable implements IDrawable
 				this.vY = 0;
 			}
 			else if (this.playBounceSound)
-				Drawing.drawing.playGlobalSound("bounce.ogg", (float) (bullet_size / size));
+                Drawing.drawing.playGlobalSound("bounce.ogg", (float) (bullet_size / size));
 
-			if (!destroy)
-			{
-				Game.eventsOut.add(new EventBulletBounce(this));
-				this.addTrail();
-			}
-		}
-	}
+            if (!destroy)
+            {
+                Game.eventsOut.add(new EventBulletBounce(this));
+                this.addTrail();
+            }
+        }
+    }
 
-	public Ray getRay()
-	{
-		Ray r = new Ray(posX, posY, this.getAngleInDirection(this.posX + this.vX, this.posY + this.vY), this.bounces, tank);
-		r.size = this.size;
-		return r;
-	}
+    public int checkCollisionWith(Obstacle o)
+    {
+        int output = 0;
 
-	@Override
-	public void update()
+        if (o == null || (!o.bulletCollision && !o.checkForObjects))
+            return output;
+
+        if (o.enableStacking && !Game.lessThan(true, o.startHeight * Game.tile_size, this.posZ, o.startHeight * Game.tile_size + o.getTileHeight()))
+            return output;
+
+        double dx = this.posX - o.posX;
+        double dy = this.posY - o.posY;
+
+        double horizontalDist = Math.abs(dx);
+        double verticalDist = Math.abs(dy);
+        double s = !useCustomWallCollision ? this.size : this.wallCollisionSize;
+
+        double bound = s / 2 + Game.tile_size / 2;
+
+        if (horizontalDist < bound && verticalDist < bound)
+        {
+            if (o.checkForObjects)
+                o.onObjectEntry(this);
+
+            if (!o.bulletCollision)
+                return output;
+
+            boolean left = o.hasLeftNeighbor();
+            boolean right = o.hasRightNeighbor();
+            boolean up = o.hasUpperNeighbor();
+            boolean down = o.hasLowerNeighbor();
+
+            if (left && dx <= 0)
+                horizontalDist = 0;
+
+            if (right && dx >= 0)
+                horizontalDist = 0;
+
+            if (up && dy <= 0)
+                verticalDist = 0;
+
+            if (down && dy >= 0)
+                verticalDist = 0;
+
+            output = output | (o.bouncy ? 1 : 0);
+            output = output | (o.allowBounce ? 0 : 2);
+            output = output | 4;
+
+            if (!left && dx <= 0 && dx > 0 - bound && horizontalDist > verticalDist)
+            {
+                this.posX += 2 * (horizontalDist - bound);
+                this.vX = -Math.abs(this.vX);
+
+                this.collisionX = this.posX - (horizontalDist - bound);
+                this.collisionY = this.posY - (horizontalDist - bound) / vX * vY;
+            }
+            else if (!up && dy <= 0 && dy > 0 - bound && horizontalDist < verticalDist)
+            {
+                this.posY += 2 * (verticalDist - bound);
+                this.vY = -Math.abs(this.vY);
+
+                this.collisionX = this.posX - (verticalDist - bound) / vY * vX;
+                this.collisionY = this.posY - (verticalDist - bound);
+            }
+            else if (!right && dx >= 0 && dx < bound && horizontalDist > verticalDist)
+            {
+                this.posX -= 2 * (horizontalDist - bound);
+                this.vX = Math.abs(this.vX);
+
+                this.collisionX = this.posX + (horizontalDist - bound);
+                this.collisionY = this.posY + (horizontalDist - bound) / vX * vY;
+            }
+            else if (!down && dy >= 0 && dy < bound && horizontalDist < verticalDist)
+            {
+                this.posY -= 2 * (verticalDist - bound);
+                this.vY = Math.abs(this.vY);
+
+                this.collisionX = this.posX + (verticalDist - bound) / vY * vX;
+                this.collisionY = this.posY + (verticalDist - bound);
+            }
+        }
+
+        return output;
+    }
+
+    public Ray getRay()
+    {
+        Ray r = new Ray(posX, posY, this.getAngleInDirection(this.posX + this.vX, this.posY + this.vY), this.bounces, tank);
+        r.size = this.size;
+        return r;
+    }
+
+    @Override
+    public void update()
 	{
 		if (!this.isRemote && (Math.abs(this.vX - this.lastVX) > 0.1 || Math.abs(this.vY - this.lastVY) > 0.1))
 			Game.eventsOut.add(new EventBulletUpdate(this));

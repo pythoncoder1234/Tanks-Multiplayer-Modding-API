@@ -1,10 +1,10 @@
 package tanks;
 
 import basewindow.*;
-import tanks.network.event.EventPlaySound;
 import tanks.gui.Button;
 import tanks.gui.Joystick;
 import tanks.gui.screen.ScreenGame;
+import tanks.network.event.EventPlaySound;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.translation.Translation;
@@ -665,25 +665,94 @@ public class Drawing
 			double shrubMod = 1;
 
 			if (shrubberyMode)
-			{
-				shrubMod = 0.5;
-				if (Game.screen instanceof ScreenGame)
-					shrubMod = ((ScreenGame) Game.screen).shrubberyScale;
-			}
+            {
+                shrubMod = 0.5;
+                if (Game.screen instanceof ScreenGame)
+                    shrubMod = ((ScreenGame) Game.screen).shrubberyScale;
+            }
 
-			this.fillBox(x, y, z * shrubMod, sizeX, sizeY, sizeZ * shrubMod, options);
-		}
-	}
+            this.fillBox(x, y, z * shrubMod, sizeX, sizeY, sizeZ * shrubMod, options);
+        }
+    }
 
-	public void fillForcedBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ, byte options)
-	{
-		double drawX = gameToAbsoluteX(x, sizeX);
-		double drawY = gameToAbsoluteY(y, sizeY);
-		double drawZ = z * scale;
+    private void preprocessParams(double x, double y, double rotation, boolean convertCoords, double... params)
+    {
+        double minX = 9999, minY = 9999, maxX = -9999, maxY = -9999;
 
-		double drawSizeX = sizeX * scale;
-		double drawSizeY = sizeY * scale;
-		double drawSizeZ = sizeZ * scale;
+        for (int i = 0; i < params.length; i += 2)
+        {
+            params[i] += x;
+            params[i + 1] += y;
+
+            minX = Math.min(params[i], minX);
+            minY = Math.min(params[i + 1], minY);
+            maxX = Math.max(params[i], maxX);
+            maxY = Math.max(params[i + 1], maxY);
+        }
+
+        double cos = Math.cos(rotation);
+        double sin = Math.sin(rotation);
+
+        for (int i = 0; i < params.length; i += 2)
+        {
+            params[i] -= (maxX - minX) / 2;
+            params[i + 1] -= (maxY - minY) / 2;
+
+            if (rotation > 0)
+            {
+                double temp = ((params[i] - x) * cos - (params[i + 1] - y) * sin) + x;
+                params[i + 1] = ((params[i] - x) * sin + (params[i + 1] - y) * cos) + y;
+                params[i] = temp;
+            }
+
+            if (convertCoords)
+            {
+                params[i] = gameToAbsoluteX(params[i], (maxX - minX) / 2);
+                params[i + 1] = gameToAbsoluteY(params[i + 1], (maxY - minY) / 2);
+            }
+        }
+    }
+
+    public void fillPolygon(double x, double y, double rotation, double... params)
+    {
+        fillPolygon(x, y, rotation, false, params);
+    }
+
+    public void fillPolygon(double x, double y, double rotation, boolean convertCoords, double... params)
+    {
+        preprocessParams(x, y, rotation, convertCoords, params);
+        Game.game.window.shapeRenderer.fillPolygon(params);
+    }
+
+    public void fill3dPolygon(double x, double y, IBatchRenderableObject o, double... params)
+    {
+        fill3dPolygon(x, y, 0, 0, o, params);
+    }
+
+    public void fill3dPolygon(double x, double y, double z, double sZ, IBatchRenderableObject o, double... params)
+    {
+        fill3dPolygon(0, x, y, z, sZ, o, params);
+    }
+
+    public void fill3dPolygon(double x, double y, double z, double sZ, double rotation, IBatchRenderableObject o, double... params)
+    {
+        preprocessParams(x, y, rotation, false, params);
+
+        if (this.terrainRendering)
+            this.currentTerrainRenderer.fillPolygon(z, sZ, o, params);
+        else
+            Game.game.window.shapeRenderer.fillPolygon(params);
+    }
+
+    public void fillForcedBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ, byte options)
+    {
+        double drawX = gameToAbsoluteX(x, sizeX);
+        double drawY = gameToAbsoluteY(y, sizeY);
+        double drawZ = z * scale;
+
+        double drawSizeX = sizeX * scale;
+        double drawSizeY = sizeY * scale;
+        double drawSizeZ = sizeZ * scale;
 
 		Game.game.window.shapeRenderer.fillBox(drawX, drawY, drawZ, drawSizeX, drawSizeY, drawSizeZ, options, null);
 	}
@@ -1150,8 +1219,8 @@ public class Drawing
 		double x = getInterfaceMouseX();
 		double y = getInterfaceMouseY();
 
-		int xPadding = 16;
-		int yPadding = 8;
+        int xPadding = 16;
+        int yPadding = 9;
 
 		setInterfaceFontSize(14);
 
@@ -1165,41 +1234,31 @@ public class Drawing
 
 		double endX = (Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeX) / 2
 				+ Drawing.drawing.interfaceSizeX - Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale;
-		if (x + sizeX + xPadding * 2 - 14 > endX)
-			x -= x + sizeX + xPadding * 2 - 14 - endX;
+        if (x + sizeX + xPadding * 2 - 14 > endX)
+            x -= x + sizeX + xPadding * 2 - 14 - endX;
 
-		if (y + sizeY + yPadding * 2 * text.length > Drawing.drawing.interfaceSizeY)
-			y -= y + sizeY + yPadding * 2 * text.length - Drawing.drawing.interfaceSizeY;
+        if (y + sizeY + yPadding * 2 * text.length > Drawing.drawing.interfaceSizeY)
+            y -= y + sizeY + yPadding * 2 * text.length - Drawing.drawing.interfaceSizeY;
 
-		double drawX = x + sizeX / 2.0 + xPadding;
-		double drawY = y + sizeY / 2.0 + yPadding * text.length;
+        double drawX = x + sizeX / 2.0 + xPadding;
+        double drawY = y + sizeY / 2.0 + yPadding * text.length;
 
-		setColor(0, 0, 0, 127);
-		fillInterfaceRect(drawX - 7, drawY, sizeX + xPadding * 2 - 14, sizeY + yPadding * 2 * text.length);
-		fillInterfaceRect(drawX - 7, drawY, sizeX + xPadding * 2 - 14 - 10, sizeY + yPadding * 2 * text.length - 10);
+        setColor(0, 0, 0, 127);
+        fillInterfaceRect(drawX - 7, drawY, sizeX + xPadding * 2 - 14, sizeY + yPadding * 2.15 * text.length);
+        fillInterfaceRect(drawX - 7, drawY, sizeX + xPadding * 2 - 14 - 10, sizeY + yPadding * 2.15 * text.length - 10);
 
-		setColor(255, 255, 255);
-		for (int i = 0; i < text.length; i++)
-			drawUncenteredInterfaceText(x + xPadding, y + 2 + yPadding * (2 * i + 1), text[i]);
+        setColor(255, 255, 255);
+        for (int i = 0; i < text.length; i++)
+            drawUncenteredInterfaceText(x + xPadding, y + 2 + yPadding * (2 * i + 1), text[i]);
 
-		//return (y - (drawY / Window.scale + sizeY + yPadding / Window.scale * 2));
-	}
+        //return (y - (drawY / Window.scale + sizeY + yPadding / Window.scale * 2));
+    }
 
 	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius)
 	{
-		drawPopup(x, y, sX, sY, borderWidth, borderRadius, 0, 0, 0, 150);
-	}
-
-	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius, double a)
-	{
-		drawPopup(x, y, sX, sY, borderWidth, borderRadius, 0, 0, 0, a);
-	}
-
-	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius, double r, double g, double b, double a)
-	{
-		Drawing.drawing.setColor(r, g, b, a * 0.75);
 		fillRect(x, y, sX, sY, borderRadius);
-		drawRect(x, y, sX, sY, borderWidth, borderRadius);
+        drawRect(x, y, sX, sY, borderWidth, borderRadius);
+        Drawing.drawing.setColor(255, 255, 255);
 	}
 
 	public void playMusic(String sound, float volume, boolean looped, String id, long fadeTime)
@@ -1638,13 +1697,13 @@ public class Drawing
 
 		Tank t = ScreenGame.focusedTank();
 
-		if ((!Game.followingCam || !Drawing.drawing.movingCamera) || !(Game.screen instanceof ScreenGame))
-			return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
-		else
-		{
-			return (drawX - gameToAbsoluteX(t.posX, 0)) * Math.cos(t.angle)
-					+ (drawY - gameToAbsoluteY(t.posY, 0)) * Math.sin(t.angle) < -dist;
-		}
+        if ((!Game.followingCam || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam) || !Drawing.drawing.movingCamera) || !(Game.screen instanceof ScreenGame))
+            return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
+        else
+        {
+            return (drawX - gameToAbsoluteX(t.posX, 0)) * Math.cos(t.angle)
+                    + (drawY - gameToAbsoluteY(t.posY, 0)) * Math.sin(t.angle) < -dist;
+        }
 	}
 
 	public double getTrackOffset()

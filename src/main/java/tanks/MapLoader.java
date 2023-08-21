@@ -320,84 +320,19 @@ public class MapLoader
             updateLoadedSizes();
         }
 
-        public void unload()
-        {
-            if (loaded)
-                loaded = false;
-            else
-                return;
-
-            obstacles = new ArrayList<>();
-            movables = new ArrayList<>();
-
-            for (Obstacle o : Game.obstacles)
-            {
-                if (Game.lessThan(startX, o.posX / 50 - 0.5, totalX) && Game.lessThan(startY, o.posY / 50 - 0.5, totalY))
-                    obstacles.add(o);
-            }
-
-            movables = new ArrayList<>();
-            for (Movable m : Game.movables)
-            {
-                if (!(!(m instanceof Tank) || m instanceof TankPlayer || m instanceof TankPlayerRemote) &&
-                        Game.lessThan(startX, m.posX / 50 - 0.5, totalX) && Game.lessThan(startY, m.posY / 50 - 0.5, totalY))
-                    movables.add(m);
-            }
-
-            Game.movables.removeAll(movables);
-            Game.obstacles.removeAll(obstacles);
-
-            for (int tileX = startX; tileX < totalX; tileX++)
-            {
-                for (int tileY = startY; tileY < totalY; tileY++)
-                    Game.obstacleMap[tileX][tileY] = null;
-            }
-        }
-
-        private void updateLoadedSizes()
-        {
-            if (posX > 0)
-            {
-                for (int i = posX; i < grid.length; i++)
-                {
-                    Section current = grid[i][posY];
-                    Section prev = grid[i - 1][posY];
-
-                    current.loadedX = prev.loadedX;
-
-                    if (prev.loaded)
-                        current.loadedX += prev.sizeX;
-                }
-            }
-
-            if (posY > 0)
-            {
-                for (int i = posY; i < grid.length; i++)
-                {
-                    Section current = grid[posX][i];
-                    Section prev = grid[posX][i - 1];
-
-                    current.loadedY = prev.loadedY;
-
-                    if (prev.loaded)
-                        current.loadedY += prev.sizeY;
-                }
-            }
-        }
-
         public static void loadTiles(Level level, int startX, int startY, Section[][] grid)
         {
             double[][] tilesR = Game.tilesR;
             double[][] tilesG = Game.tilesG;
             double[][] tilesB = Game.tilesB;
             double[][] tilesDepth = Game.tilesDepth;
-            Obstacle[][] map = Game.obstacleMap;
+            Obstacle[][] map = Game.obstacleGrid;
 
             Game.tilesR = new double[Game.currentSizeX][Game.currentSizeY];
             Game.tilesG = new double[Game.currentSizeX][Game.currentSizeY];
             Game.tilesB = new double[Game.currentSizeX][Game.currentSizeY];
             Game.tilesDepth = new double[Game.currentSizeX][Game.currentSizeY];
-            Game.obstacleMap = new Obstacle[Game.currentSizeX][Game.currentSizeY];
+            Game.obstacleGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
             int tileX = -1;
             int tileY = -1;
@@ -432,7 +367,7 @@ public class MapLoader
                         Game.tilesG[x][y] = tilesG[x + startX][y + startY];
                         Game.tilesB[x][y] = tilesB[x + startX][y + startY];
                         Game.tilesDepth[x][y] = tilesDepth[x + startX][y + startY];
-                        Game.obstacleMap[x][y] = map[x + startX][y + startY];
+                        Game.obstacleGrid[x][y] = map[x + startX][y + startY];
                     }
                     else
                     {
@@ -457,7 +392,10 @@ public class MapLoader
 
                 o.postOverride();
 
-                if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && o.startHeight < 1)
+                if (o.startHeight > Game.tile_size)
+                    continue;
+
+                if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
                 {
                     if (o.bulletCollision)
                         Game.game.solidGrid[x][y] = true;
@@ -470,9 +408,35 @@ public class MapLoader
             Drawing.drawing.setScreenBounds(Game.currentSizeX * Game.tile_size, Game.currentSizeY * Game.tile_size);
         }
 
-        public static void loadLevelWithOffset(Level level, int offsetX, int offsetY)
+        private void updateLoadedSizes()
         {
-            loadLevelWithOffset(level, offsetX, offsetY, null);
+            if (posX > 0)
+            {
+                for (int i = posX; i < grid.length; i++)
+                {
+                    Section current = grid[i][posY];
+                    Section prev = grid[i - 1][posY];
+
+                    current.loadedX = prev.loadedX;
+
+                    if (prev.loaded)
+                        current.loadedX += prev.sizeX;
+                }
+            }
+
+            if (posY > 0)
+            {
+                for (int i = posY; i < grid.length; i++)
+                {
+                    Section current = grid[posX][i];
+                    Section prev = grid[posX][i - 1];
+
+                    current.loadedY = prev.loadedY;
+
+                    if (prev.loaded)
+                        current.loadedY += prev.sizeY;
+                }
+            }
         }
 
         public static void loadLevelWithOffset(Level level, int offsetX, int offsetY, Section section)
@@ -598,7 +562,10 @@ public class MapLoader
 
                 o.postOverride();
 
-                if (o.bulletCollision && o.startHeight < 1 && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                if (o.startHeight > Game.tile_size)
+                    continue;
+
+                if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
                 {
                     Game.game.solidGrid[x][y] = true;
 
@@ -606,7 +573,7 @@ public class MapLoader
                         Game.game.unbreakableGrid[x][y] = true;
                 }
 
-                if (o.tankCollision && o.startHeight < 1 && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                if (o.tankCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
                     solidGrid[x][y] = true;
             }
 
@@ -694,6 +661,45 @@ public class MapLoader
                     else
                         Game.movables.add(t);
                 }
+            }
+        }
+
+        public static void loadLevelWithOffset(Level level, int offsetX, int offsetY)
+        {
+            loadLevelWithOffset(level, offsetX, offsetY, null);
+        }
+
+        public void unload()
+        {
+            if (loaded)
+                loaded = false;
+            else
+                return;
+
+            obstacles = new ArrayList<>();
+            movables = new ArrayList<>();
+
+            for (Obstacle o : Game.obstacles)
+            {
+                if (Game.lessThan(startX, o.posX / 50 - 0.5, totalX) && Game.lessThan(startY, o.posY / 50 - 0.5, totalY))
+                    obstacles.add(o);
+            }
+
+            movables = new ArrayList<>();
+            for (Movable m : Game.movables)
+            {
+                if (!(!(m instanceof Tank) || m instanceof TankPlayer || m instanceof TankPlayerRemote) &&
+                        Game.lessThan(startX, m.posX / 50 - 0.5, totalX) && Game.lessThan(startY, m.posY / 50 - 0.5, totalY))
+                    movables.add(m);
+            }
+
+            Game.movables.removeAll(movables);
+            Game.obstacles.removeAll(obstacles);
+
+            for (int tileX = startX; tileX < totalX; tileX++)
+            {
+                for (int tileY = startY; tileY < totalY; tileY++)
+                    Game.obstacleGrid[tileX][tileY] = null;
             }
         }
     }

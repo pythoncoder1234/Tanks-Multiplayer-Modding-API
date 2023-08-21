@@ -4,7 +4,7 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 
-public class ScreenOptionsSpeedrun extends Screen
+public class ScreenOptionsSpeedrun extends ScreenOptionsOverlay
 {
     public static final String deterministicText = "Deterministic: ";
     public static final String timerText = "Timer: ";
@@ -58,8 +58,6 @@ public class ScreenOptionsSpeedrun extends Screen
 
     public ScreenOptionsSpeedrun()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         if (Game.showSpeedrunTimer)
             timer.setText(timerText, ScreenOptions.onText);
@@ -77,6 +75,8 @@ public class ScreenOptionsSpeedrun extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         back.update();
         timer.update();
         deterministic.update();

@@ -21,26 +21,30 @@ public class ItemBar
 
 	public static int size = 50; // The slot size.
 	public static int count_margin_right = 26; // Item number's distance from right.
-	public static int count_margin_bottom = 35; // Item number's distance from bottom.
-	public static int gap = 75; // Gap between slots.
-	public static int bar_margin = 60; // Bar's distance from bottom.
+    public static int count_margin_bottom = 35; // Item number's distance from bottom.
+    public static int gap = 75; // Gap between slots.
+    public static int bar_margin = 60; // Bar's distance from bottom.
 
-	public static double slotBgA = 127;
+    public static double slotBgA = 127;
 
-	public static double slotSelectedR = 255;
-	public static double slotSelectedG = 128;
-	public static double slotSelectedB = 0;
+    public static double slotSelectedR = 255;
+    public static double slotSelectedG = 128;
+    public static double slotSelectedB = 0;
 
-	public static double itemCountR = 255;
-	public static double itemCountG = 255;
-	public static double itemCountB = 255;
+    public static double slotCooldownR = 255;
+    public static double slotCooldownG = 128;
+    public static double slotCooldownB = 0;
 
-	public Item[] slots = new Item[5];
-	public Button[] slotButtons = new Button[5];
+    public static double itemCountR = 255;
+    public static double itemCountG = 255;
+    public static double itemCountB = 255;
 
-	public double selectedTimer = 0;
+    public Item[] slots = new Item[5];
+    public Button[] slotButtons = new Button[5];
 
-	public int selected = -1;
+    public double selectedTimer = 0;
+
+    public int selected = -1;
 
 	public double lastItemSwitch = -1000;
 	public double age;
@@ -127,23 +131,22 @@ public class ItemBar
 
 					if (this.player != Game.player)
 						Game.eventsOut.add(new EventSetItem(this.player, x, this.slots[x]));
-
-					return true;
 				}
 				else
-				{
-					int remaining = i.stackSize - i.maxStackSize;
-					this.slots[x] = Item.parseItem(this.player, i.toString());
-					this.slots[x].stackSize = this.slots[x].maxStackSize;
-					i.stackSize = remaining;
+                {
+                    int remaining = i.stackSize - i.maxStackSize;
+                    this.slots[x] = Item.parseItem(this.player, i.toString());
+                    this.slots[x].stackSize = this.slots[x].maxStackSize;
+                    i.stackSize = remaining;
 
-					if (this.player != Game.player)
-						Game.eventsOut.add(new EventSetItem(this.player, x, this.slots[x]));
+                    if (this.player != Game.player)
+                        Game.eventsOut.add(new EventSetItem(this.player, x, this.slots[x]));
 
-					this.addItem(i);
-					return true;
-				}
-			}
+                    this.addItem(i);
+                }
+
+                return true;
+            }
 		}
 		return true;
 	}
@@ -273,7 +276,8 @@ public class ItemBar
 
 	public void draw()
 	{
-		int y = (int) (Drawing.drawing.interfaceSizeY - bar_margin + this.player.hotbar.percentHidden - this.player.hotbar.verticalOffset);
+        double a = (100 - this.player.hotbar.percentHidden) * 2.55;
+        int y = (int) (Drawing.drawing.interfaceSizeY - bar_margin + this.player.hotbar.percentHidden - this.player.hotbar.verticalOffset);
 
 		double slotBgBrightness = 0;
 
@@ -290,27 +294,34 @@ public class ItemBar
 
 			if (i + 2 == selected)
 			{
-				Drawing.drawing.setColor(slotSelectedR, slotSelectedG, slotSelectedB, (100 - this.player.hotbar.percentHidden) * 2.55);
-				Drawing.drawing.fillInterfaceRect(x, y, size, size);
+                Drawing.drawing.setColor(slotSelectedR, slotSelectedG, slotSelectedB, a);
+                Drawing.drawing.fillInterfaceRect(x, y, size, size);
 				Drawing.drawing.setColor(slotBgBrightness, slotBgBrightness, slotBgBrightness, slotBgA);
 			}
 
-			Drawing.drawing.setColor(255, 255, 255, (100 - this.player.hotbar.percentHidden) * 2.55);
+            Drawing.drawing.setColor(255, 255, 255, a);
 			if (slots[i + 2].icon != null)
 				Drawing.drawing.drawInterfaceImage(slots[i + 2].icon, x, y, size, size);
 
 			if (slots[i + 2] != null)
-			{
-				Item item = slots[i + 2];
-				if (item.stackSize > 1)
-				{
-					Drawing.drawing.setColor(itemCountR, itemCountG, itemCountB, (100 - this.player.hotbar.percentHidden) * 2.55);
+            {
+                Item item = slots[i + 2];
+                if (item.cooldown > 0 && item.cooldownBase > 50)
+                {
+                    double s = size * (item.cooldown / item.cooldownBase);
+                    Drawing.drawing.setColor(slotCooldownR, slotCooldownG, slotCooldownB, slotBgA * 1.25);
+                    Drawing.drawing.fillInterfaceRect(x, y + (25 - s / 2), size, s);
+                }
 
-					int extra = 0;
+                if (item.stackSize > 1)
+                {
+                    Drawing.drawing.setColor(itemCountR, itemCountG, itemCountB, a);
 
-					if (item.stackSize > 9999)
-					{
-						Drawing.drawing.setInterfaceFontSize(12);
+                    int extra = 0;
+
+                    if (item.stackSize > 9999)
+                    {
+                        Drawing.drawing.setInterfaceFontSize(12);
 						extra = 3;
 					}
 					else

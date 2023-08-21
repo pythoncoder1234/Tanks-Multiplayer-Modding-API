@@ -3,7 +3,6 @@ package tanks.gui.screen;
 import basewindow.InputCodes;
 import tanks.*;
 import tanks.gui.Button;
-import tanks.Minigame;
 import tanks.obstacle.Face;
 import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
@@ -92,17 +91,19 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 				Game.bulletLocked = false;
 				ScreenGame.finishTimer = ScreenGame.finishTimerMax;
 				logo.team = Game.playerTeamNoFF;
-				logo.invulnerable = false;
-				logo.depthTest = true;
-				controlPlayer = true;
+                logo.invulnerable = false;
+                logo.depthTest = true;
+                controlPlayer = true;
 
-				Game.currentGame = new ScreenTitleMinigame((ScreenTitle) Game.screen);
-				Game.currentLevel = new Level("{28,18||2-8-player}");
-				Game.currentSizeX = 28;
-				Game.currentSizeY = 18;
-				Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-				Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-			}
+                Game.currentGame = new ScreenTitleMinigame((ScreenTitle) Game.screen);
+                Game.currentLevel = new Level("{28,18||2-8-player}");
+                Game.currentSizeX = 28;
+                Game.currentSizeY = 18;
+                Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
+                Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
+                Game.obstacleGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
+                Game.surfaceTileGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
+            }
 		}
 	});
 
@@ -315,31 +316,29 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 				if (t instanceof TankRed)
 					continue;
 
-				t.team = Game.enemyTeam;
-				Game.movables.add(new Crate(t));
+                t.team = Game.enemyTeam;
+                Game.movables.add(new Crate(t));
 
-				Game.playerTank.health = 1;
-			}
-		}
+                Game.playerTank.health = 1;
+            }
+        }
 
-		if (wave < 1)
-			wave = 1;
+        if (wave < 1)
+            wave = 1;
 
-		for (int i = 0; i < Game.effects.size(); i++)
-		{
-			Game.effects.get(i).update();
-		}
+        for (Effect e : Game.effects)
+            e.update();
 
-		Game.tracks.removeAll(Game.removeTracks);
-		Game.removeTracks.clear();
+        Game.tracks.removeAll(Game.removeTracks);
+        Game.removeTracks.clear();
 
-		Game.movables.removeAll(Game.removeMovables);
-		Game.removeMovables.clear();
+        Game.movables.removeAll(Game.removeMovables);
+        Game.removeMovables.clear();
 
-		Game.effects.removeAll(Game.removeEffects);
-		Game.removeEffects.clear();
+        Game.effects.removeAll(Game.removeEffects);
+        Game.removeEffects.clear();
 
-		if (!Game.movables.contains(this.logo) && Game.screen == this)
+        if (!Game.movables.contains(this.logo) && Game.screen == this)
 		{
 			this.logo = new TankPlayer(Drawing.drawing.sizeX / 2, Drawing.drawing.sizeY / 2 - 250 * Drawing.drawing.interfaceScaleZoom, 0);
 			this.logo.networkID = 0;

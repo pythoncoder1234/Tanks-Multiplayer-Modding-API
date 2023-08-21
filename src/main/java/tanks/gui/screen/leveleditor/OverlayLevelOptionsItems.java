@@ -10,9 +10,9 @@ public class OverlayLevelOptionsItems extends ScreenLevelEditorOverlay
 {
     public TextBox editCoins;
 
-    public Button editShop = new Button(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "Shop", () -> Game.screen = new OverlayEditLevelShop(Game.screen, screenLevelEditor));
+    public Button editShop = new Button(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth, this.objHeight, "Shop", () -> Game.screen = new OverlayEditLevelShop(Game.screen, editor));
 
-    public Button editStartingItems = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Starting items", () -> Game.screen = new OverlayEditLevelStartingItems(Game.screen, screenLevelEditor));
+    public Button editStartingItems = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Starting items", () -> Game.screen = new OverlayEditLevelStartingItems(Game.screen, editor));
 
     public Button back = new Button(this.centerX, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "Back", this::escape);
 
@@ -49,7 +49,7 @@ public class OverlayLevelOptionsItems extends ScreenLevelEditorOverlay
     {
         super.draw();
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.setColor(screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness, screenLevelEditor.fontBrightness);
+        Drawing.drawing.setColor(editor.fontBrightness, editor.fontBrightness, editor.fontBrightness);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Items");
         this.editCoins.draw();
         this.editShop.draw();

@@ -96,27 +96,24 @@ public class Game
 	public static Tank dummyTank;
 
 	public static int currentSizeX = 28;
-	public static int currentSizeY = 18;
-	public static int tileOffsetX = 0;
-	public static int tileOffsetY = 0;
-	public static double bgResMultiplier = 1;
-
-	public static double[][] tilesR = new double[28][18];
-	public static double[][] tilesG = new double[28][18];
-	public static double[][] tilesB = new double[28][18];
-	public static double[][] tilesFlash = new double[28][18];
-
-	public static Obstacle[][] obstacleMap = new Obstacle[28][18];
-
-	public static double[][] tilesDepth = new double[28][18];
-
-	//Remember to change the version in android's build.gradle and ios's robovm.properties
-	public static final String version = "Tanks v1.5.1";
-	public static final String ModAPIVersion = "Mod API v1.1.4";
-	public static final int network_protocol = 48;
-	public static boolean debug = false;
-	public static boolean traceAllRays = false;
-	public static boolean showTankIDs = false;
+    //Remember to change the version in android's build.gradle and ios's robovm.properties
+    public static final String version = "Tanks v1.5.1";
+    public static final String ModAPIVersion = "Mod API v1.1.5";
+    public static final int network_protocol = 48;
+    public static int currentSizeY = 18;
+    public static int tileOffsetX = 0;
+    public static int tileOffsetY = 0;
+    public static double bgResMultiplier = 1;
+    public static double[][] tilesR = new double[28][18];
+    public static double[][] tilesG = new double[28][18];
+    public static double[][] tilesB = new double[28][18];
+    public static double[][] tilesFlash = new double[28][18];
+    public static Obstacle[][] obstacleGrid = new Obstacle[28][18];
+    public static Obstacle[][] surfaceTileGrid = new Obstacle[28][18];
+    public static double[][] tilesDepth = new double[28][18];
+    public static boolean debug = false;
+    public static boolean traceAllRays = false;
+    public static boolean showTankIDs = false;
 	public static boolean showTankHitboxes = false;
 	public static boolean showObstacleHitboxes = false;
 	public static boolean showPathfinding = false;
@@ -499,30 +496,35 @@ public class Game
 		registerObstacle(ObstacleHole.class, "hole");
 		registerObstacle(ObstacleBouncy.class, "bouncy");
 		registerObstacle(ObstacleNoBounce.class, "nobounce");
-		registerObstacle(ObstacleBreakable.class, "breakable");
-		registerObstacle(ObstacleExplosive.class, "explosive");
-		registerObstacle(ObstacleLight.class, "light");
-		registerObstacle(ObstacleShrubbery.class, "shrub");
-		registerObstacle(ObstacleHill.class, "hill", true);
-		registerObstacle(ObstaclePath.class, "path", true);
-		registerObstacle(ObstacleMud.class, "mud");
-		registerObstacle(ObstacleTrainTrack.class, "track");
-		registerObstacle(ObstacleWater.class, "water", true);
-		registerObstacle(ObstacleSand.class, "sand", true);
-		registerObstacle(ObstacleIce.class, "ice");
-		registerObstacle(ObstacleSnow.class, "snow");
-		registerObstacle(ObstacleBoostPanel.class, "boostpanel");
-		registerObstacle(ObstacleTeleporter.class, "teleporter");
+        registerObstacle(ObstacleBreakable.class, "breakable");
+        registerObstacle(ObstacleExplosive.class, "explosive");
+        registerObstacle(ObstacleLight.class, "light");
+        registerObstacle(ObstacleShrubbery.class, "shrub");
+        registerObstacle(ObstacleHill.class, "hill", true);
+        registerObstacle(ObstaclePath.class, "path", true);
+        registerObstacle(ObstacleMud.class, "mud");
+        registerObstacle(ObstacleTrainTrack.class, "track", true);
+        registerObstacle(ObstacleWater.class, "water", true);
+        registerObstacle(ObstacleSand.class, "sand", true);
+        registerObstacle(ObstacleLava.class, "lava", true);
+        registerObstacle(ObstaclePathfinding.class, "pathfinding", true);
+        registerObstacle(ObstacleConveyor.class, "conveyor", true);
+        registerObstacle(ObstacleIce.class, "ice");
+        registerObstacle(ObstacleSnow.class, "snow");
+        registerObstacle(ObstacleBoostPanel.class, "boostpanel");
+        registerObstacle(ObstacleTeleporter.class, "teleporter");
 
-		registerTank(TankDummy.class, "dummy", 0);
-		registerTank(TankBrown.class, "brown", 1);
-		registerTank(TankGray.class, "gray", 1);
-		registerTank(TankMint.class, "mint", 1.0 / 2);
-		registerTank(TankYellow.class, "yellow", 1.0 / 2);
-		registerTank(TankMagenta.class, "magenta", 1.0 / 3);
-		registerTank(TankRed.class, "red", 1.0 / 6);
-		registerTank(TankGreen.class, "green", 1.0 / 10);
-		registerTank(TankPurple.class, "purple", 1.0 / 10);
+//		printObstacleProperties();
+
+        registerTank(TankDummy.class, "dummy", 0);
+        registerTank(TankBrown.class, "brown", 1);
+        registerTank(TankGray.class, "gray", 1);
+        registerTank(TankMint.class, "mint", 1.0 / 2);
+        registerTank(TankYellow.class, "yellow", 1.0 / 2);
+        registerTank(TankMagenta.class, "magenta", 1.0 / 3);
+        registerTank(TankRed.class, "red", 1.0 / 6);
+        registerTank(TankGreen.class, "green", 1.0 / 10);
+        registerTank(TankPurple.class, "purple", 1.0 / 10);
 		registerTank(TankBlue.class, "blue", 1.0 / 4);
 		registerTank(TankWhite.class, "white", 1.0 / 10);
 		registerTank(TankCyan.class, "cyan", 1.0 / 4);
@@ -531,33 +533,35 @@ public class Game
 		registerTank(TankMustard.class, "mustard", 1.0 / 4);
 		registerTank(TankMedic.class, "medic", 1.0 / 4);
 		registerTank(TankOrangeRed.class, "orangered", 1.0 / 4);
-		registerTank(TankGold.class, "gold", 1.0 / 4);
-		registerTank(TankDarkGreen.class, "darkgreen", 1.0 / 10);
-		registerTank(TankBlack.class, "black", 1.0 / 10);
-		registerTank(TankMimic.class, "mimic", 1.0 / 4);
-		registerTank(TankLightBlue.class, "lightblue", 1.0 / 8);
-		registerTank(TankPink.class, "pink", 1.0 / 12);
-		registerTank(TankMini.class, "mini", 0);
-		registerTank(TankSalmon.class, "salmon", 1.0 / 10);
-		registerTank(TankLightPink.class, "lightpink", 1.0 / 10);
-		registerTank(TankBoss.class, "boss", 1.0 / 40, true);
-		registerTank(TankTrain.class, "train", 0, true);
+        registerTank(TankGold.class, "gold", 1.0 / 4);
+        registerTank(TankDarkGreen.class, "darkgreen", 1.0 / 10);
+        registerTank(TankBlack.class, "black", 1.0 / 10);
+        registerTank(TankMimic.class, "mimic", 1.0 / 4);
+        registerTank(TankLightBlue.class, "lightblue", 1.0 / 8);
+        registerTank(TankPink.class, "pink", 1.0 / 12);
+        registerTank(TankMini.class, "mini", 0);
+        registerTank(TankSalmon.class, "salmon", 1.0 / 10);
+        registerTank(TankLightPink.class, "lightpink", 1.0 / 10);
+        registerTank(TankBoss.class, "boss", 1.0 / 40, true);
+        registerTank(TankTrain.class, "train", 0);
+        registerTank(TankShoe.class, "shoe", 0);
 
-		registerBullet(Bullet.class, Bullet.bullet_name, "bullet_normal.png");
-		registerBullet(BulletFlame.class, BulletFlame.bullet_name, "bullet_flame.png");
-		registerBullet(BulletLaser.class, BulletLaser.bullet_name, "bullet_laser.png");
-		registerBullet(BulletFreeze.class, BulletFreeze.bullet_name, "bullet_freeze.png");
-		registerBullet(BulletElectric.class, BulletElectric.bullet_name, "bullet_electric.png");
-		registerBullet(BulletHealing.class, BulletHealing.bullet_name, "bullet_healing.png");
-		registerBullet(BulletArc.class, BulletArc.bullet_name, "bullet_arc.png");
-		registerBullet(BulletExplosive.class, BulletExplosive.bullet_name, "bullet_explosive.png");
-		registerBullet(BulletBoost.class, BulletBoost.bullet_name, "bullet_boost.png");
+        registerBullet(Bullet.class, Bullet.bullet_name, "bullet_normal.png");
+        registerBullet(BulletFlame.class, BulletFlame.bullet_name, "bullet_flame.png");
+        registerBullet(BulletLaser.class, BulletLaser.bullet_name, "bullet_laser.png");
+        registerBullet(BulletFreeze.class, BulletFreeze.bullet_name, "bullet_freeze.png");
+        registerBullet(BulletElectric.class, BulletElectric.bullet_name, "bullet_electric.png");
+        registerBullet(BulletHealing.class, BulletHealing.bullet_name, "bullet_healing.png");
+        registerBullet(BulletArc.class, BulletArc.bullet_name, "bullet_arc.png");
+        registerBullet(BulletExplosive.class, BulletExplosive.bullet_name, "bullet_explosive.png");
+        registerBullet(BulletBoost.class, BulletBoost.bullet_name, "bullet_boost.png");
 		registerBullet(BulletAir.class, BulletAir.bullet_name, "bullet_air.png");
 		registerBullet(BulletHoming.class, BulletHoming.bullet_name, "bullet_homing.png");
 
 		registerItem(ItemBullet.class, ItemBullet.item_name, "bullet_normal.png");
 		registerItem(ItemMine.class, ItemMine.item_name, "mine.png");
 		registerItem(ItemShield.class, ItemShield.item_name, "shield.png");
+//		registerItem(ItemShieldInstantUse.class, ItemShieldInstantUse.item_name, "shield_gold.png");
 
 		registerMinigame(Arcade.class, "Arcade mode", "A gamemode which gets crazier as you---destroy more tanks.------Featuring a score mechanic, unlimited---lives, a time limit, item drops, and---end-game bonuses!");
 
@@ -587,7 +591,7 @@ public class Game
 
 		BaseFile extensionRegistryFile = game.fileManager.getFile(homedir + extensionRegistryPath);
 		if (!extensionRegistryFile.exists())
-			extensionRegistry.initRegistry();
+            extensionRegistry.saveRegistry();
 
 		BaseFile levelsFile = game.fileManager.getFile(homedir + levelDir);
 		if (!levelsFile.exists())
@@ -815,21 +819,6 @@ public class Game
 	}
 
 	/**
-	 * Adds a tank to the game's movables list and generates/registers a network ID for it.
-	 * Use this if you want to add computer-controlled tanks if you are not connected to a server.
-	 *
-	 * @param isTileCoords Whether the tank's x-y coordinates are in tiles and not pixels.
-	 * @param tank the tank to add
-	 */
-	public static void addTank(boolean isTileCoords, Tank tank)
-	{
-		if (isTileCoords)
-			tank.posX = tank.posX * 50 + 25;
-
-		addTank(tank);
-	}
-
-	/**
 	 * Adds a tank to the game's movables list and generates/registers a network ID for it after it was spawned by another tank.
 	 * Use this if you want to spawn computer-controlled tanks from another tank if you are not connected to a server.
 	 *
@@ -929,17 +918,21 @@ public class Game
 	}
 
 	public static void reset()
-	{
-		if (Game.playerTank != null)
-			Game.playerTank.team = Game.playerTeam;
+    {
+        if (Game.playerTank != null)
+            Game.playerTank.team = Game.playerTeam;
 
-		Game.currentGame = null;
-		Game.eventListeners.clear();
-		ItemBar.overrideState = false;
-		ScreenInterlevel.fromMinigames = false;
-		ObstacleTeleporter.exitCooldown = 100;
-		SyncedFieldMap.mapIDs.clear();
-	}
+        for (Runnable r : ModAPI.resetFunc)
+            r.run();
+
+        Game.currentGame = null;
+        Game.eventListeners.clear();
+        ItemBar.overrideState = false;
+        ScreenInterlevel.fromMinigames = false;
+        ObstacleTeleporter.exitCooldown = 100;
+        Interval.gameIntervals.clear();
+        SyncedFieldMap.mapIDs.clear();
+    }
 
 	public static void exitToInterlevel()
 	{
@@ -1055,27 +1048,28 @@ public class Game
 	{
 		Drawing.drawing.setScreenBounds(Game.tile_size * 28, Game.tile_size * 18);
 
-		tileOffsetX = 0;
-		tileOffsetY = 0;
+        tileOffsetX = 0;
+        tileOffsetY = 0;
 
-		Game.tilesR = new double[28][18];
-		Game.tilesG = new double[28][18];
-		Game.tilesB = new double[28][18];
-		Game.tilesDepth = new double[28][18];
-		Game.tilesFlash = new double[28][18];
-		Game.game.heightGrid = new double[28][18];
-		Game.game.groundHeightGrid = new double[28][18];
-		Game.obstacleMap = new Obstacle[28][18];
+        Game.tilesR = new double[28][18];
+        Game.tilesG = new double[28][18];
+        Game.tilesB = new double[28][18];
+        Game.tilesDepth = new double[28][18];
+        Game.tilesFlash = new double[28][18];
+        Game.game.heightGrid = new double[28][18];
+        Game.game.groundHeightGrid = new double[28][18];
+        Game.obstacleGrid = null;
+        Game.surfaceTileGrid = null;
 
-		double var = 0;
+        double var = 0;
 
-		if (Game.fancyTerrain)
-			var = 20;
+        if (Game.fancyTerrain)
+            var = 20;
 
-		for (int i = 0; i < 28; i++)
-		{
-			for (int j = 0; j < 18; j++)
-			{
+        for (int i = 0; i < 28; i++)
+        {
+            for (int j = 0; j < 18; j++)
+            {
 				Game.tilesR[i][j] = (235 + Math.random() * var);
 				Game.tilesG[i][j] = (207 + Math.random() * var);
 				Game.tilesB[i][j] = (166 + Math.random() * var);
@@ -1270,9 +1264,11 @@ public class Game
 		removeEffects.clear();
 		removeTracks.clear();
 		removeClouds.clear();
-		ModAPI.fixedMenus.clear();
+        ModAPI.fixedMenus.clear();
+        Interval.levelIntervals.clear();
 
-		resetNetworkIDs();
+        TankNPC.focusedNPC = null;
+        resetNetworkIDs();
 
 		if (!Crusade.crusadeMode)
 		{
@@ -1404,7 +1400,7 @@ public class Game
 
 	public static boolean lessThan(double a, double b, double c)
 	{
-		return a < b && b < c;
+        return (a < b && b < c) || (c < b && b < a);
 	}
 
 	public static boolean lessThan(boolean orEqualTo, double a, double b, double c)
@@ -1412,6 +1408,6 @@ public class Game
 		if (!orEqualTo)
 			return lessThan(a, b, c);
 
-		return a <= b && b <= c;
+        return (a <= b && b <= c) || (c <= b && b <= a);
 	}
 }

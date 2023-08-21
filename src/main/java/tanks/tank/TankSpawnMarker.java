@@ -26,4 +26,16 @@ public class TankSpawnMarker extends Tank
 
         super.draw();
     }
+
+    @Override
+    public void postInitSelectors()
+    {
+        super.postInitSelectors();
+
+        this.teamSelector.id = "player_team";
+        this.teamSelector.defaultTeamIndex = 0;
+
+        if (!this.teamSelector.modified)
+            this.teamSelector.setChoice(0);
+    }
 }

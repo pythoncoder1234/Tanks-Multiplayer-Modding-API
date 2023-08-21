@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBoxSlider;
 
-public class ScreenOptionsShadows extends Screen
+public class ScreenOptionsShadows extends ScreenOptionsOverlay
 {
     public static final String shadowsText = "Shadows: ";
 
@@ -43,8 +43,6 @@ public class ScreenOptionsShadows extends Screen
 
     public ScreenOptionsShadows()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
 
         shadowQuality.allowLetters = false;
         shadowQuality.allowSpaces = false;
@@ -66,6 +64,8 @@ public class ScreenOptionsShadows extends Screen
     @Override
     public void update()
     {
+        super.update();
+
         shadowQuality.update();
         shadows.update();
         back.update();

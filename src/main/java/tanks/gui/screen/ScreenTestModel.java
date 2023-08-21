@@ -1,11 +1,12 @@
 package tanks.gui.screen;
 
-import basewindow.*;
+import basewindow.InputCodes;
+import basewindow.Model;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
 
-public class ScreenTestModel extends Screen
+public class ScreenTestModel extends ScreenOptionsOverlay
 {
     public Model model;
     public double yaw;
@@ -22,9 +23,9 @@ public class ScreenTestModel extends Screen
 
     public ScreenTestModel(Model m)
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
+        super();
         this.model = m;
+        this.screenHint = "Esc to exit";
 
         //animation = new PosedModelAnimation(Game.game.fileManager, "/models/mustard-test/walk.pma");
         //pose = new PosedModelPose(Game.game.fileManager, "/models/mustard-test/idlehands.pmp");
@@ -33,8 +34,7 @@ public class ScreenTestModel extends Screen
     @Override
     public void update()
     {
-        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_ESCAPE))
-            Game.screen = new ScreenDebug();
+        super.update();
 
         double frac = 0.02;
 
@@ -79,6 +79,9 @@ public class ScreenTestModel extends Screen
 
         if (Game.game.window.pressedKeys.contains(InputCodes.KEY_R))
             this.posZ += Panel.frameFrequency;
+
+        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_ESCAPE))
+            Game.screen = prevScreen;
 
         /*for (PosedModel.PoseBone b: model.bones)
         {

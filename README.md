@@ -1,3 +1,4 @@
+
 # Tanks Multiplayer Modding API
 
 This is a multiplayer modding API for Tanks: The Crusades. I'll call this project Mod API for short.
@@ -29,14 +30,10 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-**Mod API v1.1.4**:
-- Revamped multiplayer crusades
-- Fixed multiplayer crusade bugs
-- Lowered third person turning sensitivity
-- Added zoom controls to first and third person (press c and scroll)
-- :train:
-- Added two methods to `Tank`s: `sendCreateEvent()` and `sendUpdateEvent()`.
-- Removed `IModdedTank`
+- Level editor rewrite
+- Level editor selector system
+- Lava obstacle implementation
+- Many, many bug fixes
 
 
 [Older Changelogs](changelog.md)
