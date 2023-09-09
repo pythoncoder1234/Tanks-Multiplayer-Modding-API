@@ -10,7 +10,6 @@ import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
 import tanks.network.Client;
 import tanks.network.ClientHandler;
-import tanks.network.EventMinigameStart;
 import tanks.network.MessageReader;
 import tanks.network.event.EventBeginLevelCountdown;
 import tanks.network.event.EventPing;
@@ -233,9 +232,6 @@ public class Panel
             this.setUp();
 
         firstFrame = false;
-
-        if (ScreenPartyHost.isServer && Game.game.window.validPressedKeys.contains(InputCodes.KEY_E))
-            Game.eventsOut.add(new EventMinigameStart("hi aisdfalsdi"));
 
         Game.prevScreen = Game.screen;
         Obstacle.lastDrawSize = Obstacle.draw_size;

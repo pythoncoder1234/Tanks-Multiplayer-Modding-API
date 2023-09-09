@@ -6,7 +6,6 @@ import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.gui.screen.leveleditor.ScreenLevelEditorOverlay;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public abstract class GameObject implements Cloneable
 {
@@ -79,6 +78,7 @@ public abstract class GameObject implements Cloneable
 
     }
 
+    /** Warning: Shallow copy. */
     @Override
     public GameObject clone()
     {
@@ -87,8 +87,7 @@ public abstract class GameObject implements Cloneable
             GameObject clone = (GameObject) super.clone();
 
             if (clone.hasCustomSelectors())
-                // deepcopy
-                clone.selectors = selectors.stream().map(LevelEditorSelector::clone).collect(Collectors.toCollection(ArrayList::new));
+                clone.selectors = (ArrayList<LevelEditorSelector<? extends GameObject>>) selectors.clone();
 
             return clone;
         }
@@ -124,14 +123,24 @@ public abstract class GameObject implements Cloneable
             s.gameObject = this;
             s.editor = editor1;
             s.baseInit();
+
+            if (editor1 != null)
+                s.button = s.getButton();
         });
 
         postInitSelectors();
+    }
 
-        this.forAllSelectors(s ->
-        {
-            if (s.editor != null && s.editor.addedShortcutButtons.add(s.id))
-                s.addShortcutButton();
-        });
+    public int saveOrder(int index)
+    {
+        return index;
+    }
+
+    public void setMetadata(String s) {}
+    public String getMetadata() { return null; }
+
+    public void updateSelectors()
+    {
+        this.forAllSelectors(LevelEditorSelector::updateAndDraw);
     }
 }

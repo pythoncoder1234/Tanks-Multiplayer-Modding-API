@@ -19,10 +19,7 @@ import tanks.gui.screen.leveleditor.OverlayEditorMenu;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.ItemBar;
-import tanks.hotbar.item.Item;
-import tanks.hotbar.item.ItemBullet;
-import tanks.hotbar.item.ItemMine;
-import tanks.hotbar.item.ItemShield;
+import tanks.hotbar.item.*;
 import tanks.minigames.Arcade;
 import tanks.network.*;
 import tanks.network.event.EventSetMusic;
@@ -507,7 +504,7 @@ public class Game
         registerObstacle(ObstacleWater.class, "water", true);
         registerObstacle(ObstacleSand.class, "sand", true);
         registerObstacle(ObstacleLava.class, "lava", true);
-        registerObstacle(ObstaclePathfinding.class, "pathfinding", true);
+//        registerObstacle(ObstaclePathfinding.class, "pathfinding", true);
         registerObstacle(ObstacleConveyor.class, "conveyor", true);
         registerObstacle(ObstacleIce.class, "ice");
         registerObstacle(ObstacleSnow.class, "snow");
@@ -561,7 +558,6 @@ public class Game
 		registerItem(ItemBullet.class, ItemBullet.item_name, "bullet_normal.png");
 		registerItem(ItemMine.class, ItemMine.item_name, "mine.png");
 		registerItem(ItemShield.class, ItemShield.item_name, "shield.png");
-//		registerItem(ItemShieldInstantUse.class, ItemShieldInstantUse.item_name, "shield_gold.png");
 
 		registerMinigame(Arcade.class, "Arcade mode", "A gamemode which gets crazier as you---destroy more tanks.------Featuring a score mechanic, unlimited---lives, a time limit, item drops, and---end-game bonuses!");
 

@@ -4,7 +4,6 @@ import basewindow.IModel;
 import tanks.*;
 import tanks.bullet.*;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
 import tanks.network.event.*;
@@ -2818,16 +2817,9 @@ public class TankAIControlled extends Tank
 
     public TankAIControlled instantiate(String name, double x, double y, double angle)
     {
-        return instantiate(name, x, y, angle, null);
-    }
-
-    public TankAIControlled instantiate(String name, double x, double y, double angle, ScreenLevelEditor editor)
-    {
         TankAIControlled t = new TankAIControlled(name, x, y, this.size, this.colorR, this.colorG, this.colorB, angle, this.shootAIType);
         this.cloneProperties(t);
-        this.registerSelectors();
-        this.initSelectors(editor);
-
+		t.registerSelectors();
         return t;
     }
 

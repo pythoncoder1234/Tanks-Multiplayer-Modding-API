@@ -566,11 +566,11 @@ public class TextBox implements IDrawable, ITrigger
 		try
 		{
 			if (checkMaxValue)
-				if (Integer.parseInt(inputText) > this.maxValue)
+				if (Double.parseDouble(inputText) > this.maxValue)
 					inputText = (int) this.maxValue + "";
 
 			if (checkMinValue)
-				if (Integer.parseInt(inputText) < this.minValue)
+				if (Double.parseDouble(inputText) < this.minValue)
 					inputText = (int) this.minValue + "";
 		}
 		catch (Exception ignored) {}

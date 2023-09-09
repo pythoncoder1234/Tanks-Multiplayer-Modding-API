@@ -51,6 +51,9 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
 
     public void update()
     {
+        if (!editor.initialized)
+            editor.initialize();
+
         if (editor.level.editable)
         {
             resume.update();

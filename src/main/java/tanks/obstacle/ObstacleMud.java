@@ -2,6 +2,7 @@ package tanks.obstacle;
 
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
+import tanks.tank.Mine;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
 
@@ -33,7 +34,7 @@ public class ObstacleMud extends Obstacle
     @Override
     public void onObjectEntry(Movable m)
     {
-        if (m instanceof Tank)
+        if (m instanceof Tank || m instanceof Mine)
             m.addStatusEffect(StatusEffect.mud, 0, 20, 30);
 
         this.onObjectEntryLocal(m);

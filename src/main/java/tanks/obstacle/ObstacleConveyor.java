@@ -27,6 +27,7 @@ public class ObstacleConveyor extends Obstacle
         this.tankCollision = false;
         this.bulletCollision = false;
         this.enableStacking = false;
+        this.enableGroupID = true;
         this.enableRotation = true;
         this.update = true;
         this.checkForObjects = true;
@@ -114,14 +115,14 @@ public class ObstacleConveyor extends Obstacle
     }
 
     @Override
-    public void registerSelectors()
+    public void postInitSelectors()
     {
-        GroupIdSelector selector = new GroupIdSelector();
-        this.registerSelector(selector);
+        GroupIdSelector selector = (GroupIdSelector) this.selectors.get(0);
 
         selector.id = "speed_selector";
         selector.title = "Speed";
         selector.min = 1;
+        selector.number = 1;
         selector.max = 10;
         selector.image = "icons/speed.png";
         selector.buttonText = "Speed: %.0f";

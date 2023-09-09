@@ -15,6 +15,8 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
     public int selectedIndex = 0;
     public boolean addNoneChoice = false;
 
+    {this.property = "selectedChoice";}
+
     @Override
     public void onSelect()
     {
@@ -40,11 +42,22 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
     }
 
     @Override
+    public void onPropertySet()
+    {
+        int i = 0;
+        for (V choice : choices)
+        {
+            if (selectedChoice.equals(choice))
+                setChoice(i);
+            i++;
+        }
+    }
+
+    @Override
     public void changeMetadata(int add)
     {
         selectedIndex += add;
         setChoice(selectedIndex);
-        syncProperties();
     }
 
     @Override
@@ -68,7 +81,7 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
         if (modify && selectedIndex != index)
             modified = true;
 
-        index = (index + (!addNoneChoice ? choices.size() : 0)) % choices.size();
+        index = (index + choices.size()) % choices.size();
 
         if (addNoneChoice && index < -1)
             index = choices.size() - 1;
@@ -80,6 +93,5 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
         else
             selectedChoice = null;
 
-        syncProperties();
     }
 }

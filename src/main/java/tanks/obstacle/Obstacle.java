@@ -3,9 +3,9 @@ package tanks.obstacle;
 import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.editorselector.GroupIdSelector;
-import tanks.editorselector.HeightSelector;
 import tanks.editorselector.LevelEditorSelector;
 import tanks.editorselector.RotationSelector;
+import tanks.editorselector.StackHeightSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.tank.TankAIControlled;
@@ -43,6 +43,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	public boolean bouncy = false;
 	public boolean allowBounce = true;
 	public boolean replaceTiles = true;
+
+	/** Only takes effect when <code>bouncy</code> is set to <code>true</code>. */
+	public double bounciness = 1;
 
 	/**
 	 * If set to true, will draw as a VBO. Set to false for simpler rendering of more dynamic obstacles.
@@ -158,6 +161,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			this.drawOutline = false;
 			this.draw3dOutline(255, 255, 255);
 		}
+
+		this.updateSelectors();
 
 		if (this.stackHeight <= 0)
 			return;
@@ -391,19 +396,12 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	{
 		StringBuilder s = new StringBuilder();
 
-		if (this.enableStacking)
-			s.append(this.stackHeight).append("-");
-
-		if (this.enableTeams)
-			s.append(this.team.name).append("-");
-
-		if (this.enableRotation)
-			s.append((int) (this.rotation / Math.PI * 2)).append("-");
-
-		this.forAllSelectors(c -> s.append(c.getMetadata()).append("-"));
+		int sc = this.selectorCount();
+		for (int i = 0; i < sc; i++)
+			s.append(this.selectors.get(saveOrder(i)).getMetadata()).append("-");
 
 		if (this.startHeight > 0)
-			s.append(this.startHeight).append("-");
+			s.append(this.startHeight);
 
 		if (s.toString().endsWith("-"))
 			return s.substring(0, s.length() - 1);
@@ -415,42 +413,10 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	{
 		String[] metadata = s.split("-");
 
-		int index = 0;
-		int i = 0;
-
-		for (String s1 : metadata)
+		for (int i = 0; i < Math.min(this.selectorCount(), metadata.length); i++)
 		{
-			if (this.enableStacking && index == 0)
-				this.stackHeight = Double.parseDouble(s1);
-			else if (index == 0)
-				index++;
-
-			if (this.enableTeams && index == 1)
-				this.teamName = s1;
-			else if (index == 1)
-				index++;
-
-			if (this.enableRotation && index == 2)
-				this.rotation = Integer.parseInt(s1);
-			else if (index == 2)
-				index++;
-
-			if (index >= 3)
-			{
-				if (index < 3 + this.selectorCount())
-				{
-					int j = index - 3;
-					LevelEditorSelector sel = this.selectors.get(j);
-					sel.setMetadata(metadata[i]);
-					sel.syncProperties(this);
-				}
-				else if (index == 3 + this.selectorCount())
-					this.startHeight = Double.parseDouble(metadata[i]);
-				else
-					break;
-			}
-
-			i++;
+			LevelEditorSelector<Obstacle> sel = (LevelEditorSelector<Obstacle>) this.selectors.get(saveOrder(i));
+			sel.setMetadata(metadata[i]);
 		}
 	}
 
@@ -681,13 +647,18 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	public void registerSelectors()
 	{
 		if (this.enableStacking)
-			this.registerSelector(new HeightSelector());
-
-		if (this.enableRotation)
-			this.registerSelector(new RotationSelector<Obstacle>());
+			this.registerSelector(new StackHeightSelector());
 
 		if (this.enableGroupID)
 			this.registerSelector(new GroupIdSelector());
+
+		if (this.enableRotation)
+			this.registerSelector(new RotationSelector<Obstacle>());
+	}
+
+	public double getBounciness()
+	{
+		return this.bouncy ? this.bounciness : 0;
 	}
 
 	public boolean wasRedrawn()

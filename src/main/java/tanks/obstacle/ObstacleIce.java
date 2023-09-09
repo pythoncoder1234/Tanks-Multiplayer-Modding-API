@@ -1,6 +1,7 @@
 package tanks.obstacle;
 
 import tanks.*;
+import tanks.tank.Mine;
 import tanks.tank.Tank;
 
 public class ObstacleIce extends Obstacle
@@ -35,10 +36,8 @@ public class ObstacleIce extends Obstacle
     @Override
     public void onObjectEntry(Movable m)
     {
-        if (m instanceof Tank)
-        {
+        if (m instanceof Tank || m instanceof Mine)
             m.addStatusEffect(StatusEffect.ice, 0, 5, 10);
-        }
     }
 
     @Override

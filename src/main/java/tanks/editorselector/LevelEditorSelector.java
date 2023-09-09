@@ -8,7 +8,9 @@ import tanks.gui.screen.leveleditor.OverlayObjectMenu;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.obstacle.Obstacle;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * A selector that is added to <code>GameObject</code>s.
@@ -19,28 +21,31 @@ import java.util.ArrayList;
 public abstract class LevelEditorSelector<T extends GameObject> implements Cloneable
 {
     public static ArrayList<Consumer<GameObject>> addSelFuncRegistry = new ArrayList<>();
-    public boolean init = false;
-    /**
-     * Whether the selector has been modified.
-     */
-    public boolean modified = false;
+
     public Position position;
     public Position shortcutPos = Position.editor_bottom_right;
-    public GameObject gameObject;
     public ScreenLevelEditor editor;
     public OverlayObjectMenu objectMenu;
+
+    public GameObject gameObject;
+    public Class<? extends GameObject> objCls;
+    public String property, objectProperty;
+    public Field propField, objPropField;
+    public Object prevObject = null;
+
     public String id = "";
     public String title = "";
     public String description = null;
-    /**
-     * The result of {@link #getButton()} is stored in this variable.
-     */
+
+    /** The result of {@link #getButton()} is stored in this variable. */
     public Button button;
     public String buttonText = "";
     public String image = null;
-    /**
-     * The result of {@link #addShortcutButton()} is stored in this variable.
-     */
+
+    public boolean init = false;
+    public boolean modified = false;
+
+    /** The result of {@link #addShortcutButton()} is stored in this variable.*/
     public ScreenLevelEditor.EditorButton shortcutButton;
     public InputBindingGroup keybind = null;
 
@@ -78,8 +83,15 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
 
     public void addShortcutButton()
     {
-        shortcutButton = new ScreenLevelEditor.EditorButton(getLocation(shortcutPos), image.replace("icons/", ""),
+        shortcutButton = editor.addedShortcutButtons.get(id);
+        ArrayList<ScreenLevelEditor.EditorButton> pos = getLocation(shortcutPos);
+
+        if (shortcutButton != null)
+            pos.remove(shortcutButton);
+
+        shortcutButton = new ScreenLevelEditor.EditorButton(pos, image.replace("icons/", ""),
                 50, 50, this::onShortcut, () -> false, this::gameObjectSelected, description, keybind);
+        editor.addedShortcutButtons.put(id, shortcutButton);
 
         editor.buttons.refreshButtons();
 
@@ -93,61 +105,67 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
         onSelect();
     }
 
-    /**
-     * Syncs the changes between the selector and the selector's game object.
-     */
-    public void syncProperties()
+    public void updateAndDraw()
     {
-        //noinspection unchecked
-        syncProperties((T) this.gameObject);
+        if (!this.init)
+            return;
+
+        try
+        {
+            Object sel = getPropertyBase();
+            Object obj = getObjectProp();
+
+            if (!Objects.equals(sel, prevObject))
+            {
+                objPropField.set(gameObject, sel);
+                gameObject.onPropertySet(this);
+                prevObject = sel;
+            }
+            else if (!Objects.equals(sel, obj))
+            {
+                setProperty(obj);
+                prevObject = obj;
+                onPropertySet();
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
-    /**
-     * Syncs the changes between the selector and the game object.
-     */
-    public void syncProperties(T o)
-    {
-        setProperty(o);
-        o.onPropertySet(this);
-    }
-
-    public abstract void setProperty(T o);
+    public void onPropertySet() {}
 
     public abstract String getMetadata();
 
     public abstract void setMetadata(String data);
 
     /**
-     * Don't forget to call {@link #syncProperties(GameObject) setPropertyWithUpdate}.<br>
      * The <code>add</code> parameter takes two values:<br>
      * -1: If the editor's prev. meta keybind was pressed or if Shift+RMB was pressed.<br>
      * 1: If the editor's next meta keybind was pressed or if RMB was pressed.
      */
     public abstract void changeMetadata(int add);
 
-    public void load()
-    {
-    }
+    public void load() {}
 
     public void cloneProperties(LevelEditorSelector<T> s)
     {
-        this.editor = s.editor;
-        this.objectMenu = s.objectMenu;
-        this.button = s.button;
-        this.shortcutButton = s.shortcutButton;
+        if (s.editor != null)
+            this.editor = s.editor;
+
+        if (s.objectMenu != null)
+            this.objectMenu = s.objectMenu;
+
+        this.baseInit();
+        this.button = getButton();
         this.modified = true;
 
         this.setMetadata(s.getMetadata());
-        this.syncProperties();
-
-        if (this.editor.addedShortcutButtons.add(this.id))
-            this.addShortcutButton();
     }
 
     public void baseInit()
     {
-        this.syncProperties();
-
         if (this.init)
             return;
 
@@ -159,7 +177,72 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
             this.image = "icons/" + this.image;
 
         if (description == null)
-            description = title + " (" + keybind.getInputs() + ")";
+        {
+            description = title;
+
+            if (keybind != null)
+                description += " (" + keybind.getInputs() + ")";
+        }
+
+        this.objCls = gameObject.getClass();
+    }
+
+    public void setProperty(Object o)
+    {
+        try
+        {
+            propField.set(this, o);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Object getProperty()
+    {
+        try
+        {
+            return propField.get(this);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Object getPropertyBase()
+    {
+        if (propField == null)
+        {
+            try
+            {
+                this.propField = this.getClass().getField(property);
+                this.objPropField = this.objCls.getField(objectProperty);
+            }
+            catch (NullPointerException e)
+            {
+                throw new RuntimeException("Either property must be set, or the getProperty function should be overridden.");
+            }
+            catch (NoSuchFieldException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return getProperty();
+    }
+
+    public Object getObjectProp()
+    {
+        try
+        {
+            return this.objPropField.get(gameObject);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean gameObjectSelected()

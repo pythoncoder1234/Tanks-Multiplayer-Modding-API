@@ -1,16 +1,18 @@
 package tanks.gui.screen.leveleditor;
 
 import tanks.Drawing;
-import tanks.Game;
+import tanks.editorselector.StackHeightSelector;
 import tanks.gui.Button;
 import tanks.gui.screen.Screen;
 import tanks.obstacle.Obstacle;
 
 public class OverlayBlockHeight extends ScreenLevelEditorOverlay
 {
-    public Button increaseHeight = new Button(this.centerX + 100, this.centerY, 60, 60, "+", () -> editor.mouseObstacle.stackHeight += 0.5);
+    public StackHeightSelector selector;
 
-    public Button decreaseHeight = new Button(this.centerX - 100, this.centerY, 60, 60, "-", () -> editor.mouseObstacle.stackHeight -= 0.5);
+    public Button increaseHeight = new Button(this.centerX + 100, this.centerY, 60, 60, "+", () -> selector.number += 0.5);
+
+    public Button decreaseHeight = new Button(this.centerX - 100, this.centerY, 60, 60, "-", () -> selector.number -= 0.5);
 
     public Button back = new Button(this.centerX, this.centerY + 300, 350, 40, "Done", this::escape);
 
@@ -18,12 +20,12 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
     {
         if (!editor.stagger)
         {
-            editor.mouseObstacle.stackHeight = Math.max(editor.mouseObstacle.stackHeight, 1);
+            selector.number = Math.max(selector.number, 1);
             editor.stagger = true;
         }
         else if (!editor.oddStagger)
         {
-            editor.mouseObstacle.stackHeight = Math.max(editor.mouseObstacle.stackHeight, 1);
+            selector.number = Math.max(selector.number, 1);
             editor.oddStagger = true;
         }
         else
@@ -34,9 +36,12 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
     }, " --- "
     );
 
-    public OverlayBlockHeight(Screen previous, ScreenLevelEditor screenLevelEditor)
+    public OverlayBlockHeight(Screen previous, ScreenLevelEditor screenLevelEditor, StackHeightSelector selector)
     {
         super(previous, screenLevelEditor);
+
+        this.selector = selector;
+        screenLevelEditor.paused = true;
 
         staggering.imageSizeX = 40;
         staggering.imageSizeY = 40;
@@ -45,11 +50,11 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
 
     public void update()
     {
-        this.increaseHeight.enabled = editor.mouseObstacle.stackHeight < Obstacle.default_max_height / (Game.debug ? 1 : 2.);
-        this.decreaseHeight.enabled = editor.mouseObstacle.stackHeight > 0.5;
+        this.increaseHeight.enabled = selector.number < Obstacle.default_max_height;
+        this.decreaseHeight.enabled = selector.number > 0.5;
 
         if (editor.stagger)
-            this.decreaseHeight.enabled = editor.mouseObstacle.stackHeight > 1;
+            this.decreaseHeight.enabled = selector.number > 1;
 
         this.increaseHeight.update();
         this.decreaseHeight.update();
@@ -89,7 +94,7 @@ public class OverlayBlockHeight extends ScreenLevelEditorOverlay
 
         Drawing.drawing.setColor(255, 255, 255);
         Drawing.drawing.setInterfaceFontSize(36);
-        Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, editor.mouseObstacle.stackHeight + "");
+        Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, selector.number + "");
 
         this.increaseHeight.draw();
         this.decreaseHeight.draw();

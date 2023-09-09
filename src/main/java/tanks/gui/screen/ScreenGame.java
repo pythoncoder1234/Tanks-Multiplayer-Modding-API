@@ -7,6 +7,7 @@ import basewindow.transformation.ScaleAboutPoint;
 import basewindow.transformation.Transformation;
 import basewindow.transformation.Translation;
 import tanks.*;
+import tanks.bullet.Bullet;
 import tanks.bullet.BulletArc;
 import tanks.generator.LevelGeneratorVersus;
 import tanks.gui.Button;
@@ -1757,7 +1758,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 					for (Movable m : Game.movables)
 					{
-						if (m instanceof tanks.bullet.Bullet || m instanceof Mine)
+						if (m instanceof Bullet || m instanceof Mine)
 						{
 							noMovables = false;
 							m.destroy = true;
@@ -1766,24 +1767,24 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 					if (Game.effects.size() == 0 && noMovables)
 					{
-						if (Obstacle.draw_size == Game.tile_size)
-							Drawing.drawing.playSound("level_end.ogg");
+						if (name == null)
+							Obstacle.draw_size = Math.max(0, Obstacle.draw_size - Panel.frameFrequency);
 
-						Obstacle.draw_size = Math.max(0, Obstacle.draw_size - Panel.frameFrequency);
+						if (endFirstFrame)
+							Drawing.drawing.playSound("level_end.ogg");
 
 						this.saveRemainingTanks();
 
 						for (Movable m: Game.movables)
 							m.destroy = true;
 
-						if (Obstacle.draw_size <= 0)
+						if ((name == null && Obstacle.draw_size <= 0) || Game.movables.isEmpty())
 						{
 							if (Crusade.crusadeMode)
 								Crusade.currentCrusade.saveHotbars();
 
 							if (ScreenPartyHost.isServer && endFirstFrame)
 							{
-								endFirstFrame = false;
 								Game.silentCleanUp();
 
 								String s = "**";
@@ -1842,6 +1843,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 									Game.exitToInterlevel();
 							}
 						}
+
+						endFirstFrame = false;
 					}
 				}
 			}

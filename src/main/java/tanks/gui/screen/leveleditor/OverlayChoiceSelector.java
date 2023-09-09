@@ -41,7 +41,10 @@ public class OverlayChoiceSelector extends ScreenLevelEditorOverlay
         for (Button b : choiceButtons)
             b.enabled = true;
 
-        choiceButtons.get(selector.selectedIndex).enabled = false;
+        if (selector.selectedChoice != null)
+            choiceButtons.get(selector.selectedIndex).enabled = false;
+        else
+            choiceButtons.get(choiceButtons.size() - 1).enabled = false;
 
         selector.buttonList.update();
         this.back.update();

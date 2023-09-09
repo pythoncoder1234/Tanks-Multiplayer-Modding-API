@@ -28,6 +28,9 @@ public class Hotbar
 
 	public double hideTimer = 0;
 
+	public int prevLive = -1000;
+	public double rechargeTimer = 0;
+
 	public static Button toggle;
 
 	public void update()
@@ -142,7 +145,8 @@ public class Hotbar
             Drawing.drawing.fillInterfaceRect(x, y, 350, 5);
 
             int live = 1;
-            int max = 1;
+            double max = 1;
+			double cooldown = 0;
             double cooldownFrac = 0;
 
             ItemBullet ib = null;
@@ -160,6 +164,7 @@ public class Hotbar
             {
                 live = ib.liveBullets;
                 max = ib.maxLiveBullets;
+				cooldown = ib.cooldownBase;
                 cooldownFrac = ib.cooldown / ib.cooldownBase;
             }
 
@@ -194,22 +199,33 @@ public class Hotbar
                 rcCooldownFrac = Math.max(0, (i.cooldown - 20) / (i.cooldownBase - 20));
             }
 
-            double ammo = live * 1.0 / max;
-            double ammo2 = (live - cooldownFrac) / max;
+			rechargeTimer += Panel.frameFrequency;
+
+            double ammo = 1 - prevLive / max;
+            double ammo2 = (prevLive - cooldownFrac) / max;
+
+			if (live < prevLive)
+				ammo += rechargeTimer / cooldown / max;
 
             if (max <= 0)
                 ammo = 0;
+
+			if (rechargeTimer > (prevLive - live) * (cooldown + 10))
+			{
+				rechargeTimer = 0;
+				prevLive = live;
+			}
 
             Drawing.drawing.setColor(0, 255, 255, a);
             Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, 1 - ammo2));
 
             Drawing.drawing.setColor(0, 200, 255, a);
-            Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, 1 - ammo);
+            Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, ammo);
 
             Drawing.drawing.setColor(0, 255, 255, a);
             Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, Math.max(0, -ammo2 * max)));
 
-            Drawing.drawing.setColor(0, 0, 0, 128 * (100 - this.percentHidden) / 100.0);
+            Drawing.drawing.setColor(0, 0, 0, a / 2);
 
             for (int i = 1; i < Math.min(50, max); i++)
             {
@@ -222,7 +238,7 @@ public class Hotbar
                 if (uses > 0 || rcMax == 0)
                     Drawing.drawing.setColor(0, 150, 255, a);
                 else
-                    Drawing.drawing.setColor(255, 0, 0);
+                    Drawing.drawing.setColor(255, 128, 0);
 
                 Drawing.drawing.fillInterfaceOval(x + 175, y, 18, 18);
 
@@ -233,8 +249,8 @@ public class Hotbar
                 {
                     Drawing.drawing.setColor(255, 0, 0);
 
-                    for (double p = -Math.PI; p <= rcCooldownFrac * 2 * Math.PI - Math.PI; p += 0.2)
-                        Drawing.drawing.fillInterfaceOval(x + 175 + Math.sin(-p) * 8, y + Math.cos(-p) * 8, 2, 2);
+                    for (double p = -Math.PI; p <= rcCooldownFrac * 2 * Math.PI - Math.PI; p += 0.3)
+                        Drawing.drawing.fillInterfaceOval(x + 175 + Math.sin(-p) * 8, y + Math.cos(-p) * 8, 3, 3);
                 }
             }
             else

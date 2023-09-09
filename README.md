@@ -30,7 +30,7 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-- Level editor rewrite
+- Huge level editor rewrite
 - Level editor selector system
 - Lava obstacle implementation
 - Many, many bug fixes

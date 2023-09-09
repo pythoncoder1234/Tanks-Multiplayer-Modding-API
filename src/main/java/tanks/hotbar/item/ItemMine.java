@@ -19,6 +19,8 @@ public class ItemMine extends Item
     public int maxLiveMines;
     public double size;
     public boolean destroysObstacles;
+    public double launchSpeed;
+    public double friction = Mine.mine_friction;
 
     public int liveMines;
 
@@ -36,6 +38,8 @@ public class ItemMine extends Item
         new UIPropertyDouble(this.properties, "cooldown", 50.0);
         new UIPropertyDouble(this.properties, "size", Mine.mine_size);
         new UIPropertyBoolean(this.properties, "destroys_blocks", true);
+        new UIPropertyDouble(this.properties, "launch_speed", 0.0);
+        new UIPropertyDouble(this.properties, "friction", Mine.mine_friction);
 
         this.supportsHits = true;
     }
@@ -49,6 +53,7 @@ public class ItemMine extends Item
     public void use(Tank t)
     {
         Mine m = new Mine(t.posX, t.posY, this.timer, t, this);
+        m.setPolarMotion(t.angle, launchSpeed);
 
         this.setOtherItemsCooldown();
         this.cooldown = this.cooldownBase;
@@ -56,6 +61,7 @@ public class ItemMine extends Item
         m.triggeredTimer = this.triggeredTimer;
         m.radius = this.radius;
         m.damage = this.damage;
+        m.friction = friction;
         m.size = this.size;
         m.destroysObstacles = this.destroysObstacles;
 
@@ -77,7 +83,10 @@ public class ItemMine extends Item
     @Override
     public String convertToString()
     {
-        return super.convertToString() + "," + item_name + "," + timer + "," + triggeredTimer + "," + radius + "," + damage + "," + maxLiveMines + "," + cooldownBase + "," + size + "," + destroysObstacles;
+        String s =  super.convertToString() + "," + item_name + "," + timer + "," + triggeredTimer + "," + radius + "," + damage + "," + maxLiveMines + "," + cooldownBase + "," + size + "," + destroysObstacles;
+        if (launchSpeed > 0)
+            s += "," + launchSpeed + "," + friction;
+        return s;
     }
 
     @Override
@@ -93,6 +102,12 @@ public class ItemMine extends Item
         this.cooldownBase = Double.parseDouble(p[5]);
         this.size = Double.parseDouble(p[6]);
         this.destroysObstacles = Boolean.parseBoolean(p[7]);
+
+        if (p.length > 8)
+        {
+            this.launchSpeed = Double.parseDouble(p[8]);
+            this.friction = Double.parseDouble(p[9]);
+        }
     }
 
     @Override
@@ -108,6 +123,8 @@ public class ItemMine extends Item
         this.setProperty("cooldown", this.cooldownBase);
         this.setProperty("size", this.size);
         this.setProperty("destroys_blocks", this.destroysObstacles);
+        this.setProperty("launch_speed", this.launchSpeed);
+        this.setProperty("friction", this.friction);
     }
 
     @Override
@@ -129,5 +146,7 @@ public class ItemMine extends Item
         this.cooldownBase = (double) this.getProperty("cooldown");
         this.size = (double) this.getProperty("size");
         this.destroysObstacles = (boolean) this.getProperty("destroys_blocks");
+        this.launchSpeed = (double) this.getProperty("launch_speed");
+        this.friction = (double) this.getProperty("friction");
     }
 }

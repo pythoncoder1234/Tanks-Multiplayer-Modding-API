@@ -5,6 +5,7 @@ import basewindow.InputCodes;
 import basewindow.InputPoint;
 import tanks.*;
 import tanks.editorselector.LevelEditorSelector;
+import tanks.editorselector.StackHeightSelector;
 import tanks.gui.Button;
 import tanks.gui.ButtonList;
 import tanks.gui.input.InputBindingGroup;
@@ -20,6 +21,7 @@ import tanks.tank.TankSpawnMarker;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings({"unchecked", "unused"})
 public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
@@ -66,8 +68,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	public double selectY1;
 	public double selectX2;
 	public double selectY2;
-	public HashSet<String> addedShortcutButtons = new HashSet<>();
-	public boolean firstFrame = true;
+	public HashMap<String, EditorButton> addedShortcutButtons = new HashMap<>();
+	public boolean initialized = false;
 	public double symmetryX1;
 	public double symmetryY1;
 	public double symmetryX2;
@@ -169,6 +171,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	);
 	EditorButton undo = new EditorButton(buttons.bottomLeft, "undo.png", 40, 40, () ->
 	{
+		if (undoActions.isEmpty())
+			return;
+
 		Game.game.window.pressedKeys.clear();
 		Game.game.window.pressedButtons.clear();
 
@@ -180,6 +185,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	);
 	EditorButton redo = new EditorButton(buttons.bottomLeft, "redo.png", 40, 40, () ->
 	{
+		if (redoActions.isEmpty())
+			return;
+
 		Game.game.window.pressedKeys.clear();
 		Game.game.window.pressedButtons.clear();
 
@@ -342,14 +350,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	@Override
 	public void update()
 	{
-		if (firstFrame)
-		{
-			firstFrame = false;
-
-			mouseTank.registerSelectors();
-			mouseTank.initSelectors(this);
-			cloneSelectorProperties();
-		}
+		if (!initialized)
+			initialize();
 
 		if (Game.game.input.hotbar1.isValid())
 		{
@@ -568,10 +570,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 				if (currentPlaceable == Placeable.obstacle)
 				{
-					if (mouseObstacle.hasCustomSelectors())
+					if (mouseObstacle.selectorCount() > 0)
 						mouseObstacle.selectors.get(0).changeMetadata(-1);
 				}
-				else if (mouseTank.hasCustomSelectors())
+				else if (mouseTank.selectorCount() > 0)
 					mouseTank.selectors.get(0).changeMetadata(-1);
 			}
 
@@ -581,10 +583,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 				if (currentPlaceable == Placeable.obstacle)
 				{
-					if (mouseObstacle.hasCustomSelectors())
+					if (mouseObstacle.selectorCount() > 0)
 						mouseObstacle.selectors.get(0).changeMetadata(1);
 				}
-				else if (mouseTank.hasCustomSelectors())
+				else if (mouseTank.selectorCount() > 0)
 					mouseTank.selectors.get(0).changeMetadata(1);
 			}
 		}
@@ -753,6 +755,34 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		Game.obstacles.removeAll(Game.removeObstacles);
 		Game.removeObstacles.clear();
+	}
+
+	public void initialize()
+	{
+		if (!this.initialized)
+		{
+			this.initialized = true;
+			this.clickCooldown = 50;
+
+			if (ScreenLevelEditor.currentPlaceable == ScreenLevelEditor.Placeable.obstacle)
+			{
+				if (this.mouseObstacle.selectors.isEmpty())
+					this.mouseObstacle.registerSelectors();
+
+				this.mouseObstacle.initSelectors(this);
+				this.mouseObstacle.forAllSelectors(LevelEditorSelector::addShortcutButton);
+			}
+			else
+			{
+				if (this.mouseTank.selectors.isEmpty())
+					this.mouseTank.registerSelectors();
+
+				this.mouseTank.initSelectors(this);
+				this.mouseTank.forAllSelectors(LevelEditorSelector::addShortcutButton);
+			}
+
+			this.cloneSelectorProperties();
+		}
 	}
 
 	public boolean[] checkMouse(double mx, double my, boolean left, boolean right, boolean validLeft, boolean validRight)
@@ -1234,7 +1264,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 									t = ((TankAIControlled) mouseTank).instantiate(mouseTank.name, mouseTank.posX, mouseTank.posY, mouseTank.angle);
 							}
 
-							t.team = mouseTank.team;
+							AtomicInteger i = new AtomicInteger();
+							t.forAllSelectors(c -> c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement())));
+
 							this.undoActions.add(new Action.ActionTank(t, true));
 							Game.movables.add(t);
 
@@ -1246,19 +1278,16 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 							ArrayList<TankSpawnMarker> spawnsClone = (ArrayList<TankSpawnMarker>) spawns.clone();
 							if (this.movePlayer && !paste)
 							{
-								for (int i = 0; i < Game.movables.size(); i++)
-								{
-									Movable m = Game.movables.get(i);
-
-									if (m instanceof TankSpawnMarker)
-										Game.removeMovables.add(m);
-								}
-
+								Game.removeMovables.addAll(this.spawns);
 								this.spawns.clear();
 							}
 
 							TankSpawnMarker t = new TankSpawnMarker("player", mouseTank.posX, mouseTank.posY, mouseTank.angle);
-							t.team = mouseTank.team;
+							t.registerSelectors();
+
+							AtomicInteger i = new AtomicInteger();
+							t.forAllSelectors(c -> c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement())));
+
 							this.spawns.add(t);
 
 							if (this.movePlayer && !paste)
@@ -1276,23 +1305,24 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						}
 						else if (currentPlaceable == Placeable.obstacle)
 						{
-							Obstacle o = !paste ? (Obstacle) mouseObstacle.clone() : mouseObstacle;
-							o.forAllSelectors(s -> s.syncProperties(o));
+							Obstacle o = !paste ? Game.registryObstacle.getEntry(obstacleNum).getObstacle(0, 0) : mouseObstacle;
+							o.posX = mouseObstacle.posX;
+							o.posY = mouseObstacle.posY;
+
+							AtomicInteger i = new AtomicInteger();
+							o.forAllSelectors(s -> s.cloneProperties(mouseObstacle.selectors.get(i.getAndIncrement())));
 
 							if (o.enableStacking)
 							{
-								o.stackHeight = mouseObstacle.stackHeight;
+								StackHeightSelector s = (StackHeightSelector) o.selectors.get(0);
+								s.number = mouseObstacle.stackHeight;
 
 								if (this.stagger && !paste)
 								{
-									if ((((int) (o.posX / Game.tile_size) + (int) (o.posY / Game.tile_size)) % 2 == 1 && !this.oddStagger)
-											|| (((int) (o.posX / Game.tile_size) + (int) (o.posY / Game.tile_size)) % 2 == 0 && this.oddStagger))
-										o.stackHeight -= 0.5;
+									if ((((int) (o.posX / Game.tile_size) + (int) (o.posY / Game.tile_size)) % 2 == (this.oddStagger ? 1 : 0)))
+										s.number -= 0.5;
 								}
 							}
-
-							if (o.enableTeams)
-								o.team = mouseTank.team;
 
 							this.undoActions.add(new Action.ActionObstacle(o, true));
 							Game.obstacles.add(o);
@@ -1342,8 +1372,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				mouseObstacleStartHeight = n.startHeight;
 				mouseTank.posX = mouseObstacle.posX;
 				mouseTank.posY = mouseObstacle.posY;
-
-				n.forAllSelectors(s -> s.syncProperties(n));
 
 				handlePlace(handled, true, false, true, false, true, true);
 			}
@@ -1566,19 +1594,14 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		for (int i = 0; i < Game.movables.size(); i++)
 		{
-			if (Game.movables.get(i) instanceof Tank)
+			if (Game.movables.get(i) instanceof Tank t)
 			{
-				Tank t = (Tank) Game.movables.get(i);
 				int x = (int) (t.posX / Game.tile_size);
 				int y = (int) (t.posY / Game.tile_size);
 				int angle = (int) (t.angle * 2 / Math.PI);
 
-				level.append(x).append("-").append(y).append("-").append(t.name).append("-").append(angle);
-
-				if (t.team != null)
-					level.append("-").append(t.team.name);
-
-				level.append(",");
+				level.append(x).append("-").append(y).append("-").append(t.name).append("-");
+				level.append(t.getMetadata()).append(",");
 			}
 		}
 
@@ -1939,14 +1962,14 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			}
 		}
 
+		buttons.draw();
+
 		if (Game.screen instanceof IOverlayScreen || this.paused)
 		{
 			Drawing.drawing.setColor(127, 178, 228, 64);
 			//Drawing.drawing.setColor(0, 0, 0, 127);
 			Game.game.window.shapeRenderer.fillRect(0, 0, Game.game.window.absoluteWidth + 1, Game.game.window.absoluteHeight + 1);
 		}
-
-		buttons.draw();
 
 		if (!paused && showControls)
 		{
@@ -2141,7 +2164,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						obstacles.add(o);
 						Game.removeObstacles.add(o);
 					}
-
 				}
 				catch (Exception e)
 				{
@@ -2166,7 +2188,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 					if (t.getClass().equals(TankAIControlled.class))
 					{
-						n = new TankAIControlled(((TankAIControlled) t).name, t.posX, t.posY, ((TankAIControlled) t).size, ((TankAIControlled) t).colorR, ((TankAIControlled) t).colorG, ((TankAIControlled) t).colorB, ((TankAIControlled) t).angle, ((TankAIControlled) t).shootAIType);
+						n = new TankAIControlled(((TankAIControlled) t).name, t.posX, t.posY, t.size, ((TankAIControlled) t).colorR, ((TankAIControlled) t).colorG, ((TankAIControlled) t).colorB, ((TankAIControlled) t).angle, ((TankAIControlled) t).shootAIType);
 						((TankAIControlled) t).cloneProperties((TankAIControlled) n);
 					}
 					else
@@ -2234,7 +2256,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		t.drawAge = mouseTank.drawAge;
 		mouseTank = t;
-		OverlayObjectMenu.loadSelectors(t, null);
+		OverlayObjectMenu.loadSelectors(t, null, this);
 	}
 
 	public double clampTileX(double x)
@@ -2278,9 +2300,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 	public static class EditorButton extends Button
 	{
-		public final ToBooleanFunction disabledFunc;
-		public final ToBooleanFunction shownFunc;
-
+		public ToBooleanFunction disabledFunc;
+		public ToBooleanFunction shownFunc;
 		public InputBindingGroup keybind;
 
 		public double baseImageSX;
@@ -2347,7 +2368,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		public boolean prevShowControls = true;
 		public boolean slideAnimation = false;
-		public double animationTimer = 0;
+		public double animationTimer = 50;
 		public double animationMultiplier = 0;
 
 		public double[] xs;
@@ -2426,7 +2447,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			if (slideAnimation)
 			{
-				animationTimer += Panel.frameFrequency;
+				animationTimer += Panel.frameFrequency * 2;
 				animationMultiplier = Math.sin(animationTimer / 50 * Math.PI / 2);
 				refreshButtons();
 

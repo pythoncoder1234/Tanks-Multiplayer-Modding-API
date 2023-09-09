@@ -16,6 +16,7 @@ public class Mine extends Movable implements IAvoidObject
 {
     public static double mine_size = 30;
     public static double mine_radius = Game.tile_size * 2.5;
+    public static double mine_friction = 0.02;
 
     public double timer;
     public double outlineColorR;
@@ -28,6 +29,7 @@ public class Mine extends Movable implements IAvoidObject
     public boolean destroysObstacles = true;
 
     public boolean enableCollision = true;
+    public double friction = mine_friction;
     public double frictionModifier = 1;
 
     public double radius = mine_radius;
@@ -50,7 +52,8 @@ public class Mine extends Movable implements IAvoidObject
         this.size = mine_size;
         this.timer = timer;
         this.drawLevel = 2;
-        tank = t;
+        this.bounciness = 0.2;
+        this.tank = t;
 
         this.item = item;
 
@@ -150,6 +153,8 @@ public class Mine extends Movable implements IAvoidObject
     {
         this.timer -= Panel.frameFrequency;
 
+        this.frictionModifier = this.getAttributeValue(AttributeModifier.friction, 1);
+
         if (this.timer < 0)
             this.timer = 0;
 
@@ -165,8 +170,8 @@ public class Mine extends Movable implements IAvoidObject
 
         super.update();
 
-        this.vX *= Math.pow(0.95, frictionModifier * Panel.frameFrequency);
-        this.vY *= Math.pow(0.95, frictionModifier * Panel.frameFrequency);
+        this.vX *= Math.pow(1 - friction, frictionModifier * Panel.frameFrequency);
+        this.vY *= Math.pow(1 - friction, frictionModifier * Panel.frameFrequency);
 
         if (this.enableCollision)
             checkCollision();
@@ -196,6 +201,9 @@ public class Mine extends Movable implements IAvoidObject
 
     public void checkCollision()
     {
+        if (Tank.checkCollisionWithBorder(this))
+            onCollidedWith(null);
+
         double t = Game.tile_size;
 
         int x1 = (int) Math.min(Math.max(0, this.posX / t - this.size / t / 2 - 1), Game.currentSizeX);
@@ -215,57 +223,13 @@ public class Mine extends Movable implements IAvoidObject
 
     public void checkCollisionWith(Obstacle o)
     {
-        if (o == null)
-            return;
-
-        double horizontalDist = Math.abs(this.posX - o.posX);
-        double verticalDist = Math.abs(this.posY - o.posY);
-
-        double distX = this.posX - o.posX;
-        double distY = this.posY - o.posY;
-
-        double bound = this.size / 2 + Game.tile_size / 2;
-
-        if (horizontalDist < bound && verticalDist < bound)
-        {
-            if (o.checkForObjects)
-                o.onObjectEntry(this);
-
-            if (!o.bulletCollision)
-                return;
-
-            if (!o.hasLeftNeighbor() && distX <= 0 && distX >= -bound && horizontalDist >= verticalDist)
-            {
-                this.vX = -this.vX;
-                this.posX += horizontalDist - bound;
-            }
-            else if (!o.hasUpperNeighbor() && distY <= 0 && distY >= -bound && horizontalDist <= verticalDist)
-            {
-                this.vY = -this.vY;
-                this.posY += verticalDist - bound;
-            }
-            else if (!o.hasRightNeighbor() && distX >= 0 && distX <= bound && horizontalDist >= verticalDist)
-            {
-                this.vX = -this.vX;
-                this.posX -= horizontalDist - bound;
-            }
-            else if (!o.hasLowerNeighbor() && distY >= 0 && distY <= bound && horizontalDist <= verticalDist)
-            {
-                this.vY = -this.vY;
-                this.posY -= verticalDist - bound;
-            }
-
-            if (!o.bouncy)
-            {
-                this.vX *= 0.3;
-                this.vY *= 0.3;
-            }
-        }
+        if (Tank.checkCollideWith(this, o))
+            onCollidedWith(o);
     }
 
     public void onCollidedWith(Obstacle o)
     {
-        this.explode();
+
     }
 
     public void explode()

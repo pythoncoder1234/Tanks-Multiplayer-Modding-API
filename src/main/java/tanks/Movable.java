@@ -50,6 +50,8 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 
 	public boolean skipNextUpdate = false;
 
+	public double bounciness = 0;
+
 	public int drawLevel = 3;
 	public boolean isRemote = false;
 

@@ -1,6 +1,7 @@
 package tanks.gui.screen.leveleditor;
 
 import tanks.Game;
+import tanks.editorselector.LevelEditorSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.Screen;
 import tanks.tank.TankSpawnMarker;
@@ -36,6 +37,14 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
 
         if (previous == editor)
         {
+            if (editor.initialized)
+            {
+                if (ScreenLevelEditor.currentPlaceable == ScreenLevelEditor.Placeable.obstacle)
+                    editor.mouseObstacle.forAllSelectors(LevelEditorSelector::load);
+                else
+                    editor.mouseTank.forAllSelectors(LevelEditorSelector::load);
+            }
+
             editor.clickCooldown = 20;
             editor.paused = false;
         }

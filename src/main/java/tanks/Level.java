@@ -1,5 +1,6 @@
 package tanks;
 
+import tanks.editorselector.TeamSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
@@ -375,6 +376,7 @@ public class Level
 					for (double y = startY; y <= endY; y++)
 					{
 						Obstacle o = Game.registryObstacle.getEntry(name).getObstacle(x, y);
+						o.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 
 						if (meta != null)
 							o.setMetadata(meta);
@@ -437,6 +439,10 @@ public class Level
                 String type = tank[2].toLowerCase();
                 double angle = 0;
 
+				StringBuilder metadata = new StringBuilder();
+				for (int i = 3; i < tank.length; i++)
+					metadata.append(tank[i]).append("-");
+
                 if (tank.length >= 4)
                     angle = (Math.PI / 2 * Double.parseDouble(tank[3]));
 
@@ -478,7 +484,7 @@ public class Level
 				else
 				{
 					if (customTanksMap.get(type) != null)
-                        t = customTanksMap.get(type).instantiate(type, x, y, angle, sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
+                        t = customTanksMap.get(type).instantiate(type, x, y, angle);
 					else
 						t = Game.registryTank.getEntry(type).getTank(x, y, angle);
 
@@ -487,9 +493,9 @@ public class Level
 
 					if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks && Crusade.currentCrusade.retry && !Crusade.currentCrusade.livingTankIDs.contains(t.crusadeID))
 						tanksToRemove.add(t);
+					else if (metadata.length() > 0)
+						t.setMetadata(metadata.toString());
 				}
-
-				t.team = team;
 
 				// Don't do this in your code! We only want to dynamically generate tank IDs on level load!
 				t.networkID = Tank.nextFreeNetworkID();
@@ -501,7 +507,10 @@ public class Level
 					Game.movables.add(t1);
 				}
 				else
+				{
+					t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 					Game.movables.add(t);
+				}
 			}
 		}
 
@@ -661,7 +670,14 @@ public class Level
 			for (int i = 0; i < playerSpawnsTeam.size(); i++)
 			{
 				TankSpawnMarker t = new TankSpawnMarker("player", this.playerSpawnsX.get(i), this.playerSpawnsY.get(i), this.playerSpawnsAngle.get(i));
-				t.team = this.playerSpawnsTeam.get(i);
+				t.registerSelectors();
+
+				TeamSelector<?> sel = ((TeamSelector<?>) t.selectors.get(0));
+				sel.choices = playerSpawnsTeam;
+
+				if (playerSpawnsTeam.get(i) != null)
+					sel.setMetadata(playerSpawnsTeam.get(i).name);
+
 				Game.movables.add(t);
 
 				if (sc != null)

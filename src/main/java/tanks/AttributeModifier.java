@@ -5,11 +5,6 @@ import java.util.UUID;
 
 public class AttributeModifier
 {
-    /**
-     * Causes objects to spawn a particle trail of embers
-     */
-    public static final Type ember_effect = new Type("effect");
-	
 	/**An unique name for the modifier, to prevent double effects*/
 	public String name = UUID.randomUUID().toString();
 	
@@ -34,6 +29,8 @@ public class AttributeModifier
 
 	public static HashMap<String, Type> attributeModifierTypes = new HashMap<>();
 
+	/** Causes objects to spawn a particle trail of embers */
+	public static final Type ember_effect = new Type("effect");
 	/** Changes the speed at which objects move */
 	public static final Type velocity = new Type("velocity");
 	/** Damages any Tank it is applied to */

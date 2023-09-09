@@ -22,7 +22,6 @@ public class OverlayNumberSelector extends ScreenLevelEditorOverlay
         {
             selector.number += selector.step;
             textBox.inputText = String.format(selector.format, selector.number);
-            selector.syncProperties(selector.gameObject);
         }
     }
     );
@@ -34,7 +33,6 @@ public class OverlayNumberSelector extends ScreenLevelEditorOverlay
         {
             selector.number -= selector.step;
             textBox.inputText = String.format(selector.format, selector.number);
-            selector.syncProperties(selector.gameObject);
         }
     }
     );
@@ -44,24 +42,8 @@ public class OverlayNumberSelector extends ScreenLevelEditorOverlay
         super(previous, screenLevelEditor);
 
         this.selector = selector;
-
-        textBox = new TextBox(this.centerX, this.centerY + 15, 350, 40, this.selector.title, () ->
-        {
-            if (textBox.inputText.length() == 0 || textBox.inputText.equals(textBox.previousInputText))
-            {
-                textBox.inputText = textBox.previousInputText;
-                return;
-            }
-
-            this.selector.modified = true;
-
-            if (selector.forceStep)
-                textBox.inputText = String.format(selector.format, Math.round(Double.parseDouble(textBox.inputText) * selector.step) / selector.step);
-
-            this.selector.setMetadata(textBox.inputText);
-            this.selector.syncProperties(this.selector.gameObject);
-        }
-                , this.selector.numberString());
+        textBox = new TextBox(this.centerX, this.centerY + 15, 350, 40, this.selector.title,
+                this::submit, this.selector.numberString());
 
         textBox.allowLetters = false;
         textBox.allowSpaces = false;
@@ -103,5 +85,21 @@ public class OverlayNumberSelector extends ScreenLevelEditorOverlay
         this.textBox.draw();
 
         this.back.draw();
+    }
+
+    public void submit()
+    {
+        if (textBox.inputText.length() == 0 || textBox.inputText.equals(textBox.previousInputText))
+        {
+            textBox.inputText = textBox.previousInputText;
+            return;
+        }
+
+        this.selector.modified = true;
+
+        if (selector.forceStep)
+            textBox.inputText = String.format(selector.format, Math.round(Double.parseDouble(textBox.inputText) * selector.step) / selector.step);
+
+        this.selector.setMetadata(textBox.inputText);
     }
 }

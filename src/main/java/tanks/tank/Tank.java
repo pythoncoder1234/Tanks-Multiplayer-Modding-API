@@ -4,6 +4,7 @@ import basewindow.Model;
 import basewindow.ModelPart;
 import tanks.*;
 import tanks.bullet.Bullet;
+import tanks.editorselector.LevelEditorSelector;
 import tanks.editorselector.RotationSelector;
 import tanks.editorselector.TeamSelector;
 import tanks.gui.screen.ScreenGame;
@@ -40,8 +41,8 @@ public abstract class Tank extends Movable implements ISolidObject
 
     public static ModelPart health_model;
 
-    public TeamSelector<Tank> teamSelector;
     public RotationSelector<Tank> rotationSelector;
+    public TeamSelector<Tank> teamSelector;
 
     public boolean fromRegistry = false;
 
@@ -307,7 +308,7 @@ public abstract class Tank extends Movable implements ISolidObject
 			if (m.skipNextUpdate)
 				continue;
 
-			if (this != m && m instanceof Tank && ((Tank)m).size > 0)
+			if (this != m && m instanceof Tank && m.size > 0)
 			{
 				Tank t = (Tank) m;
 				double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
@@ -326,30 +327,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		this.size *= this.hitboxSize;
 
-		if (this.posX + this.size / 2 > Drawing.drawing.sizeX)
-		{
-			this.posX = Drawing.drawing.sizeX - this.size / 2;
-			this.vX = 0;
-			hasCollided = true;
-		}
-		if (this.posY + this.size / 2 > Drawing.drawing.sizeY)
-		{
-			this.posY = Drawing.drawing.sizeY - this.size / 2;
-			this.vY = 0;
-			hasCollided = true;
-		}
-		if (this.posX - this.size / 2 < 0)
-		{
-			this.posX = this.size / 2;
-            this.vX = 0;
-            hasCollided = true;
-        }
-        if (this.posY - this.size / 2 < 0)
-        {
-            this.posY = this.size / 2;
-            this.vY = 0;
-            hasCollided = true;
-        }
+		checkCollisionWithBorder(this);
 
         double t = Game.tile_size;
 
@@ -373,7 +351,39 @@ public abstract class Tank extends Movable implements ISolidObject
         this.size /= this.hitboxSize;
     }
 
-    public void onCollidedWith(Tank t, double distSq)
+	public static boolean checkCollisionWithBorder(Movable m)
+	{
+		boolean hasCollided = false;
+
+		if (m.posX + m.size / 2 > Drawing.drawing.sizeX)
+		{
+			m.posX = Drawing.drawing.sizeX - m.size / 2;
+			m.vX *= -m.bounciness;
+			hasCollided = true;
+		}
+		if (m.posY + m.size / 2 > Drawing.drawing.sizeY)
+		{
+			m.posY = Drawing.drawing.sizeY - m.size / 2;
+			m.vY *= -m.bounciness;
+			hasCollided = true;
+		}
+		if (m.posX - m.size / 2 < 0)
+		{
+			m.posX = m.size / 2;
+			m.vX *= -m.bounciness;
+			hasCollided = true;
+		}
+		if (m.posY - m.size / 2 < 0)
+		{
+			m.posY = m.size / 2;
+			m.vY *= -m.bounciness;
+			hasCollided = true;
+		}
+
+		return hasCollided;
+	}
+
+	public void onCollidedWith(Tank t, double distSq)
     {
         double ourMass = this.size * this.size;
         double theirMass = t.size * t.size;
@@ -407,74 +417,75 @@ public abstract class Tank extends Movable implements ISolidObject
     }
 
     public void checkCollisionWith(Obstacle o)
+	{
+		hasCollided = checkCollideWith(this, o);
+	}
+
+    public static boolean checkCollideWith(Movable m, Obstacle o)
     {
         if (o == null)
-            return;
+            return false;
 
-        if ((o.isSurfaceTile || !o.enableStacking) && this.posZ > 25)
-            return;
+        if ((o.isSurfaceTile || !o.enableStacking) && m.posZ > 25)
+            return false;
 
-        if (!o.isSurfaceTile && !Game.lessThan(true, o.startHeight * Game.tile_size, this.posZ, o.startHeight * Game.tile_size + o.getTileHeight()))
-            return;
+        if (!o.isSurfaceTile && !Game.lessThan(true, o.startHeight * Game.tile_size, m.posZ, o.startHeight * Game.tile_size + o.getTileHeight()))
+            return false;
 
-        boolean bouncy = o.bouncy;
+		boolean hasCollided = false;
 
         if ((!o.tankCollision && !o.checkForObjects) || o.startHeight >= 1)
-            return;
+            return false;
 
-        double horizontalDist = Math.abs(this.posX - o.posX);
-        double verticalDist = Math.abs(this.posY - o.posY);
+		double bounciness = m.bounciness + o.getBounciness();
 
-        double distX = this.posX - o.posX;
-        double distY = this.posY - o.posY;
+        double horizontalDist = Math.abs(m.posX - o.posX);
+        double verticalDist = Math.abs(m.posY - o.posY);
 
-        double bound = this.size / 2 + Game.tile_size / 2;
+        double distX = m.posX - o.posX;
+        double distY = m.posY - o.posY;
+
+        double bound = m.size / 2 + Game.tile_size / 2;
 
         if (horizontalDist < bound && verticalDist < bound)
         {
             if (o.checkForObjects)
-                o.onObjectEntry(this);
+                o.onObjectEntry(m);
 
             if (!o.tankCollision)
-                return;
+                return false;
 
             if (!o.hasLeftNeighbor() && distX <= 0 && distX >= -bound && horizontalDist >= verticalDist)
             {
                 hasCollided = true;
-                if (bouncy)
-                    this.vX = -this.vX;
-                else
-                    this.vX = 0;
-                this.posX += horizontalDist - bound;
+				m.vX *= -bounciness;
+				m.vY *= bounciness > 1 ? bounciness : 1;
+                m.posX += horizontalDist - bound;
             }
             else if (!o.hasUpperNeighbor() && distY <= 0 && distY >= -bound && horizontalDist <= verticalDist)
             {
                 hasCollided = true;
-                if (bouncy)
-                    this.vY = -this.vY;
-                else
-                    this.vY = 0;
-                this.posY += verticalDist - bound;
+				m.vY *= -bounciness;
+				m.vX *= bounciness > 1 ? bounciness : 1;
+                m.posY += verticalDist - bound;
             }
             else if (!o.hasRightNeighbor() && distX >= 0 && distX <= bound && horizontalDist >= verticalDist)
             {
                 hasCollided = true;
-                if (bouncy)
-                    this.vX = -this.vX;
-                else
-                    this.vX = 0;
-                this.posX -= horizontalDist - bound;
+				m.vX *= -bounciness;
+				m.vY *= bounciness > 1 ? bounciness : 1;
+                m.posX -= horizontalDist - bound;
             }
             else if (!o.hasLowerNeighbor() && distY >= 0 && distY <= bound && horizontalDist <= verticalDist)
             {
                 hasCollided = true;
-                if (bouncy)
-                    this.vY = -this.vY;
-                else
-                    this.vY = 0;
-                this.posY -= verticalDist - bound;
+				m.vY *= -bounciness;
+				m.vX *= bounciness > 1 ? bounciness : 1;
+                m.posY -= verticalDist - bound;
             }
         }
+
+		return hasCollided;
     }
 
     @Override
@@ -923,6 +934,8 @@ public abstract class Tank extends Movable implements ISolidObject
 		if (!Game.game.window.drawingShadow)
 			drawAge += Panel.frameFrequency;
 
+		this.updateSelectors();
+
 		this.drawTank(false, false);
 
 		if (this.possessor != null)
@@ -1217,6 +1230,30 @@ public abstract class Tank extends Movable implements ISolidObject
 		return Math.max(nearest, farthestInSight);
 	}
 
+	public void setMetadata(String s)
+	{
+		String[] data = s.split("-");
+
+		for (int i = 0; i < Math.min(data.length, this.selectorCount()); i++)
+		{
+			LevelEditorSelector<Tank> sel = (LevelEditorSelector<Tank>) this.selectors.get(saveOrder(i));
+			sel.setMetadata(data[i]);
+		}
+	}
+
+	public String getMetadata()
+	{
+		StringBuilder s = new StringBuilder();
+		int sc = this.selectorCount();
+		for (int i = 0; i < sc; i++)
+			s.append(this.selectors.get(saveOrder(i)).getMetadata()).append("-");
+
+		String s1 = s.toString();
+		if (s1.endsWith("-"))
+			return s1.substring(0, s1.length() - 1);
+		return s1;
+	}
+
 	/** Override this method if both the server and clients support a custom creation event for your modded tank. */
 	public void sendCreateEvent()
 	{
@@ -1239,6 +1276,14 @@ public abstract class Tank extends Movable implements ISolidObject
 	{
 		this.bullet.cooldown = Math.max(this.bullet.cooldown, value);
 		this.mine.cooldown = Math.max(this.mine.cooldown, value);
+	}
+
+	/** This is for backwards compatibility with the base game. */
+	public int saveOrder(int index)
+	{
+		if (index < 2)
+			return 1 - index;
+		return index;
 	}
 
 	public Tank getTopLevelPossessor()
