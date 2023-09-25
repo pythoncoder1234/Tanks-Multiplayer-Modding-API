@@ -228,14 +228,5 @@ public abstract class Item extends GameObject
 		i.unlimitedStack = this.unlimitedStack;
 		return i;
 	}
-
-	public void setOtherItemsCooldown()
-	{
-		Tank user = this.getUser();
-
-		if (user != null)
-			user.setBufferCooldown(20);
-	}
-
 	public abstract String getTypeName();
 }

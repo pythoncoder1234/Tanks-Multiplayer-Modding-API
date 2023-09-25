@@ -34,7 +34,7 @@ public class TeamSelector<T extends GameObject> extends ChoiceSelector<T, Team>
 
         updateDefaultChoices();
 
-        if (Game.currentLevel.enableTeams)
+        if (Game.currentLevel.enableTeams && editor == null)
             setChoice(-1, false);
         else
             setChoice(Math.min(this.choices.size() - 1, defaultTeamIndex), false);
@@ -62,6 +62,12 @@ public class TeamSelector<T extends GameObject> extends ChoiceSelector<T, Team>
             return "null";
 
         return choice.name;
+    }
+
+    @Override
+    public String getMetadata()
+    {
+        return choiceToString(selectedChoice);
     }
 
     public void updateDefaultChoices()

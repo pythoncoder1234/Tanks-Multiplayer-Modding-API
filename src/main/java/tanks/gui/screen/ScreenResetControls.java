@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.input.InputBindingGroup;
 
-public class ScreenResetControls extends Screen
+public class ScreenResetControls extends ScreenOptionsOverlay
 {
     public Button reset = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, this.objWidth, this.objHeight, "Reset controls", () ->
     {
@@ -19,10 +19,6 @@ public class ScreenResetControls extends Screen
 
     public Button cancel = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 60, this.objWidth, this.objHeight, "No", () -> Game.screen = ScreenOverlayControls.lastControlsScreen
     );
-
-    public ScreenResetControls()
-    {
-    }
 
     @Override
     public void update()

@@ -3,6 +3,7 @@ package tanks.obstacle;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
+import tanks.editorselector.StringSelector;
 
 public class ObstacleText extends Obstacle
 {
@@ -10,6 +11,11 @@ public class ObstacleText extends Obstacle
 	public double fontSize = 16;
 	public double age = 0;
 	public double duration = -1;
+
+	public ObstacleText(String name, double posX, double posY)
+	{
+		this(name, "Tt", posX, posY);
+	}
 
 	public ObstacleText(String name, String text, double posX, double posY) 
 	{
@@ -55,9 +61,30 @@ public class ObstacleText extends Obstacle
 	@Override
 	public void drawForInterface(double x, double y)
 	{	
-		Drawing.drawing.setFontSize(this.fontSize);
+		Drawing.drawing.setFontSize(draw_size / 1.5);
 		Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
-		Drawing.drawing.drawInterfaceText(this.posX, this.posY, this.text);
+		Drawing.drawing.drawInterfaceText(x, y, this.text);
+	}
+
+	@Override
+	public void drawOutline()
+	{
+		Drawing.drawing.setFontSize(this.fontSize);
+		Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, 128);
+		Drawing.drawing.drawText(this.posX, this.posY, this.text);
+	}
+
+	@Override
+	public void registerSelectors()
+	{
+		StringSelector<ObstacleText> sel = new StringSelector<>();
+		sel.id = "text_obstacle";
+		sel.title = "Text";
+		sel.objectProperty = "text";
+		sel.keybind = Game.game.input.editorTeam;
+		sel.buttonText = "Choose Text";
+		sel.image = "text.png";
+		this.registerSelector(sel);
 	}
 
 	public double getTileHeight()

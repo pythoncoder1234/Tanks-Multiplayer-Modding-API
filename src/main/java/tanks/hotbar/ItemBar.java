@@ -1,12 +1,15 @@
 package tanks.hotbar;
 
+import basewindow.InputCodes;
 import tanks.*;
 import tanks.gui.Button;
+import tanks.gui.ScreenElement.CenterMessage;
 import tanks.gui.input.InputBindingGroup;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
+import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemEmpty;
 import tanks.minigames.Arcade;
 import tanks.network.ServerHandler;
@@ -103,8 +106,6 @@ public class ItemBar
 
 					if (this.player != Game.player)
 						Game.eventsOut.add(new EventSetItem(this.player, x, this.slots[x]));
-
-					return true;
 				}
 				else
 				{
@@ -116,8 +117,8 @@ public class ItemBar
 						Game.eventsOut.add(new EventSetItem(this.player, x, this.slots[x]));
 
 					this.addItem(i);
-					return true;
 				}
+				return true;
 			}
 		}
 
@@ -170,6 +171,9 @@ public class ItemBar
 			destroy = true;
 			slots[selected] = new ItemEmpty();
 			this.lastItemSwitch = this.age;
+
+			if (this.player == Game.player)
+				Game.playerTank.setBufferCooldown(35);
 		}
 
 		if (this.player != Game.player)
@@ -216,6 +220,29 @@ public class ItemBar
 		checkKey(Game.game.input.hotbar4, 3);
 		checkKey(Game.game.input.hotbar5, 4);
 
+		if (Game.autocannon)
+		{
+			for (int i = 0; i < this.slots.length; i++)
+				autocannon(i);
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+			{
+				if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_BRACKET) && Game.cannonSpeed > 0.21)
+				{
+					Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_LEFT_BRACKET);
+					Game.cannonSpeed -= 0.2;
+					Panel.currentMessage = new CenterMessage("Autocannon speed: %.1fx", Game.cannonSpeed);
+				}
+
+				if (Game.game.window.pressedKeys.contains(InputCodes.KEY_RIGHT_BRACKET) && Game.cannonSpeed < 3)
+				{
+					Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_RIGHT_BRACKET);
+					Game.cannonSpeed += 0.2;
+					Panel.currentMessage = new CenterMessage("Autocannon speed: %.1fx", Game.cannonSpeed);
+				}
+			}
+		}
+
 		if (this.player.hotbar.persistent || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).shopScreen))
 		{
 			for (int i = 0; i < this.slotButtons.length; i++)
@@ -242,6 +269,18 @@ public class ItemBar
 		}
 
 		this.selectedTimer = Math.max(0, this.selectedTimer - Panel.frameFrequency);
+	}
+
+	public void autocannon(int i)
+	{
+		if (this.selected < 0 || !this.slots[this.selected].name.equals(this.slots[i].name) || this.slots[this.selected].price > 0 || this.slots[i].price > 0)
+			return;
+
+		Item selected = this.slots[this.selected];
+
+		if (selected.cooldown > 0 && selected.cooldown < selected.cooldownBase -
+				(selected instanceof ItemBullet ? 60 / ((ItemBullet) selected).speed : 10) / Game.cannonSpeed && this.slots[i].cooldown < 1)
+			this.selected = i;
 	}
 
 	public void checkKey(InputBindingGroup input, int index)

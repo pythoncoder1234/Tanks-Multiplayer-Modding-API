@@ -45,6 +45,7 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
                     editor.mouseTank.forAllSelectors(LevelEditorSelector::load);
             }
 
+            OverlayObjectMenu.saveSelectors(editor);
             editor.clickCooldown = 20;
             editor.paused = false;
         }
@@ -70,8 +71,10 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
         {
             Game.game.input.editorObjectMenu.invalidate();
             Game.screen = editor;
+
             editor.clickCooldown = 20;
             editor.paused = false;
+            OverlayObjectMenu.saveSelectors(editor);
         }
 
         allowClose = editor.undoActions.isEmpty() && !editor.optionsEdited;

@@ -39,11 +39,12 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
 
     /** The result of {@link #getButton()} is stored in this variable. */
     public Button button;
-    public String buttonText = "";
+    public String buttonText = "Sample button";
     public String image = null;
 
     public boolean init = false;
     public boolean modified = false;
+    protected boolean updated = false;
 
     /** The result of {@link #addShortcutButton()} is stored in this variable.*/
     public ScreenLevelEditor.EditorButton shortcutButton;
@@ -71,7 +72,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
      */
     public Button getButton()
     {
-        Button b = new Button(0, 0, editor.objWidth, editor.objHeight, "", this::onSelect);
+        Button b = new Button(0, 0, editor.objWidth, editor.objHeight, buttonText, this::onSelect);
 
         b.imageXOffset = -155;
         b.imageSizeX = 30;
@@ -105,10 +106,12 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
         onSelect();
     }
 
-    public void updateAndDraw()
+    public void update()
     {
         if (!this.init)
             return;
+
+        updated = true;
 
         try
         {
@@ -117,12 +120,19 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
 
             if (!Objects.equals(sel, prevObject))
             {
-                objPropField.set(gameObject, sel);
+                if (objPropField.getType() == int.class && sel instanceof Double)
+                    objPropField.setInt(gameObject, ((Double) sel).intValue());
+                else if (!objPropField.getType().isPrimitive())
+                    objPropField.set(gameObject, objPropField.getType().cast(sel));
+                else
+                    objPropField.set(gameObject, sel);
+
                 gameObject.onPropertySet(this);
                 prevObject = sel;
             }
             else if (!Objects.equals(sel, obj))
             {
+                modified = true;
                 setProperty(obj);
                 prevObject = obj;
                 onPropertySet();
@@ -136,7 +146,17 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
 
     public void onPropertySet() {}
 
-    public abstract String getMetadata();
+    public String getMetadata()
+    {
+        try
+        {
+            return propField.get(this).toString();
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
     public abstract void setMetadata(String data);
 
@@ -147,21 +167,40 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
      */
     public abstract void changeMetadata(int add);
 
+    public void changeMeta(int add)
+    {
+        changeMetadata(add);
+        update();
+    }
+
     public void load() {}
 
     public void cloneProperties(LevelEditorSelector<T> s)
     {
+        if (this == s)
+            return;     // weirdest bug ever
+
         if (s.editor != null)
             this.editor = s.editor;
 
         if (s.objectMenu != null)
             this.objectMenu = s.objectMenu;
 
-        this.baseInit();
+        if (!s.init)
+            this.baseInit();
+
         this.button = getButton();
         this.modified = true;
 
         this.setMetadata(s.getMetadata());
+    }
+
+    public boolean modified()
+    {
+        if (!updated)
+            update();
+
+        return modified;
     }
 
     public void baseInit()
@@ -213,16 +252,18 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
 
     public Object getPropertyBase()
     {
+        if (property == null || objectProperty == null)
+        {
+            System.err.println("Warning: Neither property or objectProperty should be null.");
+            return null;
+        }
+
         if (propField == null)
         {
             try
             {
                 this.propField = this.getClass().getField(property);
                 this.objPropField = this.objCls.getField(objectProperty);
-            }
-            catch (NullPointerException e)
-            {
-                throw new RuntimeException("Either property must be set, or the getProperty function should be overridden.");
             }
             catch (NoSuchFieldException e)
             {

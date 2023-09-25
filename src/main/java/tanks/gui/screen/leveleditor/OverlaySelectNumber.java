@@ -7,7 +7,7 @@ import tanks.gui.TextBox;
 import tanks.gui.screen.Screen;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class OverlayNumberSelector extends ScreenLevelEditorOverlay
+public class OverlaySelectNumber extends ScreenLevelEditorOverlay
 {
     public TextBox textBox;
     public NumberSelector selector;
@@ -37,9 +37,11 @@ public class OverlayNumberSelector extends ScreenLevelEditorOverlay
     }
     );
 
-    public OverlayNumberSelector(Screen previous, ScreenLevelEditor screenLevelEditor, NumberSelector selector)
+    public OverlaySelectNumber(Screen previous, ScreenLevelEditor screenLevelEditor, NumberSelector selector)
     {
         super(previous, screenLevelEditor);
+
+        screenLevelEditor.paused = true;
 
         this.selector = selector;
         textBox = new TextBox(this.centerX, this.centerY + 15, 350, 40, this.selector.title,

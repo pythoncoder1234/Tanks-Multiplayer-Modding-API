@@ -4,6 +4,7 @@ import basewindow.BaseFile;
 import basewindow.InputCodes;
 import basewindow.transformation.Translation;
 import tanks.extension.Extension;
+import tanks.gui.ScreenElement.*;
 import tanks.gui.TextBox;
 import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
@@ -25,6 +26,7 @@ public class Panel
 {
     public static boolean onlinePaused;
     public static Notification currentNotification;
+	public static CenterMessage currentMessage;
 
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
@@ -240,7 +242,6 @@ public class Panel
         {
             started = true;
             this.startTime = System.currentTimeMillis() + splash_duration;
-//			Drawing.drawing.playSound("splash_jingle.ogg");
         }
 
 		if (!started)
@@ -822,6 +823,9 @@ public class Panel
         if (currentNotification != null)
             currentNotification.draw();
 
+		if (currentMessage != null)
+			currentMessage.draw();
+
         ScreenOverlayChat.draw(!(Game.screen instanceof IHiddenChatboxScreen));
 
         if (!(Game.screen instanceof ScreenExit))
@@ -1079,10 +1083,10 @@ public class Panel
 		double partyIpLen = 10;
 		if (ScreenPartyLobby.isClient && !Game.connectedToOnline)
 		{
-			String s = "In party: " + (Game.lastParty.equals("") ? "localhost" : Game.lastParty) + ":" + Game.port;
+			String s = "Connected to party";
 
-			if (!Game.showIP)
-				s = "Connected to party";
+			if (Game.showIP)
+				s = "In party: " + (Game.lastParty.equals("") ? "localhost" : Game.lastParty) + (!Game.lastParty.contains(":") ? ":" + Game.port : "");
 
 			partyIpLen = Game.game.window.fontRenderer.getStringSizeX(0.4, s) + 10 + offset;
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);
@@ -1129,45 +1133,5 @@ public class Panel
             col[0] = 255;
 
         return col;
-    }
-
-    public static class Notification
-    {
-        public ArrayList<String> text;
-        public int duration;
-
-        protected double age = 0;
-
-        public Notification(String text, int duration)
-        {
-            this.text = Drawing.drawing.wrapText(text, 300, 16);
-            this.duration = duration;
-        }
-
-        public void draw()
-        {
-            this.age += Panel.frameFrequency;
-
-            if (this.age > this.duration)
-                Panel.currentNotification = null;
-
-            double linesHeight = Math.max(4, this.text.size()) * 20;
-            double x = Drawing.drawing.interfaceSizeX - 320;
-            double y = Drawing.drawing.interfaceSizeY - Drawing.drawing.statsHeight - linesHeight - 80;
-
-            Drawing.drawing.setColor(0, 0, 0, 128);
-            Drawing.drawing.drawPopup(x + 158, y + linesHeight / 2, 315, linesHeight + 10, 10, 5);
-            Drawing.drawing.setInterfaceFontSize(14);
-
-            for (int i = 0; i < this.text.size(); i++)
-                Drawing.drawing.drawUncenteredInterfaceText(x + 50, y + i * 20 + 12, this.text.get(i));
-
-            Drawing.drawing.setColor(0, 150, 255);
-            Drawing.drawing.fillOval(x + 27, y + 25, 25, 25);
-
-            Drawing.drawing.setColor(255, 255, 255);
-            Drawing.drawing.setInterfaceFontSize(16);
-            Drawing.drawing.drawInterfaceText(x + 27, y + 25, "!");
-        }
     }
 }

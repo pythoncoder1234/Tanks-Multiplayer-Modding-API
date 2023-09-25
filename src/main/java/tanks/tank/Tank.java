@@ -434,10 +434,8 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		boolean hasCollided = false;
 
-        if ((!o.tankCollision && !o.checkForObjects) || o.startHeight >= 1)
+        if ((!(m instanceof Tank ? o.tankCollision : o.bulletCollision) && !o.checkForObjects) || o.startHeight >= 1)
             return false;
-
-		double bounciness = m.bounciness + o.getBounciness();
 
         double horizontalDist = Math.abs(m.posX - o.posX);
         double verticalDist = Math.abs(m.posY - o.posY);
@@ -454,6 +452,8 @@ public abstract class Tank extends Movable implements ISolidObject
 
             if (!o.tankCollision)
                 return false;
+
+			double bounciness = m.bounciness + o.getBounciness();
 
             if (!o.hasLeftNeighbor() && distX <= 0 && distX >= -bound && horizontalDist >= verticalDist)
             {
@@ -500,6 +500,7 @@ public abstract class Tank extends Movable implements ISolidObject
                 this.disabled = this.targetable = true;
         }
 
+		updateSelectors();
         super.preUpdate();
     }
 
@@ -555,7 +556,7 @@ public abstract class Tank extends Movable implements ISolidObject
 				this.unregisterNetworkID();
 			}
 
-			if (this.destroyTimer <= 0 && this.health <= 0)
+			if (this.destroyTimer <= 0 && this.health <= 1e-7)
 			{
 				Drawing.drawing.playSound("destroy.ogg", (float) (Game.tile_size / this.size));
 
@@ -651,7 +652,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		super.update();
 
-		if (this.health <= 0)
+		if (this.health <= 1e-7)
 			this.destroy = true;
 
 		this.checkCollision();
@@ -934,8 +935,6 @@ public abstract class Tank extends Movable implements ISolidObject
 		if (!Game.game.window.drawingShadow)
 			drawAge += Panel.frameFrequency;
 
-		this.updateSelectors();
-
 		this.drawTank(false, false);
 
 		if (this.possessor != null)
@@ -1098,7 +1097,7 @@ public abstract class Tank extends Movable implements ISolidObject
 			Game.effects.add(e);
 		}
 
-		return this.health <= 0;
+		return this.health <= 1e-7;
 	}
 
     public void checkHit(Tank owner, GameObject source)
@@ -1109,7 +1108,7 @@ public abstract class Tank extends Movable implements ISolidObject
             {
                 CrusadePlayer cp = Crusade.currentCrusade.getCrusadePlayer(((IServerPlayerTank) owner).getPlayer());
 
-                if (cp != null && this.health <= 0)
+                if (cp != null && this.health <= 1e-7)
                 {
                     if (this.possessor != null && this.possessor.overridePossessedKills)
 						cp.addKill(this.getTopLevelPossessor());
@@ -1121,7 +1120,7 @@ public abstract class Tank extends Movable implements ISolidObject
 					cp.addItemHit(source);
 			}
 
-			if (owner != null && this instanceof IServerPlayerTank && this.health <= 0)
+			if (owner != null && this instanceof IServerPlayerTank && this.health <= 1e-7)
 			{
 				CrusadePlayer cp = Crusade.currentCrusade.getCrusadePlayer(((IServerPlayerTank) this).getPlayer());
 

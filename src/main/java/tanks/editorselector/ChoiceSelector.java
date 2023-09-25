@@ -3,11 +3,12 @@ package tanks.editorselector;
 import tanks.Game;
 import tanks.GameObject;
 import tanks.gui.ButtonList;
-import tanks.gui.screen.leveleditor.OverlayChoiceSelector;
+import tanks.gui.screen.leveleditor.OverlaySelectChoice;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
-public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEditorSelector<T>
+public class ChoiceSelector<T extends GameObject, V> extends LevelEditorSelector<T>
 {
     public ArrayList<V> choices = new ArrayList<>();
     public V selectedChoice;
@@ -15,12 +16,23 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
     public int selectedIndex = 0;
     public boolean addNoneChoice = false;
 
-    {this.property = "selectedChoice";}
+    @Override
+    public void baseInit()
+    {
+        if (this.init)
+            return;
+
+        this.id = "choice";
+        this.title = "Choice Selector";
+        this.property = "selectedChoice";
+
+        super.baseInit();
+    }
 
     @Override
     public void onSelect()
     {
-        Game.screen = new OverlayChoiceSelector(Game.screen, editor, this);
+        Game.screen = new OverlaySelectChoice(Game.screen, editor, this);
     }
 
     @Override
@@ -32,6 +44,12 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
     @Override
     public void setMetadata(String data)
     {
+        if (addNoneChoice && data.equals(choiceToString(null)))
+        {
+            setChoice(-1);
+            return;
+        }
+
         int i = 0;
         for (V choice : choices)
         {
@@ -47,7 +65,7 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
         int i = 0;
         for (V choice : choices)
         {
-            if (selectedChoice.equals(choice))
+            if (Objects.equals(selectedChoice, choice))
                 setChoice(i);
             i++;
         }
@@ -81,10 +99,15 @@ public abstract class ChoiceSelector<T extends GameObject, V> extends LevelEdito
         if (modify && selectedIndex != index)
             modified = true;
 
-        index = (index + choices.size()) % choices.size();
-
-        if (addNoneChoice && index < -1)
-            index = choices.size() - 1;
+        if (addNoneChoice)
+        {
+            if (index < -1)
+                index += choices.size() + 1;
+            else if (index >= choices.size())
+                index = -1;
+        }
+        else
+            index = (index + choices.size()) % choices.size();
 
         selectedIndex = index;
 

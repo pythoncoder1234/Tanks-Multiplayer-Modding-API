@@ -55,7 +55,6 @@ public class ItemMine extends Item
         Mine m = new Mine(t.posX, t.posY, this.timer, t, this);
         m.setPolarMotion(t.angle, launchSpeed);
 
-        this.setOtherItemsCooldown();
         this.cooldown = this.cooldownBase;
         m.timer = this.timer;
         m.triggeredTimer = this.triggeredTimer;

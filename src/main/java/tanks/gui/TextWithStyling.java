@@ -1,6 +1,7 @@
 package tanks.gui;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Drawing;
 import tanks.network.ISyncable;
 import tanks.network.NetworkUtils;
 import tanks.network.SyncedFieldMap;
@@ -18,6 +19,16 @@ public class TextWithStyling implements ISyncable
     public double colorA;
     public double fontSize;
 
+    public TextWithStyling(String text, double r, double g, double b, double fontSize)
+    {
+        this(text, r, g, b, 255, fontSize);
+    }
+
+    public TextWithStyling(String text, double r, double g, double b)
+    {
+        this(text, r, g, b, 255, 24);
+    }
+
     public TextWithStyling(String text, double r, double g, double b, double a, double fontSize)
     {
         this.text = text;
@@ -31,6 +42,38 @@ public class TextWithStyling implements ISyncable
     public TextWithStyling()
     {
 
+    }
+
+    public void setColor()
+    {
+        Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, this.colorA);
+    }
+
+    public void drawText(double posX, double posY)
+    {
+        setColor();
+        Drawing.drawing.setFontSize(this.fontSize);
+        Drawing.drawing.drawText(posX, posY, this.text);
+    }
+
+    public void drawInterfaceText(double posX, double posY)
+    {
+        setColor();
+        Drawing.drawing.setInterfaceFontSize(this.fontSize);
+        Drawing.drawing.drawInterfaceText(posX, posY, this.text);
+    }
+
+    public TextWithStyling shadowColor()
+    {
+        double[] output = new double[] {this.colorR - 50, this.colorG - 50, this.colorB - 50};
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (output[i] < 0)
+                output[i] += 100;
+        }
+
+        return new TextWithStyling(text, output[0], output[1], output[2], this.colorA, this.fontSize);
     }
 
     @Override

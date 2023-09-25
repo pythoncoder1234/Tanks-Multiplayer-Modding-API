@@ -2,8 +2,10 @@ package tanks.editorselector;
 
 import tanks.Game;
 import tanks.GameObject;
-import tanks.gui.screen.leveleditor.OverlayRotationSelector;
+import tanks.gui.screen.leveleditor.OverlaySelectRotation;
 import tanks.tank.Tank;
+
+import java.util.Objects;
 
 public class RotationSelector<T extends GameObject> extends NumberSelector<T>
 {
@@ -33,15 +35,45 @@ public class RotationSelector<T extends GameObject> extends NumberSelector<T>
         }
     }
 
-    @Override
-    public void updateAndDraw()
+    public void update()
     {
+        if (!this.init)
+            return;
 
+        try
+        {
+            Object sel = getPropertyBase();
+
+            if (!Objects.equals(sel, prevObject))
+            {
+                if (gameObject instanceof Tank)
+                    ((Tank) gameObject).orientation = this.number * Math.PI / 2;
+
+                objPropField.set(gameObject, sel);
+                gameObject.onPropertySet(this);
+                prevObject = sel;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Object getProperty()
+    {
+        return this.number * Math.PI / 2;
+    }
+
+    @Override
+    public String getMetadata()
+    {
+        return super.getMetadata();
     }
 
     @Override
     public void onSelect()
     {
-        Game.screen = new OverlayRotationSelector(Game.screen, editor, this);
+        Game.screen = new OverlaySelectRotation(Game.screen, editor, this);
     }
 }

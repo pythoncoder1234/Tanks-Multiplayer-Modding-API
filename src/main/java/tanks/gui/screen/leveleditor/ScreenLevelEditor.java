@@ -350,7 +350,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	@Override
 	public void update()
 	{
-		if (!initialized)
+ 		if (!initialized)
 			initialize();
 
 		if (Game.game.input.hotbar1.isValid())
@@ -571,10 +571,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				if (currentPlaceable == Placeable.obstacle)
 				{
 					if (mouseObstacle.selectorCount() > 0)
-						mouseObstacle.selectors.get(0).changeMetadata(-1);
+						mouseObstacle.selectors.get(0).changeMeta(-1);
 				}
 				else if (mouseTank.selectorCount() > 0)
-					mouseTank.selectors.get(0).changeMetadata(-1);
+					mouseTank.selectors.get(0).changeMeta(-1);
 			}
 
 			if (Game.game.input.editorNextMeta.isValid())
@@ -584,10 +584,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				if (currentPlaceable == Placeable.obstacle)
 				{
 					if (mouseObstacle.selectorCount() > 0)
-						mouseObstacle.selectors.get(0).changeMetadata(1);
+						mouseObstacle.selectors.get(0).changeMeta(1);
 				}
 				else if (mouseTank.selectorCount() > 0)
-					mouseTank.selectors.get(0).changeMetadata(1);
+					mouseTank.selectors.get(0).changeMeta(1);
 			}
 		}
 
@@ -1155,10 +1155,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						if (currentPlaceable == Placeable.obstacle)
 						{
 							if (mouseObstacle.selectorCount() > 1)
-								mouseObstacle.selectors.get(1).changeMetadata(add);
+								mouseObstacle.selectors.get(1).changeMeta(add);
 						}
 						else if (mouseTank.selectorCount() > 1)
-							mouseTank.selectors.get(1).changeMetadata(add);
+							mouseTank.selectors.get(1).changeMeta(add);
 					}
 
 					if (Game.game.window.touchscreen)
@@ -1265,7 +1265,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 							}
 
 							AtomicInteger i = new AtomicInteger();
-							t.forAllSelectors(c -> c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement())));
+							t.forAllSelectors(c ->
+							{
+								c.editor = this;
+								c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement()));
+							});
 
 							this.undoActions.add(new Action.ActionTank(t, true));
 							Game.movables.add(t);
@@ -1308,6 +1312,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 							Obstacle o = !paste ? Game.registryObstacle.getEntry(obstacleNum).getObstacle(0, 0) : mouseObstacle;
 							o.posX = mouseObstacle.posX;
 							o.posY = mouseObstacle.posY;
+							o.startHeight = mouseObstacleStartHeight;
 
 							AtomicInteger i = new AtomicInteger();
 							o.forAllSelectors(s -> s.cloneProperties(mouseObstacle.selectors.get(i.getAndIncrement())));
@@ -1490,7 +1495,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 	public void save()
 	{
-		cloneSelectorProperties();
+		OverlayObjectMenu.saveSelectors(this);
+
+		if (undoActions.isEmpty() && redoActions.isEmpty() && !optionsEdited)
+			return;
 
 		StringBuilder level = new StringBuilder("{");
 
@@ -1709,7 +1717,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			{
 				o.postOverride();
 
-				if (o.startHeight > Game.tile_size)
+				if (o.startHeight > 1)
 					continue;
 
 				int x = (int) (o.posX / Game.tile_size);
@@ -1729,6 +1737,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		for (Movable m: Game.movables)
 			drawables[m.drawLevel].add(m);
+
+		mouseTank.updateSelectors();
+		mouseObstacle.updateSelectors();
 
 		for (int i = 0; i < drawables.length; i++)
 		{
@@ -2022,7 +2033,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			o.postOverride();
 
-			if (o.startHeight > Game.tile_size)
+			if (o.startHeight > 1)
 				continue;
 
 			if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
@@ -2241,7 +2252,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			LevelEditorSelector<?> s1 = ScreenLevelEditor.selectors.get(s.id);
 			if (s1 != null)
 				s.cloneProperties(s1);
-			else if (s.modified)
+			else if (s.modified())
 				ScreenLevelEditor.selectors.put(s.id, s);
 		});
 	}

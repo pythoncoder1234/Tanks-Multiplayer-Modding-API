@@ -1,6 +1,5 @@
 package tanks;
 
-import tanks.editorselector.TeamSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
@@ -398,7 +397,7 @@ public class Level
 
             o.postOverride();
 
-            if (o.startHeight > Game.tile_size)
+            if (o.startHeight > 1)
                 continue;
 
             if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
@@ -441,7 +440,11 @@ public class Level
 
 				StringBuilder metadata = new StringBuilder();
 				for (int i = 3; i < tank.length; i++)
-					metadata.append(tank[i]).append("-");
+				{
+					metadata.append(tank[i]);
+					if (i < tank.length - 1)
+						metadata.append("-");
+				}
 
                 if (tank.length >= 4)
                     angle = (Math.PI / 2 * Double.parseDouble(tank[3]));
@@ -488,6 +491,8 @@ public class Level
 					else
 						t = Game.registryTank.getEntry(type).getTank(x, y, angle);
 
+					t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
+
 					t.crusadeID = currentCrusadeID;
 					currentCrusadeID++;
 
@@ -508,7 +513,6 @@ public class Level
 				}
 				else
 				{
-					t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 					Game.movables.add(t);
 				}
 			}
@@ -654,7 +658,9 @@ public class Level
 				Team team = this.playerSpawnsTeam.get(spawn);
 
 				if (ScreenPartyHost.isServer)
+				{
 					Game.addPlayerTank(this.includedPlayers.get(i), x, y, angle, team);
+				}
 				else if (!remote)
 				{
 					TankPlayer tank = new TankPlayer(x, y, angle);
@@ -671,13 +677,8 @@ public class Level
 			{
 				TankSpawnMarker t = new TankSpawnMarker("player", this.playerSpawnsX.get(i), this.playerSpawnsY.get(i), this.playerSpawnsAngle.get(i));
 				t.registerSelectors();
-
-				TeamSelector<?> sel = ((TeamSelector<?>) t.selectors.get(0));
-				sel.choices = playerSpawnsTeam;
-
-				if (playerSpawnsTeam.get(i) != null)
-					sel.setMetadata(playerSpawnsTeam.get(i).name);
-
+				t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
+				t.team = this.playerSpawnsTeam.get(i);
 				Game.movables.add(t);
 
 				if (sc != null)
@@ -763,7 +764,7 @@ public class Level
 
             o.postOverride();
 
-            if (o.startHeight > Game.tile_size)
+            if (o.startHeight > 1)
                 continue;
 
             if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)

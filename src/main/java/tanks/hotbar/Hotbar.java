@@ -205,7 +205,7 @@ public class Hotbar
             double ammo2 = (prevLive - cooldownFrac) / max;
 
 			if (live < prevLive)
-				ammo += rechargeTimer / cooldown / max;
+				ammo = Math.min(1, ammo + rechargeTimer / cooldown / max);
 
             if (max <= 0)
                 ammo = 0;
@@ -220,7 +220,7 @@ public class Hotbar
             Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, 1 - ammo2));
 
             Drawing.drawing.setColor(0, 200, 255, a);
-            Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, ammo);
+            Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.max(0, ammo));
 
             Drawing.drawing.setColor(0, 255, 255, a);
             Drawing.drawing.fillInterfaceProgressRect(x, y, 350, 5, Math.min(1, Math.max(0, -ammo2 * max)));
@@ -264,7 +264,7 @@ public class Hotbar
             {
                 Drawing.drawing.setInterfaceFontSize(12);
                 Drawing.drawing.setColor(uses > 0 ? 0 : 255, 0, 0, a);
-                Drawing.drawing.drawInterfaceText(x + 175, y, uses + "");
+                Drawing.drawing.drawInterfaceText(x + 175, y, Math.max(0, uses) + "");
             }
         }
 

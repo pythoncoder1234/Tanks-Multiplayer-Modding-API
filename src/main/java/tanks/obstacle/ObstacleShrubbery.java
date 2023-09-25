@@ -85,7 +85,13 @@ public class ObstacleShrubbery extends Obstacle
 			Drawing.drawing.fillRect(this, this.posX, this.posY, draw_size, draw_size);
 		}
 	}
-	
+
+	@Override
+	public void drawTile(double r, double g, double b, double d, double extra)
+	{
+		super.drawTile(r, g, b, d, extra + 0.1);
+	}
+
 	@Override
 	public void drawForInterface(double x, double y)
 	{

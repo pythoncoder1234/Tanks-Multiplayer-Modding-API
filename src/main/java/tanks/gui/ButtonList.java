@@ -1,7 +1,9 @@
 package tanks.gui;
 
+import basewindow.InputCodes;
 import tanks.BiConsumer;
 import tanks.Drawing;
+import tanks.Game;
 import tanks.Level;
 import tanks.translation.Translation;
 
@@ -44,45 +46,13 @@ public class ButtonList
 
     public BiConsumer<Integer, Integer> reorderBehavior;
 
-    Button next = new Button(Drawing.drawing.interfaceSizeX / 2 + this.objXSpace / 2, Drawing.drawing.interfaceSizeY / 2, this.objWidth, this.objHeight, "Next page", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            page++;
-        }
-    }
-    );
+    Button next = new Button(Drawing.drawing.interfaceSizeX / 2 + this.objXSpace / 2, Drawing.drawing.interfaceSizeY / 2, this.objWidth, this.objHeight, "Next page", () -> page++);
 
-    Button previous = new Button(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace / 2, 0, this.objWidth, this.objHeight, "Previous page", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            page--;
-        }
-    }
-    );
+    Button previous = new Button(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace / 2, 0, this.objWidth, this.objHeight, "Previous page", () -> page--);
 
-    Button first = new Button(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace - this.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, this.objHeight, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            page = 0;
-        }
-    }
-    );
+    Button first = new Button(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace - this.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, this.objHeight, this.objHeight, "", () -> page = 0);
 
-    Button last = new Button(Drawing.drawing.interfaceSizeX / 2 + this.objXSpace + this.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, this.objHeight, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            page = (buttons.size() - 1) / rows / columns;
-        }
-    }
-    );
+    Button last = new Button(Drawing.drawing.interfaceSizeX / 2 + this.objXSpace + this.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, this.objHeight, this.objHeight, "", () -> page = (buttons.size() - 1) / rows / columns);
 
     public ButtonList(ArrayList<Button> buttons, int page, double xOffset, double yOffset)
     {
@@ -207,6 +177,28 @@ public class ButtonList
     {
         while (page * rows * columns >= buttons.size() && page > 0)
             page--;
+
+        if (previous.enabled && Game.game.window.validPressedKeys.contains(InputCodes.KEY_LEFT))
+        {
+            Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_LEFT);
+            Game.game.input.moveLeft.invalidate();
+
+            if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+                first.function.run();
+            else
+                previous.function.run();
+        }
+
+        if (next.enabled && Game.game.window.validPressedKeys.contains(InputCodes.KEY_RIGHT))
+        {
+            Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_RIGHT);
+            Game.game.input.moveRight.invalidate();
+
+            if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+                last.function.run();
+            else
+                next.function.run();
+        }
 
         if (this.arrowsEnabled && this.buttons.size() > 0)
         {

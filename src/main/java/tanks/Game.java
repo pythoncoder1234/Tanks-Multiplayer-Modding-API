@@ -95,8 +95,8 @@ public class Game
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
     public static final String version = "Tanks v1.5.1";
-    public static final String ModAPIVersion = "Mod API v1.1.5";
-    public static final int network_protocol = 48;
+    public static final String ModAPIVersion = "Mod API v1.2.0a";
+    public static final int network_protocol = 51;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;
     public static int tileOffsetY = 0;
@@ -117,6 +117,9 @@ public class Game
 	public static boolean allowAllNumbers = false;
 	public static final boolean cinematic = false;
 	public static boolean recordMode = false;
+
+	public static boolean autocannon = false;
+	public static float cannonSpeed = 1f;
 
 	public static String lastVersion = Game.version;
 
@@ -510,6 +513,7 @@ public class Game
         registerObstacle(ObstacleSnow.class, "snow");
         registerObstacle(ObstacleBoostPanel.class, "boostpanel");
         registerObstacle(ObstacleTeleporter.class, "teleporter");
+		registerObstacle(ObstacleText.class, "text");
 
 //		printObstacleProperties();
 
@@ -1265,6 +1269,8 @@ public class Game
 
         TankNPC.focusedNPC = null;
         resetNetworkIDs();
+
+		Game.player.hotbar = new Hotbar();
 
 		if (!Crusade.crusadeMode)
 		{

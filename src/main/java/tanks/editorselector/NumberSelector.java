@@ -2,9 +2,9 @@ package tanks.editorselector;
 
 import tanks.Game;
 import tanks.GameObject;
-import tanks.gui.screen.leveleditor.OverlayNumberSelector;
+import tanks.gui.screen.leveleditor.OverlaySelectNumber;
 
-public abstract class NumberSelector<T extends GameObject> extends LevelEditorSelector<T>
+public class NumberSelector<T extends GameObject> extends LevelEditorSelector<T>
 {
     public String format = "%.1f";
 
@@ -25,6 +25,12 @@ public abstract class NumberSelector<T extends GameObject> extends LevelEditorSe
     @Override
     public void baseInit()
     {
+        if (this.init)
+            return;
+
+        this.id = "number";
+        this.title = "Number Selector";
+
         super.baseInit();
         this.property = "number";
         this.number = Math.max(this.min, Math.min(this.max, this.number));
@@ -33,7 +39,7 @@ public abstract class NumberSelector<T extends GameObject> extends LevelEditorSe
     @Override
     public void onSelect()
     {
-        Game.screen = new OverlayNumberSelector(Game.screen, editor, this);
+        Game.screen = new OverlaySelectNumber(Game.screen, editor, this);
     }
 
     public String numberString()

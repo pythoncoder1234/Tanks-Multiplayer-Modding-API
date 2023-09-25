@@ -122,7 +122,9 @@ public abstract class GameObject implements Cloneable
         {
             s.gameObject = this;
             s.editor = editor1;
-            s.baseInit();
+
+            if (!s.init)
+                s.baseInit();
 
             if (editor1 != null)
                 s.button = s.getButton();
@@ -141,6 +143,6 @@ public abstract class GameObject implements Cloneable
 
     public void updateSelectors()
     {
-        this.forAllSelectors(LevelEditorSelector::updateAndDraw);
+        this.forAllSelectors(LevelEditorSelector::update);
     }
 }

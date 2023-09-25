@@ -8,7 +8,7 @@ import tanks.gui.Button;
 import tanks.gui.screen.Screen;
 import tanks.obstacle.Obstacle;
 
-public class OverlayRotationSelector extends ScreenLevelEditorOverlay
+public class OverlaySelectRotation extends ScreenLevelEditorOverlay
 {
     public RotationSelector<?> selector;
 
@@ -22,7 +22,7 @@ public class OverlayRotationSelector extends ScreenLevelEditorOverlay
 
     public Button back = new Button(this.centerX, this.centerY, 75, 75, "Done", this::escape);
 
-    public OverlayRotationSelector(Screen previous, ScreenLevelEditor screenLevelEditor, RotationSelector<?> selector)
+    public OverlaySelectRotation(Screen previous, ScreenLevelEditor screenLevelEditor, RotationSelector<?> selector)
     {
         super(previous, screenLevelEditor);
 

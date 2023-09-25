@@ -162,8 +162,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			this.draw3dOutline(255, 255, 255);
 		}
 
-		this.updateSelectors();
-
 		if (this.stackHeight <= 0)
 			return;
 
@@ -418,6 +416,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			LevelEditorSelector<Obstacle> sel = (LevelEditorSelector<Obstacle>) this.selectors.get(saveOrder(i));
 			sel.setMetadata(metadata[i]);
 		}
+
+		if (metadata.length - this.selectorCount() == 1)
+			this.startHeight = Double.parseDouble(metadata[metadata.length - 1]);
 	}
 
 	public static double[] getRandomColor()

@@ -112,8 +112,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
     public double fcPitch = 0;
     public boolean selectedArcBullet = false;
     public double fcArcAim = 0;
-    public double fcAngle = 0;
-    public double fcVel = 0;
     public String introMusic = null;
     public String mainMusic = null;
     public boolean endMusic = true;
@@ -127,8 +125,10 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
     public double z = 0;
     public double yaw = 0;
     public double pitch = 0;
+    public double pitchAdd = 0;
     public double roll = 0;
     protected boolean musicStarted = false;
+
     Button play = new Button(Drawing.drawing.interfaceSizeX - 200, Drawing.drawing.interfaceSizeY - 50, 350, 40, "Play", () ->
     {
         playing = true;
@@ -747,8 +747,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
         if (ScreenPartyHost.isServer && this.shop.isEmpty() && Game.autoReady && !this.ready)
             this.readyButton.function.run();
 
-        this.forceInBounds = true;
-
         if (Game.game.input.zoom.isValid())
         {
             zoomScrolled = false;
@@ -765,9 +763,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             {
                 x = 0;
                 y = 0;
-                z = -0.5;
+                z = -1;
                 yaw = 0;
-                pitch = 0;
+                pitchAdd = Math.PI;
                 roll = 0;
             }
         }
@@ -2092,7 +2090,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             {
                 o.postOverride();
 
-                if (o.startHeight > Game.tile_size)
+                if (o.startHeight > 1)
                     continue;
 
                 int x = (int) (o.posX / Game.tile_size);
@@ -2142,23 +2140,33 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				drawables[m.nameTag.drawLevel].add(m.nameTag);
 		}
 
-		if (Game.enable3d && (Obstacle.draw_size <= 0 || Obstacle.draw_size >= Game.tile_size) && Game.game.window.shapeRenderer.supportsBatching)
+		boolean batchSupported = (Obstacle.draw_size <= 0 || Obstacle.draw_size >= Game.tile_size) && Game.game.window.shapeRenderer.supportsBatching;
+
+		if (Game.enable3d)
+		{
+			for (Obstacle o : Game.obstacles)
+			{
+				if (batchSupported && o.batchDraw)
+					o.draw();
+				else
+					drawables[o.drawLevel].add(o);
+			}
+		}
+		else
 		{
 			for (int i = 0; i < drawables.length; i++)
 			{
 				for (Obstacle o : Game.obstacles)
 				{
-					if (o.drawLevel == i && o.batchDraw)
+					if (o.drawLevel != i)
+						continue;
+
+					if (o.batchDraw)
 						o.draw();
-					else if (o.drawLevel == i)
+					else
 						drawables[i].add(o);
 				}
 			}
-		}
-		else
-		{
-			for (Obstacle o : Game.obstacles)
-				drawables[o.drawLevel].add(o);
 		}
 
 		for (Effect e: Game.effects)
@@ -2749,45 +2757,55 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
     public void updateFreecam()
     {
-        fcAngle = yaw;
+		if (!Game.followingCam)
+			freecam = false;
 
-        boolean up = Game.game.input.moveUp.isPressed();
-        boolean down = Game.game.input.moveDown.isPressed();
-        boolean left = Game.game.input.moveLeft.isPressed();
-        boolean right = Game.game.input.moveRight.isPressed();
-        boolean speed = Game.game.window.pressedKeys.contains(InputCodes.KEY_R);
+        int fwd = Game.game.input.moveUp.isPressed() ? 1 : 0;
+		int bwd = Game.game.input.moveDown.isPressed() ? -1 : 0;
+		int left = Game.game.input.moveLeft.isPressed() ? -1 : 0;
+		int right = Game.game.input.moveRight.isPressed() ? 1 : 0;
+		int speed = Game.game.window.pressedKeys.contains(InputCodes.KEY_R) && fwd != 0 ? 2 : 1;
+		boolean up = Game.game.window.pressedKeys.contains(InputCodes.KEY_SPACE);
+		boolean down = Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT);
+		double move = (fwd + bwd) / (left + (double) right);
+		double angle = (!Double.isNaN(move) ? Math.atan(move) : 0) + yaw;
 
-        if (up || down || left || right)
-            fcVel = speed ? Panel.frameFrequency / 200 : Panel.frameFrequency / 500;
-        else
-            fcVel = 0;
+		if (fwd + bwd == 0 && right != 0)
+			angle += Math.PI;
 
-        if (right)
-            fcAngle -= Math.PI;
-        if (up)
-            fcAngle += Math.PI / 2;
-        if (down)
-            fcAngle -= Math.PI / 2;
+		if (up && down)
+			speed *= 0.5;
 
-        if (fcVel > 0)
-        {
-            x += fcVel * Math.cos(fcAngle);
-            y += fcVel * Math.sin(fcAngle);
-        }
+		if (fwd + bwd == 0 && left + right == 0)
+			speed = 0;
+
+		if (fwd + bwd != 0 && (left != 0 || right != 0))
+			angle += Math.PI / 2;
+
+		if (fwd + bwd == -1)
+		{
+			if (left + right == 1)
+				angle += Math.PI / 2;
+			else if (left + right == -1)
+				angle += Math.PI;
+		}
+
+		if (right != 0 && fwd == 0)
+			angle = -(angle + Math.PI);
+
+		x += Math.cos(angle) * speed * Panel.frameFrequency / 150;
+		y += Math.sin(angle) * speed * Panel.frameFrequency / 150;
 
         yaw = (yaw + (Drawing.drawing.getInterfaceMouseX() - prevCursorX) / 300) % (Math.PI * 2);
-        pitch = (pitch + (Drawing.drawing.getInterfaceMouseY() - prevCursorY) / 300) % (Math.PI * 2);
-//		roll = 0.245 * yaw + 0.03;
+        pitchAdd = (pitchAdd + (Drawing.drawing.getInterfaceMouseY() - prevCursorY) / 300) % (Math.PI * 2);
+		roll = 0.5 * Math.sin(yaw);
+		pitchAdd = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitchAdd));
+		pitch = 0.5 * Math.sin(yaw - 1.5) + pitchAdd;
 
-        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT))
-            roll -= Panel.frameFrequency / 300;
-        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_RIGHT))
-            roll += Panel.frameFrequency / 300;
-
-        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+        if (down)
             z += Panel.frameFrequency / 200;
 
-        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_SPACE))
+        if (up)
             z -= Panel.frameFrequency / 200;
 
         this.prevCursorX = Drawing.drawing.getInterfaceMouseX();

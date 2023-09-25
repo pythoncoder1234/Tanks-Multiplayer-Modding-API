@@ -22,7 +22,69 @@ public class ScreenDebug extends ScreenOptionsOverlay
         else
             Game.screen = new ScreenTitle();
     });
+
     Button test = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "Test stuff", () -> Game.screen = new ScreenTestDebug());
+
+    Button glipping = new Button(this.centerX - this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.game.window.allowGlipping = !Game.game.window.allowGlipping;
+            glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button tankHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showTankHitboxes = !Game.showTankHitboxes;
+            tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button obstacleHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showObstacleHitboxes = !Game.showObstacleHitboxes;
+            obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button pathfinding = new Button(this.centerX + this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showPathfinding = !Game.showPathfinding;
+            pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button allNums = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.allowAllNumbers = !Game.allowAllNumbers;
+
+            allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+    Button autocannon = new Button(this.centerX - this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.autocannon = !Game.autocannon;
+            autocannon.setText("Autocannon: ", Game.autocannon ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
 
     public ScreenDebug()
     {
@@ -54,6 +116,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
         tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        autocannon.setText("Autocannon: ", Game.autocannon ? ScreenOptions.onText : ScreenOptions.offText);
         pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
         allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
     }
@@ -125,13 +188,16 @@ public class ScreenDebug extends ScreenOptionsOverlay
         firstPerson.update();
         invulnerable.update();
         glipping.update();
+        autocannon.update();
         tankIDs.update();
         tankHitboxes.update();
         obstacleHitboxes.update();
         pathfinding.update();
         allNums.update();
         back.update();
-    }    Button invulnerable = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    }
+
+    Button invulnerable = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -163,60 +229,8 @@ public class ScreenDebug extends ScreenOptionsOverlay
         pathfinding.draw();
         tankIDs.draw();
         glipping.draw();
+        autocannon.draw();
         invulnerable.draw();
         back.draw();
-    }    Button glipping = new Button(this.centerX - this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.game.window.allowGlipping = !Game.game.window.allowGlipping;
-            glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button tankHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.showTankHitboxes = !Game.showTankHitboxes;
-            tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button obstacleHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.showObstacleHitboxes = !Game.showObstacleHitboxes;
-            obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button pathfinding = new Button(this.centerX + this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.showPathfinding = !Game.showPathfinding;
-            pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button allNums = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.allowAllNumbers = !Game.allowAllNumbers;
-
-            allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-
-
-
+    }
 }

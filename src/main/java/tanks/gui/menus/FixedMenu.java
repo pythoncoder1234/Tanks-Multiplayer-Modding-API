@@ -28,6 +28,7 @@ public abstract class FixedMenu implements ISyncable, IDrawable
     public int drawLevel = 3;
 
     public TextWithStyling styling = new TextWithStyling();
+    public TextWithStyling shadowColor = null;
     public double glow = 0;
 
     public double age = 0;

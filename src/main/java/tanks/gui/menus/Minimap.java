@@ -10,6 +10,8 @@ import tanks.tank.Tank;
 
 public class Minimap extends FixedMenu
 {
+    public Tank focusedTank;
+
     public boolean draggable = false;
     public Level level = Game.currentLevel;
     public int posX = (int) (Panel.windowWidth - sizeX);
@@ -39,8 +41,10 @@ public class Minimap extends FixedMenu
     @Override
     public void draw()
     {
-        if (!enabled)
+        if (!enabled || Game.obstacleGrid == null)
             return;
+
+        focusedTank = ScreenGame.focusedTank();
 
         double colA = 255 * (Obstacle.draw_size / Game.tile_size);
         int brightness = darkMode ? 0 : 255;
@@ -50,7 +54,7 @@ public class Minimap extends FixedMenu
         brightness = darkMode ? 255 : 0;
         Drawing.drawing.setColor(brightness, brightness, brightness, colA);
         ModAPI.fixedText.drawString(posX + 40, posY + 10, 0.5, 0.5, "Minimap (x" + scale + ")");
-        ModAPI.fixedText.drawString(posX + 30, posY + 210, 0.5, 0.5, "Mode: " + (colorfulObstacles ? "Obstacles" : "Tanks"));
+        ModAPI.fixedText.drawString(posX + 30, posY + 205, 0.5, 0.5, "Mode: " + (colorfulObstacles ? "Obstacles" : "Tanks"));
 
         if (forceDisabled)
         {
@@ -65,10 +69,14 @@ public class Minimap extends FixedMenu
         }
 
         double drawSize = 4 * scale * (Obstacle.draw_size / Game.tile_size);
+        int cX = (int) ((focusedTank.posX + panOffsetX) / Game.tile_size);
+        int cY = (int) ((focusedTank.posY + panOffsetY) / Game.tile_size);
+        int tX = (int) (25 / scale);
+        int tY = tX * sizeX / sizeY;
 
-        for (int gridX = 0; gridX < Game.currentSizeX; gridX++)
+        for (int gridX = Math.max(0, cX - tX); gridX < Math.min(Game.currentSizeX, cX + tX); gridX++)
         {
-            for (int gridY = 0; gridY < Game.currentSizeY; gridY++)
+            for (int gridY = Math.max(0, cY - tY); gridY < Math.min(Game.currentSizeY, cY + tY); gridY++)
             {
                 Obstacle o = Game.obstacleGrid[gridX][gridY];
                 if (o == null || o.startHeight >= 1)
@@ -79,8 +87,8 @@ public class Minimap extends FixedMenu
 
                 if (centered)
                 {
-                    x = (posX + 95) + o.posX / 13 * scale - Game.playerTank.posX / 13 * scale;
-                    y = (posY + 110) + o.posY / 13 * scale - Game.playerTank.posY / 13 * scale;
+                    x = (posX + 95) + o.posX / 13 * scale - focusedTank.posX / 13 * scale;
+                    y = (posY + 110) + o.posY / 13 * scale - focusedTank.posY / 13 * scale;
                 }
                 else
                 {
@@ -115,8 +123,8 @@ public class Minimap extends FixedMenu
 
             if (centered)
             {
-                x = (posX + 95) + m.posX / 13 * scale - Game.playerTank.posX / 13 * scale;
-                y = (posY + 110) + m.posY / 13 * scale - Game.playerTank.posY / 13 * scale;
+                x = (posX + 95) + m.posX / 13 * scale - focusedTank.posX / 13 * scale;
+                y = (posY + 110) + m.posY / 13 * scale - focusedTank.posY / 13 * scale;
             }
             else
             {
@@ -135,16 +143,16 @@ public class Minimap extends FixedMenu
                     else
                         Drawing.drawing.setColor(t.colorR, t.colorG, t.colorB, colA);
 
-                    if (m.equals(Game.playerTank))
+                    if (m.equals(focusedTank))
                     {
                         if (!centered)
                         {
-                            if (!Game.playerTank.destroy || ScreenGame.finished || ScreenGame.finishedQuick)
+                            if (!focusedTank.destroy || ScreenGame.finished || ScreenGame.finishedQuick)
                                 Drawing.drawing.setColor(0, 255, 0, colA);
                             else
                                 Drawing.drawing.setColor(255, 0, 0, colA);
 
-                            ModAPI.fixedShapes.drawImage(x, y, 12, 10, "/images/icons/vertical_arrow_white.png", Game.playerTank.angle - ModAPI.up, false);
+                            ModAPI.fixedShapes.drawImage(x, y, 12, 10, "/images/icons/vertical_arrow_white.png", focusedTank.angle - ModAPI.up, false);
                         }
                     }
                     else
@@ -179,8 +187,8 @@ public class Minimap extends FixedMenu
         }
 
         Drawing.drawing.setColor(0, 255, 0, colA);
-        if (centered && !Game.playerTank.destroy)
-            ModAPI.fixedShapes.drawImage(posX + sizeX / 2.0, posY + sizeY / 2.0, 12, 10, "/images/icons/vertical_arrow_white.png", Game.playerTank.angle - ModAPI.up, false);
+        if (centered && !focusedTank.destroy)
+            ModAPI.fixedShapes.drawImage(posX + sizeX / 2.0, posY + sizeY / 2.0, 12, 10, "/images/icons/vertical_arrow_white.png", focusedTank.angle - ModAPI.up, false);
     }
 
     @Override
@@ -222,78 +230,78 @@ public class Minimap extends FixedMenu
             }
         }
 
-        if (Game.game.input.minimapChangeTheme.isValid())
+        if (Game.game.input.minimapTheme.isValid())
         {
-            Game.game.input.minimapChangeTheme.invalidate();
+            Game.game.input.minimapTheme.invalidate();
             darkMode = !darkMode;
         }
 
-        if (Game.game.input.minimapChangeType.isValid())
+        if (Game.game.input.minimapType.isValid())
         {
-            Game.game.input.minimapChangeType.invalidate();
+            Game.game.input.minimapType.invalidate();
             colorfulObstacles = !colorfulObstacles;
         }
 
-        if (Game.game.input.minimapIncreaseScale.isValid() && scale < 3)
+        if (Game.game.input.minimapZoomIn.isValid() && scale < 3)
         {
-            Game.game.input.minimapIncreaseScale.invalidate();
+            Game.game.input.minimapZoomIn.invalidate();
             scale += 0.25;
         }
 
-        if (Game.game.input.minimapDecreaseScale.isValid() && scale > 0.25)
+        if (Game.game.input.minimapZoomOut.isValid() && scale > 0.25)
         {
-            Game.game.input.minimapDecreaseScale.invalidate();
+            Game.game.input.minimapZoomOut.invalidate();
             scale -= 0.25;
         }
 
-        if (Game.game.input.minimapPanUp.isValid())
+        if (Game.game.input.minimapPanUp.isValid() && panOffsetY > -Game.tile_size / 13)
         {
             Game.game.input.minimapPanUp.invalidate();
 
             if (centered)
             {
                 centered = false;
-                panOffsetX = Game.playerTank.posX / 13 * scale;
-                panOffsetY = Game.playerTank.posY / 13 * scale;
+                panOffsetX = focusedTank.posX / 13 * scale;
+                panOffsetY = focusedTank.posY / 13 * scale;
             }
             panOffsetY -= panSpeed * scale;
         }
 
-        if (Game.game.input.minimapPanDown.isValid())
+        if (Game.game.input.minimapPanDown.isValid() && panOffsetY < Game.currentSizeY * Game.tile_size / 13 * scale)
         {
             Game.game.input.minimapPanDown.invalidate();
 
             if (centered)
             {
                 centered = false;
-                panOffsetX = Game.playerTank.posX / 13 * scale;
-                panOffsetY = Game.playerTank.posY / 13 * scale;
+                panOffsetX = focusedTank.posX / 13 * scale;
+                panOffsetY = focusedTank.posY / 13 * scale;
             }
             panOffsetY += panSpeed * scale;
         }
 
-        if (Game.game.input.minimapPanRight.isValid())
+        if (Game.game.input.minimapPanRight.isValid() && panOffsetX < Game.currentSizeX * Game.tile_size / 13 * scale)
         {
             Game.game.input.minimapPanRight.invalidate();
 
             if (centered)
             {
                 centered = false;
-                panOffsetX = Game.playerTank.posX / 13 * scale;
-                panOffsetY = Game.playerTank.posY / 13 * scale;
+                panOffsetX = focusedTank.posX / 13 * scale;
+                panOffsetY = focusedTank.posY / 13 * scale;
             }
             panOffsetX += panSpeed * scale;
         }
 
-        if (Game.game.input.minimapPanLeft.isValid())
+        if (Game.game.input.minimapPanLeft.isValid() && panOffsetX > -Game.tile_size / 13)
         {
             Game.game.input.minimapPanLeft.invalidate();
 
             if (centered)
             {
                 centered = false;
-                panOffsetX = Game.playerTank.posX / 13 * scale;
-                panOffsetY = Game.playerTank.posY / 13 * scale;
+                panOffsetX = focusedTank.posX / 13 * scale;
+                panOffsetY = focusedTank.posY / 13 * scale;
             }
             panOffsetX -= panSpeed * scale;
         }

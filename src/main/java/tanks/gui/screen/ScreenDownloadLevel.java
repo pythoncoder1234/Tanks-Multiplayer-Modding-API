@@ -99,7 +99,7 @@ public class ScreenDownloadLevel extends ScreenOnline implements ILevelPreviewSc
 
                 o.postOverride();
 
-                if (o.startHeight > Game.tile_size)
+                if (o.startHeight > 1)
                     continue;
 
                 int x = (int) (o.posX / Game.tile_size);

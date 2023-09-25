@@ -38,7 +38,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
     {
         super.draw();
 
-        Drawing.drawing.setColor(50, 50, 50);
+        Drawing.drawing.setColor(255, 255, 255);
         Drawing.drawing.drawModel(shoeModel, this.posX, this.posY, Math.max(10, this.posZ), size, size, size, this.getSpeed() > 0 ? this.getPolarDirection() : this.orientation);
         Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, Math.max(10, this.posZ), size, size, size, this.angle);
     }

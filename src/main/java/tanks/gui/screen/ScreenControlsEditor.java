@@ -56,7 +56,6 @@ public class ScreenControlsEditor extends ScreenOptionsOverlay
 
     public ScreenControlsEditor()
     {
-
         next.enabled = page < page_count - 1;
         previous.enabled = page > 0;
 

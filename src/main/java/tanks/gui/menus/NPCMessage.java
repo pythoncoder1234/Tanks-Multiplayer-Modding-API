@@ -29,7 +29,7 @@ public class NPCMessage extends FixedMenu
         Drawing.drawing.setColor(120, 66, 18, 200);
         Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY * 0.2, Math.max(1300, Game.game.window.absoluteWidth * 0.8), Drawing.drawing.interfaceSizeY / 3);
         Drawing.drawing.setColor(175, 96, 26, 200);
-        Drawing.drawing.drawInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY * 0.2, Math.max(1300, Game.game.window.absoluteWidth * 0.8), Drawing.drawing.interfaceSizeY / 3, 10);
+        Drawing.drawing.drawInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY * 0.2, Math.max(1300, Game.game.window.absoluteWidth * 0.8) + 20, Drawing.drawing.interfaceSizeY / 3 + 20, 10);
 
         double prevAngle = tank.angle;
         tank.angle = 0;

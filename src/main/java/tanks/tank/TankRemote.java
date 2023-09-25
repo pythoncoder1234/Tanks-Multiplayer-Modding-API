@@ -109,7 +109,7 @@ public class TankRemote extends Tank
         this.posY = this.posY - this.interpolatedOffY * (interpolationTime - interpolatedProgress) / interpolationTime;
         this.angle += angleRate / interpolationTime * Panel.frameFrequency;
 
-        if (this.interpolatedProgress >= this.interpolationTime)
+        if (this.interpolatedProgress >= this.interpolationTime || this.interpolatedProgress > 10)
             this.angle = this.trueAngle;
 
         this.localAge += Panel.frameFrequency;

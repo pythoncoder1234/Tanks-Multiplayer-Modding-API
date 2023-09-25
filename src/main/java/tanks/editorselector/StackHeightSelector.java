@@ -1,7 +1,7 @@
 package tanks.editorselector;
 
 import tanks.Game;
-import tanks.gui.screen.leveleditor.OverlayBlockHeight;
+import tanks.gui.screen.leveleditor.OverlaySelectBlockHeight;
 import tanks.obstacle.Obstacle;
 
 public class StackHeightSelector extends NumberSelector<Obstacle>
@@ -24,6 +24,6 @@ public class StackHeightSelector extends NumberSelector<Obstacle>
     @Override
     public void onSelect()
     {
-        Game.screen = new OverlayBlockHeight(Game.screen, editor, this);
+        Game.screen = new OverlaySelectBlockHeight(Game.screen, editor, this);
     }
 }

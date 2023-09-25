@@ -24,7 +24,9 @@ public class ScreenOverlayControls
 
     public Button editor = new Button(Drawing.drawing.interfaceSizeX / 6, Drawing.drawing.interfaceSizeY / 2 - 90, this.objWidth, this.objHeight, "Editor", () -> Game.screen = new ScreenControlsEditor());
 
-    Button reset = new Button(Drawing.drawing.interfaceSizeX / 6, Drawing.drawing.interfaceSizeY / 2 - 10, this.objWidth, this.objHeight, "Reset controls", () -> Game.screen = new ScreenResetControls()
+    public Button minimap = new Button(Drawing.drawing.interfaceSizeX / 6, Drawing.drawing.interfaceSizeY / 2 - 30, this.objWidth, this.objHeight, "Minimap", () -> Game.screen = new ScreenControlsMinimap());
+
+    Button reset = new Button(Drawing.drawing.interfaceSizeX / 6, Drawing.drawing.interfaceSizeY / 2 + 45, this.objWidth, this.objHeight, "Reset controls", () -> Game.screen = new ScreenResetControls()
     );
 
     public static final String mouseTargetText = "Mouse target: ";
@@ -117,6 +119,7 @@ public class ScreenOverlayControls
         tank.enabled = !(s instanceof ScreenControlsTank);
         hotbar.enabled = !(s instanceof ScreenControlsHotbar);
         editor.enabled = !(s instanceof ScreenControlsEditor);
+        minimap.enabled = !(s instanceof ScreenControlsMinimap);
 
         lastControlsScreen = Game.screen;
 
@@ -125,6 +128,7 @@ public class ScreenOverlayControls
         tank.update();
         hotbar.update();
         editor.update();
+        minimap.update();
         reset.update();
         back.update();
 
@@ -146,13 +150,13 @@ public class ScreenOverlayControls
         Drawing.drawing.setColor(255, 255, 255);
         Drawing.drawing.setInterfaceFontSize(Game.screen.titleSize);
         Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 6, Drawing.drawing.interfaceSizeY / 2 - 380, "Controls");
-        Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 6, Drawing.drawing.interfaceSizeY / 2 + 85, "Input options");
 
         game.draw();
         camera.draw();
         tank.draw();
         hotbar.draw();
         editor.draw();
+        minimap.draw();
         reset.draw();
         back.draw();
 

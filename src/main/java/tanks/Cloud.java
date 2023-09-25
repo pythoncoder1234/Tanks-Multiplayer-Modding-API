@@ -2,11 +2,12 @@ package tanks;
 
 import basewindow.IBatchRenderableObject;
 
-public class Cloud implements IBatchRenderableObject
+public class Cloud implements IDrawable, IBatchRenderableObject
 {
+    // todo: fix bug
     public double posX, posY, posZ;
     public double vX, vY, vZ;
-    public double drawLevel = 8;
+    public int drawLevel = 8;
 
     public double[] relativeX = new double[5];
     public double[] relativeY = new double[5];

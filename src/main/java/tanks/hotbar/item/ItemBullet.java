@@ -119,7 +119,6 @@ public class ItemBullet extends Item
 				else
 					this.fractionUsed++;
 
-				this.setOtherItemsCooldown();
 				this.cooldown = this.cooldownBase;
 
 				double off = baseOff + (Math.random() - 0.5) * Math.toRadians(this.accuracy);

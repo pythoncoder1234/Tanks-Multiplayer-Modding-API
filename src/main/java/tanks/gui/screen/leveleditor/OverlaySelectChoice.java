@@ -8,7 +8,7 @@ import tanks.gui.screen.Screen;
 
 import java.util.ArrayList;
 
-public class OverlayChoiceSelector extends ScreenLevelEditorOverlay
+public class OverlaySelectChoice extends ScreenLevelEditorOverlay
 {
     public ChoiceSelector<?, ?> selector;
     public ArrayList<Button> choiceButtons = new ArrayList<>();
@@ -16,7 +16,7 @@ public class OverlayChoiceSelector extends ScreenLevelEditorOverlay
     public Button back = new Button(this.centerX, this.centerY + 300, 350, 40, "Done", this::escape
     );
 
-    public <V> OverlayChoiceSelector(Screen previous, ScreenLevelEditor screenLevelEditor, ChoiceSelector<?, V> selector)
+    public <V> OverlaySelectChoice(Screen previous, ScreenLevelEditor screenLevelEditor, ChoiceSelector<?, V> selector)
     {
         super(previous, screenLevelEditor);
 

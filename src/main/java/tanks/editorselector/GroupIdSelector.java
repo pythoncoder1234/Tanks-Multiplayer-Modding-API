@@ -9,7 +9,7 @@ public class GroupIdSelector extends NumberSelector<Obstacle>
     {
         this.id = "group_id";
         this.title = "Group ID";
-        this.objectProperty = "group_id";
+        this.objectProperty = "groupID";
 
         this.keybind = Game.game.input.editorGroupID;
         this.format = "%.0f";

@@ -72,6 +72,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
 
+		this.baseModel = TankModels.arrow.base;
+
 		if (enableDestroyCheat)
 		{
 			this.showName = true;
@@ -107,7 +109,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.teamSelector.id = "player_team";
         this.teamSelector.defaultTeamIndex = 0;
 
-        if (!this.teamSelector.modified)
+        if (!this.teamSelector.modified())
             this.teamSelector.setChoice(0);
     }
 
@@ -116,10 +118,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
     {
         super.draw();
 
-        if (!Game.angledView && !Game.followingCam)
-            return;
-
-        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.setColor(255, 255, 255);
         Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
     }
 

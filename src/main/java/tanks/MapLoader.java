@@ -392,7 +392,7 @@ public class MapLoader
 
                 o.postOverride();
 
-                if (o.startHeight > Game.tile_size)
+                if (o.startHeight > 1)
                     continue;
 
                 if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
@@ -562,7 +562,7 @@ public class MapLoader
 
                 o.postOverride();
 
-                if (o.startHeight > Game.tile_size)
+                if (o.startHeight > 1)
                     continue;
 
                 if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)

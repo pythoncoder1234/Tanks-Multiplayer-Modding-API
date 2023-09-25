@@ -113,7 +113,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
 
         this.angle += angleRate / interpolationTime * Panel.frameFrequency;
 
-        if (this.interpolatedProgress >= this.interpolationTime)
+        if (this.interpolatedProgress >= this.interpolationTime || this.interpolatedProgress > 10)
             this.angle = this.trueAngle;
 
         if (this.hasCollided)
