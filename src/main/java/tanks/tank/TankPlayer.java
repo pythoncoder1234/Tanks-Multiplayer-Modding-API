@@ -46,6 +46,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
 	protected double prevDistSq;
 
+	public boolean headlight = false;
+
 	protected long lastTrace = 0;
 	protected static boolean lockTrace = false;
 
@@ -71,8 +73,6 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.secondaryColorR = Game.player.turretColorR;
         this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
-
-		this.baseModel = TankModels.arrow.base;
 
 		if (enableDestroyCheat)
 		{
@@ -114,15 +114,6 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
     }
 
     @Override
-    public void draw()
-    {
-        super.draw();
-
-        Drawing.drawing.setColor(255, 255, 255);
-        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
-    }
-
-    @Override
     public void update()
     {
         boolean up = Game.game.input.moveUp.isPressed();
@@ -132,6 +123,18 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         boolean trace = Game.game.input.aim.isPressed();
 
         boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
+
+		if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_H))
+		{
+			Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_H);
+
+			headlight = !headlight;
+			double multiplier = headlight ? (1 - Level.currentLightIntensity) * 4.25 : 0;
+			this.glowSize = 0;
+			this.lightSize = 10 * multiplier;
+			this.lightIntensity = multiplier;
+			this.luminance = multiplier / 2;
+		}
 
 		if (Game.game.input.aim.isValid())
 		{

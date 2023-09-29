@@ -46,12 +46,6 @@ public class FriendsMixin
 		}
 
 		@Override
-		public void onGameOverlayActivated(boolean active)
-		{
-
-		}
-
-		@Override
 		public void onGameLobbyJoinRequested(SteamID steamIDLobby, SteamID steamIDFriend)
 		{
 

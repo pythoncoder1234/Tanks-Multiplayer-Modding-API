@@ -419,6 +419,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 		if (metadata.length - this.selectorCount() == 1)
 			this.startHeight = Double.parseDouble(metadata[metadata.length - 1]);
+
+		this.updateSelectors();
 	}
 
 	public static double[] getRandomColor()

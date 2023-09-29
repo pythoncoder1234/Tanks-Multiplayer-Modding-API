@@ -77,7 +77,7 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
             OverlayObjectMenu.saveSelectors(editor);
         }
 
-        allowClose = editor.undoActions.isEmpty() && !editor.optionsEdited;
+        allowClose = editor.undoActions.isEmpty() && !editor.modified;
     }
 
     @Override

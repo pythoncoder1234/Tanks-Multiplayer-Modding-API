@@ -34,6 +34,7 @@ public class ItemBullet extends Item
 
 	public double fractionUsed = 0;
 	public int liveBullets;
+	public int prevLive;
 	public String className;
 
 	public Class<? extends Bullet> bulletClass = Bullet.class;

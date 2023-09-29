@@ -18,9 +18,12 @@ public class OverlaySelectString extends ScreenLevelEditorOverlay
     {
         super(previous, screenLevelEditor);
 
+        screenLevelEditor.paused = true;
         this.selector = selector;
+        this.textBox.inputText = selector.string.replaceAll("§", "\\\\u00a7");
         this.textBox.maxChars = 50;
-        this.textBox.allowAll = true;
+        this.textBox.enableCaps = true;
+        this.textBox.enablePunctuation = true;
     }
 
     @Override
@@ -47,13 +50,17 @@ public class OverlaySelectString extends ScreenLevelEditorOverlay
 
     public void submit()
     {
-        if (textBox.inputText.length() == 0 || textBox.inputText.equals(textBox.previousInputText))
+        if (textBox.inputText.isEmpty() || textBox.inputText.equals(textBox.previousInputText))
         {
             textBox.inputText = textBox.previousInputText;
             return;
         }
 
+        String text = textBox.inputText;
+        if (text.matches(".*\\\\u00a7[\\d{12}].*"))
+            text = text.replaceAll("\\\\u00a7", "§");
+
         this.selector.modified = true;
-        this.selector.setMetadata(textBox.inputText);
+        this.selector.setMetadata(text);
     }
 }

@@ -545,7 +545,7 @@ public class Game
         registerTank(TankLightPink.class, "lightpink", 1.0 / 10);
         registerTank(TankBoss.class, "boss", 1.0 / 40, true);
         registerTank(TankTrain.class, "train", 0);
-        registerTank(TankShoe.class, "shoe", 0);
+//        registerTank(TankShoe.class, "shoe", 0);
 
         registerBullet(Bullet.class, Bullet.bullet_name, "bullet_normal.png");
         registerBullet(BulletFlame.class, BulletFlame.bullet_name, "bullet_flame.png");

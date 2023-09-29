@@ -1,10 +1,12 @@
 package tanks;
 
 import basewindow.IBatchRenderableObject;
+import tanks.gui.screen.ScreenGame;
 
 public class Cloud implements IDrawable, IBatchRenderableObject
 {
-    // todo: fix bug
+    public static int cloudRange = 100;
+
     public double posX, posY, posZ;
     public double vX, vY, vZ;
     public int drawLevel = 8;
@@ -12,50 +14,57 @@ public class Cloud implements IDrawable, IBatchRenderableObject
     public double[] relativeX = new double[5];
     public double[] relativeY = new double[5];
     public double[] relativeZ = new double[5];
+    public double[] sizeX = new double[5];
+    public double[] sizeY = new double[5];
+    public double[] sizeZ = new double[5];
 
-    public double size = Math.random() * 300 + 100;
-    public double sizeZ = Math.random() * 100 + 500;
     private boolean redrawn;
 
-    public Cloud(double x, double y)
+    public Cloud()
     {
-        this.posX = x;
-        this.posY = y;
-        this.posZ = Math.random() * 100 + 500;
+        if (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing)
+            this.posX = -1000;
+        else
+            this.posX = (Math.random() - 0.5) * (Game.currentSizeX + cloudRange) * Game.tile_size;
 
-        this.vX = Game.dirX[Level.windDirection];
-        this.vY = Game.dirY[Level.windDirection];
-        this.vZ = 0;
+        this.posY = (Math.random() - 0.5) * (Game.currentSizeY + cloudRange) * Game.tile_size;
+        this.posZ = Math.random() * 150 + 800;
 
-        for (int i = 0; i < 5; i++)
+        this.vX = 0.5;
+
+        for (int i = 0; i < this.relativeY.length; i++)
         {
-            this.relativeX[i] = Math.random() * size * 0.75;
-            this.relativeY[i] = Math.random() * size * 0.75;
-            this.relativeZ[i] = Math.random() * size / 2;
+            this.sizeX[i] = Math.random() * 500 + 200;
+            this.sizeY[i] = Math.random() * 500 + 200;
+            this.sizeZ[i] = Math.random() * 50 + 10;
+
+            this.relativeX[i] = Math.random() * sizeX[i] * 0.75;
+            this.relativeY[i] = Math.random() * sizeY[i] * 0.75;
+            this.relativeZ[i] = Math.random() * sizeZ[i] / 2;
         }
     }
 
     public void draw()
     {
-        if (!Game.followingCam || !Game.enable3d || !Drawing.drawing.movingCamera || Game.game.window.drawingShadow)
+        if (!Game.followingCam || !Game.enable3d || !Drawing.drawing.movingCamera)
             return;
 
-        for (int i = 0; i < this.relativeY.length; i++)
+        double fade = Math.min(1 - (Math.max(0, (this.posX - Game.currentSizeX * Game.tile_size) / 2000)), Math.min(0, this.posX) / 1000 + 1);
+
+        for (int i = 0; i < relativeY.length; i++)
         {
-            Drawing.drawing.setColor(255 * Level.currentLightIntensity, 255 * Level.currentLightIntensity, 255 * Level.currentLightIntensity, 255);
-            Drawing.drawing.fillBox(this, this.relativeX[i], this.relativeY[i], this.posZ + this.relativeZ[i], size, size, sizeZ, (byte) 0);
+            int brightness = (int) (255 * (1.25 - this.relativeZ[i] / 70) * Panel.skylight);
+            Drawing.drawing.setColor(brightness, brightness, brightness, 128 * fade);
+            Drawing.drawing.fillBox(this, posX + relativeX[i], posY + relativeY[i], posZ + relativeZ[i], sizeX[i], sizeY[i], sizeZ[i], (byte) 0);
         }
     }
 
     public void update()
     {
-        for (int i = 0; i < this.relativeX.length; i++)
-        {
-            this.posX += Game.dirX[Level.windDirection] * Panel.frameFrequency;
-            this.posY += Game.dirY[Level.windDirection] * Panel.frameFrequency;
-        }
+        posX += vX * Panel.frameFrequency;
+        posY += vY * Panel.frameFrequency;
 
-        if (this.relativeX[0] < -Game.tile_size * 5 || this.relativeX[0] > Game.currentSizeX * Game.tile_size * 5)
+        if (relativeX[0] < -Game.tile_size * 5 || relativeX[0] > (Game.currentSizeX + 5) * Game.tile_size)
             Game.removeClouds.add(this);
     }
 
@@ -74,12 +83,12 @@ public class Cloud implements IDrawable, IBatchRenderableObject
     @Override
     public boolean wasRedrawn()
     {
-        return this.redrawn;
+        return redrawn;
     }
 
     @Override
     public void setRedrawn(boolean b)
     {
-        this.redrawn = b;
+        redrawn = b;
     }
 }

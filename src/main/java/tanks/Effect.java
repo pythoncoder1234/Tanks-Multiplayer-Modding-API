@@ -745,7 +745,7 @@ public class Effect extends Movable implements IDrawableWithGlow
         }
         else if (this.type == EffectType.ray)
         {
-            drawing.setColor(255, 255, 255, 50, 1);
+            drawing.setColor(255, 255, 255, Math.min(0.5, 1 - Level.currentLightIntensity) * 150, 1);
 
             if (Game.enable3d)
                 drawing.fillGlow(this.posX, this.posY, this.posZ, 24, 24, false);

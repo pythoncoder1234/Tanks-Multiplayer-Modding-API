@@ -33,7 +33,7 @@ public class OverlayEditTeam extends ScreenLevelEditorOverlay
                 }
             }
 
-            if (teamName.inputText.length() == 0 || duplicate)
+            if (teamName.inputText.isEmpty() || duplicate)
                 teamName.inputText = team.name;
             else
                 team.name = teamName.inputText;
@@ -87,9 +87,7 @@ public class OverlayEditTeam extends ScreenLevelEditorOverlay
     );
 
     public Button teamColor = new Button(this.centerX, this.centerY, this.objWidth, this.objHeight, "Team color", () ->
-        {
-            Game.screen = new OverlayEditTeamColor(Game.screen, editor, team);
-        }
+            Game.screen = new OverlayEditTeamColor(Game.screen, editor, team)
     );
 
     public void update()
@@ -106,6 +104,7 @@ public class OverlayEditTeam extends ScreenLevelEditorOverlay
     public void draw()
     {
         super.draw();
+
         back.draw();
         teamName.draw();
         teamColor.draw();

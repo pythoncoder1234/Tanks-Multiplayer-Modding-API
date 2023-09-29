@@ -761,35 +761,33 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
             if (freecam)
             {
-                x = 0;
-                y = 0;
-                z = -1;
-                yaw = 0;
-                pitchAdd = Math.PI;
-                roll = 0;
+                x = -0.08;
+                y = 0.22;
+                z = -0.07;
+                yaw = -0.4;
+                pitchAdd = 1;
+                roll = -0.27;
             }
         }
 
         showDefaultMouse = finishedQuick || paused || !playing || shopScreen || npcShopScreen || (!Game.followingCam && !Game.angledView);
         Game.game.window.moveMouseToOtherSide = !showDefaultMouse;
 
-        if (windChangeTimer <= 0)
+        if (playing && !paused)
         {
-            windChangeTimer = 0.8 * Level.windDirectionChangeTime + 0.2 * Math.random() * Level.windDirectionChangeTime;
-            Level.windDirection = (int) (Math.random() * 4);
+			if (randomTickCounter <= 0)
+			{
+				randomTickCounter = 200;
+
+				if (Math.random() < 0.2)
+					Game.clouds.add(new Cloud());
+			}
+
+			randomTickCounter -= Panel.frameFrequency;
         }
 
-        if (randomTickCounter <= 0)
-        {
-            randomTickCounter = 10;
 
-            if (Math.random() < 0.02)
-                Game.clouds.add(new Cloud(0, 0));
-        }
-
-        randomTickCounter -= Panel.frameFrequency;
-
-        windChangeTimer -= Panel.frameFrequency;
+//        windChangeTimer -= Panel.frameFrequency;
 
         if (playing)
         {
@@ -1078,6 +1076,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			{
                 Game.game.window.setCursorLocked(Game.followingCam);
                 Game.game.window.setShowCursor(!Panel.showMouseTarget);
+
+				this.prevCursorX = Drawing.drawing.getInterfaceMouseX();
+				this.prevCursorY = Drawing.drawing.getInterfaceMouseY();
 			}
 
 			Game.game.input.pause.invalidate();
@@ -2764,37 +2765,25 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		int bwd = Game.game.input.moveDown.isPressed() ? -1 : 0;
 		int left = Game.game.input.moveLeft.isPressed() ? -1 : 0;
 		int right = Game.game.input.moveRight.isPressed() ? 1 : 0;
-		int speed = Game.game.window.pressedKeys.contains(InputCodes.KEY_R) && fwd != 0 ? 2 : 1;
+		double speed = Game.game.window.pressedKeys.contains(InputCodes.KEY_R) && fwd != 0 ? 2 : 1;
 		boolean up = Game.game.window.pressedKeys.contains(InputCodes.KEY_SPACE);
 		boolean down = Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT);
-		double move = (fwd + bwd) / (left + (double) right);
-		double angle = (!Double.isNaN(move) ? Math.atan(move) : 0) + yaw;
-
-		if (fwd + bwd == 0 && right != 0)
-			angle += Math.PI;
 
 		if (up && down)
 			speed *= 0.5;
 
-		if (fwd + bwd == 0 && left + right == 0)
+		if (fwd == 0 && bwd == 0 && left == 0 && right == 0)
 			speed = 0;
 
-		if (fwd + bwd != 0 && (left != 0 || right != 0))
-			angle += Math.PI / 2;
+		double angle = yaw + Math.PI / 2;
+		double strafe = fwd + bwd == 0 ? 1 : (fwd + bwd == 1 ? 0.5 : -0.5);
 
-		if (fwd + bwd == -1)
-		{
-			if (left + right == 1)
-				angle += Math.PI / 2;
-			else if (left + right == -1)
-				angle += Math.PI;
-		}
+		if (fwd + bwd == -1) angle -= Math.PI;
+		if (left + right == 1) angle += Math.PI / 2 * strafe;
+		else if (left + right == -1) angle -= Math.PI / 2 * strafe;
 
-		if (right != 0 && fwd == 0)
-			angle = -(angle + Math.PI);
-
-		x += Math.cos(angle) * speed * Panel.frameFrequency / 150;
-		y += Math.sin(angle) * speed * Panel.frameFrequency / 150;
+		x += Math.cos(angle) * speed * (Panel.frameFrequency / 150);
+		y += Math.sin(angle) * speed * (Panel.frameFrequency / 150);
 
         yaw = (yaw + (Drawing.drawing.getInterfaceMouseX() - prevCursorX) / 300) % (Math.PI * 2);
         pitchAdd = (pitchAdd + (Drawing.drawing.getInterfaceMouseY() - prevCursorY) / 300) % (Math.PI * 2);

@@ -1,6 +1,7 @@
 package tanks.gui.input;
 
 import tanks.Game;
+import tanks.Panel;
 
 public class InputBinding
 {
@@ -28,6 +29,9 @@ public class InputBinding
 
     public boolean isPressed()
     {
+        if (Panel.selectedTextBox != null)
+            return false;
+
         if (inputType == InputType.keyboard)
             return Game.game.window.pressedKeys.contains(input);
         else if (inputType == InputType.mouse)
@@ -38,6 +42,9 @@ public class InputBinding
 
     public boolean isValid()
     {
+        if (Panel.selectedTextBox != null)
+            return false;
+
         if (inputType == InputType.keyboard)
             return Game.game.window.validPressedKeys.contains(input);
         else if (inputType == InputType.mouse)

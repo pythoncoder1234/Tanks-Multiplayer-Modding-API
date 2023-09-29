@@ -28,7 +28,6 @@ public class Hotbar
 
 	public double hideTimer = 0;
 
-	public int prevLive = -1000;
 	public double rechargeTimer = 0;
 
 	public static Button toggle;
@@ -145,6 +144,7 @@ public class Hotbar
             Drawing.drawing.fillInterfaceRect(x, y, 350, 5);
 
             int live = 1;
+			int multishot = 1;
             double max = 1;
 			double cooldown = 0;
             double cooldownFrac = 0;
@@ -164,6 +164,7 @@ public class Hotbar
             {
                 live = ib.liveBullets;
                 max = ib.maxLiveBullets;
+				multishot = ib.shotCount;
 				cooldown = ib.cooldownBase;
                 cooldownFrac = ib.cooldown / ib.cooldownBase;
             }
@@ -201,19 +202,21 @@ public class Hotbar
 
 			rechargeTimer += Panel.frameFrequency;
 
+			int prevLive = ib != null ? ib.prevLive : live;
+
             double ammo = 1 - prevLive / max;
             double ammo2 = (prevLive - cooldownFrac) / max;
 
 			if (live < prevLive)
-				ammo = Math.min(1, ammo + rechargeTimer / cooldown / max);
+				ammo = Math.min(1, ammo + rechargeTimer / cooldown / max * multishot);
 
             if (max <= 0)
                 ammo = 0;
 
-			if (rechargeTimer > (prevLive - live) * (cooldown + 10))
+			if (ib != null && rechargeTimer > (prevLive - live) * cooldown + 10)
 			{
 				rechargeTimer = 0;
-				prevLive = live;
+				ib.prevLive = live;
 			}
 
             Drawing.drawing.setColor(0, 255, 255, a);

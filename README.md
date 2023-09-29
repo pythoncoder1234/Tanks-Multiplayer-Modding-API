@@ -1,4 +1,3 @@
-
 # Tanks Multiplayer Modding API
 
 This is a multiplayer modding API for Tanks: The Crusades. I'll call this project Mod API for short.
@@ -30,9 +29,19 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-- Huge level editor rewrite
-- Level editor selector system
-- Lava obstacle implementation
+- `LevelEditorSelector`: Customizable and modular editor properties
+- `ScreenLevelEditor.buttons`: Made adding buttons to the editor much simpler.
+- A variety of selectors already added in
+- Registered `ObstacleText`: ability to add text to level editor
+- Made some super smooth transitions
+- Extensions menu in options!
+- Minimap input screen is finally back
+  - default panning controls: u, h, j, and k
+
+- Many hotbar improvements:
+  - Shows individual item, mine, and shield cooldown
+- Mine collision! This means throwable mines, blowable mines, freezable mines, and more!
+- Implemented lava obstacle
 - Many, many bug fixes
 
 

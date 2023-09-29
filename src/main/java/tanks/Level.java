@@ -44,8 +44,6 @@ public class Level
     public static double currentShadowIntensity = 0.5;
 
     public static int currentCloudCount = 0;
-    public static int windDirection = 0;
-    public static int windDirectionChangeTime = 1000;
 
     public static Random random = new Random();
 
@@ -278,11 +276,10 @@ public class Level
             }
         }
 
-        currentCloudCount = (int) (Math.random() * (double) this.sizeX / 10.0D + Math.random() * (double) this.sizeY / 10.0D);
-        windDirectionChangeTime = (int) (Math.random() * 2000 + 500);
+        currentCloudCount = (int) (Math.random() * this.sizeX / 10.2 + Math.random() * this.sizeY / 10.2);
 
         for (int i = 0; i < Level.currentCloudCount; i++)
-            Game.clouds.add(new Cloud(Math.random() * Game.currentSizeX * Game.tile_size, Math.random() * Game.currentSizeY * Game.tile_size));
+            Game.clouds.add(new Cloud());
 
         if (screen.length >= 9)
         {

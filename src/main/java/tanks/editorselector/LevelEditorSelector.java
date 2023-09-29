@@ -186,13 +186,14 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
         if (s.objectMenu != null)
             this.objectMenu = s.objectMenu;
 
-        if (!s.init)
+        if (!this.init)
             this.baseInit();
 
         this.button = getButton();
         this.modified = true;
 
         this.setMetadata(s.getMetadata());
+        this.update();
     }
 
     public boolean modified()

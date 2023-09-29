@@ -27,6 +27,7 @@ public class ObstacleText extends Obstacle
 		this.destructible = false;
 		this.bulletCollision = false;
 		this.tankCollision = false;
+		this.draggable = false;
 		this.colorR = 0;
 		this.colorG = 0;
 		this.colorB = 0;
@@ -61,7 +62,7 @@ public class ObstacleText extends Obstacle
 	@Override
 	public void drawForInterface(double x, double y)
 	{	
-		Drawing.drawing.setFontSize(draw_size / 1.5);
+		Drawing.drawing.setInterfaceFontSize(draw_size / 1.5);
 		Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
 		Drawing.drawing.drawInterfaceText(x, y, this.text);
 	}

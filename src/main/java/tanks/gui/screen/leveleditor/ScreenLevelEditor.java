@@ -49,7 +49,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	public boolean oddStagger = false;
 	public boolean paused = false;
 	public boolean objectMenu = false;
-	public boolean optionsEdited = false;
+	public boolean modified = false;
 
 	public double clickCooldown = 0;
 	public ArrayList<Team> teams = new ArrayList<>();
@@ -387,7 +387,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		if (clipboard == null)
 			clipboard = new Clipboard();
 
-		allowClose = this.undoActions.isEmpty() && !optionsEdited;
+		allowClose = this.undoActions.isEmpty() && !modified;
 
 		if (Level.isDark())
 			this.fontBrightness = 255;
@@ -600,9 +600,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		panDown = false;
 		zoomDown = false;
-
 		validZoomFingers = 0;
-		if (!Game.game.window.touchscreen)
+
+		if (!Game.game.window.touchscreen && Game.obstacleGrid != null)
 		{
 			double mx = Drawing.drawing.getMouseX();
 			double my = Drawing.drawing.getMouseY();
@@ -635,7 +635,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			{
 				InputPoint p = Game.game.window.touchPoints.get(i);
 
-				if (p.tag.equals("") || p.tag.equals("levelbuilder"))
+				if (p.tag.isEmpty() || p.tag.equals("levelbuilder"))
 				{
 					input = true;
 
@@ -730,7 +730,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			Game.game.input.editorPaste.invalidate();
 		}
 
-		if (redoActions.size() > 0 && redoLength != undoActions.size())
+		if (!redoActions.isEmpty() && redoLength != undoActions.size())
 		{
 			redoActions.clear();
 			redoLength = -1;
@@ -982,7 +982,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						}
 					}
 
-					if (this.undoActions.size() > 0)
+					if (!this.undoActions.isEmpty())
 					{
 						Action a = new Action.ActionGroup(this, this.undoActions);
 						actions.add(a);
@@ -1265,11 +1265,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 							}
 
 							AtomicInteger i = new AtomicInteger();
-							t.forAllSelectors(c ->
-							{
-								c.editor = this;
-								c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement()));
-							});
+							t.forAllSelectors(c -> c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement())));
 
 							this.undoActions.add(new Action.ActionTank(t, true));
 							Game.movables.add(t);
@@ -1313,6 +1309,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 							o.posX = mouseObstacle.posX;
 							o.posY = mouseObstacle.posY;
 							o.startHeight = mouseObstacleStartHeight;
+							o.initSelectors(this);
 
 							AtomicInteger i = new AtomicInteger();
 							o.forAllSelectors(s -> s.cloneProperties(mouseObstacle.selectors.get(i.getAndIncrement())));
@@ -1497,7 +1494,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	{
 		OverlayObjectMenu.saveSelectors(this);
 
-		if (undoActions.isEmpty() && redoActions.isEmpty() && !optionsEdited)
+		if (undoActions.isEmpty() && redoActions.isEmpty() && !modified)
 			return;
 
 		StringBuilder level = new StringBuilder("{");
@@ -1613,7 +1610,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			}
 		}
 
-		if (Game.movables.size() == 0)
+		if (Game.movables.isEmpty())
 			level.append("|");
 
 		level = new StringBuilder(level.substring(0, level.length() - 1));
@@ -2070,7 +2067,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		for (int i = 0; i < playerCount; i++)
 		{
-			if (availablePlayerSpawns.size() == 0)
+			if (availablePlayerSpawns.isEmpty())
 			{
 				for (int j = 0; j < this.spawns.size(); j++)
 					availablePlayerSpawns.add(j);
@@ -2617,7 +2614,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		}
 	}
 
-	static abstract class Action
+	public static abstract class Action
 	{
 		public abstract void undo();
 

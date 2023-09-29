@@ -44,13 +44,10 @@ public class Panel
 	public static boolean pauseOnDefocus = true;
 
 	public static Panel panel;
-
 	public static boolean forceRefreshMusic;
-
 	public static boolean win = false;
-
 	public static double darkness = 0;
-
+	public static double skylight;
 	public static TextBox selectedTextBox;
 
 	public Translation zoomTranslation = new Translation(Game.game.window, 0, 0, 0);
@@ -789,10 +786,13 @@ public class Panel
 			this.introFinished = true;
 		}
 
+		double t = 3;
+		skylight = (t - Math.pow(t, 1 - Level.currentLightIntensity)) / (t - 1) * 0.95;
+
 		if (!(Game.screen instanceof ScreenExit))
 		{
 			if (Game.followingCam && Game.screen instanceof ScreenGame && Game.currentLevel != null)
-				Drawing.drawing.setColor(133 * (Level.currentLightIntensity * 0.7), 193 * (Level.currentLightIntensity * 0.7), 233 * (Level.currentLightIntensity * 0.7));
+				Drawing.drawing.setColor(135 * skylight, 206 * skylight, 235 * skylight);
 			else
 				Drawing.drawing.setColor(174, 92, 16);
 

@@ -500,7 +500,6 @@ public abstract class Tank extends Movable implements ISolidObject
                 this.disabled = this.targetable = true;
         }
 
-		updateSelectors();
         super.preUpdate();
     }
 
@@ -934,6 +933,8 @@ public abstract class Tank extends Movable implements ISolidObject
 	{
 		if (!Game.game.window.drawingShadow)
 			drawAge += Panel.frameFrequency;
+
+		updateSelectors();
 
 		this.drawTank(false, false);
 

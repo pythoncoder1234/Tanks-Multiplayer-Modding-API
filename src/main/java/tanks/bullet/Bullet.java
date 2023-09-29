@@ -321,7 +321,7 @@ public class Bullet extends Movable implements IDrawable
 			if (o instanceof Bullet)
 			{
 				if (((Bullet) o).playPopSound)
-					Drawing.drawing.playGlobalSound("bullet_explode.ogg", (float) (bullet_size / ((Bullet) o).size));
+					Drawing.drawing.playGlobalSound("bullet_explode.ogg", (float) (bullet_size / o.size));
 			}
 		}
 	}
@@ -439,52 +439,45 @@ public class Bullet extends Movable implements IDrawable
 		}
 
 		boolean collidedWithTank = false;
-		for (int i = 0; i < Game.movables.size(); i++)
+        for (int i = 0; i < Game.movables.size(); i++)
         {
-            Movable o = Game.movables.get(i);
-            if (o.posZ > 25 || o.posZ < -Tank.disabledZ)
+            Movable m = Game.movables.get(i);
+            if (m.posZ > 25 || m.posZ < -Tank.disabledZ)
                 continue;
 
-            if (o instanceof Tank && !o.destroy)
+            if (m instanceof Tank && !m.destroy)
             {
-                double horizontalDist = Math.abs(this.posX - o.posX);
-                double verticalDist = Math.abs(this.posY - o.posY);
+                double horizontalDist = Math.abs(this.posX - m.posX);
+                double verticalDist = Math.abs(this.posY - m.posY);
 
-                Tank t = ((Tank) o);
+                Tank t = ((Tank) m);
 
                 double bound = this.size / 2 + t.size * t.hitboxSize / 2;
 
                 if (horizontalDist < bound && verticalDist < bound && t.size > 0)
-				{
-					this.collisionX = this.posX;
-					this.collisionY = this.posY;
-					this.collided();
-					this.collidedWithTank(t);
-					collidedWithTank = true;
-				}
-			}
-			else if (((o instanceof Bullet && ((Bullet) o).enableCollision && (((Bullet) o).bulletCollision && ((Bullet) o).externalBulletCollision && this.bulletCollision)) || o instanceof Mine) && o != this && !o.destroy)
-			{
-				double distSq = Math.pow(this.posX - o.posX, 2) + Math.pow(this.posY - o.posY, 2);
+                {
+                    this.collisionX = this.posX;
+                    this.collisionY = this.posY;
+                    this.collided();
+                    this.collidedWithTank(t);
+                    collidedWithTank = true;
+                }
+            }
+            else if (((m instanceof Bullet && ((Bullet) m).enableCollision && (((Bullet) m).bulletCollision && ((Bullet) m).externalBulletCollision && this.bulletCollision)) || m instanceof Mine) && m != this && !m.destroy)
+            {
+                double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
 
-				double s = 0;
+                double bound = this.size / 2 + m.size / 2;
 
-				if (o instanceof Mine)
-					s = ((Mine) o).size;
-				else
-					s = ((Bullet) o).size;
-
-				double bound = this.size / 2 + s / 2;
-
-				if (distSq <= bound * bound)
-				{
-					this.collisionX = this.posX;
-					this.collisionY = this.posY;
-					this.collided();
-					this.collidedWithObject(o);
-				}
-			}
-		}
+                if (distSq <= bound * bound)
+                {
+                    this.collisionX = this.posX;
+                    this.collisionY = this.posY;
+                    this.collided();
+                    this.collidedWithObject(m);
+                }
+            }
+        }
 
 		if (!collidedWithTank)
 			this.tankInside = null;
@@ -525,7 +518,8 @@ public class Bullet extends Movable implements IDrawable
         if (o == null || (!o.bulletCollision && !o.checkForObjects))
             return output;
 
-        if (o.enableStacking && !Game.lessThan(true, o.startHeight * Game.tile_size, this.posZ, o.startHeight * Game.tile_size + o.getTileHeight()))
+        if (!(this.posZ < Game.tile_size && o.startHeight < 1) &&
+				(o.enableStacking && !Game.lessThan(true, o.startHeight * Game.tile_size, this.posZ, o.startHeight * Game.tile_size + o.getTileHeight())))
             return output;
 
         double dx = this.posX - o.posX;
