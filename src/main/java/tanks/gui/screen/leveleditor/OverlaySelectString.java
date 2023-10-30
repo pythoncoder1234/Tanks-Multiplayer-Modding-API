@@ -42,8 +42,6 @@ public class OverlaySelectString extends ScreenLevelEditorOverlay
     @Override
     public void update()
     {
-        super.update();
-
         textBox.update();
         back.update();
     }

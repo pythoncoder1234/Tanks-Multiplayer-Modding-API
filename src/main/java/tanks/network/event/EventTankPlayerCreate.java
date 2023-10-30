@@ -115,27 +115,21 @@ public class EventTankPlayerCreate extends PersonalEvent
 				t.nameTag.name = Game.chatFilter.filterChat(t.nameTag.name);
 		}
 
-		if (team.equals("**"))
-			t.team = Game.playerTeam;
-		else if (team.equals("***"))
-			t.team = Game.playerTeamNoFF;
-		else if (team.equals("*"))
-			t.team = null;
-		else
-			t.team = Game.currentLevel.teamsMap.get(team);
+        switch (team)
+        {
+            case "**" -> t.team = Game.playerTeam;
+            case "***" -> t.team = Game.playerTeamNoFF;
+            case "*" -> t.team = null;
+            default -> t.team = Game.currentLevel.teamsMap.get(team);
+        }
 
 		t.colorR = this.colorR;
 		t.colorG = this.colorG;
 		t.colorB = this.colorB;
 
 		t.secondaryColorR = this.colorR2;
-		t.nameTag.colorR = this.colorR2;
-
 		t.secondaryColorG = this.colorG2;
-		t.nameTag.colorG = this.colorG2;
-
 		t.secondaryColorB = this.colorB2;
-		t.nameTag.colorB = this.colorB2;
 
 		t.drawAge = this.drawAge;
 

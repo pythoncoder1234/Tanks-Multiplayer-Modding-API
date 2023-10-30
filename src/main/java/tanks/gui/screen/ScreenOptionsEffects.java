@@ -65,11 +65,11 @@ public class ScreenOptionsEffects extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         effectMultiplier.update();
         effects.update();
         back.update();
+
+        super.update();
     }
 
     @Override

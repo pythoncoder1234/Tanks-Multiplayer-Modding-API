@@ -37,10 +37,10 @@ public class ScreenTestFonts extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         back.update();
         box.update();
+
+        super.update();
     }
 
     @Override

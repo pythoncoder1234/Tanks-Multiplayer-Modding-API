@@ -53,13 +53,13 @@ public class ScreenTestShapes extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         shapeLength.update();
         shapeWidth.update();
         radius.update();
         bWidth.update();
         back.update();
+
+        super.update();
     }
 
     @Override

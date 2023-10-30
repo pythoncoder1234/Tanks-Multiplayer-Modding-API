@@ -1,12 +1,13 @@
 package tanks.bullet;
 
+import tanks.Effect;
 import tanks.Game;
 import tanks.Panel;
+import tanks.gui.screen.ScreenGame;
+import tanks.hotbar.item.ItemBullet;
 import tanks.network.event.EventBulletDestroyed;
 import tanks.network.event.EventBulletInstantWaypoint;
 import tanks.network.event.EventShootBullet;
-import tanks.gui.screen.ScreenGame;
-import tanks.hotbar.item.ItemBullet;
 import tanks.tank.Tank;
 
 import java.util.ArrayList;
@@ -38,7 +39,32 @@ public abstract class BulletInstant extends Bullet
 		this.yTargets.add(this.collisionY);
 	}
 
-	public abstract void addDestroyEffect();
+	public void addDestroyEffect()
+	{
+		if (Game.effectsEnabled)
+		{
+			double mul = 4;
+			if (this.item.cooldownBase <= 0)
+				mul = 0.25;
+
+			for (int i = 0; i < this.size * mul * Game.effectMultiplier; i++)
+			{
+				Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+				double var = 50;
+				e.maxAge /= 2;
+				e.colR = Math.min(255, Math.max(0, this.baseColorR + Math.random() * var - var / 2));
+				e.colG = Math.min(255, Math.max(0, this.baseColorG + Math.random() * var - var / 2));
+				e.colB = Math.min(255, Math.max(0, this.baseColorB + Math.random() * var - var / 2));
+
+				if (Game.enable3d)
+					e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * Math.PI, Math.random() * this.size / 50.0 * 4);
+				else
+					e.setPolarMotion(Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
+
+				Game.effects.add(e);
+			}
+		}
+	}
 
 	public void shoot()
 	{
@@ -63,7 +89,9 @@ public abstract class BulletInstant extends Bullet
 				this.destroy = true;
 
 			super.update();
-			//this.addEffect();
+
+			if (Math.abs(this.lastFinalVX) < 0.01 && Math.abs(this.lastFinalVY) < 0.01)
+				this.destroy = true;
 		}
 
 		if (!this.tank.isRemote)
@@ -71,9 +99,7 @@ public abstract class BulletInstant extends Bullet
 			this.saveTarget();
 
 			for (int i = 0; i < this.xTargets.size(); i++)
-			{
-				Game.eventsOut.add(new EventBulletInstantWaypoint(this, this.xTargets.get(i), this.yTargets.get(i)));
-			}
+                Game.eventsOut.add(new EventBulletInstantWaypoint(this, this.xTargets.get(i), this.yTargets.get(i)));
 
 			Game.eventsOut.add(new EventBulletDestroyed(this));
 		}
@@ -148,9 +174,7 @@ public abstract class BulletInstant extends Bullet
 	public void draw()
 	{
 		for (Laser s: this.segments)
-		{
-			s.draw();
-		}
+            s.draw();
 	}
 
 	public void superUpdate()

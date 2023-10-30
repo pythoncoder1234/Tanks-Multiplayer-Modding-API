@@ -64,11 +64,11 @@ public class ScreenOptionsShadows extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         shadowQuality.update();
         shadows.update();
         back.update();
+
+        super.update();
     }
 
     @Override

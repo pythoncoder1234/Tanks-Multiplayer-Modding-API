@@ -153,14 +153,14 @@ public class ScreenOptionsInputTouchscreen extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         back.update();
         dualJoysticks.update();
         mobile.update();
         snap.update();
         vibrations.update();
         test.update();
+
+        super.update();
     }
 
     @Override

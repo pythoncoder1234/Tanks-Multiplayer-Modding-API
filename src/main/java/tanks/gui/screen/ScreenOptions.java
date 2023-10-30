@@ -456,8 +456,6 @@ public class ScreenOptions extends ScreenOptionsOverlay
 	@Override
 	public void update()
     {
-        super.update();
-
         soundOptions.update();
         miscOptions.update();
         windowOptions.update();
@@ -468,6 +466,8 @@ public class ScreenOptions extends ScreenOptionsOverlay
         personalize.update();
 
         back.update();
+
+		super.update();
 	}
 
 	@Override
@@ -492,7 +492,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
 
 		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Options");
 
-		if (Game.player.colorR + Game.player.colorG + Game.player.colorB >= 220 * 3 && Game.player.username.length() >= 1)
+		if (Game.player.colorR + Game.player.colorG + Game.player.colorB >= 220 * 3 && !Game.player.username.isEmpty())
 		{
 			Drawing.drawing.setColor(200, 200, 200);
 			double s = Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, Game.player.username) / Drawing.drawing.interfaceScale;
@@ -508,7 +508,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
 		Drawing.drawing.setColor(Game.player.colorR, Game.player.colorG, Game.player.colorB);
 		Drawing.drawing.drawInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, Game.player.username);
 
-		if (Game.player.username.length() < 1)
+		if (Game.player.username.isEmpty())
 		{
 			Drawing.drawing.setColor(127, 127, 127);
 			Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY + personalize.sizeY * 0.1, "Pick a username...");

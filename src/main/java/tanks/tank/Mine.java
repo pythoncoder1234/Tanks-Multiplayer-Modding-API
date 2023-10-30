@@ -1,18 +1,18 @@
 package tanks.tank;
 
 import tanks.*;
-import tanks.gui.menus.FixedMenu;
-import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemMine;
 import tanks.network.event.EventMineChangeTimer;
 import tanks.network.event.EventMineRemove;
+import tanks.obstacle.Face;
+import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Mine extends Movable implements IAvoidObject
+public class Mine extends Movable implements IAvoidObject, ISolidObject
 {
     public static double mine_size = 30;
     public static double mine_radius = Game.tile_size * 2.5;
@@ -38,17 +38,23 @@ public class Mine extends Movable implements IAvoidObject
     public double cooldown = 0;
     public int lastBeep = Integer.MAX_VALUE;
 
+    public double knockbackRadius = this.radius * 2;
+    public double bulletKnockback = 10;
+    public double tankKnockback = 10;
+
     public int networkID = -1;
 
     public static int currentID = 0;
     public static ArrayList<Integer> freeIDs = new ArrayList<>();
     public static HashMap<Integer, Mine> idMap = new HashMap<>();
 
+    public Face[] horizontalFaces;
+    public Face[] verticalFaces;
+
     public Mine(double x, double y, double timer, Tank t, ItemMine item)
     {
         super(x, y);
 
-        this.posZ = t.posZ;
         this.size = mine_size;
         this.timer = timer;
         this.drawLevel = 2;
@@ -60,15 +66,17 @@ public class Mine extends Movable implements IAvoidObject
         if (!ScreenPartyLobby.isClient)
             this.item.liveMines++;
 
-        this.team = t.team;
         double[] outlineCol = Team.getObjectColor(t.colorR, t.colorG, t.colorB, t);
         this.outlineColorR = outlineCol[0];
         this.outlineColorG = outlineCol[1];
         this.outlineColorB = outlineCol[2];
 
+        this.posZ = t.posZ;
+        this.team = t.team;
+
         if (!ScreenPartyLobby.isClient)
         {
-            if (freeIDs.size() > 0)
+            if (!freeIDs.isEmpty())
                 this.networkID = freeIDs.remove(0);
             else
             {
@@ -77,23 +85,6 @@ public class Mine extends Movable implements IAvoidObject
             }
 
             idMap.put(this.networkID, this);
-        }
-
-        for (FixedMenu m : ModAPI.fixedMenus)
-        {
-            if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.mines_placed))
-            {
-                Scoreboard s = ((Scoreboard) m);
-
-                if (!s.teamPoints.isEmpty())
-                    s.addTeamScore(this.team, 1);
-
-                else if (this.tank instanceof TankPlayer)
-                    s.addPlayerScore(((TankPlayer) this.tank).player, 1);
-
-                else if (this.tank instanceof TankPlayerRemote)
-                    s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
-            }
         }
     }
 
@@ -117,11 +108,16 @@ public class Mine extends Movable implements IAvoidObject
 
         if (Game.enable3d)
         {
+            int x = (int) (this.posX / Game.tile_size);
+            int y = (int) (this.posY / Game.tile_size);
+
             for (double i = height; i < height + 6; i++)
             {
                 double frac = ((i - height + 1) / 6 + 1) / 2;
+                boolean shouldXRay = i == height + 5 && Game.xrayBullets && Game.obstacleGrid[x][y] == null;
+
                 Drawing.drawing.setColor(this.outlineColorR * frac, this.outlineColorG  * frac, this.outlineColorB * frac, 255, 0.5);
-                Drawing.drawing.fillOval(this.posX, this.posY, this.posZ + i + 1.5, this.size, this.size, true, false);
+                Drawing.drawing.fillOval(this.posX, this.posY, this.posZ + i + 1.5, this.size, this.size, !shouldXRay, false);
             }
 
             Drawing.drawing.setColor(this.outlineColorR, this.outlineColorG, this.outlineColorB, 255, 1);
@@ -137,9 +133,9 @@ public class Mine extends Movable implements IAvoidObject
                 Drawing.drawing.fillGlow(this.posX, this.posY, this.size * 4, this.size * 4);
         }
 
-        Drawing.drawing.setColor(255, Math.min(1000, this.timer) / 1000.0 * 255, 0, 255, 0.5);
+        Drawing.drawing.setColor(255, Math.min(255, this.timer / 1000 * 255), 0, 255, 0.5);
 
-        if (timer < 150 && ((int) timer % 20) / 10 == 1)
+        if (timer < 150 && timer % 20 >= 10)
             Drawing.drawing.setColor(255, 255, 0, 255, 0.5);
 
         if (Game.enable3d)
@@ -259,5 +255,102 @@ public class Mine extends Movable implements IAvoidObject
     public double getSeverity(double posX, double posY)
     {
         return this.timer;
+    }
+
+    public static void drawRange(double posX, double posY, double size)
+    {
+        int faces = (int) (size + 5);
+        double r = Drawing.drawing.currentColorR;
+        double g = Drawing.drawing.currentColorG;
+        double b = Drawing.drawing.currentColorB;
+        double a = Drawing.drawing.currentColorA;
+
+        Game.game.window.shapeRenderer.setBatchMode(true, true, true, false, false);
+        for (int f = 0; f < faces; f++)
+        {
+            for (int i = 0; i <= 10; i++)
+            {
+                double hfrac = i / 10.0;
+                double hfrac2 = (i + 1) / 10.0;
+                double height = Math.sin(hfrac);
+                double pitchMul = Math.cos(hfrac);
+                double height2 = Math.sin(hfrac2);
+                double pitchMul2 = Math.cos(hfrac2);
+
+                double angle = f * Math.PI * 2 / faces;
+                double angle2 = (f + 1) * Math.PI * 2 / faces;
+                Drawing.drawing.setColor(r, g, b, (1 - hfrac) * a, 1);
+                Drawing.drawing.addVertex(posX + Math.cos(angle) * size * pitchMul, posY + Math.sin(angle) * size * pitchMul, height * size);
+                Drawing.drawing.addVertex(posX + Math.cos(angle2) * size * pitchMul, posY + Math.sin(angle2) * size * pitchMul, height * size);
+                Drawing.drawing.setColor(r, g, b, (1 - hfrac2) * a, 1);
+                Drawing.drawing.addVertex(posX + Math.cos(angle2) * size * pitchMul2, posY + Math.sin(angle2) * size * pitchMul2, height2 * size);
+                Drawing.drawing.addVertex(posX + Math.cos(angle) * size * pitchMul2, posY + Math.sin(angle) * size * pitchMul2, height2 * size);
+            }
+        }
+        Game.game.window.shapeRenderer.setBatchMode(false, true, false);
+    }
+
+    public static void drawRange2D(double posX, double posY, double size)
+    {
+        int faces = (int) (size + 5);
+        double r = Drawing.drawing.currentColorR;
+        double g = Drawing.drawing.currentColorG;
+        double b = Drawing.drawing.currentColorB;
+        double a = Drawing.drawing.currentColorA;
+
+        Game.game.window.shapeRenderer.setBatchMode(true, true, false);
+        for (int f = 0; f < faces; f++)
+        {
+            double angle = f * Math.PI * 2 / faces;
+            double angle2 = (f + 1) * Math.PI * 2 / faces;
+            double inner = 0.8;
+            Drawing.drawing.setColor(r, g, b, a, 1);
+            Drawing.drawing.addVertex(posX + Math.cos(angle) * size, posY + Math.sin(angle) * size, 0);
+            Drawing.drawing.addVertex(posX + Math.cos(angle2) * size, posY + Math.sin(angle2) * size, 0);
+            Drawing.drawing.setColor(r, g, b, 0, 1);
+            Drawing.drawing.addVertex(posX + Math.cos(angle2) * size * inner, posY + Math.sin(angle2) * size * inner, 0);
+            Drawing.drawing.addVertex(posX + Math.cos(angle) * size * inner, posY + Math.sin(angle) * size * inner, 0);
+        }
+        Game.game.window.shapeRenderer.setBatchMode(false, true, false);
+    }
+
+    @Override
+    public Face[] getHorizontalFaces()
+    {
+        double s = this.size / 2;
+
+        if (this.horizontalFaces == null)
+        {
+            this.horizontalFaces = new Face[2];
+            this.horizontalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX + s, this.posY - s, true, true, true, true);
+            this.horizontalFaces[1] = new Face(this, this.posX - s, this.posY + s, this.posX + s, this.posY + s, true, false,true, true);
+        }
+        else
+        {
+            this.horizontalFaces[0].update(this.posX - s, this.posY - s, this.posX + s, this.posY - s);
+            this.horizontalFaces[1].update(this.posX - s, this.posY + s, this.posX + s, this.posY + s);
+        }
+
+        return this.horizontalFaces;
+    }
+
+    @Override
+    public Face[] getVerticalFaces()
+    {
+        double s = this.size / 2;
+
+        if (this.verticalFaces == null)
+        {
+            this.verticalFaces = new Face[2];
+            this.verticalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX - s, this.posY + s, false, true, true, true);
+            this.verticalFaces[1] = new Face(this, this.posX + s, this.posY - s, this.posX + s, this.posY + s, false, false, true, true);
+        }
+        else
+        {
+            this.verticalFaces[0].update(this.posX - s, this.posY - s, this.posX - s, this.posY + s);
+            this.verticalFaces[1].update(this.posX + s, this.posY - s, this.posX + s, this.posY + s);
+        }
+
+        return this.verticalFaces;
     }
 }

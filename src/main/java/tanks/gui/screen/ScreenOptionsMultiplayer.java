@@ -8,21 +8,19 @@ public class ScreenOptionsMultiplayer extends ScreenOptionsOverlay
 {
     public static final String chatFilterText = "Chat filter: ";
     public static final String autoReadyText = "Auto ready: ";
-    public static final String anticheatText = "Anticheat: ";
-
-    public static final String weakText = "\u00A7200100000255weak";
-    public static final String strongText = "\u00A7000200000255strong";
 
 	@Override
 	public void update()
     {
-        super.update();
-
         chatFilter.update();
         back.update();
         hostOptions.update();
         autoReady.update();
-    }    Button chatFilter = new Button(this.centerX, this.centerY + this.objYSpace * 0, this.objWidth, this.objHeight, "", new Runnable()
+
+		super.update();
+	}
+
+	Button chatFilter = new Button(this.centerX, this.centerY + this.objYSpace * 0, this.objWidth, this.objHeight, "", new Runnable()
     {
 		@Override
 		public void run() 

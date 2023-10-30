@@ -1,6 +1,7 @@
 
 package tanks.obstacle;
 
+import basewindow.IBatchRenderableObject;
 import basewindow.Model;
 import tanks.Drawing;
 import tanks.Game;
@@ -24,7 +25,6 @@ public class ObstacleTrainTrack extends Obstacle
      */
     public ObstacleTrainTrack[] connectedTo = new ObstacleTrainTrack[4];
     public boolean horizontal = true;
-    public boolean colorChanged = false;
     public int turn = 0;
     protected boolean firstFrame = true;
 
@@ -94,7 +94,7 @@ public class ObstacleTrainTrack extends Obstacle
     }
 
     @Override
-    public void drawTile(double r, double g, double b, double d, double extra)
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         if (firstFrame)
             setOrientation();
@@ -103,7 +103,7 @@ public class ObstacleTrainTrack extends Obstacle
 
         Drawing.drawing.setColor(r, g, b);
 
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
 
         if (turn > 0)
             return;
@@ -112,13 +112,13 @@ public class ObstacleTrainTrack extends Obstacle
         double offY = this.horizontal ? 15 : 0;
 
         Drawing.drawing.setColor(192, 192, 192);
-        Drawing.drawing.fillBox(this, this.posX + offX, this.posY + offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
-        Drawing.drawing.fillBox(this, this.posX - offX, this.posY - offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
+        Drawing.drawing.fillBox(tile, this.posX + offX, this.posY + offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
+        Drawing.drawing.fillBox(tile, this.posX - offX, this.posY - offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
 
         for (int i = -1; i <= 1; i++)
         {
             Drawing.drawing.setColor(this.stackColorR[i + 1], this.stackColorG[i + 1], this.stackColorB[i + 1]);
-            Drawing.drawing.fillBox(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d + startHeight * 50, offX * 2.86 + 7, offY * 2.86 + 7, 6);
+            Drawing.drawing.fillBox(tile, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d + startHeight * 50, offX * 2.86 + 7, offY * 2.86 + 7, 6);
         }
     }
 
@@ -229,15 +229,6 @@ public class ObstacleTrainTrack extends Obstacle
         }
 
         this.updateTurn();
-    }
-
-    @Override
-    public boolean colorChanged()
-    {
-        boolean r = colorChanged;
-        colorChanged = false;
-
-        return super.colorChanged() || r;
     }
 
     @Override

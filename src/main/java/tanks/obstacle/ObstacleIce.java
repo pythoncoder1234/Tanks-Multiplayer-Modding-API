@@ -1,6 +1,12 @@
 package tanks.obstacle;
 
-import tanks.*;
+import basewindow.IBatchRenderableObject;
+import tanks.Drawing;
+import tanks.Game;
+import tanks.Movable;
+import tanks.StatusEffect;
+import tanks.rendering.ShaderGroundIce;
+import tanks.rendering.ShaderIce;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
 
@@ -29,6 +35,8 @@ public class ObstacleIce extends Obstacle
         this.colorA = 180;
 
         this.replaceTiles = true;
+        this.renderer = ShaderIce.class;
+        this.tileRenderer = ShaderGroundIce.class;
 
         this.description = "A slippery layer of ice";
     }
@@ -54,12 +62,12 @@ public class ObstacleIce extends Obstacle
     }
 
     @Override
-    public void drawTile(double r, double g, double b, double d, double extra)
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         double frac = Obstacle.draw_size / Game.tile_size;
 
         Drawing.drawing.setColor(r, g, b);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -frac * 15 - extra, Game.tile_size, Game.tile_size, d + extra);
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -frac * 15 - extra, Game.tile_size, Game.tile_size, d + extra);
     }
 
     public double getTileHeight()

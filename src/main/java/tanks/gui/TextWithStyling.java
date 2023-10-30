@@ -73,7 +73,7 @@ public class TextWithStyling implements ISyncable
                 output[i] += 100;
         }
 
-        return new TextWithStyling(text, output[0], output[1], output[2], this.colorA, this.fontSize);
+        return new TextWithStyling(text, output[0], output[1], output[2], 255, this.fontSize);
     }
 
     @Override

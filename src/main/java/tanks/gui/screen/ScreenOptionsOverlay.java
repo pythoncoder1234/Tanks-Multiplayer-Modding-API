@@ -14,10 +14,10 @@ public abstract class ScreenOptionsOverlay extends Screen implements IHiddenChat
 
     public ScreenOptionsOverlay()
     {
-        if (Game.screen instanceof ScreenGame)
-            game = (ScreenGame) Game.screen;
-        else if (Game.screen instanceof ScreenOptionsOverlay)
-            game = ((ScreenOptionsOverlay) Game.screen).game;
+        if (Game.screen instanceof ScreenGame g)
+            game = g;
+        else if (Game.screen instanceof ScreenOptionsOverlay o)
+            game = o.game;
 
         if (game != null)
         {
@@ -49,10 +49,14 @@ public abstract class ScreenOptionsOverlay extends Screen implements IHiddenChat
                     game.screenshotMode = false;
             }
 
-            Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_O);
-
             game.paused = true;
             game.update();
+        }
+
+        if (Game.game.window.textValidPressedKeys.contains(InputCodes.KEY_D) && Game.game.window.shift)
+        {
+            Game.game.window.textValidPressedKeys.remove((Integer) InputCodes.KEY_D);
+            Game.screen = new ScreenDebug();
         }
     }
 

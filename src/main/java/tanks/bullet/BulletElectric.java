@@ -5,7 +5,7 @@ import tanks.AttributeModifier.Operation;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.item.ItemBullet;
 import tanks.network.event.EventBulletDestroyed;
-import tanks.network.event.EventBulletElectricStunEffect;
+import tanks.network.event.EventBulletStunEffect;
 import tanks.network.event.EventBulletInstantWaypoint;
 import tanks.network.event.EventShootBullet;
 import tanks.tank.Mine;
@@ -65,6 +65,7 @@ public class BulletElectric extends BulletInstant
 		{
 			double angle = this.getAngleInDirection(target.posX, target.posY);
 			this.addPolarMotion(angle, 25.0 / 8);
+			this.speed = 25.0 / 8;
 		}
 
 		if (!this.tank.isRemote)
@@ -76,8 +77,6 @@ public class BulletElectric extends BulletInstant
 				this.destroy = true;
 
 			this.move();
-
-			//this.addEffect();
 		}
 
 		this.addDestroyEffect();
@@ -121,8 +120,10 @@ public class BulletElectric extends BulletInstant
 	}
 
 	public void move()
-	{	
+	{
 		this.invulnerability -= Panel.frameFrequency;
+		if (this.invulnerability < -1e5)
+			this.destroy = true;
 		super.superUpdate();
 	}
 
@@ -195,8 +196,7 @@ public class BulletElectric extends BulletInstant
                 b.damage = this.damage;
                 b.team = this.team;
 
-                if (validTarget)
-                    b.delay = 10;
+				b.delay = 10;
 
                 if (movable instanceof Tank)
                     b.invulnerability = 16;
@@ -208,9 +208,9 @@ public class BulletElectric extends BulletInstant
             }
 		}
 
-        if (validTarget && movable instanceof Tank && !(this.team != null && !this.team.friendlyFire && Team.isAllied(movable, this)) && !this.tank.isRemote)
+        if (validTarget && movable instanceof Tank)
         {
-            Game.eventsOut.add(new EventBulletElectricStunEffect(this.posX, this.posY, this.posZ, 1));
+            Game.eventsOut.add(new EventBulletStunEffect(this.posX, this.posY, this.posZ, 1));
 
             if (Game.effectsEnabled)
             {

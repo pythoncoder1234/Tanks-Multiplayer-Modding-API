@@ -163,7 +163,7 @@ public class MapLoader
         if (redrawCounter < 0)
         {
             redrawCounter = 0;
-            Drawing.drawing.forceRedrawTerrain();
+//            Drawing.drawing.forceRedrawTerrain();
         }
     }
 

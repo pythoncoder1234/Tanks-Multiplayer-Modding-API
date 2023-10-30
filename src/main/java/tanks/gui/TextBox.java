@@ -11,19 +11,18 @@ import java.util.ArrayList;
 
 public class TextBox implements IDrawable, ITrigger
 {
-    public Runnable function;
-    public InputBindingGroup keybind;
+	public Runnable function;
+	public InputBindingGroup keybind;
+	public double posX;
+	public double posY;
+	public double sizeX;
+	public double sizeY;
 
-    public double posX;
-    public double posY;
-    public double sizeX;
-    public double sizeY;
+	public String rawLabelText;
+	public String labelText;
+	public String translatedLabelText;
 
-    public String rawLabelText;
-    public String labelText;
-    public String translatedLabelText;
-
-    public String previousInputText;
+	public String previousInputText;
 	public String inputText;
 
 	public boolean enableHover = false;
@@ -52,7 +51,7 @@ public class TextBox implements IDrawable, ITrigger
 	public boolean lowerCase = false;
 	public boolean enableCaps = false;
 
-	public int maxChars = 20;
+	public int maxChars = 40;
 	public double maxValue = Integer.MAX_VALUE;
 	public double minValue = Integer.MIN_VALUE;
 
@@ -69,8 +68,12 @@ public class TextBox implements IDrawable, ITrigger
 	public double selectedColorG = 255;
 	public double selectedColorB = 220;
 	public double selectedFullColorR = 255;
-	public double selectedFullColorG = 238;
+	public double selectedFullColorG = 255;
 	public double selectedFullColorB = 220;
+	public double selectedFullFlashColorR = 255;
+	public double selectedFullFlashColorG = 200;
+	public double selectedFullFlashColorB = 200;
+	public double flashAnimation = 0;
 
 	public long lastFrame;
 	public double effectTimer;
@@ -159,7 +162,11 @@ public class TextBox implements IDrawable, ITrigger
 		if (selected)
 		{
 			if (this.inputText.length() >= this.maxChars)
-				drawing.setColor(this.selectedFullColorR, this.selectedFullColorG, this.selectedFullColorB);
+			{
+				drawing.setColor(this.selectedFullColorR * (1 - this.flashAnimation) + this.selectedFullFlashColorR * flashAnimation,
+						this.selectedFullColorG * (1 - this.flashAnimation) + this.selectedFullFlashColorG * flashAnimation,
+						this.selectedFullColorB * (1 - this.flashAnimation) + this.selectedFullFlashColorB * flashAnimation);
+			}
 			else
 				drawing.setColor(this.selectedColorR, this.selectedColorG, this.selectedColorB);
 		}
@@ -231,11 +238,7 @@ public class TextBox implements IDrawable, ITrigger
 					Button.drawGlow(this.posX - this.sizeX / 2 + this.sizeY / 2, this.posY + 2.5, this.sizeY * 3 / 4, this.sizeY * 3 / 4, 0.6, 0, 0, 0, 100, false);
 			}
 
-			if (!clearSelected || Game.game.window.touchscreen)
-				drawing.setColor(255, 0, 0);
-			else
-				drawing.setColor(255, 127, 127);
-
+			drawing.setColor(255, 0, 0);
 			drawing.fillInterfaceOval(this.posX - this.sizeX / 2 + this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
 
 			drawing.setColor(255, 255, 255);
@@ -245,35 +248,25 @@ public class TextBox implements IDrawable, ITrigger
 		}
 
 		if (selected && Game.game.window.touchscreen)
-        {
-            drawing.setColor(255, 255, 255);
-            drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
-            drawing.drawInterfaceImage("icons/paste.png", this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
+		{
+			drawing.setColor(255, 255, 255);
+			drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
+			drawing.drawInterfaceImage("icons/paste.png", this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
 
-            drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
-            drawing.drawInterfaceImage("icons/copy.png", this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
-        }
-    }
+			drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
+			drawing.drawInterfaceImage("icons/copy.png", this.posX + this.sizeX / 2 - this.sizeY * 3 / 2, this.posY - sizeY * 13 / 16, this.sizeY * 1 / 2, this.sizeY * 1 / 2);
+		}
+	}
 
-    @Override
-    public void updateKeybind()
-    {
-        if (this.keybind != null && this.keybind.isValid())
-        {
-            this.keybind.invalidate();
-            this.select();
-        }
-    }
+	public void drawInput()
+	{
+		double size = this.sizeY * 0.6;
+		if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale > this.sizeX - 80)
+			Drawing.drawing.setInterfaceFontSize(size * (this.sizeX - 80) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale));
 
-    public void drawInput()
-    {
-        double size = this.sizeY * 0.6;
-        if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale > this.sizeX - 80)
-            Drawing.drawing.setInterfaceFontSize(size * (this.sizeX - 80) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale));
-
-        if (selected)
-            Drawing.drawing.drawInterfaceText(posX, posY, inputText + "\u00a7127127127255_");
-        else
+		if (selected)
+			Drawing.drawing.drawInterfaceText(posX, posY, inputText + "\u00a7127127127255_");
+		else
 			Drawing.drawing.drawInterfaceText(posX, posY, inputText);
 	}
 
@@ -346,6 +339,8 @@ public class TextBox implements IDrawable, ITrigger
 
 		if (this.selected)
 			Panel.selectedTextBox = this;
+
+		this.flashAnimation = Math.max(0, this.flashAnimation - Panel.frameFrequency / 25);
 	}
 
 	public void addEffect()
@@ -390,8 +385,20 @@ public class TextBox implements IDrawable, ITrigger
 			}
 			else if (!selected)
 			{
-                handled = true;
-                this.select();
+				handled = true;
+				selected = true;
+				this.previousInputText = this.inputText;
+
+				TextBox prev = Panel.selectedTextBox;
+
+				Panel.selectedTextBox = this;
+
+				if (prev != null)
+					prev.submit();
+
+				Drawing.drawing.playVibration("click");
+				Drawing.drawing.playSound("bounce.ogg", 0.5f, 0.7f);
+				Game.game.window.getRawTextKeys().clear();
 			}
 		}
 
@@ -420,41 +427,24 @@ public class TextBox implements IDrawable, ITrigger
 			}
 		}
 
-        if (Game.game.window.touchscreen)
-        {
-            sizeX -= 20;
-            sizeY -= 20;
-        }
+		if (Game.game.window.touchscreen)
+		{
+			sizeX -= 20;
+			sizeY -= 20;
+		}
 
-        return handled;
-    }
+		return handled;
+	}
 
-    public void select()
-    {
-        selected = true;
-        this.previousInputText = this.inputText;
+	public void clear()
+	{
+		Drawing.drawing.playVibration("click");
+		Drawing.drawing.playSound("bounce.ogg", 0.25f, 0.7f);
+		this.inputText = "";
+	}
 
-        TextBox prev = Panel.selectedTextBox;
-
-        Panel.selectedTextBox = this;
-
-        if (prev != null)
-            prev.submit();
-
-        Drawing.drawing.playVibration("click");
-        Drawing.drawing.playSound("bounce.ogg", 0.5f, 0.7f);
-        Game.game.window.getRawTextKeys().clear();
-    }
-
-    public void clear()
-    {
-        Drawing.drawing.playVibration("click");
-        Drawing.drawing.playSound("bounce.ogg", 0.25f, 0.7f);
-        this.inputText = "";
-    }
-
-    public void checkDeselect(double mx, double my, boolean valid)
-    {
+	public void checkDeselect(double mx, double my, boolean valid)
+	{
 		if (Game.game.window.touchscreen)
 		{
 			sizeX += 20;
@@ -501,6 +491,15 @@ public class TextBox implements IDrawable, ITrigger
 			Button.addEffect(this.posX, this.posY, this.sizeX - this.sizeY * (1 - 0.8), this.sizeY * 0.8, this.glowEffects, Math.random() * 4, 0.8, 0.25);
 	}
 
+	public void revert()
+	{
+		selected = false;
+		Panel.selectedTextBox = null;
+		this.inputText = this.previousInputText;
+		Drawing.drawing.playSound("bounce.ogg", 0.25f, 0.7f);
+		Game.game.window.showKeyboard = false;
+	}
+
 	public void checkKeys()
 	{
 		if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_ENTER))
@@ -512,12 +511,10 @@ public class TextBox implements IDrawable, ITrigger
 		if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_ESCAPE) && selected)
 		{
 			Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_ESCAPE);
-			selected = false;
-			Panel.selectedTextBox = null;
-			this.inputText = this.previousInputText;
-			Drawing.drawing.playSound("bounce.ogg", 0.25f, 0.7f);
-			Game.game.window.showKeyboard = false;
+			this.revert();
 		}
+
+		ArrayList<Character> texts = Game.game.window.getRawTextKeys();
 
 		Game.game.window.pressedKeys.clear();
 		Game.game.window.validPressedKeys.clear();
@@ -544,18 +541,9 @@ public class TextBox implements IDrawable, ITrigger
 			}
 		}
 
-		boolean caps = this.enableCaps && (Game.game.window.shift || Game.game.window.capsLock);
-
-		ArrayList<Integer> texts = Game.game.window.getRawTextKeys();
-
-		for (int key : texts)
+		for (char key : texts)
 		{
-			String text = Game.game.window.getTextKeyText(key);
-
-			if (text == null && key == InputCodes.KEY_SPACE)
-				text = " ";
-
-			inputKey(Game.game.window.translateTextKey(key), text, caps);
+			inputKey(key);
 		}
 
 		texts.clear();
@@ -566,32 +554,23 @@ public class TextBox implements IDrawable, ITrigger
 		try
 		{
 			if (checkMaxValue)
-				if (Double.parseDouble(inputText) > this.maxValue)
+				if (Integer.parseInt(inputText) > this.maxValue)
 					inputText = (int) this.maxValue + "";
 
 			if (checkMinValue)
-				if (Double.parseDouble(inputText) < this.minValue)
+				if (Integer.parseInt(inputText) < this.minValue)
 					inputText = (int) this.minValue + "";
 		}
 		catch (Exception ignored) {}
 	}
 
-	public void inputKey(int key, String text, boolean caps)
+	public void inputKey(char key)
 	{
-		if (this.enableCaps && (key == InputCodes.KEY_LEFT_SHIFT || key == InputCodes.KEY_RIGHT_SHIFT))
-			return;
-
-		if (key == InputCodes.KEY_SPACE)
-			text = " ";
-
-		text = text.replace("Keypad ", "");
-
-		if (key == InputCodes.KEY_BACKSPACE || key == '\b')
+		if (key == '\b')
 			inputText = inputText.substring(0, Math.max(0, inputText.length() - 1));
-
-		else if (text != null && inputText.length() + text.length() <= maxChars)
+		else if (this.inputText.length() < this.maxChars)
 		{
-			if (text.equals(" "))
+			if (key == ' ')
 			{
 				if (allowSpaces)
 				{
@@ -603,114 +582,68 @@ public class TextBox implements IDrawable, ITrigger
 			}
 			else
 			{
-				if (allowAll)
+				if (allowAll && Game.game.window.fontRenderer.supportsChar(key))
 				{
-					inputText += text;
+					inputText += key;
 					return;
 				}
 
 				if (allowDots)
 				{
-					if (".".contains(text))
-						inputText += text;
+					if (key == '.')
+						inputText += key;
 				}
 
-				if ((allowNegatives || Game.allowAllNumbers) && inputText.length() == 0)
+				if (allowNegatives && inputText.length() == 0)
 				{
-					if ("-".contains(text))
-						inputText += text;
+					if ('-' == key)
+						inputText += key;
 				}
 
-				if ((allowDoubles || Game.allowAllNumbers) && !inputText.contains("."))
+				if (allowDoubles && !inputText.contains("."))
 				{
-					if (".".contains(text))
-						inputText += text;
+					if ('.' == key)
+						inputText += key;
 				}
 
 				if (enablePunctuation)
 				{
-					if (enableCaps && caps && "1234567890-=[]\\;',./`".contains(text))
-					{
-						if ("1".contains(text))
-							inputText += "!";
-						else if ("2".contains(text))
-							inputText += "@";
-						else if ("3".contains(text))
-							inputText += "#";
-						else if ("4".contains(text))
-							inputText += "$";
-						else if ("5".contains(text))
-							inputText += "%";
-						else if ("6".contains(text))
-							inputText += "^";
-						else if ("7".contains(text))
-							inputText += "&";
-						else if ("8".contains(text))
-							inputText += "*";
-						else if ("9".contains(text))
-							inputText += "(";
-						else if ("0".contains(text))
-							inputText += ")";
-						else if ("-".contains(text))
-							inputText += "_";
-						else if ("=".contains(text))
-							inputText += "+";
-						else if ("`".contains(text))
-							inputText += "~";
-						else if ("[".contains(text))
-							inputText += "{";
-						else if ("]".contains(text))
-							inputText += "}";
-						else if ("\\".contains(text))
-							inputText += "|";
-						else if (";".contains(text))
-							inputText += ":";
-						else if ("'".contains(text))
-							inputText += "\"";
-						else if (",".contains(text))
-							inputText += "<";
-						else if (".".contains(text))
-							inputText += ">";
-						else if ("/".contains(text))
-							inputText += "?";
-
-						return;
-					}
-					else if ("-=[]\\;',./`!@#$%^&*()_+~{}|:\"<>?".contains(text))
-						inputText += text;
+					if ("-=[]\\;',./`!@#$%^&*()_+~{}|:\"<>?".contains(key + ""))
+						inputText += key;
 				}
 				else if (allowColons)
 				{
-					if (";".contains(text) || ":".contains(text))
-						inputText += ":";
+					if (';' == key || ':' == key)
+						inputText += ':';
 				}
 
 				if (allowLetters)
 				{
-					if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(text))
+					if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".contains(key + ""))
 					{
 						if (enableCaps)
 						{
-							if (caps)
-								inputText += text.toUpperCase();
-							else
-								inputText += text;
+							inputText += key;
 						}
 						else if (lowerCase)
-							inputText += text.toLowerCase();
+							inputText += Character.toLowerCase(key);
 						else
-							inputText += text.toUpperCase();
+							inputText += Character.toUpperCase(key);
 					}
 				}
 
 				if (allowNumbers)
 				{
-					if ("1234567890".contains(text))
+					if ("1234567890".contains(key + ""))
 					{
-						inputText += text;
+						inputText += key;
 					}
 				}
 			}
+		}
+		else
+		{
+			this.flashAnimation = 1;
 		}
 	}
 
@@ -733,7 +666,7 @@ public class TextBox implements IDrawable, ITrigger
 
 		for (int i = 0; i < s.length(); i++)
 		{
-			this.inputKey(0, s.substring(i, i + 1).toLowerCase(), Character.isUpperCase(s.charAt(i)));
+			this.inputKey(s.charAt(i));
 		}
 	}
 
@@ -844,4 +777,14 @@ public class TextBox implements IDrawable, ITrigger
 		this.translatedLabelText = Translation.translate(this.rawLabelText, objects);
 	}
 
+
+	@Override
+	public void updateKeybind()
+	{
+		if (this.keybind != null && this.keybind.isValid())
+		{
+			this.keybind.invalidate();
+			this.function.run();
+		}
+	}
 }

@@ -43,6 +43,7 @@ public class RotationSelector<T extends GameObject> extends NumberSelector<T>
         try
         {
             Object sel = getPropertyBase();
+            Object obj = getObjectProp();
 
             if (!Objects.equals(sel, prevObject))
             {
@@ -63,6 +64,11 @@ public class RotationSelector<T extends GameObject> extends NumberSelector<T>
     public Object getProperty()
     {
         return this.number * Math.PI / 2;
+    }
+
+    public void setProperty(Object o)
+    {
+        super.setProperty(((double) o) / (Math.PI / 2));
     }
 
     @Override

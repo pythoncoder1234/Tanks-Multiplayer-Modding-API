@@ -73,8 +73,6 @@ public class ScreenControlsEditor extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         if (page == 0)
         {
             pause.update();
@@ -133,6 +131,7 @@ public class ScreenControlsEditor extends ScreenOptionsOverlay
         previous.update();
 
         ScreenOverlayControls.overlay.update();
+        super.update();
     }
 
     @Override

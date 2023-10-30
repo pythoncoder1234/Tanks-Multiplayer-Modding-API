@@ -1,5 +1,6 @@
 package tanks.obstacle;
 
+import basewindow.IBatchRenderableObject;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Movable;
@@ -94,7 +95,9 @@ public class ObstacleBreakable extends Obstacle
     {
         this.lastFallAnimation = this.fallAnimation;
         this.fallAnimation = Math.max(0, this.fallAnimation - Panel.frameFrequency * 2);
-        //this.allowBounce = this.fallAnimation <= 0;
+
+        if (this.fallAnimation != this.lastFallAnimation)
+            Game.redrawObstacles.add(this);
     }
 
     @Override
@@ -157,17 +160,12 @@ public class ObstacleBreakable extends Obstacle
         return this.stackHeight * Game.tile_size - Math.pow(this.fallAnimation / 100, 2) * Game.tile_size;
     }
 
-    public boolean positionChanged()
-    {
-        return this.fallAnimation != this.lastFallAnimation || super.positionChanged();
-    }
-
-    public void drawTile(double r, double g, double b, double d, double extra)
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         if (Obstacle.draw_size < Game.tile_size || extra != 0 || this.fallAnimation > 0)
         {
             Drawing.drawing.setColor(r, g, b);
-            Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d * (1 - Obstacle.draw_size / Game.tile_size));
+            Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d * (1 - Obstacle.draw_size / Game.tile_size));
         }
     }
 }

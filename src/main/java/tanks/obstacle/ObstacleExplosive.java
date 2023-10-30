@@ -7,6 +7,7 @@ import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
 import tanks.network.event.EventObstacleDestroy;
+import tanks.rendering.ShaderExplosive;
 import tanks.tank.*;
 
 public class ObstacleExplosive extends Obstacle implements IAvoidObject
@@ -39,6 +40,8 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
             if (!Game.fancyTerrain)
                 this.stackColorG[i] = 100;
         }
+
+        this.renderer = ShaderExplosive.class;
 
         this.destroyEffectAmount = 0;
         this.checkForObjects = true;

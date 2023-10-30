@@ -146,14 +146,22 @@ public class ScreenSaveLevel extends Screen implements ILevelPreviewScreen
 
     public void drawLevel()
     {
-        for (Effect e: Game.tracks)
-            drawables[0].add(e);
-
         for (Movable m: Game.movables)
             drawables[m.drawLevel].add(m);
 
-        for (Obstacle o: Game.obstacles)
-            drawables[o.drawLevel].add(o);
+        if (Game.enable3d && /*(Obstacle.draw_size <= 0 || Obstacle.draw_size >= Game.tile_size) && */Game.game.window.shapeRenderer.supportsBatching)
+        {
+            for (Obstacle o : Game.obstacles)
+            {
+                if (!o.batchDraw)
+                    drawables[o.drawLevel].add(o);
+            }
+        }
+        else
+        {
+            for (Obstacle o : Game.obstacles)
+                drawables[o.drawLevel].add(o);
+        }
 
         for (Effect e: Game.effects)
             drawables[7].add(e);

@@ -4,6 +4,7 @@ import basewindow.BaseFile;
 import tanks.Crusade;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.Panel;
 import tanks.gui.Button;
 import tanks.gui.SpeedrunTimer;
 import tanks.translation.Translation;
@@ -69,26 +70,9 @@ public class ScreenCrusadeDetails extends Screen
         }
     });
 
-    public Button edit = new Button(this.centerX, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Edit", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            if (crusade.started)
-                Game.screen = new ScreenCrusadeEditWarning(Game.screen, crusade);
-            else
-                Game.screen = new ScreenCrusadeEditor(crusade);
-        }
-    });
+    public Button edit = new Button(this.centerX, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Edit", () -> Game.screen = new ScreenCrusadeEditor(crusade));
 
-    public Button delete = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Delete crusade", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.screen = new ScreenConfirmDeleteCrusade(((ScreenCrusadeDetails) Game.screen), crusade);
-        }
-    });
+    public Button delete = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Delete crusade", () -> Game.screen = new ScreenConfirmDeleteCrusade(((ScreenCrusadeDetails) Game.screen), crusade));
 
     public Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () ->
     {
@@ -132,7 +116,7 @@ public class ScreenCrusadeDetails extends Screen
         if (Game.previewCrusades)
             this.forceInBounds = true;
 
-        if (c.levels.size() == 0)
+        if (c.levels.isEmpty())
         {
             begin.enabled = false;
             begin.enableHover = true;
@@ -140,7 +124,7 @@ public class ScreenCrusadeDetails extends Screen
         }
 
         if (crusade.description != null)
-            this.levelsTextOffset += this.objYSpace;
+            this.levelsTextOffset += (int) this.objYSpace;
 
         if (!c.internal)
         {
@@ -186,7 +170,7 @@ public class ScreenCrusadeDetails extends Screen
             back.posY += addY;
 
             levelsTextOffset = (int) (resume.posY - this.centerY + this.objYSpace / 2 + addY / 3);
-            sizeY += this.description.size() * 0.5;
+            sizeY += this.description.size() * 0.75;
 
             if (crusade.started)
                 back2.posY = (crusade.internal ? startOver.posY : delete.posY) + this.objYSpace;
@@ -245,7 +229,17 @@ public class ScreenCrusadeDetails extends Screen
     public void draw()
     {
         if (Game.previewCrusades)
+        {
             this.background.draw();
+
+            if (!Game.game.window.drawingShadow)
+                Game.game.window.clearDepth();
+
+            Panel.darkness = Math.max(Panel.darkness - Panel.frameFrequency * 3, 0);
+
+            Drawing.drawing.setColor(0, 0, 0, Math.max(0, Panel.darkness));
+            Game.game.window.shapeRenderer.fillRect(0, 0, Game.game.window.absoluteWidth, Game.game.window.absoluteHeight - Drawing.drawing.statsHeight);
+        }
         else
             this.drawDefaultBackground();
 

@@ -115,6 +115,5 @@ public class ChoiceSelector<T extends GameObject, V> extends LevelEditorSelector
             selectedChoice = choices.get(index);
         else
             selectedChoice = null;
-
     }
 }

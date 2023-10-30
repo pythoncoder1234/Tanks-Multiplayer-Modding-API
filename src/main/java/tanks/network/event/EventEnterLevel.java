@@ -38,17 +38,21 @@ public class EventEnterLevel extends PersonalEvent
 	@Override
 	public void write(ByteBuf b)
 	{
-		b.writeBoolean(Crusade.currentCrusade != null && Crusade.currentCrusade.replay);
+		if (!Game.vanillaMode)
+			b.writeBoolean(Crusade.currentCrusade != null && Crusade.currentCrusade.replay);
 	}
 
 	@Override
 	public void read(ByteBuf b)
 	{
-		boolean replay = b.readBoolean();
-		if (Crusade.currentCrusade != null)
+		if (!Game.vanillaMode)
 		{
-			prevReplay = Crusade.currentCrusade.replay;
-			Crusade.currentCrusade.replay = replay;
+			boolean replay = b.readBoolean();
+			if (Crusade.currentCrusade != null)
+			{
+				prevReplay = Crusade.currentCrusade.replay;
+				Crusade.currentCrusade.replay = replay;
+			}
 		}
 	}
 }

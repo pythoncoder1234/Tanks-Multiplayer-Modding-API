@@ -58,25 +58,15 @@ public class TankNPC extends TankDummy implements ISyncable
 
     public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b)
     {
-        this(name, x, y, angle, messageList, tagName, r, g, b, r, g, b, new ArrayList<>());
+        this(name, x, y, angle, messageList, tagName, r, g, b, new ArrayList<>());
     }
 
     public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, Item... shop)
     {
-        this(name, x, y, angle, messageList, tagName, r, g, b, r, g, b, new ArrayList<>(Arrays.asList(shop)));
-    }
-
-    public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, double nameR, double nameG, double nameB, Item... shop)
-    {
-        this(name, x, y, angle, messageList, tagName, r, g, b, nameR, nameG, nameB, new ArrayList<>(Arrays.asList(shop)));
+        this(name, x, y, angle, messageList, tagName, r, g, b, new ArrayList<>(Arrays.asList(shop)));
     }
 
     public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, ArrayList<Item> shop)
-    {
-        this(name, x, y, angle, messageList, tagName, r, g, b, r, g, b, shop);
-    }
-
-    public TankNPC(String name, int x, int y, double angle, MessageList messageList, String tagName, double r, double g, double b, double nameR, double nameG, double nameB, ArrayList<Item> shop)
     {
         super("npc", x * 50 + 25, y * 50 + 25, angle);
 
@@ -86,11 +76,11 @@ public class TankNPC extends TankDummy implements ISyncable
         this.npcName = name;
         this.shopItems = shop;
         this.tagName = tagName;
-        this.showName = tagName != null && tagName.length() > 0;
+        this.showName = tagName != null && !tagName.isEmpty();
         this.emblem = null;
 
         if (this.showName)
-            this.nameTag = new NameTag(this, 0, this.size / 7 * 5, this.size / 2, tagName, nameR, nameG, nameB);
+            this.nameTag = new NameTag(this, 0, this.size / 7 * 5, this.size / 2, tagName);
 
         this.colorR = r;
         this.colorG = g;
@@ -101,7 +91,7 @@ public class TankNPC extends TankDummy implements ISyncable
 
         this.invulnerable = true;
         this.targetable = false;
-        this.collisionPush = false;
+        this.enableCollision = false;
         this.mandatoryKill = false;
 
         this.messageDisplay = new NPCMessage(this);
@@ -252,11 +242,6 @@ public class TankNPC extends TankDummy implements ISyncable
         b.writeDouble(this.colorB);
 
         b.writeInt(this.networkID);
-
-        b.writeBoolean(this.nameTag != null);
-        if (this.nameTag != null)
-            this.nameTag.writeTo(b);
-
         b.writeInt(this.shopItems.size());
         for (Item i : this.shopItems)
             NetworkUtils.writeString(b, i.toString());
@@ -270,13 +255,6 @@ public class TankNPC extends TankDummy implements ISyncable
                 b.readDouble(), b.readDouble(), b.readDouble());
 
         t.networkID = b.readInt();
-
-        if (b.readBoolean())
-        {
-            t.nameTag = NameTag.readFrom(b);
-            t.nameTag.movable = t;
-            t.showName = true;
-        }
 
         int size = b.readInt();
         for (int i = 0; i < size; i++)

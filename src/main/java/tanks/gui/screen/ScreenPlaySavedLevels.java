@@ -131,19 +131,15 @@ public class ScreenPlaySavedLevels extends Screen
 
 		this.sort.draw();
 
-		if (levels.buttons.size() <= 0)
+        if (levels.buttons.isEmpty())
 		{
 			Drawing.drawing.setColor(0, 0, 0);
 			Drawing.drawing.setInterfaceFontSize(24);
 
-			if (search.inputText.length() > 0)
-			{
-				Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, "No levels found");
-			}
+            if (!search.inputText.isEmpty())
+                Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, "No levels found");
 			else
-			{
-				Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, "You have no levels");
-			}
+                Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, "You have no levels");
 		}
 
 		Drawing.drawing.setInterfaceFontSize(this.titleSize);

@@ -56,7 +56,10 @@ public class EventLoadLevel extends PersonalEvent
 			ScreenPartyLobby.includedPlayers.clear();
 			Game.cleanUp();
 
-			Game.currentLevel = new Level(level);
+			if (Game.vanillaMode && level.startsWith("minigame="))
+				Game.currentGame = Game.registryMinigame.minigames.get(level.substring(level.indexOf("=") + 1)).getConstructor().newInstance();
+			else
+				Game.currentLevel = new Level(level);
 
 			Game.currentLevel.startTime = startTime;
 			Game.currentLevel.disableFriendlyFire = disableFriendlyFire;

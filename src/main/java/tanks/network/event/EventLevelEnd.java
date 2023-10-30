@@ -101,17 +101,20 @@ public class EventLevelEnd extends PersonalEvent
 	public void write(ByteBuf b) 
 	{
 		b.writeBoolean(crusade);
-		if (!crusade)
+		if (!crusade || Game.vanillaMode)
 		{
 			NetworkUtils.writeString(b, this.winningTeams);
-			
-			b.writeBoolean(custom);
-			if (custom)
+
+			if (!Game.vanillaMode)
 			{
-				NetworkUtils.writeString(b, this.wt);
-				NetworkUtils.writeString(b, this.lt);
-				NetworkUtils.writeString(b, this.ws);
-				NetworkUtils.writeString(b, this.ls);
+				b.writeBoolean(custom);
+				if (custom)
+				{
+					NetworkUtils.writeString(b, this.wt);
+					NetworkUtils.writeString(b, this.lt);
+					NetworkUtils.writeString(b, this.ws);
+					NetworkUtils.writeString(b, this.ls);
+				}
 			}
 		}
 		else
@@ -126,25 +129,32 @@ public class EventLevelEnd extends PersonalEvent
 	@Override
 	public void read(ByteBuf b)
 	{
-		this.crusade = b.readBoolean();
+		if (!Game.vanillaMode)
+			this.crusade = b.readBoolean();
+
 		if (!this.crusade)
 		{
 			this.winningTeams = NetworkUtils.readString(b);
-			
-			if (b.readBoolean())
+
+			if (!Game.vanillaMode)
 			{
-				this.wt = NetworkUtils.readString(b);
-				this.lt = NetworkUtils.readString(b);
-				this.ws = NetworkUtils.readString(b);
-				this.ls = NetworkUtils.readString(b);
+				if (b.readBoolean())
+				{
+					this.wt = NetworkUtils.readString(b);
+					this.lt = NetworkUtils.readString(b);
+					this.ws = NetworkUtils.readString(b);
+					this.ls = NetworkUtils.readString(b);
+				}
 			}
 		}
-		else
+		else if (!Game.vanillaMode)
 		{
 			this.levelPassed = b.readBoolean();
 			this.currentLevel = b.readInt();
 			this.win = b.readBoolean();
 			this.lose = b.readBoolean();
 		}
+		else
+			winningTeams = NetworkUtils.readString(b);
 	}
 }

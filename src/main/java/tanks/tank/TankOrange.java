@@ -26,6 +26,7 @@ public class TankOrange extends TankAIControlled
 		this.mineAvoidSensitivity = 1;
 
 		this.bullet.maxLiveBullets = 0;
+		this.bullet.accuracy = 5;
 		this.bullet.bulletClass = BulletFlame.class;
 		this.bullet.cooldownBase = 0;
 		this.cooldownBase = 0;

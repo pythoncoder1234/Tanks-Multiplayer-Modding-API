@@ -5,6 +5,8 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBoxSlider;
+import tanks.network.event.EventSendTankColors;
+import tanks.network.event.EventUpdateTankColors;
 import tanks.tank.TankPlayer;
 import tanks.tank.Turret;
 
@@ -52,7 +54,6 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
         }
     });
 
-
     public ScreenOptionsPlayerColor()
     {
         if (Drawing.drawing.interfaceScaleZoom > 1)
@@ -69,6 +70,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
                 colorRed.inputText = colorRed.previousInputText;
 
             Game.player.colorR = Integer.parseInt(colorRed.inputText);
+            updateColorParty();
         }
                 , Game.player.colorR, 0, 255, 1);
 
@@ -85,6 +87,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
                 colorGreen.inputText = colorGreen.previousInputText;
 
             Game.player.colorG = Integer.parseInt(colorGreen.inputText);
+            updateColorParty();
         }
                 , Game.player.colorG, 0, 255, 1);
 
@@ -101,6 +104,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
                 colorBlue.inputText = colorBlue.previousInputText;
 
             Game.player.colorB = Integer.parseInt(colorBlue.inputText);
+            updateColorParty();
         }
                 , Game.player.colorB, 0, 255, 1);
 
@@ -117,6 +121,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
                 colorRed2.inputText = colorRed2.previousInputText;
 
             Game.player.turretColorR = Integer.parseInt(colorRed2.inputText);
+            updateColorParty();
         }
                 , Game.player.turretColorR, 0, 255, 1);
 
@@ -133,6 +138,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
                 colorGreen2.inputText = colorGreen2.previousInputText;
 
             Game.player.turretColorG = Integer.parseInt(colorGreen2.inputText);
+            updateColorParty();
         }
                 , Game.player.turretColorG, 0, 255, 1);
 
@@ -149,6 +155,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
                 colorBlue2.inputText = colorBlue2.previousInputText;
 
             Game.player.turretColorB = Integer.parseInt(colorBlue2.inputText);
+            updateColorParty();
         }
                 , Game.player.turretColorB, 0, 255, 1);
 
@@ -191,11 +198,17 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
     }
 
+    public void updateColorParty()
+    {
+        if (ScreenPartyHost.isServer)
+            Game.eventsOut.add(new EventUpdateTankColors(Game.player));
+        else if (ScreenPartyLobby.isClient)
+            Game.eventsOut.add(new EventSendTankColors(Game.player));
+    }
+
     @Override
     public void update()
     {
-        super.update();
-
         colorRed.update();
         colorGreen.update();
         colorBlue.update();
@@ -225,6 +238,8 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
         if (swag)
             chroma.update();
+
+        super.update();
     }
 
     public void setupButtons(boolean initial)
@@ -325,14 +340,10 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
             chroma.draw();
 
         enableSecondary.draw();
-
         preview.draw();
-
         back.draw();
 
-
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.setColor(0, 0, 0);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Tank color");
     }
 }

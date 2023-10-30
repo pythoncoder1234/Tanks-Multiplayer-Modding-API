@@ -49,7 +49,7 @@ public class NumberSelector<T extends GameObject> extends LevelEditorSelector<T>
 
     public void changeMetadata(int add)
     {
-        this.number += add;
+        this.number += add * step;
 
         if (loop)
         {

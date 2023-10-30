@@ -1,12 +1,16 @@
 package tanks;
 
-import tanks.gui.screen.Screen;
+import tanks.eventlistener.DamageListener;
+import tanks.gui.menus.FixedMenu;
+import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenInterlevel;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.network.EventMinigameStart;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.tank.TankPlayerRemote;
+
+import java.util.HashSet;
 
 /**
  * The base class you extend to create modded minigames.<br><br>
@@ -15,7 +19,7 @@ import tanks.tank.TankPlayerRemote;
  * class and register it in {@link ModAPI#registerGames()}. You can test it by going to
  * Singleplayer -> Minigames -> the class name of your minigame.<br><br>
  * <p>
- * The default <code>Minigame</code> class does nothing, so implement functions such as {@link #start()}.
+ * The default <code>Minigame</code> class does nothing, so implement functions such as {@link #startBase()}.
  * <br><br>
  * <p>
  * You can look at {@link tanks.minigames.TeamDeathmatch TeamDeathmatch} for reference.
@@ -54,11 +58,6 @@ public abstract class Minigame
     public boolean enableShooting = true;
     public boolean enableLayingMines = true;
 
-    /**
-     * Unfinished feature by Aehmttw
-     */
-    public boolean flashBackground = false;
-
     /** Whether the minigame is remote. You can also use <code>ScreenPartyLobby.isClient</code>. */
     public boolean remote = false;
 
@@ -71,8 +70,13 @@ public abstract class Minigame
         }
     }
 
-    /** Initialize the minigame here. Make sure to call <code>super.start()</code>! */
+    /** Initialize the minigame here. */
     public void start()
+    {
+
+    }
+
+    public void startBase()
     {
         ModAPI.fixedMenus.clear();
         ScreenInterlevel.fromMinigames = true;
@@ -80,20 +84,25 @@ public abstract class Minigame
         if (!ScreenPartyLobby.isClient && enableRemote)
             Game.eventsOut.add(new EventMinigameStart(this.name));
 
-        Game.screen.splitTiles = flashBackground;
-
-        if (this.flashBackground)
-        {
-            Game.screen.tiles = new Screen.FlashingTile[Game.currentSizeX][Game.currentSizeY];
-
-            for (int i = 0; i < Game.screen.tiles.length; i++)
-            {
-                for (int j = 0; j < Game.screen.tiles[i].length; j++)
+        DamageListener.add(tanks ->
                 {
-                    Game.screen.tiles[i][j] = new Screen.FlashingTile(i, j);
-                }
-            }
-        }
+                    for (DamageListener.DamagedTank dt : tanks)
+                    {
+                        for (FixedMenu m : ModAPI.fixedMenus)
+                        {
+                            if (m instanceof Scoreboard s)
+                            {
+                                if (s.objectiveType.equals(Scoreboard.objectiveTypes.kills))
+                                    s.addTankScore(dt.attacker, 1);
+                                else if (s.objectiveType.equals(Scoreboard.objectiveTypes.deaths))
+                                    s.addTankScore(dt.target, 1);
+                            }
+                        }
+                    }
+
+                    this.onKill(tanks);
+                }, true);
+        start();
     }
 
     /**
@@ -125,12 +134,17 @@ public abstract class Minigame
         Game.screen = new ScreenInterlevel();
     }
 
-    /**
-     * Override to do something when a tank destroys another tank
-     */
+    /** Override to do something when a tank destroys another tank */
     public void onKill(Tank attacker, Tank target)
     {
 
+    }
+
+    /** Override to do something when a tank destroys another tank */
+    public void onKill(HashSet<DamageListener.DamagedTank> tanks)
+    {
+        for (DamageListener.DamagedTank t : tanks)
+            onKill(t.attacker, t.target);
     }
 
     public String generateKillMessage(Tank target, Tank attacker, boolean isBullet)
@@ -152,7 +166,7 @@ public abstract class Minigame
         return getName(killed) + "\u00a7000000000255 drowned (nice)";
     }
 
-    public StringBuilder getName(Tank t)
+    public static String getName(Tank t)
     {
         StringBuilder message = new StringBuilder();
 
@@ -200,6 +214,6 @@ public abstract class Minigame
             message.append(outputName);
         }
 
-        return message;
+        return message.toString();
     }
 }

@@ -75,7 +75,7 @@ public class BulletHealing extends BulletInstant
 
 		Drawing.drawing.playGlobalSound("heal2.ogg", (float) ((Math.min(t.health, t.baseHealth + 1) / (t.baseHealth + 1) / 2) + 1f) / 2, freq / 2);
 
-		Game.eventsOut.add(new EventTankUpdateHealth(t));
+		Game.eventsOut.add(new EventTankUpdateHealth(t, this));
 
 		t.addAttribute(new AttributeModifier("healray", AttributeModifier.healray, Operation.add, 1.0));
 

@@ -1,12 +1,14 @@
 package tanks;
 
+import basewindow.IBatchRenderableObject;
 import tanks.bullet.Bullet;
-import tanks.minigames.Arcade;
 import tanks.gui.screen.ScreenGame;
+import tanks.minigames.Arcade;
 import tanks.obstacle.Obstacle;
+import tanks.rendering.TrackRenderer;
 import tanks.tank.Turret;
 
-public class Effect extends Movable implements IDrawableWithGlow
+public class Effect extends Movable implements IDrawableWithGlow, IDrawableLightSource, IBatchRenderableObject
 {
     public enum EffectType {fire, smokeTrail, trail, ray, explosion, laser, piece, obstaclePiece, obstaclePiece3d, charge, tread, darkFire, electric, healing, stun, bushBurn, glow, teleporterLight, teleporterPiece, interfacePiece, interfacePieceSparkle, snow, shield, boostLight, exclamation, chain, tutorialProgress}
 
@@ -35,6 +37,8 @@ public class Effect extends Movable implements IDrawableWithGlow
 
     public int initialGridX;
     public int initialGridY;
+
+    public double[] lightInfo = new double[7];
 
     //Effects that have this set to true are removed faster when the level has ended
     public boolean fastRemoveOnExit = false;
@@ -121,6 +125,7 @@ public class Effect extends Movable implements IDrawableWithGlow
             this.maxAge = Math.random() * 100 + 50;
         else if (type == EffectType.obstaclePiece3d)
         {
+            this.size = Math.random() * 10;
             this.maxAge = Math.random() * 150 + 75;
             this.force = true;
         }
@@ -138,9 +143,7 @@ public class Effect extends Movable implements IDrawableWithGlow
         }
         else if (type == EffectType.tread)
         {
-            this.maxAge = 510;
-            if (Game.effectsEnabled)
-                this.maxAge *= 2;
+            this.maxAge = TrackRenderer.getMaxTrackAge();
         }
         else if (type == EffectType.darkFire)
             this.maxAge = 20;
@@ -175,6 +178,7 @@ public class Effect extends Movable implements IDrawableWithGlow
             this.maxAge = 50;
         else if (type == EffectType.chain || type == EffectType.tutorialProgress)
         {
+            this.drawLayer = 9;
             this.maxAge = 100;
             this.size = Game.tile_size * 2;
         }
@@ -228,7 +232,7 @@ public class Effect extends Movable implements IDrawableWithGlow
             return;
 
         if (this.age < 0)
-            throw new RuntimeException("Effect with negative age");
+            this.age = 0;
 
         double opacityMultiplier = ScreenGame.finishTimer / ScreenGame.finishTimerMax;
         Drawing drawing = Drawing.drawing;
@@ -347,7 +351,7 @@ public class Effect extends Movable implements IDrawableWithGlow
         }
         else if (this.type == EffectType.obstaclePiece3d)
         {
-            double size = 1 + (12.5 * (1 - this.age / this.maxAge));
+            double size = 1 + (this.size * (1 - this.age / this.maxAge));
             drawing.setColor(this.colR, this.colG, this.colB);
 
             drawing.fillBox(this.posX, this.posY, this.posZ, size, size, size);
@@ -361,19 +365,6 @@ public class Effect extends Movable implements IDrawableWithGlow
                 drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
             else
                 drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.tread)
-        {
-            double opacityFactor = 2;
-
-            if (Game.effectsEnabled)
-            {
-                opacityFactor = 4;
-            }
-
-            double opacity = (255 - this.age / opacityFactor) / 4;
-            drawing.setColor(0, 0, 0, opacity);
-            drawing.drawModel(Drawing.rotatedRect, this.posX, this.posY, this.posZ, size * Obstacle.draw_size / Game.tile_size, size * Obstacle.draw_size / Game.tile_size, 1, angle, 0, 0);
         }
         else if (this.type == EffectType.darkFire)
         {
@@ -500,15 +491,18 @@ public class Effect extends Movable implements IDrawableWithGlow
         }
         else if (this.type == EffectType.boostLight)
         {
+            if (Game.game.window.drawingShadow)
+                return;
+
             Drawing.drawing.setColor(255, 255, 255, 255, 1);
             Game.game.window.shapeRenderer.setBatchMode(true, true, true, true, false);
 
-            double max = (this.size);
+            double max = this.size;
             for (int i = 0; i < max; i++)
             {
                 double a = (max - i) / 400;
                 Drawing.drawing.setColor(255 * a, 255 * a, 200 * a, 255, 1.0);
-                Drawing.drawing.fillBox(this.posX, this.posY, i, Obstacle.draw_size, Obstacle.draw_size, 0, (byte) 62);
+                Drawing.drawing.fillBox(this.posX, this.posY, i, Game.tile_size, Game.tile_size, 0, (byte) 62);
             }
 
             Game.game.window.shapeRenderer.setBatchMode(false, true, true, true, false);
@@ -629,7 +623,7 @@ public class Effect extends Movable implements IDrawableWithGlow
         }
         else
         {
-            Game.exitToCrash(new RuntimeException("Invalid effect type!"));
+            throw new RuntimeException("Invalid effect type!");
         }
     }
 
@@ -642,7 +636,7 @@ public class Effect extends Movable implements IDrawableWithGlow
             return;
 
         if (this.age < 0)
-            Game.exitToCrash(new RuntimeException("Effect with negative age"));
+            this.age = 0;
 
         Drawing drawing = Drawing.drawing;
 
@@ -778,9 +772,14 @@ public class Effect extends Movable implements IDrawableWithGlow
             this.state = State.removed;
 
             if (Game.effects.contains(this) && !Game.removeEffects.contains(this))
+            {
                 Game.removeEffects.add(this);
+            }
             else if (Game.tracks.contains(this) && !Game.removeTracks.contains(this))
+            {
+                Drawing.drawing.trackRenderer.remove(this);
                 Game.removeTracks.add(this);
+            }
         }
 
         if (this.type == EffectType.obstaclePiece3d)
@@ -790,7 +789,7 @@ public class Effect extends Movable implements IDrawableWithGlow
 
             boolean collidedX = false;
             boolean collidedY = false;
-            boolean collided = false;
+            boolean collided;
 
             if (x < 0 || x >= Game.currentSizeX)
                 collidedX = true;
@@ -862,5 +861,27 @@ public class Effect extends Movable implements IDrawableWithGlow
             this.prevGridX = (int) (this.posX / Game.tile_size);
             this.prevGridY = (int) (this.posY / Game.tile_size);
         }
+    }
+
+    public void firstDraw()
+    {
+        Drawing.drawing.setColor(0, 0, 0, 64);
+        Drawing.drawing.trackRenderer.addRect(this, this.posX, this.posY, this.posZ, size * Obstacle.draw_size / Game.tile_size, size * Obstacle.draw_size / Game.tile_size, angle);
+    }
+
+    @Override
+    public boolean lit()
+    {
+        return false;
+    }
+
+    @Override
+    public double[] getLightInfo()
+    {
+        this.lightInfo[3] = 4 * (1 - this.age / this.maxAge);
+        this.lightInfo[4] = 255;
+        this.lightInfo[5] = 200;
+        this.lightInfo[6] = 160;
+        return this.lightInfo;
     }
 }

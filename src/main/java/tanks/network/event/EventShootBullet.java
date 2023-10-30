@@ -79,31 +79,7 @@ public class EventShootBullet extends PersonalEvent
 		bullet.vY = this.vY;
 		bullet.vZ = this.vZ;
 		bullet.name = this.name;
-
-		switch (this.type)
-		{
-			case "none":
-				bullet.effect = Bullet.BulletEffect.none;
-				break;
-			case "trail":
-				bullet.effect = Bullet.BulletEffect.trail;
-				break;
-			case "fire":
-				bullet.effect = Bullet.BulletEffect.fire;
-				break;
-			case "fireTrail":
-				bullet.effect = Bullet.BulletEffect.fireTrail;
-				break;
-			case "darkFire":
-				bullet.effect = Bullet.BulletEffect.darkFire;
-				break;
-			case "ice":
-				bullet.effect = Bullet.BulletEffect.ice;
-				break;
-			case "ember":
-				bullet.effect = Bullet.BulletEffect.ember;
-				break;
-		}
+		bullet.effect = Bullet.BulletEffect.valueOf(this.type);
 
 		bullet.bounces = this.bounces;
 		bullet.damage = this.damage;

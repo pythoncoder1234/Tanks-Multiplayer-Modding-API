@@ -1,10 +1,8 @@
 package tanks;
 
-import basewindow.BaseFile;
-import basewindow.BaseFileManager;
-import basewindow.BaseWindow;
-import basewindow.ModelPart;
+import basewindow.*;
 import tanks.bullet.*;
+import tanks.eventlistener.EventListener;
 import tanks.extension.Extension;
 import tanks.extension.ExtensionRegistry;
 import tanks.generator.LevelGenerator;
@@ -17,16 +15,21 @@ import tanks.gui.menus.Animation;
 import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.OverlayEditorMenu;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
+import tanks.gui.screen.leveleditor.ScreenLevelEditorOverlay;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.ItemBar;
-import tanks.hotbar.item.*;
+import tanks.hotbar.item.Item;
+import tanks.hotbar.item.ItemBullet;
+import tanks.hotbar.item.ItemMine;
+import tanks.hotbar.item.ItemShield;
 import tanks.minigames.Arcade;
 import tanks.network.*;
-import tanks.network.event.EventSetMusic;
 import tanks.network.event.*;
 import tanks.network.event.online.*;
 import tanks.obstacle.*;
 import tanks.registry.*;
+import tanks.rendering.ShaderGroundOutOfBounds;
+import tanks.rendering.ShaderTracks;
 import tanks.tank.*;
 import tanks.translation.Translation;
 
@@ -67,19 +70,26 @@ public class Game
 	public static ArrayList<Effect> tracks = new ArrayList<>();
 	public static ArrayList<Cloud> clouds = new ArrayList<>();
 	public static SynchronizedList<Player> players = new SynchronizedList<>();
+
+	public static boolean redrawTiles = false;
+	/** Obstacles that need to change how they look next frame */
+	public static HashSet<Obstacle> redrawObstacles = new HashSet<>();
+	/** Ground tiles that need to be redrawn due to obstacles being added/removed over them */
+	public static HashSet<int[]> redrawGroundTiles = new HashSet<>();
+
 	public static Player player;
 
-	public static HashSet<Obstacle> prevObstacles = new HashSet<>();
-
-	public static ArrayList<Movable> removeMovables = new ArrayList<>();
-	public static ArrayList<Obstacle> removeObstacles = new ArrayList<>();
-	public static ArrayList<Effect> removeEffects = new ArrayList<>();
-	public static ArrayList<Effect> removeTracks = new ArrayList<>();
-	public static ArrayList<Cloud> removeClouds = new ArrayList<>();
+	public static HashSet<Movable> removeMovables = new HashSet<>();
+	public static HashSet<Obstacle> removeObstacles = new HashSet<>();
+	public static HashSet<Effect> removeEffects = new HashSet<>();
+	public static HashSet<Effect> removeTracks = new HashSet<>();
+	public static HashSet<Cloud> removeClouds = new HashSet<>();
 
 	public static Queue<Effect> recycleEffects = new LinkedList<>();
 
-	public static final HashSet<EventListener> eventListeners = new HashSet<>();
+	public static ArrayList<Effect> addEffects = new ArrayList<>();
+	public static final HashMap<Class<? extends INetworkEvent>, ArrayList<EventListener>> eventListeners = new HashMap<>();
+	public static final HashSet<EventListener> eventListenerSet = new HashSet<>();
 	public static final SynchronizedList<INetworkEvent> eventsOut = new SynchronizedList<>();
 	public static final SynchronizedList<INetworkEvent> eventsIn = new SynchronizedList<>();
 
@@ -92,11 +102,13 @@ public class Game
 	/** Use this if you want to spawn a mine not allied with any tank, or such*/
 	public static Tank dummyTank;
 
+	public static boolean vanillaMode = false;
+
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
     public static final String version = "Tanks v1.5.1";
-    public static final String ModAPIVersion = "Mod API v1.2.0a";
-    public static final int network_protocol = 51;
+    public static final String ModAPIVersion = "Mod API v1.2.b";
+    public static final int network_protocol = 50;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;
     public static int tileOffsetY = 0;
@@ -137,6 +149,7 @@ public class Game
 
 	public static boolean vsync = true;
 	public static int maxFPS = 0;
+	public static int networkRate = 60;
 
 	public static boolean enable3d = true;
 	public static boolean enable3dBg = true;
@@ -157,6 +170,7 @@ public class Game
 
 	public static boolean enableChatFilter = true;
 	public static boolean showSpeedrunTimer = false;
+	public static boolean nameInMultiplayer = true;
 
 	public static boolean previewCrusades = true;
 
@@ -214,10 +228,15 @@ public class Game
 	public static RegistryModelTank registryModelTank = new RegistryModelTank();
 	public static RegistryMinigame registryMinigame = new RegistryMinigame();
 
+	public final HashMap<Class<? extends ShaderGroup>, ShaderGroup> shaderInstances = new HashMap<>();
+	public ShaderGroundOutOfBounds shaderOutOfBounds;
+	public ShaderTracks shaderTracks;
+
 	public static boolean enableExtensions = false;
 	public static boolean autoLoadExtensions = true;
 	public static ExtensionRegistry extensionRegistry = new ExtensionRegistry();
 
+	public static ArrayList<Extension> brokenExtensions = new ArrayList<>();
 	public static Extension[] extraExtensions;
 	public static int[] extraExtensionOrder;
 
@@ -290,16 +309,15 @@ public class Game
 		NetworkEventMap.register(EventConnectionSuccess.class);
 		NetworkEventMap.register(EventKick.class);
 		NetworkEventMap.register(EventAnnounceConnection.class);
-		NetworkEventMap.register(EventSyncField.class);
 		NetworkEventMap.register(EventChat.class);
-		NetworkEventMap.register(EventCreateTank.class);
 		NetworkEventMap.register(EventPlayerChat.class);
 		NetworkEventMap.register(EventLoadLevel.class);
 		NetworkEventMap.register(EventEnterLevel.class);
-		NetworkEventMap.register(EventLevelEnd.class);
 		NetworkEventMap.register(EventLevelEndQuick.class);
+		NetworkEventMap.register(EventLevelEnd.class);
 		NetworkEventMap.register(EventReturnToLobby.class);
 		NetworkEventMap.register(EventBeginCrusade.class);
+		NetworkEventMap.register(EventReturnToCrusade.class);
 		NetworkEventMap.register(EventSendCrusadeStats.class);
 		NetworkEventMap.register(EventLoadCrusadeHotbar.class);
 		NetworkEventMap.register(EventSetupHotbar.class);
@@ -310,7 +328,6 @@ public class Game
 		NetworkEventMap.register(EventSetItemBarSlot.class);
 		NetworkEventMap.register(EventLoadItemBarSlot.class);
 		NetworkEventMap.register(EventUpdateCoins.class);
-		NetworkEventMap.register(EventUpdateLevelTime.class);
 		NetworkEventMap.register(EventPlayerReady.class);
 		NetworkEventMap.register(EventPlayerAutoReady.class);
 		NetworkEventMap.register(EventPlayerAutoReadyConfirm.class);
@@ -335,7 +352,7 @@ public class Game
 		NetworkEventMap.register(EventBulletDestroyed.class);
 		NetworkEventMap.register(EventBulletInstantWaypoint.class);
 		NetworkEventMap.register(EventBulletAddAttributeModifier.class);
-		NetworkEventMap.register(EventBulletElectricStunEffect.class);
+		NetworkEventMap.register(EventBulletStunEffect.class);
 		NetworkEventMap.register(EventBulletUpdateTarget.class);
 		NetworkEventMap.register(EventLayMine.class);
 		NetworkEventMap.register(EventMineRemove.class);
@@ -357,17 +374,18 @@ public class Game
 		NetworkEventMap.register(EventObstacleBoostPanelEffect.class);
 		NetworkEventMap.register(EventPlaySound.class);
 		NetworkEventMap.register(EventSendTankColors.class);
+		NetworkEventMap.register(EventUpdateTankColors.class);
 		NetworkEventMap.register(EventShareLevel.class);
 		NetworkEventMap.register(EventShareCrusade.class);
 		NetworkEventMap.register(EventItemDrop.class);
 		NetworkEventMap.register(EventItemPickup.class);
 		NetworkEventMap.register(EventItemDropDestroy.class);
-		NetworkEventMap.register(EventSetMusic.class);
 		NetworkEventMap.register(EventStatusEffectBegin.class);
 		NetworkEventMap.register(EventStatusEffectDeteriorate.class);
 		NetworkEventMap.register(EventStatusEffectEnd.class);
 		NetworkEventMap.register(EventArcadeHit.class);
 		NetworkEventMap.register(EventArcadeRampage.class);
+		NetworkEventMap.register(EventClearMovables.class);
 		NetworkEventMap.register(EventArcadeFrenzy.class);
 		NetworkEventMap.register(EventArcadeEnd.class);
 		NetworkEventMap.register(EventArcadeBonuses.class);
@@ -656,7 +674,7 @@ public class Game
 		catch (FileNotFoundException e)
 		{
 			Game.logger = System.err;
-			Game.logger.println(new Date().toString() + " (syswarn) logfile not found despite existence of tanks directory! using stderr instead.");
+			Game.logger.println(new Date() + " (syswarn) logfile not found despite existence of tanks directory! using stderr instead.");
 		}
 
 		BaseFile optionsFile = Game.game.fileManager.getFile(Game.homedir + Game.optionsPath);
@@ -680,8 +698,18 @@ public class Game
 			}
 		}
 
-		for (Extension e: extensionRegistry.extensions)
-			e.setUp();
+		for (Extension e : extensionRegistry.extensions)
+		{
+			try
+			{
+				e.setUp();
+			}
+			catch (Throwable ex)
+			{
+				ex.printStackTrace();
+				brokenExtensions.add(e);
+			}
+		}
 
 		for (RegistryTank.TankEntry e: registryTank.tankEntries)
 			e.initialize();
@@ -700,16 +728,7 @@ public class Game
 	public static void createModels()
 	{
 		Tank.health_model = Drawing.drawing.createModel();
-		Drawing.rotatedRect = Drawing.drawing.createModel();
-
 		TankModels.initialize();
-
-		Drawing.rotatedRect.shapes = new ModelPart.Shape[1];
-		Drawing.rotatedRect.shapes[0] = new ModelPart.Quad(
-				new ModelPart.Point(-0.5, -0.5, 0),
-				new ModelPart.Point(0.5, -0.5, 0),
-				new ModelPart.Point(0.5, 0.5, 0),
-				new ModelPart.Point(-0.5, 0.5, 0), 1);
 
 		double innerHealthEdge = 0.55;
 		double outerHealthEdge = 0.575;
@@ -849,6 +868,19 @@ public class Game
 		e.execute();
 	}
 
+	public static void addObstacle(Obstacle o)
+	{
+		o.removed = false;
+		Game.obstacles.add(o);
+		Game.redrawObstacles.add(o);
+
+		int x = (int) (o.posX / Game.tile_size);
+		int y = (int) (o.posY / Game.tile_size);
+
+		if (x >= 0 && y >= 0 && x < Game.currentSizeX && y < Game.currentSizeY)
+			Game.redrawGroundTiles.add(new int[]{x, y});
+	}
+
 	public static boolean usernameInvalid(String username)
 	{
 		if (username.length() > 20)
@@ -909,7 +941,7 @@ public class Game
 
 	public static String formatString(String s)
 	{
-		if (s.length() == 0)
+		if (s.isEmpty())
 			return s;
 		else if (s.length() == 1)
 			return s.toUpperCase();
@@ -926,7 +958,6 @@ public class Game
             r.run();
 
         Game.currentGame = null;
-        Game.eventListeners.clear();
         ItemBar.overrideState = false;
         ScreenInterlevel.fromMinigames = false;
         ObstacleTeleporter.exitCooldown = 100;
@@ -963,6 +994,12 @@ public class Game
 
 		e.printStackTrace();
 
+		if (Game.screen instanceof ScreenLevelEditor)
+			((ScreenLevelEditor) Game.screen).save();
+
+		if (Game.screen instanceof ScreenLevelEditorOverlay)
+			((ScreenLevelEditorOverlay) Game.screen).editor.save();
+
 		if (ScreenPartyHost.isServer && ScreenPartyHost.server != null)
 			ScreenPartyHost.server.close("The party has ended because the host crashed");
 
@@ -990,7 +1027,7 @@ public class Game
 		}
 
 		Game.crashTime = System.currentTimeMillis();
-		Game.logger.println(new Date().toString() + " (syserr) the game has crashed! below is a crash report, good luck:");
+		Game.logger.println(new Date() + " (syserr) the game has crashed! below is a crash report, good luck:");
 		e.printStackTrace(Game.logger);
 
 		if (!(Game.screen instanceof ScreenCrashed) && !(Game.screen instanceof ScreenOutOfMemory))
@@ -1009,9 +1046,7 @@ public class Game
 
 				f.println(e.toString());
 				for (StackTraceElement el: e.getStackTrace())
-				{
-					f.println("at " + el.toString());
-				}
+                    f.println("at " + el.toString());
 
 				f.println("\nSystem properties:");
 				Properties p = System.getProperties();
@@ -1058,7 +1093,7 @@ public class Game
         Game.tilesFlash = new double[28][18];
         Game.game.heightGrid = new double[28][18];
         Game.game.groundHeightGrid = new double[28][18];
-        Game.obstacleGrid = null;
+        Game.obstacleGrid = new Obstacle[28][18];
         Game.surfaceTileGrid = null;
 
         double var = 0;
@@ -1153,6 +1188,9 @@ public class Game
 
 	public static void loadTankMusic()
 	{
+		if (!Game.game.window.soundsEnabled)
+			return;
+
 		ArrayList<String> music = Game.game.fileManager.getInternalFileContents("/music/tank/tank_music.txt");
 
 		HashSet<String> loadedMusics = new HashSet<>();
@@ -1254,7 +1292,10 @@ public class Game
 
 	public static void silentCleanUp()
 	{
+		Game.eventListeners.clear();
+		Game.eventListenerSet.clear();
 		IAvoidObject.avoidances.clear();
+
 		obstacles.clear();
 		tracks.clear();
 		movables.clear();
@@ -1272,7 +1313,7 @@ public class Game
 
 		Game.player.hotbar = new Hotbar();
 
-		if (!Crusade.crusadeMode)
+		if (!Crusade.crusadeMode || Game.player.hotbar.itemBar == null)
 		{
 			Game.player.hotbar.coins = 0;
 			Game.player.hotbar.enabledCoins = false;
@@ -1371,11 +1412,11 @@ public class Game
 
 			if (ia != ib)
 				return ia - ib;
-			else if ((la.toString().length() == 0 || lb.toString().length() == 0) && la.toString().length() + lb.toString().length() > 0)
+			else if ((la.toString().isEmpty() || lb.toString().isEmpty()) && la.toString().length() + lb.toString().length() > 0)
 				return lb.toString().length() - la.toString().length();
 			else if (la.toString().length() != lb.toString().length())
 				return la.toString().length() - lb.toString().length();
-			else if (!la.toString().equals(lb.toString()))
+			else if (!la.toString().contentEquals(lb))
 				return la.toString().compareTo(lb.toString());
 		}
 

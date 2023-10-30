@@ -3,7 +3,6 @@ package tanks.gui.screen;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
-import tanks.gui.ChatMessage;
 
 public class ScreenPartyCrusades extends ScreenCrusades
 {
@@ -16,7 +15,6 @@ public class ScreenPartyCrusades extends ScreenCrusades
     @Override
     public void update()
     {
-        super.update();
     }
 
     @Override

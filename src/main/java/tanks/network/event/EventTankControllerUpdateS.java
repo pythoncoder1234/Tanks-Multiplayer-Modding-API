@@ -53,17 +53,21 @@ public class EventTankControllerUpdateS extends EventTankUpdate
             if (t instanceof TankRemote)
             {
                 TankRemote r = (TankRemote) t;
-                double iTime = Math.max(0.1, (time - r.lastUpdate) / 10.0);
+                double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
 
-                r.interpolatedOffX = this.posX - (t.posX - r.interpolatedOffX * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
-                r.interpolatedOffY = this.posY - (t.posY - r.interpolatedOffY * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
+                r.prevKnownPosX = r.posX;
+                r.prevKnownPosY = r.posY;
+                r.prevKnownVX = r.vX;
+                r.prevKnownVY = r.vY;
+                r.prevKnownVXFinal = r.lastFinalVX;
+                r.prevKnownVYFinal = r.lastFinalVY;
 
-                r.angleRate = angle - r.angle;
-                r.angleRate %= Math.PI * 2;
-                if (r.angleRate > Math.PI)
-                    r.angleRate = r.angleRate - Math.PI * 2;
+                r.currentKnownPosX = this.posX;
+                r.currentKnownPosY = this.posY;
+                r.currentKnownVX = this.vX;
+                r.currentKnownVY = this.vY;
 
-                r.interpolatedProgress = 0;
+                r.timeSinceRefresh = 0;
                 r.interpolationTime = iTime;
                 r.lastUpdate = time;
             }
@@ -72,6 +76,8 @@ public class EventTankControllerUpdateS extends EventTankUpdate
             t.posY = this.posY;
             t.vX = this.vX;
             t.vY = this.vY;
+
+            t.angle = this.angle;
         }
     }
 }

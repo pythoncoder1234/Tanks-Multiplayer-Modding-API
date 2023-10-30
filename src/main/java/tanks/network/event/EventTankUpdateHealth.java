@@ -3,43 +3,44 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Effect;
 import tanks.Game;
+import tanks.GameObject;
 import tanks.tank.Tank;
 
 public class EventTankUpdateHealth extends PersonalEvent
 {
-	public int tank;
+	public Tank tank;
 	public double health;
+	public GameObject source;
 	
 	public EventTankUpdateHealth()
 	{
 		
 	}
 	
-	public EventTankUpdateHealth(Tank t)
+	public EventTankUpdateHealth(Tank t, GameObject source)
 	{
-		tank = t.networkID;
+		tank = t;
 		health = t.health;
+		this.source = source;
 	}
 	
 	@Override
 	public void execute() 
 	{
-		Tank t = Tank.idMap.get(tank);
-
-		if (t == null || this.clientID != null)
+		if (tank == null || this.clientID != null)
 			return;
 
-		if (t.health > health && health > 0)
-			t.flashAnimation = 1;
+		if (tank.health > health && health > 0)
+			tank.flashAnimation = 1;
 
-		double before = t.health;
-		t.health = health;
+		double before = tank.health;
+		tank.health = health;
 
-		if (t.health > 6 && (int) (before) != (int) (t.health))
+		if (tank.health > 6 && (int) before != (int) tank.health)
 		{
-			Effect e = Effect.createNewEffect(t.posX, t.posY, t.posZ + t.size * 0.75, Effect.EffectType.shield);
-			e.size = t.size;
-			e.radius = t.health - 1;
+			Effect e = Effect.createNewEffect(tank.posX, tank.posY, tank.posZ + tank.size * 0.75, Effect.EffectType.shield);
+			e.size = tank.size;
+			e.radius = tank.health - 1;
 			Game.effects.add(e);
 		}
 	}
@@ -47,14 +48,14 @@ public class EventTankUpdateHealth extends PersonalEvent
 	@Override
 	public void write(ByteBuf b) 
 	{
-		b.writeInt(this.tank);
+		b.writeInt(this.tank.networkID);
 		b.writeDouble(this.health);
 	}
 
 	@Override
 	public void read(ByteBuf b)
 	{
-		this.tank = b.readInt();
+		this.tank = Tank.idMap.get(b.readInt());
 		this.health = b.readDouble();
 	}
 }

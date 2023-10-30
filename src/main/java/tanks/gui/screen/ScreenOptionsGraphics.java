@@ -157,8 +157,6 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         terrain.update();
         bulletTrails.update();
         glow.update();
@@ -185,7 +183,11 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
             antialiasing.unselectedColG = 255;
             antialiasing.unselectedColB = 255;
         }
-    }    Button terrain = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
+
+        super.update();
+    }
+
+    Button terrain = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -203,8 +205,6 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
                 Game.resetTiles();
             else
                 Game.currentLevel.reloadTiles();
-
-            Drawing.drawing.forceRedrawTerrain();
         }
     },
             "Fancy terrain enables varied block and---ground colors------May impact performance on large levels");
@@ -293,8 +293,6 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
                 Game.resetTiles();
             else
                 Game.currentLevel.reloadTiles();
-
-            Drawing.drawing.forceRedrawTerrain();
         }
     },
             "3D graphics may impact performance");
@@ -315,8 +313,6 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
                 Game.resetTiles();
             else
                 Game.currentLevel.reloadTiles();
-
-            Drawing.drawing.forceRedrawTerrain();
         }
     },
             "Enabling 3D ground may impact---performance in large levels");
@@ -438,8 +434,4 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
     Button shadows = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsShadows(), "Shadows are quite graphically intense---and may significantly reduce framerate");
 
     Button effects = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsEffects(), "Particle effects may significantly---impact performance");
-
-
-
-
 }

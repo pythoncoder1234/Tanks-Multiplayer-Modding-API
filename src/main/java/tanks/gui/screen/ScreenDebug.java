@@ -180,8 +180,6 @@ public class ScreenDebug extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         test.update();
         traceAllRays.update();
         followingCam.update();
@@ -195,6 +193,8 @@ public class ScreenDebug extends ScreenOptionsOverlay
         pathfinding.update();
         allNums.update();
         back.update();
+
+        super.update();
     }
 
     Button invulnerable = new Button(this.centerX - this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()

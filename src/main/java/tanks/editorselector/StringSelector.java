@@ -42,6 +42,6 @@ public class StringSelector<T extends GameObject> extends LevelEditorSelector<T>
     @Override
     public void changeMetadata(int add)
     {
-        // meow
+
     }
 }

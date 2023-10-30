@@ -18,15 +18,17 @@ public class ScreenOptionsMisc extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         back.update();
         speedrunOptions.update();
         extensionOptions.update();
         pauseOnDefocus.update();
         fullStats.update();
         autostart.update();
-    }    Button autostart = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
+
+        super.update();
+    }
+
+    Button autostart = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()

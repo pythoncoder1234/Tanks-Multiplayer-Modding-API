@@ -47,8 +47,6 @@ public class ScreenControlsMinimap extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         if (page == 0)
         {
             toggle.update();
@@ -73,6 +71,7 @@ public class ScreenControlsMinimap extends ScreenOptionsOverlay
         next.update();
 
         ScreenOverlayControls.overlay.update();
+        super.update();
     }
 
     @Override

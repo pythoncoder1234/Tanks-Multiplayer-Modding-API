@@ -133,6 +133,11 @@ public abstract class GameObject implements Cloneable
         postInitSelectors();
     }
 
+    public void refreshSelectorValue()
+    {
+        this.forAllSelectors(s -> s.prevObject = s.getPropertyBase());
+    }
+
     public int saveOrder(int index)
     {
         return index;

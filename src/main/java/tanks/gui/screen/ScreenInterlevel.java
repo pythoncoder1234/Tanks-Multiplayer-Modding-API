@@ -59,7 +59,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		try
 		{
 			Game.currentGame = Game.currentGame.getClass().getConstructor().newInstance();
-			Game.currentGame.start();
+            Game.currentGame.startBase();
 		}
 		catch (Exception e)
 		{
@@ -159,7 +159,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 			Game.exitToTitle();
 	});
 
-	Button back = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Back to my levels", () ->
+    Button back = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Back to my levels", () ->
 	{
 		Game.cleanUp();
 		System.gc();
@@ -192,7 +192,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 			f.startWriting();
 			f.println("Certificate of completion:");
 			f.println("Tanks: The Crusades tutorial");
-			f.println("Completed " + new Date().toString());
+            f.println("Completed " + new Date());
 			f.stopWriting();
 		}
 		catch (Exception e)

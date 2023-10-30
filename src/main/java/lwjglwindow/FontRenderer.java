@@ -41,6 +41,11 @@ public class FontRenderer extends BaseFontRenderer
 		this.image = fontFile;
 	}
 
+	public boolean supportsChar(char c)
+	{
+		return this.chars.indexOf(c) >= 0;
+	}
+
 	protected int drawChar(double x, double y, double z, double sX, double sY, char c, boolean depthtest)
 	{
 		int i = this.chars.indexOf(c);
@@ -129,8 +134,7 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-
-			if (c[i] == '\u00A7')
+			else if (c[i] == '\u00A7')
 				i += 12;
 			else if (this.chars.indexOf(c[i]) == -1)
 				c[i] = '?';

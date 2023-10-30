@@ -1,6 +1,7 @@
 package tanks.editorselector;
 
 import tanks.Consumer;
+import tanks.Game;
 import tanks.GameObject;
 import tanks.gui.Button;
 import tanks.gui.input.InputBindingGroup;
@@ -171,6 +172,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
     {
         changeMetadata(add);
         update();
+        ScreenLevelEditor.selectors.put(this.id, this);
     }
 
     public void load() {}
@@ -198,7 +200,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
 
     public boolean modified()
     {
-        if (!updated)
+        if (Game.currentLevel.updateModify && !updated)
             update();
 
         return modified;

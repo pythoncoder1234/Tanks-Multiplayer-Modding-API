@@ -11,7 +11,11 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
 {
     public TextBox levelName;
 
-    public Button back = new Button(this.centerX, (int) (this.centerY + this.objYSpace * 2), this.objWidth, this.objHeight, "Back", this::escape);
+    public Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3, this.objWidth, this.objHeight, "Back", this::escape);
+
+    public Button crusadeImport = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "Import from crusade", () -> Game.screen = new OverlayCrusadeImport(Game.screen, this.editor));
+
+    public Button undoImport = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "Undo import", () -> Game.screen = new OverlayCrusadeImport(Game.screen, this.editor, true));
 
     public Button colorOptions = new Button(this.centerX - this.objXSpace / 2, this.centerY, this.objWidth, this.objHeight, "Background colors", () -> Game.screen = new OverlayLevelOptionsColor(Game.screen, editor));
 
@@ -34,7 +38,7 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
             BaseFile file = Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + screenLevelEditor.name);
 
             String input = levelName.inputText.replace(" ", "_");
-            if (levelName.inputText.length() > 0 && !Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + input + ".tanks").exists())
+            if (!levelName.inputText.isEmpty() && !Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + input + ".tanks").exists())
             {
                 if (file.exists())
                     file.renameTo(Game.homedir + Game.levelDir + "/" + input + ".tanks");
@@ -47,13 +51,11 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
                 //screenLevelBuilder.reload(false);
             }
             else
-            {
-                levelName.inputText =  screenLevelEditor.name.split("\\.")[0].replace("_", " ");
-            }
+                levelName.inputText = screenLevelEditor.name.split("\\.")[0].replace("_", " ");
 
         },  screenLevelEditor.name.split("\\.")[0].replace("_", " "));
 
-        levelName.maxChars = 18;
+        levelName.maxChars = 35;
         levelName.enableCaps = true;
         screenLevelEditor.modified = true;
 
@@ -63,6 +65,8 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
     public void update()
     {
         this.levelName.update();
+        this.crusadeImport.update();
+        this.undoImport.update();
         this.back.update();
 
         this.sizeOptions.update();
@@ -73,6 +77,13 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
         this.itemOptions.update();
         this.timerOptions.update();
 
+        if (Game.game.input.editorCopy.isValid() && Game.game.window.shift)
+        {
+            Game.game.input.editorCopy.invalidate();
+            Game.game.window.setClipboard(this.editor.level.levelString);
+            Drawing.drawing.playSound("bullet_explode.ogg", 2f, 0.3f);
+        }
+
         super.update();
     }
 
@@ -81,6 +92,8 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
         super.draw();
 
         this.levelName.draw();
+        this.crusadeImport.draw();
+        this.undoImport.draw();
         this.back.draw();
 
         this.timerOptions.draw();

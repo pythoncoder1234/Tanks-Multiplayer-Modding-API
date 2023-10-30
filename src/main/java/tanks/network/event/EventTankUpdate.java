@@ -1,10 +1,11 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Game;
 import tanks.tank.Tank;
 import tanks.tank.TankRemote;
 
-public class EventTankUpdate extends PersonalEvent
+public class EventTankUpdate extends PersonalEvent implements IStackableEvent
 {
 	public int tank;
 	public double posX;
@@ -19,9 +20,9 @@ public class EventTankUpdate extends PersonalEvent
 
 	public EventTankUpdate()
 	{
-		
+
 	}
-	
+
 	public EventTankUpdate(Tank t)
 	{
 		this.tank = t.networkID;
@@ -33,7 +34,7 @@ public class EventTankUpdate extends PersonalEvent
 		this.angle = t.angle;
 		this.pitch = t.pitch;
 	}
-	
+
 	@Override
 	public void write(ByteBuf b)
 	{
@@ -44,11 +45,13 @@ public class EventTankUpdate extends PersonalEvent
 		b.writeDouble(this.vY);
 		b.writeDouble(this.angle);
 		b.writeDouble(this.pitch);
-		b.writeDouble(this.damageRate);
+
+		if (!Game.vanillaMode)
+			b.writeDouble(this.damageRate);
 	}
 
 	@Override
-	public void read(ByteBuf b) 
+	public void read(ByteBuf b)
 	{
 		this.tank = b.readInt();
 		this.posX = b.readDouble();
@@ -57,40 +60,60 @@ public class EventTankUpdate extends PersonalEvent
 		this.vY = b.readDouble();
 		this.angle = b.readDouble();
 		this.pitch = b.readDouble();
-		this.damageRate = b.readDouble();
+
+		if (!Game.vanillaMode)
+			this.damageRate = b.readDouble();
 	}
 
 	@Override
 	public void execute()
 	{
 		Tank t = Tank.idMap.get(this.tank);
-		
+
 		if (t != null && this.clientID == null)
 		{
-			if (t instanceof TankRemote)
+			t.damageRate = this.damageRate;
+
+			if (t instanceof TankRemote r)
 			{
-				TankRemote r = (TankRemote) t;
-				double iTime = Math.max(0.1, (time - r.lastUpdate) / 10.0);
+				double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
 
-				r.trueAngle = angle;
-				r.angleRate = angle - r.angle;
-				r.angleRate %= Math.PI * 2;
-				if (r.angleRate > Math.PI)
-					r.angleRate = r.angleRate - Math.PI * 2;
+				r.prevKnownPosX = r.posX;
+				r.prevKnownPosY = r.posY;
+				r.prevKnownVX = r.vX;
+				r.prevKnownVY = r.vY;
+				r.prevKnownVXFinal = r.lastFinalVX;
+				r.prevKnownVYFinal = r.lastFinalVY;
 
-				r.interpolatedOffX = this.posX - (t.posX - r.interpolatedOffX * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
-				r.interpolatedOffY = this.posY - (t.posY - r.interpolatedOffY * (r.interpolationTime - r.interpolatedProgress) / r.interpolationTime);
-				r.interpolatedProgress = 0;
+				r.currentKnownPosX = this.posX;
+				r.currentKnownPosY = this.posY;
+				r.currentKnownVX = this.vX;
+				r.currentKnownVY = this.vY;
+
+				r.timeSinceRefresh = 0;
 				r.interpolationTime = iTime;
 				r.lastUpdate = time;
-			}
 
-			t.posX = this.posX;
-			t.posY = this.posY;
-			t.vX = this.vX;
-			t.vY = this.vY;
-			t.pitch = this.pitch;
-			t.damageRate = damageRate;
+				r.lastAngle = r.angle;
+				r.lastPitch = r.pitch;
+				r.currentAngle = this.angle;
+				r.currentPitch = this.pitch;
+			}
+			else
+			{
+				t.posX = this.posX;
+				t.posY = this.posY;
+				t.vX = this.vX;
+				t.vY = this.vY;
+				t.angle = this.angle;
+				t.pitch = this.pitch;
+			}
 		}
+	}
+
+	@Override
+	public int getIdentifier()
+	{
+		return this.tank;
 	}
 }

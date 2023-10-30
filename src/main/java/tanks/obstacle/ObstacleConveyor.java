@@ -6,9 +6,12 @@ import tanks.editorselector.LevelEditorSelector;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
+import tanks.tank.TankAIControlled;
 
 public class ObstacleConveyor extends Obstacle
 {
+    public static float speedMult = 1f;
+    public static float speedAdj = -0.5f;
     public static final StatusEffect conveyor_effect = new StatusEffect("conveyor_speed",
             new AttributeModifier(AttributeModifier.max_speed, AttributeModifier.Operation.add, 0));
 
@@ -17,7 +20,8 @@ public class ObstacleConveyor extends Obstacle
     public boolean connectedBack = false;
 
     public int multX, multY;
-    public int speed = 1;
+    public double speed = 1;
+    public double finishedSpeed = 1;
 
     public ObstacleConveyor(String name, double posX, double posY)
     {
@@ -39,15 +43,19 @@ public class ObstacleConveyor extends Obstacle
         this.description = "A conveyor belt that moves tanks and mines forward";
     }
 
-    protected static boolean valid(int x, int y)
+    protected static boolean valid(int x, int y, double rotation)
     {
-        return x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && Game.obstacleGrid[x][y] instanceof ObstacleConveyor;
+        if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
+            return false;
+
+        return x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY
+                && Game.obstacleGrid[x][y] instanceof ObstacleConveyor && Game.obstacleGrid[x][y].rotation == rotation;
     }
 
     @Override
     public void draw()
     {
-        double offset = (age * this.speed) % 50 - 25;
+        double offset = (age * finishedSpeed * this.speed * speedMult + (finishedSpeed >= 1 ? speedAdj : 1)) % 50 - 25;
         double percent = (offset + 25) / 50;
 
         Drawing.drawing.setColor(0, 0, 0);
@@ -76,6 +84,9 @@ public class ObstacleConveyor extends Obstacle
                 s *= 1.25 - percent / 2;
         }
 
+        if (!(Game.screen instanceof ScreenGame))
+            s *= 2;
+
         if (connectedBack || connectedFront || age % 100 < 50)
             Drawing.drawing.fill3dPolygon(this.posX + offset * multX, this.posY + offset * multY, 15, 3, this.rotation, this, 0, 0, s / 2, s / 2, 0, s, 0, 0);
     }
@@ -83,7 +94,13 @@ public class ObstacleConveyor extends Obstacle
     @Override
     public void drawOutline(double r, double g, double b, double a)
     {
-        super.drawOutline(0, 0, 0, 255);
+        super.drawOutline(0, 0, 0, a / 4);
+        double s = draw_size * 0.25;
+
+        Drawing.drawing.setColor(0, 0, 0, a / 4);
+        Drawing.drawing.fillRect(this.posX, this.posY, draw_size, draw_size);
+        Drawing.drawing.setColor(r, g, b);
+        Drawing.drawing.fillPolygon(posX, posY, this.rotation, 0, 0, s / 2, s / 2, 0, s, 0, 0);
     }
 
     @Override
@@ -102,7 +119,7 @@ public class ObstacleConveyor extends Obstacle
         Drawing.drawing.setColor(0, 0, 0);
         Drawing.drawing.fillInterfaceRect(x, y, draw_size, draw_size);
         Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
-        Drawing.drawing.fillPolygon(x, y, 0, true, 0, 0, s / 2, s / 2, 0, s, 0, 0);
+        Drawing.drawing.fillPolygon(x, y, 0, 0, 0, s / 2, s / 2, 0, s, 0, 0);
     }
 
     @Override
@@ -117,17 +134,27 @@ public class ObstacleConveyor extends Obstacle
     @Override
     public void postInitSelectors()
     {
+        super.postInitSelectors();
+
         GroupIdSelector selector = (GroupIdSelector) this.selectors.get(0);
 
-        selector.id = "speed_selector";
+        selector.id = "speed";
         selector.title = "Speed";
         selector.min = 1;
-        selector.number = 1;
         selector.max = 10;
         selector.image = "icons/speed.png";
-        selector.buttonText = "Speed: %.0f";
+        selector.allowDecimals = true;
+        selector.objectProperty = "speed";
+        selector.buttonText = "Speed: %.1f";
 
-        super.registerSelectors();
+        if (!selector.modified)
+            selector.number = 4;
+    }
+
+    @Override
+    public int unfavorability(TankAIControlled t)
+    {
+        return this.speed >= 3 ? 100 : 3;
     }
 
     @Override
@@ -144,16 +171,13 @@ public class ObstacleConveyor extends Obstacle
         int x = (int) (posX / Game.tile_size);
         int y = (int) (posY / Game.tile_size);
 
-        if (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing)
-        {
-            connectedFront = Game.obstacleGrid[x + multX][y + multY] instanceof ObstacleConveyor;
-            connectedBack = Game.obstacleGrid[x - multX][y - multY] instanceof ObstacleConveyor;
-        }
+        connectedFront = valid(x + multX, y + multY, rotation);
+        connectedBack = valid(x - multX, y - multY, rotation);
+
+        if (ScreenGame.finishedQuick)
+            finishedSpeed = Math.max(0, finishedSpeed - Panel.frameFrequency / 700);
         else
-        {
-            connectedFront = true;
-            connectedBack = true;
-        }
+            finishedSpeed = 1;
     }
 
     @Override
@@ -163,11 +187,12 @@ public class ObstacleConveyor extends Obstacle
         if (m instanceof Tank)
             friction = ((Tank) m).friction * ((Tank) m).frictionModifier;
 
-        double moveX = speed * Panel.frameFrequency * multX;
-        double moveY = speed * Panel.frameFrequency * multY;
+        double moveX = (speed * Panel.frameFrequency * speedMult + speedAdj) * multX;
+        double moveY = (speed * Panel.frameFrequency * speedMult + speedAdj) * multY;
 
-        conveyor_effect.attributeModifiers[0].value = speed;
-        m.addStatusEffect(conveyor_effect, 0, speed / friction / 2, speed / friction / 2);
+        double sp = speed * speedMult + speedAdj;
+        conveyor_effect.attributeModifiers[0].value = sp;
+        m.addStatusEffect(conveyor_effect, 0, sp / friction / 2, sp / friction / 2);
 
         if (!(m instanceof Mine))
         {
@@ -181,12 +206,6 @@ public class ObstacleConveyor extends Obstacle
             m.vX += moveX / 50 * Panel.frameFrequency;
             m.vY += moveY / 50 * Panel.frameFrequency;
         }
-    }
-
-    @Override
-    public boolean colorChanged()
-    {
-        return age > 0;
     }
 
     @Override

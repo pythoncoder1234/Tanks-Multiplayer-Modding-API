@@ -36,7 +36,7 @@ public class ItemShield extends Item
         if (t.health > max)
             t.health = max;
 
-        Game.eventsOut.add(new EventTankUpdateHealth(t));
+        Game.eventsOut.add(new EventTankUpdateHealth(t, this));
 
         Drawing.drawing.playGlobalSound("shield.ogg");
 

@@ -18,8 +18,6 @@ public class Cloud implements IDrawable, IBatchRenderableObject
     public double[] sizeY = new double[5];
     public double[] sizeZ = new double[5];
 
-    private boolean redrawn;
-
     public Cloud()
     {
         if (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing)
@@ -55,7 +53,7 @@ public class Cloud implements IDrawable, IBatchRenderableObject
         {
             int brightness = (int) (255 * (1.25 - this.relativeZ[i] / 70) * Panel.skylight);
             Drawing.drawing.setColor(brightness, brightness, brightness, 128 * fade);
-            Drawing.drawing.fillBox(this, posX + relativeX[i], posY + relativeY[i], posZ + relativeZ[i], sizeX[i], sizeY[i], sizeZ[i], (byte) 0);
+            Drawing.drawing.fillBox(posX + relativeX[i], posY + relativeY[i], posZ + relativeZ[i], sizeX[i], sizeY[i], sizeZ[i], (byte) 0);
         }
     }
 
@@ -66,29 +64,5 @@ public class Cloud implements IDrawable, IBatchRenderableObject
 
         if (relativeX[0] < -Game.tile_size * 5 || relativeX[0] > (Game.currentSizeX + 5) * Game.tile_size)
             Game.removeClouds.add(this);
-    }
-
-    @Override
-    public boolean positionChanged()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean colorChanged()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean wasRedrawn()
-    {
-        return redrawn;
-    }
-
-    @Override
-    public void setRedrawn(boolean b)
-    {
-        redrawn = b;
     }
 }

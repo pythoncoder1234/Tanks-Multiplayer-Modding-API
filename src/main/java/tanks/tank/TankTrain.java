@@ -162,13 +162,6 @@ public class TankTrain extends Tank implements IAvoidObject
                         this.nameTag.name = parts[2].replaceAll("\\+\\+", "-");
                     }
 
-                    if (parts.length > 5)
-                    {
-                        this.nameTag.colorR = Double.parseDouble(parts[3]);
-                        this.nameTag.colorG = Double.parseDouble(parts[4]);
-                        this.nameTag.colorB = Double.parseDouble(parts[5]);
-                    }
-
                     t = t1;
                     break;
                 }

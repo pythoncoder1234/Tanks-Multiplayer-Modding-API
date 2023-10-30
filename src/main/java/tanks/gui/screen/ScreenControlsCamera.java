@@ -17,8 +17,6 @@ public class ScreenControlsCamera extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         toggleZoom.update();
         zoomIn.update();
         zoomOut.update();
@@ -28,6 +26,7 @@ public class ScreenControlsCamera extends ScreenOptionsOverlay
         cameraZoom.update();
 
         ScreenOverlayControls.overlay.update();
+        super.update();
     }
 
     @Override

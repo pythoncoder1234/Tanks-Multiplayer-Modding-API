@@ -1,6 +1,5 @@
 package tanks;
 
-import basewindow.BaseFile;
 import basewindow.BaseFontRenderer;
 import basewindow.BaseShapeRenderer;
 import tanks.gui.menus.FixedMenu;
@@ -14,7 +13,6 @@ import tanks.network.NetworkEventMap;
 import tanks.network.event.*;
 import tanks.tank.*;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,8 +56,8 @@ public class ModAPI
         NetworkEventMap.register(EventCreateScoreboard.class);
         NetworkEventMap.register(EventChangeBackgroundColor.class);
         NetworkEventMap.register(EventChangeNPCMessage.class);
+        NetworkEventMap.register(EventCreateTank.class);
         NetworkEventMap.register(EventClearMenuGroup.class);
-        NetworkEventMap.register(EventClearMovables.class);
         NetworkEventMap.register(EventClearNPCShop.class);
         NetworkEventMap.register(EventCustomLevelEndCondition.class);
         NetworkEventMap.register(EventDisableMinimap.class);
@@ -70,9 +68,12 @@ public class ModAPI
         NetworkEventMap.register(EventPurchaseNPCItem.class);
         NetworkEventMap.register(EventSetHotbar.class);
         NetworkEventMap.register(EventSetObstacle.class);
+        NetworkEventMap.register(EventSetMusic.class);
+        NetworkEventMap.register(EventSyncField.class);
         NetworkEventMap.register(EventScoreboardUpdateScore.class);
         NetworkEventMap.register(EventSortNPCShopButtons.class);
         NetworkEventMap.register(EventSkipCountdown.class);
+        NetworkEventMap.register(EventUpdateLevelTime.class);
 
         fixedShapes = Game.game.window.shapeRenderer;
         fixedText = Game.game.window.fontRenderer;
@@ -119,32 +120,9 @@ public class ModAPI
      */
     public static String getInternalLevelString(String filePath, boolean print)
     {
-        StringBuilder levelString = new StringBuilder();
-
-        BaseFile level = Game.game.fileManager.getFile(filePath);
-        try
-        {
-            level.startReading();
-
-            while (level.hasNextLine())
-            {
-                String line = level.nextLine();
-
-                if (print)
-                    System.out.println(line);
-
-                levelString.append(line).append("\n");
-            }
-
-            level.stopReading();
-
-            return levelString.toString();
-        }
-
-        catch (IOException e)
-        {
-            throw new RuntimeException("Level \"" + filePath + "\" not found");
-        }
+        String s = String.join("\n", Game.game.fileManager.getInternalFileContents(filePath));
+        if (print) System.out.println(s);
+        return s;
     }
 
     /**
@@ -293,29 +271,12 @@ public class ModAPI
         return Math.sqrt((t.posX - x) * (t.posX - x) + (t.posY - y) * (t.posY - y));
     }
 
-    @Deprecated
-    public static ArrayList<Tank> withinRange(double x, double y, double size)
-    {
-        ArrayList<Tank> output = new ArrayList<>();
-
-        for (Movable m : Game.movables)
-        {
-            if (m instanceof Tank)
-            {
-                Tank t = (Tank) m;
-
-                if (Math.pow(t.posX - (x * 50 + 25), 2) + Math.pow(t.posY - (y * 50 + 25), 2) <= (size * 50) * (size * 50))
-                    output.add(t);
-            }
-        }
-
-        return output;
-    }
-
     /**
-     * Tests if any {@link Tank} is within the radius of an area (in pixels).
+     * Tests if any {@link Tank} is within the radius of an area (in pixels or tiles,
+     * which is determined by the <code>isTileCoords</code> parameter).
      * Sorted in ascending order, by distance.
      *
+     * @param isTileCoords Whether the radius is in pixels or game tiles, which are 50 pixels by 50 pixels.
      * @return A list of map entries. The key returns the <code>Tank</code>,
      * and the value returns the distance from the location of the xy coordinates.
      * @see Map.Entry#getKey()

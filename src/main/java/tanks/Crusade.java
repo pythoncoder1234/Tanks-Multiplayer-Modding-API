@@ -34,6 +34,9 @@ public class Crusade
 
 	public double timePassed = 0;
 
+	/** The character in the description that represents the comma. */
+	public static final String commaChar = "•";
+
 	public static class CrusadeLevel
 	{
 		public String levelName;
@@ -122,7 +125,7 @@ public class Crusade
 			{
 				String s = f.nextLine();
 				
-				if (!s.equals(""))
+				if (!s.isEmpty())
 					list.add(s);
 
 				c.append(s).append("\n");
@@ -143,6 +146,7 @@ public class Crusade
 	public void initialize(ArrayList<String> levelArray, String name)
 	{
 		int parsing = -1;
+		int propertiesLine = 1;
 		
 		int i = 0;
 
@@ -151,64 +155,58 @@ public class Crusade
 		while (i < levelArray.size())
 		{
 			String s = levelArray.get(i);
-			switch (s.toLowerCase())
-			{
-				case "levels":
-					parsing = 0;
-					break;
-				case "items":
-					parsing = 1;
-					break;
-				case "properties":
-					parsing = 2;
-					break;
-				case "tanks":
-					parsing = 3;
-					break;
-				default:
-					if (parsing == 0)
-					{
-						String lvl = levelArray.get(i);
-						String lvlName;
+            switch (s.toLowerCase())
+            {
+                case "levels" -> parsing = 0;
+                case "items" -> parsing = 1;
+                case "properties" -> parsing = 2;
+                case "tanks" -> parsing = 3;
+                default ->
+                {
+                    switch (parsing)
+                    {
+                        case 0 ->
+                        {
+                            String lvl = levelArray.get(i);
+                            String lvlName;
+                            if (levelArray.get(i).contains("name="))
+                                lvlName = (levelArray.get(i).substring(levelArray.get(i).indexOf("name=") + 5));
+                            else
+                                lvlName = ("Battle " + (levels.size() + 1));
+                            this.levels.add(new CrusadeLevel(lvlName, lvl));
+                        }
+                        case 1 -> this.crusadeItems.add(Item.parseItem(null, s));
+                        case 2 ->
+                        {
+							if (propertiesLine == 1)
+							{
+								String[] z = s.split(",");
+								this.startingLives = Integer.parseInt(z[0]);
+								this.bonusLifeFrequency = Integer.parseInt(z[1]);
+								if (z.length > 2)
+									this.showNames = Boolean.parseBoolean(z[2]);
+								if (z.length > 3)
+									this.respawnTanks = Boolean.parseBoolean(z[3]);
+								if (z.length > 4 && (z[4].equals("true") || z[4].equals("false")))
+									this.disableFriendlyFire = Boolean.parseBoolean(z[4]);
+								else if (z.length > 4)
+									this.description = z[z.length - 1].replace(commaChar, ",");
+							}
 
-						if (levelArray.get(i).contains("name="))
-							lvlName = (levelArray.get(i).substring(levelArray.get(i).indexOf("name=") + 5));
-						else
-							lvlName = ("Battle " + (levels.size() + 1));
-
-						this.levels.add(new CrusadeLevel(lvlName, lvl));
-					}
-					else if (parsing == 1)
-					{
-						this.crusadeItems.add(Item.parseItem(null, s));
-					}
-					else if (parsing == 2)
-					{
-						String[] z = s.split(",");
-
-						this.startingLives = Integer.parseInt(z[0]);
-						this.bonusLifeFrequency = Integer.parseInt(z[1]);
-
-						if (z.length > 2)
-							this.showNames = Boolean.parseBoolean(z[2]);
-
-						if (z.length > 3)
-							this.respawnTanks = Boolean.parseBoolean(z[3]);
-
-						if (z.length > 4)
-							this.disableFriendlyFire = Boolean.parseBoolean(z[4]);
-					}
-					else if (parsing == 3)
-					{
-						int divider = s.indexOf("]") + 1;
-						String first = s.substring(0, divider);
-						String second = s.substring(divider);
-						TankAIControlled t = TankAIControlled.fromString(second);
-						tankOccurrences.put(t, first);
-						this.customTanks.add(t);
-					}
-					break;
-			}
+							propertiesLine++;
+                        }
+                        case 3 ->
+                        {
+                            int divider = s.indexOf("]") + 1;
+                            String first = s.substring(0, divider);
+                            String second = s.substring(divider);
+                            TankAIControlled t = TankAIControlled.fromString(second);
+                            tankOccurrences.put(t, first);
+                            this.customTanks.add(t);
+                        }
+                    }
+                }
+            }
 
 			i++;
 		}
@@ -515,7 +513,7 @@ public class Crusade
 	{
 		boolean win = ScreenGame.finishedQuick && Panel.win;
 
-		if (!win)
+		if (!win && (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
 		{
 			for (int i = 0; i < Game.movables.size(); i++)
 			{

@@ -86,8 +86,6 @@ public class ScreenOptionsFramerate extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         vsync.update();
         unlimited.update();
 
@@ -111,6 +109,7 @@ public class ScreenOptionsFramerate extends ScreenOptionsOverlay
         }
 
         back.update();
+        super.update();
     }
 
     @Override

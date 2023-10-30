@@ -11,7 +11,7 @@ import java.util.Collections;
 
 public class FixedText extends FixedMenu
 {
-    public static final double fadeDuration = 75;
+    public static final double fadeDuration = 100;
     public enum types {title, subtitle, actionbar, topLeft, topRight}
 
     public types location;
@@ -137,6 +137,7 @@ public class FixedText extends FixedMenu
             if (this.shadowColor == null)
                 this.shadowColor = this.styling.shadowColor();
 
+            this.shadowColor.colorA = this.styling.colorA;
             this.shadowColor.setColor();
             Drawing.drawing.currentGlow = this.glow;
 
@@ -147,6 +148,7 @@ public class FixedText extends FixedMenu
         }
 
         this.styling.setColor();
+        Drawing.drawing.currentGlow = glow;
 
         if (this.posZ >= 0)
             ModAPI.fixedText.drawString(this.posX - x, this.posY - y, this.sizeX, this.sizeY, this.styling.text);
@@ -194,7 +196,7 @@ public class FixedText extends FixedMenu
                 break;
             case subtitle:
                 this.posX = Panel.windowWidth / 2;
-                this.posY = Panel.windowHeight / 2 - Drawing.drawing.statsHeight + this.styling.fontSize + 10;
+                this.posY = Panel.windowHeight / 2 - Drawing.drawing.statsHeight + this.styling.fontSize + 20;
 
                 for (FixedMenu m : ModAPI.fixedMenus)
                 {

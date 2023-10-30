@@ -25,6 +25,7 @@ public class ScreenResetControls extends ScreenOptionsOverlay
     {
         reset.update();
         cancel.update();
+        super.update();
     }
 
     @Override

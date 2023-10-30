@@ -5,10 +5,11 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.Level;
 import tanks.gui.*;
-import tanks.hotbar.item.Item;
 import tanks.gui.property.*;
+import tanks.hotbar.item.Item;
 import tanks.translation.Translation;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -23,7 +24,6 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
     public int page = 0;
 
     public boolean drawBehindScreen = false;
-    public String message = null;
 
     public ArrayList<ITrigger> properties = new ArrayList<>();
 
@@ -43,8 +43,6 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
     }
     );
 
-    public Button dismissMessage = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + Drawing.drawing.objHeight, Drawing.drawing.objWidth, Drawing.drawing.objHeight, "Ok", () -> message = null);
-
     public Button delete = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 - 250, this.objWidth, this.objHeight, "Delete item", new Runnable()
     {
         @Override
@@ -55,41 +53,6 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
         }
     }
     );
-
-    public Button save = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 250, this.objWidth, this.objHeight, "Save to template", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            item.exportProperties();
-            BaseFile f = Game.game.fileManager.getFile(Game.homedir + Game.itemDir + "/" + item.name.replace(" ", "_") + ".tanks");
-
-            if (!f.exists())
-            {
-                try
-                {
-                    f.create();
-                    f.startWriting();
-                    f.println(item.toString());
-                    f.stopWriting();
-
-                    message = "Item added to templates!";
-                }
-                catch (IOException e)
-                {
-                    Game.exitToCrash(e);
-                }
-            }
-            else
-                message = "An item template with this name already exists!";
-        }
-    }
-    );
-
-    public ScreenEditItem(Item item, IItemScreen s)
-    {
-        this(item, s, false, false);
-    }
 
     public ScreenEditItem(Item item, IItemScreen s, boolean omitPrice, boolean omitUnlockLevel)
     {
@@ -128,7 +91,7 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
                 TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, name, () -> {}, p.value + "");
                 t.function = () ->
                 {
-                    if (t.inputText.length() == 0)
+                    if (t.inputText.isEmpty())
                         t.inputText = p.value + "";
                     else
                         p.value = Integer.parseInt(t.inputText);
@@ -147,7 +110,7 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
                 {
                     try
                     {
-                        if (t.inputText.length() == 0)
+                        if (t.inputText.isEmpty())
                             t.inputText = p.value + "";
                         else
                             p.value = Double.parseDouble(t.inputText);
@@ -170,7 +133,7 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
                 TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, name, () -> {}, p.value + "");
                 t.function = () ->
                 {
-                    if (t.inputText.length() == 0)
+                    if (t.inputText.isEmpty())
                         t.inputText = (String) p.value;
                     else
                         p.value = t.inputText;
@@ -243,15 +206,106 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
             else
                 properties.get(i).setPosition(Drawing.drawing.interfaceSizeX / 2 + offset + 380 * 2, posY);
         }
+    }    public Button save = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 250, this.objWidth, this.objHeight, "Save to template", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            item.exportProperties();
+            BaseFile f = Game.game.fileManager.getFile(Game.homedir + Game.itemDir + "/" + item.name.replace(" ", "_") + ".tanks");
+
+            if (!f.exists())
+            {
+                try
+                {
+                    f.create();
+                    f.startWriting();
+                    f.println(item.toString());
+                    f.stopWriting();
+
+                    save.setText("Done!");
+                }
+                catch (IOException e)
+                {
+                    Game.exitToCrash(e);
+                }
+            }
+            else
+            {
+                Game.screen = new ScreenConfirmOverwrite("Overwrite item template \"" + item.name + "\"?", () ->
+                {
+                    try
+                    {
+                        f.startWriting();
+                        f.println(item.toString());
+                        f.stopWriting();
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        }
+    }
+    );
+
+    public ScreenEditItem(Item item, IItemScreen s)
+    {
+        this(item, s, false, false);
+    }
+
+    @Override
+    public void draw()
+    {
+        if (this.drawBehindScreen)
+        {
+            this.enableMargins = ((Screen) this.screen).enableMargins;
+            ((Screen) this.screen).draw();
+        }
+        else
+            this.drawDefaultBackground();
+
+        if (Game.screen instanceof ScreenSelector)
+            return;
+
+        back.draw();
+        delete.draw();
+        save.draw();
+
+        previous.enabled = page > 0;
+        next.enabled = (properties.size() > (1 + page) * rows * 3);
+
+        if (rows * 3 < properties.size())
+        {
+            previous.draw();
+            next.draw();
+
+            if (Level.isDark())
+                Drawing.drawing.setColor(255, 255, 255);
+            else
+                Drawing.drawing.setColor(0, 0, 0);
+
+            Drawing.drawing.setInterfaceFontSize(this.textSize);
+            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 200,
+                    "Page %d of %d", (page + 1), (properties.size() / (rows * 3) + Math.min(1, properties.size() % (rows * 3))));
+        }
+
+        for (int i = Math.min(page * rows * 3 + rows * 3, properties.size()) - 1; i >= page * rows * 3; i--)
+            properties.get(i).draw();
+
+        if (Level.isDark())
+            Drawing.drawing.setColor(255, 255, 255);
+        else
+            Drawing.drawing.setColor(0, 0, 0);
+
+        Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 300, "%s item properties", Translation.translate(item.getTypeName()));
     }
 
     @Override
     public void update()
     {
-        if (this.message != null)
-            this.dismissMessage.update();
-        else
-        {
             for (int i = page * rows * 3; i < Math.min(page * rows * 3 + rows * 3, properties.size()); i++)
             {
                 if (properties.get(i) instanceof Selector)
@@ -278,79 +332,13 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
                 back.function.run();
                 Game.game.input.editorPause.invalidate();
             }
-        }
-    }
-
-    @Override
-    public void draw()
-    {
-        if (this.drawBehindScreen)
-        {
-            this.enableMargins = ((Screen) this.screen).enableMargins;
-            ((Screen) this.screen).draw();
-        }
-        else
-            this.drawDefaultBackground();
-
-        if (Game.screen instanceof ScreenSelector)
-            return;
-
-        if (this.message != null)
-        {
-            this.dismissMessage.draw();
-
-            if (Level.isDark())
-                Drawing.drawing.setColor(255, 255, 255);
-            else
-                Drawing.drawing.setColor(0, 0, 0);
-
-            Drawing.drawing.setInterfaceFontSize(Drawing.drawing.textSize);
-            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 60, this.message);
-        }
-        else
-        {
-            back.draw();
-            delete.draw();
-            save.draw();
-
-            previous.enabled = page > 0;
-            next.enabled = (properties.size() > (1 + page) * rows * 3);
-
-            if (rows * 3 < properties.size())
-            {
-                previous.draw();
-                next.draw();
-
-                if (Level.isDark())
-                    Drawing.drawing.setColor(255, 255, 255);
-                else
-                    Drawing.drawing.setColor(0, 0, 0);
-
-                Drawing.drawing.setInterfaceFontSize(this.textSize);
-                Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 200,
-                        "Page %d of %d", (page + 1), (properties.size() / (rows * 3) + Math.min(1, properties.size() % (rows * 3))));
-            }
-
-            for (int i = Math.min(page * rows * 3 + rows * 3, properties.size()) - 1; i >= page * rows * 3; i--)
-            {
-                properties.get(i).draw();
-            }
-
-            if (Level.isDark())
-                Drawing.drawing.setColor(255, 255, 255);
-            else
-                Drawing.drawing.setColor(0, 0, 0);
-
-            Drawing.drawing.setInterfaceFontSize(this.titleSize);
-            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 300, "%s item properties", Translation.translate(item.getTypeName()));
-        }
     }
 
     @Override
     public double getOffsetX()
     {
         if (drawBehindScreen)
-            return ((Screen)screen).getOffsetX();
+            return ((Screen) screen).getOffsetX();
         else
             return super.getOffsetX();
     }
@@ -359,7 +347,7 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
     public double getOffsetY()
     {
         if (drawBehindScreen)
-            return ((Screen)screen).getOffsetY();
+            return ((Screen) screen).getOffsetY();
         else
             return super.getOffsetY();
     }
@@ -368,9 +356,15 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
     public double getScale()
     {
         if (drawBehindScreen)
-            return ((Screen)screen).getScale();
+            return ((Screen) screen).getScale();
         else
             return super.getScale();
+    }
+
+    @Override
+    public void onAttemptClose()
+    {
+        ((Screen) screen).onAttemptClose();
     }
 
     @Override
@@ -382,9 +376,5 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
         return screen instanceof ScreenGame || screen instanceof ILevelPreviewScreen || screen instanceof IOverlayScreen;
     }
 
-    @Override
-    public void onAttemptClose()
-    {
-        ((Screen)this.screen).onAttemptClose();
-    }
+
 }

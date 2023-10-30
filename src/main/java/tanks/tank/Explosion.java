@@ -2,14 +2,13 @@ package tanks.tank;
 
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.gui.ChatMessage;
-import tanks.gui.menus.FixedMenu;
-import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
-import tanks.network.event.*;
+import tanks.network.event.EventExplosion;
+import tanks.network.event.EventMineChangeTimer;
+import tanks.network.event.EventObstacleDestroy;
+import tanks.network.event.EventUpdateCoins;
 import tanks.obstacle.Obstacle;
 
 public class Explosion extends Movable
@@ -86,36 +85,6 @@ public class Explosion extends Movable
 
                             if (kill)
                             {
-                                if (Game.currentGame != null)
-                                {
-                                    Game.currentGame.onKill(this.tank, t);
-
-                                    for (FixedMenu menu : ModAPI.fixedMenus)
-                                    {
-                                        if (menu instanceof Scoreboard && ((Scoreboard) menu).objectiveType.equals(Scoreboard.objectiveTypes.kills))
-                                        {
-                                            Scoreboard s = (Scoreboard) menu;
-
-                                            if (!s.teamPoints.isEmpty())
-                                                s.addTeamScore(this.tank.team, 1);
-
-                                            else if (this.tank instanceof TankPlayer)
-                                                s.addPlayerScore(((TankPlayer) this.tank).player, 1);
-
-                                            else if (this.tank instanceof TankPlayerRemote)
-                                                s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
-                                        }
-                                    }
-
-                                    if (Game.currentGame.enableKillMessages && ScreenPartyHost.isServer)
-                                    {
-                                        String message = Game.currentGame.generateKillMessage(t, this.tank, false);
-                                        ScreenPartyHost.chat.add(0, new ChatMessage(message));
-                                        Game.eventsOut.add(new EventChat(message));
-                                    }
-                                }
-
-
                                 if (this.tank.equals(Game.playerTank))
                                 {
                                     if (Game.currentGame != null && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
@@ -123,7 +92,7 @@ public class Explosion extends Movable
                                     else
                                         Game.player.hotbar.coins += t.coinValue;
                                 }
-                                else if (this.tank instanceof TankPlayerRemote && (Crusade.crusadeMode || Game.currentLevel.shop.size() > 0 || Game.currentLevel.startingItems.size() > 0))
+                                else if (this.tank instanceof TankPlayerRemote && (Crusade.crusadeMode || !Game.currentLevel.shop.isEmpty() || !Game.currentLevel.startingItems.isEmpty()))
                                 {
                                     if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
                                     {

@@ -86,6 +86,9 @@ public class InputBindings
     public InputBindingGroup editorCopy = new InputBindingGroup("editor.copy", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_C));
     public InputBindingGroup editorCut = new InputBindingGroup("editor.cut", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_X));
     public InputBindingGroup editorPaste = new InputBindingGroup("editor.paste", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_V));
+    public InputBindingGroup editorFlipHoriz = new InputBindingGroup("editor.flipHoriz", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_H));
+    public InputBindingGroup editorFlipVert = new InputBindingGroup("editor.flipVert", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_J));
+    public InputBindingGroup editorRotateClockwise = new InputBindingGroup("editor.rotateClockwise", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_K), new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_R));
 
     public void save()
     {

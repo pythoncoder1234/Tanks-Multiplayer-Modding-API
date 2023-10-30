@@ -23,7 +23,7 @@ public class ScreenTestDebug extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
+
 
         keyboardTest.update();
         textboxTest.update();

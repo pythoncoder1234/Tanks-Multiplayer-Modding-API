@@ -8,9 +8,8 @@ import tanks.bullet.Bullet;
 import tanks.bullet.BulletElectric;
 import tanks.gui.Button;
 import tanks.gui.Joystick;
-import tanks.gui.menus.FixedMenu;
-import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenTitle;
 import tanks.hotbar.Hotbar;
 import tanks.hotbar.item.*;
@@ -74,14 +73,19 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
 
+//		this.baseModel = TankModels.arrow.base;
+//		this.colorModel = TankModels.arrow.color;
+
 		if (enableDestroyCheat)
 		{
 			this.showName = true;
-			this.nameTag.colorR = 255;
-			this.nameTag.colorG = 0;
-			this.nameTag.colorB = 0;
-
 			this.nameTag.name = "Destroy cheat enabled!!!";
+		}
+
+		if (Game.nameInMultiplayer && ScreenPartyHost.isServer)
+		{
+			this.nameTag.name = Game.player.username;
+			this.showName = true;
 		}
 
 		if (Game.invulnerable)
@@ -109,8 +113,20 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.teamSelector.id = "player_team";
         this.teamSelector.defaultTeamIndex = 0;
 
-        if (!this.teamSelector.modified())
+        if (!this.teamSelector.modified)
             this.teamSelector.setChoice(0);
+    }
+
+    @Override
+    public void draw()
+    {
+        super.draw();
+
+		if (this.destroy)
+			return;
+
+//        Drawing.drawing.setColor(0, 0, 0);
+//        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
     }
 
     @Override
@@ -510,9 +526,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			speed = Double.MIN_NORMAL;
 
 		if (b.itemSound != null)
-		{
-			Drawing.drawing.playGlobalSound(b.itemSound, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
-		}
+            Drawing.drawing.playGlobalSound(b.itemSound, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
 
 		b.setPolarMotion(this.angle + offset, speed);
 		b.speed = speed;
@@ -556,17 +570,6 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	{
 		if (Crusade.crusadeMode)
 			this.player.remainingLives--;
-
-		for (FixedMenu m : ModAPI.fixedMenus)
-		{
-			if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.deaths))
-			{
-				if (!((Scoreboard) m).teamPoints.isEmpty())
-					((Scoreboard) m).addTeamScore(this.team, 1);
-				else
-					((Scoreboard) m).addPlayerScore(this.player, 1);
-			}
-		}
 	}
 
 	@Override

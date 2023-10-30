@@ -1,97 +1,94 @@
 package lwjglwindow;
 
-import basewindow.BaseShapeBatchRenderer;
-import basewindow.IBatchRenderableObject;
+import basewindow.*;
 import basewindow.transformation.Rotation;
 import basewindow.transformation.Scale;
 import basewindow.transformation.Translation;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
 
+import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.LinkedHashMap;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.glDepthMask;
 
 public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
 {
     public int vertVBO = -1;
     public int colVBO = -1;
+    public HashMap<ShaderGroup.Attribute, Integer> attributeVBOs = new HashMap<>();
 
     public boolean initialized = false;
 
-    public HashMap<IBatchRenderableObject, PointQueue> lastPoints = new HashMap<>();
-    public IntHashTable lastPointsPosHash = new IntHashTable();
-    public IntHashTable lastPointsColHash = new IntHashTable();
-    public IntHashTable lastPointsSize = new IntHashTable();
-    public int lastPointsCount = 0;
+    public LinkedHashMap<IBatchRenderableObject, Integer> bufferStartPoints = new LinkedHashMap<>();
+    public LinkedHashMap<IBatchRenderableObject, Integer> bufferSizes = new LinkedHashMap<>();
 
-    public HashMap<IBatchRenderableObject, PointQueue> points = new HashMap<>();
-    public IntHashTable pointsPosHash = new IntHashTable();
-    public IntHashTable pointsColHash = new IntHashTable();
-    public IntHashTable pointsSize = new IntHashTable();
-    public int pointsCount = 0;
+    public int size = 0;
+    public int capacity = 6000;
+    public int initSize = 0;
 
-    public IntHashTable objBufferPos = new IntHashTable();
-
-    public static Point[] recyclePoints = new Point[10000];
-    public static int recyclePointsFirst = 0;
-    public static int recyclePointsLast = 0;
-    public static int recyclePointsSize = 0;
+    public FloatBuffer vertBuffer = BufferUtils.createFloatBuffer(capacity * 3);
+    public FloatBuffer colBuffer = BufferUtils.createFloatBuffer(capacity * 4);
+    protected HashMap<ShaderGroup.Attribute, FloatBuffer> attributeBuffers = new HashMap<>();
+    protected HashMap<ShaderGroup.Attribute, float[]> floatAttributes = new HashMap<>();
 
     public LWJGLWindow window;
-
-    public double colorR;
-    public double colorG;
-    public double colorB;
-    public double colorA;
-    public double colorGlow;
 
     public float currentR;
     public float currentG;
     public float currentB;
     public float currentA;
 
-    public boolean forceRedraw = false;
+    public float colorGlow;
 
-    public boolean batching = false;
     public boolean depth = false;
     public boolean glow = false;
     public boolean depthMask = false;
 
+    public IBatchRenderableObject modifying = null;
+    public int modifyingSize = -1;
+    public int modifyingWritten = 0;
+
+    public ShaderGroup shader;
+
+    protected IBatchRenderableObject adding = null;
+    protected boolean justExpanded = false;
+
     public VBOShapeBatchRenderer(LWJGLWindow window)
     {
+        super(true);
         this.window = window;
-        this.initializeVBO();
+        this.shader = window.currentShader.group;
     }
 
-    public void begin(boolean depth)
+    public VBOShapeBatchRenderer(LWJGLWindow window, ShaderGroup s)
     {
-        this.begin(depth, false);
+        this(window);
+        this.shader = s;
+
+        for (ShaderGroup.Attribute a: s.attributes)
+        {
+            this.addAttribute(a);
+        }
     }
 
-    public void begin(boolean depth, boolean glow)
+    public void settings(boolean depth)
     {
-        this.begin(depth, glow, !(glow));
+        this.settings(depth, false);
     }
 
-    public void begin(boolean depth, boolean glow, boolean depthMask)
+    public void settings(boolean depth, boolean glow)
     {
-        this.batching = true;
+        this.settings(depth, glow, !(glow));
+    }
+
+    public void settings(boolean depth, boolean glow, boolean depthMask)
+    {
         this.depth = depth;
         this.glow = glow;
         this.depthMask = depthMask;
-
-        this.reset();
-    }
-
-    public void end()
-    {
-        this.stage();
-
-        this.draw();
     }
 
     public void draw()
@@ -124,209 +121,9 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
 
         glPopMatrix();
 
-        this.batching = false;
-
         window.disableDepthtest();
         glDepthMask(true);
         window.setTransparentBlendFunc();
-    }
-
-    public void forceRedraw()
-    {
-        this.forceRedraw = true;
-    }
-
-    public static void recyclePoint(Point p)
-    {
-        recyclePoints[recyclePointsLast] = p;
-        recyclePointsLast++;
-        recyclePointsSize++;
-
-        if (recyclePointsLast >= recyclePoints.length)
-            recyclePointsLast = 0;
-
-        if (recyclePointsSize == recyclePoints.length)
-        {
-            Point[] rp = new Point[recyclePoints.length * 2];
-            for (int i = 0; i < recyclePoints.length; i++)
-            {
-                rp[i] = recyclePoints[i];
-                recyclePoints[i] = null;
-            }
-
-            recyclePoints = rp;
-        }
-    }
-
-    public static Point getRecycledPoint()
-    {
-        Point p = recyclePoints[recyclePointsFirst];
-        recyclePoints[recyclePointsFirst] = null;
-
-        recyclePointsFirst++;
-        recyclePointsSize--;
-
-        if (recyclePointsFirst >= recyclePoints.length)
-            recyclePointsFirst = 0;
-
-        return p;
-    }
-
-    public static class Point
-    {
-        public float posX;
-        public float posY;
-        public float posZ;
-
-        public float colR;
-        public float colG;
-        public float colB;
-        public float colA;
-
-        public int posHash;
-        public int colHash;
-
-        public boolean initialized = false;
-
-        protected void initialize(float x, float y, float z, float r, float g, float b, float a)
-        {
-            this.posX = x;
-            this.posY = y;
-            this.posZ = z;
-            this.colR = r;
-            this.colG = g;
-            this.colB = b;
-            this.colA = a;
-
-            this.posHash = f(Float.floatToIntBits(posX) + f(Float.floatToIntBits(posY) + f(Float.floatToIntBits(posZ))));
-            this.colHash = f(Float.floatToIntBits(colR) + f(Float.floatToIntBits(colG) + f(Float.floatToIntBits(colB) + f(Float.floatToIntBits(colA)))));
-
-            this.initialized = true;
-        }
-
-        public void free()
-        {
-            this.initialized = false;
-            recyclePoint(this);
-        }
-    }
-
-    public static class PointQueue
-    {
-        public PointQueueNode start;
-        public PointQueueNode end;
-
-        public static PointQueue recycleNodes = new PointQueue();
-
-        public static class PointQueueNode
-        {
-            public Point point;
-            public PointQueueNode next;
-            public boolean pointInitialized;
-
-            public static PointQueueNode newNode(Point p)
-            {
-                PointQueueNode n;
-
-                if (recycleNodes.isEmpty())
-                    n = new PointQueueNode();
-                else
-                {
-                    n = recycleNodes.popNode();
-
-                    if (n.pointInitialized)
-                        n.point.free();
-                }
-
-                n.point = p;
-                n.pointInitialized = true;
-
-                return n;
-            }
-        }
-
-        public boolean isEmpty()
-        {
-            return start == null;
-        }
-
-        public void push(Point p)
-        {
-            PointQueueNode n = PointQueueNode.newNode(p);
-            this.pushNode(n);
-        }
-
-        public void pushNode(PointQueueNode n)
-        {
-            if (start == null)
-            {
-                start = n;
-                end = n;
-            }
-            else
-            {
-                end.next = n;
-                end = n;
-            }
-        }
-
-        public PointQueueNode popNode()
-        {
-            PointQueueNode n = start;
-
-            if (start == end)
-            {
-                start = null;
-                end = null;
-            }
-            else
-                start = start.next;
-
-            return n;
-        }
-
-        public Point pop()
-        {
-            PointQueueNode n = popNode();
-
-            recycleNodes.pushNode(n);
-            Point p = n.point;
-            n.point = null;
-            n.pointInitialized = false;
-            return p;
-        }
-    }
-
-    public static int f(int i)
-    {
-        return 1664525 * i + 1013904223;
-    }
-
-    public Point newPoint(float x, float y, float z, float r, float g, float b, float a)
-    {
-        Point p;
-
-        if (recyclePointsSize <= 0)
-            p = new Point();
-        else
-            p = getRecycledPoint();
-
-        p.initialize(x + offX, y + offY, z + offZ, r, g, b, a);
-        return p;
-    }
-
-    public Point newPoint(float x, float y, float z)
-    {
-        return newPoint(x, y, z, currentR, currentG, currentB, currentA);
-    }
-
-    public void setColor(double r, double g, double b, double a, double glow)
-    {
-        this.colorR = r / 255;
-        this.colorG = g / 255;
-        this.colorB = b / 255;
-        this.colorA = a / 255;
-        this.colorGlow = glow;
     }
 
     @Override
@@ -336,457 +133,530 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         this.window.freeVBO(this.vertVBO);
     }
 
-    public void setWorkingColor(float r, float g, float b, float a, float glow)
+    public void setColor(float r, float g, float b, float a)
     {
-        this.currentR = r;
-        this.currentG = g;
-        this.currentB = b;
-        this.currentA = a + ((int)(glow * 256) * 2);
+        this.currentR = r / 255;
+        this.currentG = g / 255;
+        this.currentB = b / 255;
+        this.currentA = a / 255;
     }
 
-    public void addPoint(IBatchRenderableObject o, float x, float y, float z)
+    public void setGlow(float g)
     {
-        pointsCount++;
-
-        PointQueue p = this.points.get(o);
-
-        if (p == null)
-        {
-            p = new PointQueue();
-            this.points.put(o, p);
-            this.pointsPosHash.put(o, 0);
-            this.pointsColHash.put(o, 0);
-            this.pointsSize.put(o, 0);
-        }
-
-        Point pt = newPoint(x, y, z);
-        p.push(pt);
-
-        this.pointsPosHash.put(o, f(this.pointsPosHash.get(o) + pt.posHash));
-        this.pointsColHash.put(o, f(this.pointsColHash.get(o) + pt.colHash));
-
-        this.pointsSize.put(o, this.pointsSize.get(o) + 1);
+        this.colorGlow = g;
     }
 
-    @Override
-    public void fillOval(IBatchRenderableObject o, double x, double y, double sX, double sY)
+    public void expand()
     {
-        if (o.wasRedrawn())
-            return;
+        this.vertBuffer.rewind();
+        this.colBuffer.rewind();
 
-        if (this.window.shadowsEnabled && !this.window.drawingShadow)
-            return;
-
-        x += sX / 2;
-        y += sY / 2;
-
-        int sides = Math.max(4, (int) (sX + sY) / 4 + 5);
-
-        this.setWorkingColor((float) this.colorR, (float) this.colorG, (float) this.colorB, (float) this.colorA, (float) this.colorGlow);
-        for (float i = 0; i < Math.PI * 2; i += Math.PI * 2 / sides)
-            this.addPoint(o, (float) (x + Math.cos(i) * sX / 2), (float) (y + Math.sin(i) * sY / 2), 0);
-        this.addPoint(o, (float) (x + sX / 2), (float) y, 0);
-    }
-
-    @Override
-    public void fillRect(IBatchRenderableObject o, double x, double y, double sX, double sY)
-    {
-        if (o.wasRedrawn())
-            return;
-
-        if (this.window.shadowsEnabled && !this.window.drawingShadow)
-            return;
-
-        float x0 = (float) x;
-        float y0 = (float) y;
-
-        float x1 = (float) (x + sX);
-        float y1 = (float) (y + sY);
-
-        float r1 = (float) this.colorR;
-        float g1 = (float) this.colorG;
-        float b1 = (float) this.colorB;
-        float a = (float) this.colorA;
-        float g = (float) this.colorGlow;
-
-        this.setWorkingColor(r1, g1, b1, a, g);
-        this.addPoint(o, x1, y0, 0);
-        this.addPoint(o, x0, y0, 0);
-        this.addPoint(o, x0, y1, 0);
-
-        this.addPoint(o, x1, y0, 0);
-        this.addPoint(o, x1, y1, 0);
-        this.addPoint(o, x0, y1, 0);
-    }
-
-    public void fillBox(IBatchRenderableObject o, double x, double y, double z, double sX, double sY, double sZ, byte options)
-    {
-        if (o.wasRedrawn())
-            return;
-
-        if (this.window.shadowsEnabled && !this.window.drawingShadow)
-            return;
-
-        float x0 = (float) x;
-        float y0 = (float) y;
-        float z0 = (float) z;
-
-        float x1 = (float) (x + sX);
-        float y1 = (float) (y + sY);
-        float z1 = (float) (z + sZ);
-
-        float r1 = (float) this.colorR;
-        float g1 = (float) this.colorG;
-        float b1 = (float) this.colorB;
-        float a = (float) this.colorA;
-        float g = (float) this.colorGlow;
-
-        float r2 = r1 * 0.8f;
-        float g2 = g1 * 0.8f;
-        float b2 = b1 * 0.8f;
-
-        float r3 = r1 * 0.6f;
-        float g3 = g1 * 0.6f;
-        float b3 = b1 * 0.6f;
-
-        if (options % 2 == 0)
+        for (ShaderGroup.Attribute a: this.attributeBuffers.keySet())
         {
-            this.setWorkingColor(r1, g1, b1, a, g);
-            this.addPoint(o, x1, y0, z0);
-            this.addPoint(o, x0, y0, z0);
-            this.addPoint(o, x0, y1, z0);
-
-            this.addPoint(o, x1, y0, z0);
-            this.addPoint(o, x1, y1, z0);
-            this.addPoint(o, x0, y1, z0);
+            this.attributeBuffers.get(a).rewind();
         }
 
-        if ((options >> 2) % 2 == 0)
-        {
-            this.setWorkingColor(r2, g2, b2, a, g);
-            this.addPoint(o, x1, y1, z1);
-            this.addPoint(o, x0, y1, z1);
-            this.addPoint(o, x0, y1, z0);
+        LinkedHashMap<IBatchRenderableObject, Integer> newBufferStartPoints = new LinkedHashMap<>();
 
-            this.addPoint(o, x1, y1, z1);
-            this.addPoint(o, x1, y1, z0);
-            this.addPoint(o, x0, y1, z0);
+        int totalSize = 0;
+        for (IBatchRenderableObject o : this.bufferStartPoints.keySet())
+        {
+            totalSize += this.bufferSizes.get(o);
         }
 
-        if ((options >> 3) % 2 == 0)
-        {
-            this.setWorkingColor(r2, g2, b2, a, g);
-            this.addPoint(o, x1, y0, z1);
-            this.addPoint(o, x0, y0, z1);
-            this.addPoint(o, x0, y0, z0);
+        int newCapacity = this.capacity * 2;
 
-            this.addPoint(o, x1, y0, z1);
-            this.addPoint(o, x1, y0, z0);
-            this.addPoint(o, x0, y0, z0);
+        if (totalSize <= this.capacity / 2)
+            newCapacity = this.capacity;
+
+        FloatBuffer newVertBuffer = BufferUtils.createFloatBuffer(newCapacity * 3);
+        FloatBuffer newColBuffer = BufferUtils.createFloatBuffer(newCapacity * 4);
+        HashMap<ShaderGroup.Attribute, FloatBuffer> newAttributeBuffers = new HashMap<>();
+        for (ShaderGroup.Attribute a: this.attributeBuffers.keySet())
+        {
+            newAttributeBuffers.put(a, BufferUtils.createFloatBuffer(newCapacity * a.count));
         }
 
-        if ((options >> 4) % 2 == 0)
+        int pos = 0;
+        int newPos = 0;
+        for (IBatchRenderableObject o : this.bufferStartPoints.keySet())
         {
-            this.setWorkingColor(r3, g3, b3, a, g);
-            this.addPoint(o, x0, y1, z1);
-            this.addPoint(o, x0, y1, z0);
-            this.addPoint(o, x0, y0, z0);
+            int start = this.bufferStartPoints.get(o);
+            int size = this.bufferSizes.get(o);
 
-            this.addPoint(o, x0, y1, z1);
-            this.addPoint(o, x0, y0, z1);
-            this.addPoint(o, x0, y0, z0);
-        }
-
-        if ((options >> 5) % 2 == 0)
-        {
-            this.setWorkingColor(r3, g3, b3, a, g);
-            this.addPoint(o, x1, y1, z0);
-            this.addPoint(o, x1, y1, z1);
-            this.addPoint(o, x1, y0, z1);
-
-            this.addPoint(o, x1, y1, z0);
-            this.addPoint(o, x1, y0, z0);
-            this.addPoint(o, x1, y0, z1);
-        }
-
-        if ((options >> 1) % 2 == 0)
-        {
-            this.setWorkingColor(r1, g1, b1, a, g);
-            this.addPoint(o, x1, y1, z1);
-            this.addPoint(o, x0, y1, z1);
-            this.addPoint(o, x0, y0, z1);
-
-            this.addPoint(o, x1, y1, z1);
-            this.addPoint(o, x1, y0, z1);
-            this.addPoint(o, x0, y0, z1);
-        }
-    }
-
-    @Override
-    public void fillPolygon(IBatchRenderableObject o, double... params)
-    {
-        fillPolygon(0, 0, o, params);
-    }
-
-    @Override
-    public void fillPolygon(double z, double sZ, IBatchRenderableObject o, double... params)
-    {
-        fillPolygon(z, sZ, o, (byte) 0, params);
-    }
-
-    @Override
-    public void fillPolygon(double z, double sZ, IBatchRenderableObject o, byte options, double... params)
-    {
-        if (o.wasRedrawn())
-            return;
-
-        if (this.window.shadowsEnabled && !this.window.drawingShadow)
-            return;
-
-        float z0 = (float) z;
-        float z1 = (float) (z + sZ);
-
-        float r1 = (float) this.colorR;
-        float g1 = (float) this.colorG;
-        float b1 = (float) this.colorB;
-        float a = (float) this.colorA;
-        float g = (float) this.colorGlow;
-
-        this.setWorkingColor(r1, g1, b1, a, g);
-
-        for (int i = 0; i < params.length - 2; i += 2)
-        {
-            if ((options >> i) % 2 != 0)
-                continue;
-
-            float x0 = (float) params[i];
-            float y0 = (float) params[i + 1];
-            float x1 = (float) params[i + 2];
-            float y1 = (float) params[i + 3];
-
-            this.addPoint(o, x0, y0, z0);
-            this.addPoint(o, x0, y0, z1);
-            this.addPoint(o, x1, y1, z1);
-
-            this.addPoint(o, x0, y0, z0);
-            this.addPoint(o, x1, y1, z0);
-            this.addPoint(o, x1, y1, z1);
-        }
-
-        for (int i = 2; i < params.length; i += 2)
-        {
-            float x = (float) params[i];
-            float y = (float) params[i + 1];
-
-            this.addPoint(o, x, y, z1);
-        }
-
-        for (int i = 2; i < params.length; i += 2)
-        {
-            float x = (float) params[i];
-            float y = (float) params[i + 1];
-
-            this.addPoint(o, x, y, z0);
-        }
-    }
-
-    public void initializeVBO()
-    {
-        this.vertVBO = this.window.createVBO();
-        this.colVBO = this.window.createVBO();
-    }
-
-    public void initializeBuffers()
-    {
-        this.initialized = true;
-
-        FloatBuffer vert = BufferUtils.createFloatBuffer(pointsCount * 3);
-        FloatBuffer col = BufferUtils.createFloatBuffer(pointsCount * 4);
-
-        int i = 0;
-        for (IBatchRenderableObject o: points.keySet())
-        {
-            PointQueue p = points.get(o);
-            objBufferPos.put(o, i);
-
-            PointQueue.PointQueueNode node = p.start;
-            while (node != null)
+            while (pos < start)
             {
-                i++;
+                this.vertBuffer.get();
+                this.vertBuffer.get();
+                this.vertBuffer.get();
+                this.colBuffer.get();
+                this.colBuffer.get();
+                this.colBuffer.get();
+                this.colBuffer.get();
 
-                vert.put(node.point.posX);
-                vert.put(node.point.posY);
-                vert.put(node.point.posZ);
+                for (ShaderGroup.Attribute a: this.attributeBuffers.keySet())
+                {
+                    for (int i = 0; i < a.count; i++)
+                    {
+                        FloatBuffer b = this.attributeBuffers.get(a);
+                        b.get();
+                    }
+                }
+                pos++;
+            }
 
-                col.put(node.point.colR);
-                col.put(node.point.colG);
-                col.put(node.point.colB);
-                col.put(node.point.colA);
+            newBufferStartPoints.put(o, newPos);
 
-                if (node == p.end)
-                    break;
+            while (pos < start + size)
+            {
+                newVertBuffer.put(this.vertBuffer.get());
+                newVertBuffer.put(this.vertBuffer.get());
+                newVertBuffer.put(this.vertBuffer.get());
+                newColBuffer.put(this.colBuffer.get());
+                newColBuffer.put(this.colBuffer.get());
+                newColBuffer.put(this.colBuffer.get());
+                newColBuffer.put(this.colBuffer.get());
 
-                node = node.next;
+                for (ShaderGroup.Attribute a: this.attributeBuffers.keySet())
+                {
+                    for (int i = 0; i < a.count; i++)
+                    {
+                        FloatBuffer b = this.attributeBuffers.get(a);
+                        newAttributeBuffers.get(a).put(b.get());
+                    }
+                }
+
+                pos++;
+                newPos++;
             }
         }
 
-        vert.flip();
-        col.flip();
+        this.vertBuffer = newVertBuffer;
+        this.colBuffer = newColBuffer;
 
-        this.window.vertexBufferDataDynamic(vertVBO, vert);
-        this.window.vertexBufferDataDynamic(colVBO, col);
+        for (ShaderGroup.Attribute a: newAttributeBuffers.keySet())
+        {
+            this.attributeBuffers.put(a, newAttributeBuffers.get(a));
+        }
+
+        this.bufferStartPoints = newBufferStartPoints;
+        this.size = newPos;
+        this.capacity = newCapacity;
+
+        this.justExpanded = true;
     }
 
-    public void batchDraw()
+    public void addPoint(float x, float y, float z)
     {
-        this.window.setColor(255, 255, 255, 255);
-        this.window.renderVBO(vertVBO, colVBO, 0, this.pointsCount);
+        IBatchRenderableObject o = this.adding;
+        if (this.modifyingSize < 0)
+        {
+            if (this.size >= this.capacity)
+                this.expand();
+        }
+
+        if (this.modifyingSize >= 0 && this.modifyingWritten >= this.modifyingSize)
+        {
+            this.migrate(o);
+        }
+
+        if (this.bufferStartPoints.get(o) == null)
+        {
+            this.bufferStartPoints.put(o, this.size);
+            this.bufferSizes.put(o, 1);
+        }
+        else if (this.modifyingSize < 0)
+            this.bufferSizes.put(o, this.bufferSizes.get(o) + 1);
+
+        this.vertBuffer.put(x);
+        this.vertBuffer.put(y);
+        this.vertBuffer.put(z);
+        this.colBuffer.put(this.currentR);
+        this.colBuffer.put(this.currentG);
+        this.colBuffer.put(this.currentB);
+        this.colBuffer.put(this.currentA);
+
+        for (ShaderGroup.Attribute a : attributeBuffers.keySet())
+        {
+            FloatBuffer b = this.attributeBuffers.get(a);
+            float[] vals = this.floatAttributes.get(a);
+            for (float f : vals)
+            {
+                b.put(f);
+            }
+        }
+
+        if (this.modifyingSize < 0)
+            this.size++;
+        else
+            this.modifyingWritten++;
     }
 
-    public void reset()
+    public void endModification()
     {
-        if (this.window.shadowsEnabled && !this.window.drawingShadow)
+        if (this.modifying == null || this.modifyingSize < 0)
             return;
 
-        for (IBatchRenderableObject o: this.lastPoints.keySet())
+        Integer start = this.bufferStartPoints.get(this.modifying);
+        if (start == null)
+            return;
+
+        for (int i = this.modifyingWritten + start; i < start + this.modifyingSize; i++)
         {
-            if (o.wasRedrawn())
+            this.vertBuffer.put(i * 3, 0f);
+            this.vertBuffer.put(i * 3 + 1, 0f);
+            this.vertBuffer.put(i * 3 + 2, 0f);
+
+            this.colBuffer.put(i * 4, 0f);
+            this.colBuffer.put(i * 4 + 1, 0f);
+            this.colBuffer.put(i * 4 + 2, 0f);
+            this.colBuffer.put(i * 4 + 3, 0f);
+
+            for (ShaderGroup.Attribute a: attributeBuffers.keySet())
             {
-                o.setRedrawn(false);
-                continue;
-            }
-
-            PointQueue l = this.lastPoints.get(o);
-
-            if (PointQueue.recycleNodes.end != null)
-                PointQueue.recycleNodes.end.next = l.start;
-            else
-                PointQueue.recycleNodes.start = l.start;
-
-            PointQueue.recycleNodes.end = l.end;
-
-            l.start = null;
-            l.end = null;
-        }
-
-        this.lastPoints.clear();
-        this.lastPointsPosHash.clear();
-        this.lastPointsColHash.clear();
-
-        this.lastPointsCount = this.pointsCount;
-
-        HashMap<IBatchRenderableObject, PointQueue> lastPointsC = this.lastPoints;
-        IntHashTable lastPointsPosHashC = this.lastPointsPosHash;
-        IntHashTable lastPointsColHashC = this.lastPointsColHash;
-        IntHashTable lastPointsSizeC = this.lastPointsSize;
-
-        this.lastPoints = this.points;
-        this.lastPointsPosHash = this.pointsPosHash;
-        this.lastPointsColHash = this.pointsColHash;
-        this.lastPointsSize = this.pointsSize;
-
-        this.points = lastPointsC;
-        this.pointsPosHash = lastPointsPosHashC;
-        this.pointsColHash = lastPointsColHashC;
-        this.pointsSize = lastPointsSizeC;
-
-        this.pointsCount = 0;
-
-        for (IBatchRenderableObject o: this.lastPoints.keySet())
-        {
-            if (!o.colorChanged() && !o.positionChanged() && !this.forceRedraw)
-            {
-                this.points.put(o, this.lastPoints.get(o));
-                this.pointsPosHash.put(o, this.lastPointsPosHash.get(o));
-                this.pointsColHash.put(o, this.lastPointsColHash.get(o));
-
-                int p = this.lastPointsSize.get(o);
-                this.pointsSize.put(o, p);
-                pointsCount += p;
-
-                o.setRedrawn(true);
+                for (int o = 0; o < a.count; o++)
+                {
+                    FloatBuffer b = this.attributeBuffers.get(a);
+                    b.put(i * a.count + o, 0);
+                }
             }
         }
 
-        this.forceRedraw = false;
+        this.vertBuffer.position(start * 3);
+        this.colBuffer.position(start * 4);
+        this.vertBuffer.limit((start + this.modifyingSize) * 3);
+        this.colBuffer.limit((start + this.modifyingSize) * 4);
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            this.attributeBuffers.get(a).position(start * a.count);
+            this.attributeBuffers.get(a).limit((start + this.modifyingSize) * a.count);
+        }
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertVBO);
+        GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * start * 3, this.vertBuffer);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colVBO);
+        GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * start * 4, this.colBuffer);
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.attributeVBOs.get(a));
+            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * start * a.count, this.attributeBuffers.get(a));
+        }
+
+        this.vertBuffer.limit(this.vertBuffer.capacity());
+        this.colBuffer.limit(this.colBuffer.capacity());
+        this.vertBuffer.position(this.size * 3);
+        this.colBuffer.position(this.size * 4);
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            this.attributeBuffers.get(a).limit(this.attributeBuffers.get(a).capacity());
+            this.attributeBuffers.get(a).position(this.size * a.count);
+        }
+
+        this.modifying = null;
+    }
+
+    public void beginAdd(IBatchRenderableObject o)
+    {
+        if (this.adding != o)
+            this.endAdd();
+
+        this.adding = o;
+
+        if (this.initialized)
+        {
+            this.vertBuffer.limit(this.capacity * 3);
+            this.colBuffer.limit(this.capacity * 4);
+            for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+            {
+                this.attributeBuffers.get(a).limit(this.capacity * a.count);
+            }
+
+            if (this.modifying != o)
+            {
+                this.endModification();
+                this.modifyingWritten = 0;
+
+                if (this.bufferStartPoints.get(o) != null)
+                {
+                    this.modifyingSize = this.bufferSizes.get(o);
+                    this.vertBuffer.position(this.bufferStartPoints.get(o) * 3);
+                    this.colBuffer.position(this.bufferStartPoints.get(o) * 4);
+                    for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+                    {
+                        this.attributeBuffers.get(a).position(this.bufferStartPoints.get(o) * a.count);
+                    }
+                }
+                else
+                {
+                    this.modifyingSize = -1;
+                    this.vertBuffer.position(this.size * 3);
+                    this.colBuffer.position(this.size * 4);
+                    for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+                    {
+                        this.attributeBuffers.get(a).position(this.size * a.count);
+                    }
+                }
+            }
+
+            this.modifying = o;
+        }
+    }
+
+    public void endAdd()
+    {
+        if (this.adding == null)
+            return;
+
+        this.adding = null;
+
+        if (this.justExpanded && this.initialized)
+        {
+            this.vertBuffer.flip();
+            this.colBuffer.flip();
+
+            this.vertBuffer.limit(this.vertBuffer.capacity());
+            this.colBuffer.limit(this.colBuffer.capacity());
+            this.window.vertexBufferDataDynamic(vertVBO, vertBuffer);
+            this.window.vertexBufferDataDynamic(colVBO, colBuffer);
+
+            for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+            {
+                Buffer b = this.attributeBuffers.get(a);
+                b.flip();
+                b.limit(b.capacity());
+
+                this.window.vertexBufferDataDynamic(this.attributeVBOs.get(a), b);
+            }
+
+            this.justExpanded = false;
+            this.initSize = this.size;
+        }
+        else if (this.initSize < this.size && this.initialized)
+        {
+            this.vertBuffer.position(this.initSize * 3);
+            this.colBuffer.position(this.initSize * 4);
+            for (ShaderGroup.Attribute a : attributeBuffers.keySet())
+            {
+                this.attributeBuffers.get(a).position(this.initSize * a.count);
+            }
+
+            this.vertBuffer.limit(this.size * 3);
+            this.colBuffer.limit(this.size * 4);
+            for (ShaderGroup.Attribute a : attributeBuffers.keySet())
+            {
+                this.attributeBuffers.get(a).limit(this.size * a.count);
+            }
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertVBO);
+            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * this.initSize * 3, this.vertBuffer);
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colVBO);
+            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * this.initSize * 4, this.colBuffer);
+            for (ShaderGroup.Attribute a : attributeBuffers.keySet())
+            {
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.attributeVBOs.get(a));
+                GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * this.initSize * a.count, this.attributeBuffers.get(a));
+            }
+
+            this.initSize = this.size;
+        }
+    }
+
+    public void delete(IBatchRenderableObject o)
+    {
+        if (!this.bufferStartPoints.containsKey(o))
+            return;
+
+        if (this.adding != null)
+            this.endAdd();
+
+        int pos = this.bufferStartPoints.remove(o);
+        int size = this.bufferSizes.remove(o);
+
+        this.vertBuffer.position(pos * 3);
+        this.colBuffer.position(pos * 4);
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            this.attributeBuffers.get(a).position(pos * a.count);
+        }
+
+        for (int i = pos; i < pos + size; i++)
+        {
+            this.vertBuffer.put(i * 3, 0f);
+            this.vertBuffer.put(i * 3 + 1, 0f);
+            this.vertBuffer.put(i * 3 + 2, 0f);
+
+            this.colBuffer.put(i * 4, 0f);
+            this.colBuffer.put(i * 4 + 1, 0f);
+            this.colBuffer.put(i * 4 + 2, 0f);
+            this.colBuffer.put(i * 4 + 3, 0f);
+
+            for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+            {
+                this.attributeBuffers.get(a).put(0);
+            }
+        }
+
+        this.vertBuffer.rewind();
+        this.colBuffer.rewind();
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            this.attributeBuffers.get(a).rewind();
+        }
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertVBO);
+        GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * 3, new float[3 * size]);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colVBO);
+        GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * 4, new float[4 * size]);
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.attributeVBOs.get(a));
+            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * a.count, new float[a.count * size]);
+        }
+    }
+
+    public void moveFloat(FloatBuffer b, int mul, int off, int rem)
+    {
+        b.put(this.size * mul + off,  b.get(rem * mul + off));
+        b.put(rem * mul + off, 0f);
+    }
+
+    public void migrate(IBatchRenderableObject o)
+    {
+        if (this.capacity <= this.size + this.bufferSizes.get(o))
+            this.expand();
+
+        int pos = this.bufferStartPoints.get(o);
+        int size = this.bufferSizes.get(o);
+
+        this.vertBuffer.position(pos * 3);
+        this.colBuffer.position(pos * 4);
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            this.attributeBuffers.get(a).position(pos * a.count);
+        }
+
+        this.initSize = this.size;
+
+        for (int i = pos; i < pos + size; i++)
+        {
+            this.moveFloat(this.vertBuffer, 3, 0, i);
+            this.moveFloat(this.vertBuffer, 3, 1, i);
+            this.moveFloat(this.vertBuffer, 3, 2, i);
+
+            this.moveFloat(this.colBuffer, 4, 0, i);
+            this.moveFloat(this.colBuffer, 4, 1, i);
+            this.moveFloat(this.colBuffer, 4, 2, i);
+            this.moveFloat(this.colBuffer, 4, 3, i);
+
+            for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+            {
+                for (int f = 0; f < a.count; f++)
+                {
+                    this.moveFloat(this.attributeBuffers.get(a), a.count, f, i);
+                }
+            }
+
+            this.size++;
+        }
+
+        this.bufferStartPoints.put(o, initSize);
+        this.modifyingSize = -1;
+
+        this.vertBuffer.rewind();
+        this.colBuffer.rewind();
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertVBO);
+        GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * 3, new float[3 * size]);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colVBO);
+        GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * 4, new float[4 * size]);
+        for (ShaderGroup.Attribute a: attributeBuffers.keySet())
+        {
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.attributeVBOs.get(a));
+            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * a.count, new float[a.count * size]);
+        }
+    }
+
+    public void addAttribute(ShaderGroup.Attribute attribute)
+    {
+        this.attributeBuffers.put(attribute, BufferUtils.createFloatBuffer(capacity * attribute.count));
+        this.floatAttributes.put(attribute, new float[attribute.count]);
+    }
+
+    public void setAttribute(ShaderGroup.Attribute a, float... floats)
+    {
+        float[] attribute = this.floatAttributes.get(a);
+        int index = 0;
+        for (float f: floats)
+        {
+            attribute[index] = f;
+            index++;
+        }
     }
 
     public void stage()
     {
-        if (this.window.shadowsEnabled && !this.window.drawingShadow)
-            return;
+        this.initialized = true;
 
-        if (!initialized || !points.keySet().equals(lastPoints.keySet()))
+        this.vertVBO = this.window.createVBO();
+        this.colVBO = this.window.createVBO();
+
+        for (ShaderGroup.Attribute a: this.attributeBuffers.keySet())
         {
-            this.initializeBuffers();
-            return;
+            this.attributeVBOs.put(a, this.window.createVBO());
+            this.attributeBuffers.get(a).flip();
         }
 
-        for (IBatchRenderableObject o: points.keySet())
+        this.initSize = this.size;
+        this.vertBuffer.flip();
+        this.colBuffer.flip();
+
+        if (this.dynamic)
         {
-            if (!Objects.equals(this.lastPointsSize.get(o), this.pointsSize.get(o)))
+            this.vertBuffer.limit(this.vertBuffer.capacity());
+            this.colBuffer.limit(this.colBuffer.capacity());
+            this.window.vertexBufferDataDynamic(vertVBO, vertBuffer);
+            this.window.vertexBufferDataDynamic(colVBO, colBuffer);
+
+            for (ShaderGroup.Attribute a: this.attributeBuffers.keySet())
             {
-                this.initializeBuffers();
-                return;
+                this.attributeBuffers.get(a).limit(this.attributeBuffers.get(a).capacity());
+                this.window.vertexBufferDataDynamic(this.attributeVBOs.get(a), this.attributeBuffers.get(a));
             }
         }
-
-        for (IBatchRenderableObject o: points.keySet())
+        else
         {
-            if (this.lastPointsPosHash.get(o) != this.pointsPosHash.get(o))
+            this.window.vertexBufferData(vertVBO, vertBuffer);
+            this.window.vertexBufferData(colVBO, colBuffer);
+
+            for (ShaderGroup.Attribute a: this.attributeBuffers.keySet())
             {
-                int index = objBufferPos.get(o) * 3;
+                this.window.vertexBufferData(this.attributeVBOs.get(a), this.attributeBuffers.get(a));
+            }
+        }
+    }
 
-                PointQueue p = points.get(o);
-                FloatBuffer b = BufferUtils.createFloatBuffer(this.lastPointsSize.get(o) * 3);
+    public void batchDraw()
+    {
+        this.endModification();
+        this.endAdd();
 
-                PointQueue.PointQueueNode node = p.start;
-                while (true)
-                {
-                    Point pt = node.point;
-                    b.put(pt.posX);
-                    b.put(pt.posY);
-                    b.put(pt.posZ);
+        if (!this.initialized)
+            this.stage();
 
-                    if (node == p.end)
-                        break;
+        this.modifying = null;
+        if (!this.hidden)
+        {
+            this.window.setColor(255, 255, 255, 255, this.colorGlow);
 
-                    node = node.next;
-                }
+            this.shader.setVertexBuffer(vertVBO);
+            this.shader.setColorBuffer(colVBO);
 
-                b.flip();
-
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertVBO);
-                GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, Float.BYTES * (long) index, b);
+            for (ShaderGroup.Attribute a : this.shader.attributes)
+            {
+                this.shader.setCustomBuffer(a, this.attributeVBOs.get(a), a.count);
             }
 
-            if (this.lastPointsColHash.get(o) != this.pointsColHash.get(o))
-            {
-                int index = objBufferPos.get(o) * 4;
-
-                PointQueue p = points.get(o);
-                FloatBuffer b = BufferUtils.createFloatBuffer(this.lastPointsSize.get(o) * 4);
-
-                PointQueue.PointQueueNode node = p.start;
-                while (true)
-                {
-                    Point pt = node.point;
-                    b.put(pt.colR);
-                    b.put(pt.colG);
-                    b.put(pt.colB);
-                    b.put(pt.colA);
-
-                    if (node == p.end)
-                        break;
-
-                    node = node.next;
-                }
-
-                b.flip();
-
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colVBO);
-                GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, Float.BYTES * (long) index, b);
-            }
+            this.shader.drawVBO(this.size);
         }
     }
 }

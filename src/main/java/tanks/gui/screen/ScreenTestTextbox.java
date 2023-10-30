@@ -27,11 +27,11 @@ public class ScreenTestTextbox extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         back.update();
         box.update();
         uuidBox.update();
+
+        super.update();
     }
 
     @Override

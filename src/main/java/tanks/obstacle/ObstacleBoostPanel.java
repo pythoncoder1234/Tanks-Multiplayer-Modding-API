@@ -5,6 +5,7 @@ import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.network.event.EventObstacleBoostPanelEffect;
+import tanks.rendering.ShaderBoostPanel;
 import tanks.tank.Tank;
 
 public class ObstacleBoostPanel extends Obstacle
@@ -33,6 +34,7 @@ public class ObstacleBoostPanel extends Obstacle
 
         glow = Effect.createNewEffect(this.posX, this.posY, 0, Effect.EffectType.boostLight);
 
+        this.renderer = ShaderBoostPanel.class;
         this.description = "A panel which speeds up tanks and bullets";
     }
 
@@ -101,24 +103,19 @@ public class ObstacleBoostPanel extends Obstacle
         }
         else
         {
-            Drawing.drawing.setColor(this.colorR - offset / 2, Math.min(this.colorG - offset + this.brightness, 255), this.colorB + this.brightness, 255, 1.0);
+            Drawing.drawing.setColor(255, this.brightness, 0, (this.posX / Game.tile_size + this.posY / Game.tile_size) % 255);
+            //Drawing.drawing.setColor(this.colorR - offset / 2, Math.min(this.colorG - offset + this.brightness, 255), this.colorB + this.brightness, 255, 1.0);
             Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Obstacle.draw_size, Obstacle.draw_size, 10);
-
-            if (Game.glowEnabled)
-            {
-                glow.posX = this.posX;
-                glow.posY = this.posY;
-                glow.size = this.brightness;
-
-                if (Game.screen instanceof ScreenGame)
-                    ((ScreenGame) Game.screen).drawables[9].add(glow);
-            }
         }
     }
 
     public void update()
     {
+        double prevBrightness = this.brightness;
         this.brightness = Math.max(this.brightness - Panel.frameFrequency, 0);
+
+        if (prevBrightness != brightness)
+            Game.redrawObstacles.add(this);
     }
 
     public void addEffect(double x, double y, double extra)
@@ -143,13 +140,23 @@ public class ObstacleBoostPanel extends Obstacle
         return 0;
     }
 
-    public boolean colorChanged()
-    {
-        return !Drawing.drawing.isOutOfBounds(Drawing.drawing.gameToAbsoluteX(this.posX, Obstacle.draw_size), Drawing.drawing.gameToAbsoluteY(this.posY, Obstacle.draw_size));
-    }
-
     public double getGroundHeight()
     {
         return 10;
+    }
+
+    @Override
+    public Effect getCompanionEffect()
+    {
+        if (Game.glowEnabled && brightness > 0)
+        {
+            glow.posX = this.posX;
+            glow.posY = this.posY;
+            glow.size = this.brightness;
+
+            return glow;
+        }
+
+        return null;
     }
 }

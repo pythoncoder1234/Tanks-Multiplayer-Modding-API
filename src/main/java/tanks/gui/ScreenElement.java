@@ -54,7 +54,7 @@ public abstract class ScreenElement
 
     public static class CenterMessage extends ScreenElement
     {
-        public boolean previous = false;
+        public boolean previous;
         public TextWithStyling styling;
         public double baseColorA = -1;
 

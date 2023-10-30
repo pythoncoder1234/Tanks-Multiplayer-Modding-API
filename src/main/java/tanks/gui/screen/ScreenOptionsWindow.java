@@ -29,8 +29,6 @@ public class ScreenOptionsWindow extends ScreenOptionsOverlay
                 width.inputText = (int) Game.game.window.absoluteWidth + "";
             else
                 Game.game.window.setResolution(Integer.parseInt(width.inputText), (int) Game.game.window.absoluteHeight);
-
-            Drawing.drawing.forceRedrawTerrain();
         }
                 , "");
 
@@ -46,8 +44,6 @@ public class ScreenOptionsWindow extends ScreenOptionsOverlay
                 height.inputText = (int) Game.game.window.absoluteWidth + "";
             else
                 Game.game.window.setResolution((int) Game.game.window.absoluteWidth, Integer.parseInt(height.inputText));
-
-            Drawing.drawing.forceRedrawTerrain();
         }
                 , "");
 
@@ -76,8 +72,6 @@ public class ScreenOptionsWindow extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         back.update();
         fullscreen.update();
         width.update();
@@ -89,6 +83,8 @@ public class ScreenOptionsWindow extends ScreenOptionsOverlay
 
         if (!height.selected)
             height.inputText = (int) Game.game.window.absoluteHeight + "";
+
+        super.update();
     }
 
     @Override

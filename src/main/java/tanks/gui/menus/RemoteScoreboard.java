@@ -13,6 +13,7 @@ public class RemoteScoreboard extends FixedMenu
     public Scoreboard.SortBy sortBy;
 
     public TextWithStyling title = new TextWithStyling();
+    public TextWithStyling subtitle = new TextWithStyling();
     public TextWithStyling namesStyle = new TextWithStyling();
     public TextWithStyling scoreStyle = new TextWithStyling();
 
@@ -27,7 +28,7 @@ public class RemoteScoreboard extends FixedMenu
     @Override
     public void draw()
     {
-        double[] sizes = Scoreboard.drawScoreboard(title, namesStyle, scoreStyle, names, sizeX, sizeY);
+        double[] sizes = Scoreboard.drawScoreboard(title, subtitle, namesStyle, scoreStyle, names, sizeX, sizeY);
         sizeX = sizes[0];
         sizeY = sizes[1];
     }

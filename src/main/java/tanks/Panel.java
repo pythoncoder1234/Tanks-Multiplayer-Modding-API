@@ -3,8 +3,10 @@ package tanks;
 import basewindow.BaseFile;
 import basewindow.InputCodes;
 import basewindow.transformation.Translation;
+import tanks.eventlistener.EventListener;
 import tanks.extension.Extension;
-import tanks.gui.ScreenElement.*;
+import tanks.gui.ScreenElement.CenterMessage;
+import tanks.gui.ScreenElement.Notification;
 import tanks.gui.TextBox;
 import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
@@ -17,6 +19,10 @@ import tanks.network.event.EventPing;
 import tanks.network.event.INetworkEvent;
 import tanks.network.event.online.IOnlineServerEvent;
 import tanks.obstacle.Obstacle;
+import tanks.rendering.ShaderGroundOutOfBounds;
+import tanks.rendering.ShaderTracks;
+import tanks.rendering.TerrainRenderer;
+import tanks.rendering.TrackRenderer;
 import tanks.tank.*;
 
 import java.util.ArrayList;
@@ -36,7 +42,7 @@ public class Panel
 	public static double windowWidth = 1400;
 	public static double windowHeight = 900;
 
-	public final long splash_duration = 0;
+	public final long splash_duration = Math.random() < 0.01 ? 3000 : 0;
 	public boolean playedTutorialIntroMusic = false;
 
 	public static boolean showMouseTarget = true;
@@ -97,6 +103,9 @@ public class Panel
 	public boolean settingUp = true;
 
 	protected boolean prevFocused = true;
+	protected Screen lastDrawnScreen = null;
+
+	public ArrayList<double[]> lights = new ArrayList<>();
 
 	public static void initialize()
 	{
@@ -113,19 +122,34 @@ public class Panel
 
 	public void setUp()
 	{
-		Drawing.drawing.defaultRenderer = new Drawing.LevelRenderer();
-		Drawing.drawing.terrainRenderer = Drawing.drawing.defaultRenderer.terrainRenderer;
-		Drawing.drawing.terrainRendererTransparent = Drawing.drawing.defaultRenderer.terrainRendererTransparent;
-		Drawing.drawing.terrainRendererShrubbery = Drawing.drawing.defaultRenderer.terrainRendererShrubbery;
+		Game.game.shaderOutOfBounds = new ShaderGroundOutOfBounds(Game.game.window);
+		Game.game.shaderTracks = new ShaderTracks(Game.game.window);
 
+		try
+		{
+			Game.game.shaderOutOfBounds.initialize();
+			Game.game.shaderTracks.initialize();
+		}
+		catch (Exception e)
+		{
+			Game.exitToCrash(e);
+		}
+
+		Drawing.drawing.terrainRenderer = new TerrainRenderer();
+		Drawing.drawing.trackRenderer = new TrackRenderer();
 		ModAPI.setUp();
-
 		Game.resetTiles();
 
 		if (Game.game.fullscreen)
 			Game.game.window.setFullscreen(Game.game.fullscreen);
 
 		Game.game.window.setIcon("/images/icon64.png");
+
+		if (Game.game.window.soundPlayer == null)
+		{
+			Game.soundsEnabled = false;
+			Game.musicEnabled = false;
+		}
 
 		double scale = 1;
 		if (Game.game.window.touchscreen && Game.game.window.pointHeight > 0 && Game.game.window.pointHeight <= 500)
@@ -239,7 +263,10 @@ public class Panel
         {
             started = true;
             this.startTime = System.currentTimeMillis() + splash_duration;
-        }
+
+			if (splash_duration > 0)
+				Drawing.drawing.playSound("splash_jingle.ogg");
+		}
 
 		if (!started)
 			this.startTime = System.currentTimeMillis();
@@ -363,13 +390,34 @@ public class Panel
 			{
 				for (int i = 0; i < Game.eventsIn.size(); i++)
 				{
-					if (!(Game.eventsIn.get(i) instanceof IOnlineServerEvent))
-						Game.eventsIn.get(i).execute();
+					INetworkEvent e = Game.eventsIn.get(i);
+
+					if (ScreenPartyLobby.isClient)
+					{
+						ArrayList<EventListener> arr = Game.eventListeners.get(e.getClass());
+						if (arr != null)
+						{
+							for (EventListener l : arr)
+							{
+								if (l != null)
+									l.eventsThisFrame.add(e);
+							}
+						}
+					}
+
+					if (!(e instanceof IOnlineServerEvent))
+						e.execute();
 				}
 			}
 			finally
 			{
 				Game.eventsIn.clear();
+			}
+
+			if (ScreenPartyLobby.isClient)
+			{
+				for (EventListener l : Game.eventListenerSet)
+					l.func.apply(l.eventsThisFrame);
 			}
 		}
 
@@ -470,17 +518,6 @@ public class Panel
 			{
 				Drawing.drawing.playerX = ((ScreenGame) Game.screen).spectatingTank.posX;
 				Drawing.drawing.playerY = ((ScreenGame) Game.screen).spectatingTank.posY;
-
-				if (((ScreenGame) Game.screen).spectatingTank instanceof TankRemote)
-				{
-					Drawing.drawing.playerX = ((TankRemote) ((ScreenGame) Game.screen).spectatingTank).interpolatedPosX;
-					Drawing.drawing.playerY = ((TankRemote) ((ScreenGame) Game.screen).spectatingTank).interpolatedPosY;
-				}
-				else if (((ScreenGame) Game.screen).spectatingTank instanceof TankPlayerRemote)
-				{
-					Drawing.drawing.playerX = ((TankPlayerRemote) ((ScreenGame) Game.screen).spectatingTank).interpolatedPosX;
-					Drawing.drawing.playerY = ((TankPlayerRemote) ((ScreenGame) Game.screen).spectatingTank).interpolatedPosY;
-				}
 			}
 			else
 			{
@@ -650,16 +687,32 @@ public class Panel
 			}
 		}
 
-		for (INetworkEvent e : Game.eventsOut)
+		if (!ScreenPartyLobby.isClient)
 		{
-			for (EventListener l : Game.eventListeners)
+			for (EventListener l : Game.eventListenerSet)
+				l.eventsThisFrame.clear();
+
+			for (INetworkEvent e : Game.eventsOut)
 			{
-				if (e.getClass() == l.event)
-					l.function.apply(e);
+				ArrayList<EventListener> arr = Game.eventListeners.get(e.getClass());
+				if (arr != null)
+				{
+					for (EventListener l : arr)
+					{
+						if (l != null)
+							l.eventsThisFrame.add(e);
+					}
+				}
 			}
 		}
 
 		Game.eventsOut.clear();
+
+		if (!ScreenPartyLobby.isClient)
+		{
+			for (EventListener l : Game.eventListenerSet)
+				l.func.apply(l.eventsThisFrame);
+		}
 
 		if (prevScreen != Game.screen)
 		{
@@ -708,22 +761,30 @@ public class Panel
 		if (Game.cinematic)
 			introAnimationTime = 4000;
 
-		if (System.currentTimeMillis() - startTime < 0)
+		if (System.currentTimeMillis() - startTime < splash_duration)
 		{
 			double frac = (startTime - System.currentTimeMillis() * 1.0) / splash_duration;
-
 			double frac2 = Math.min(frac * 4, 1) * Math.min((1 - frac) * 4, 1);
+			double[] col = Game.getRainbowColor((System.currentTimeMillis() % 1000) / 1000.0);
 
-			double[] col = Game.getRainbowColor((System.currentTimeMillis() % (1000)) / 1000.0);
+			Drawing.drawing.scale = Math.min(Game.game.window.absoluteWidth / Game.currentSizeX, (Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Game.currentSizeY) / 50.0;
+			Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
+			Drawing.drawing.scale = Game.screen.getScale();
+			Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Game.game.window.absoluteWidth / 28, (Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
+			Game.game.window.absoluteDepth = Drawing.drawing.interfaceScale * Game.absoluteDepthBase;
+
+			Drawing.drawing.setColor(255, 255, 255, 255 * frac2);
+			Drawing.drawing.drawInterfaceImage(frac * 5,"opal.png", Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, 600 * (1 + (- frac + 0.5) * 2), 600 * (1 + (- frac + 0.5) * 2));
+
 			Drawing.drawing.setColor(1 * frac2 * col[0], 1 * frac2 * col[1], 1 * frac2 * col[2]);
-			Drawing.drawing.setInterfaceFontSize(100 * (1 + (- frac + 0.5) * 0.8));
-			Drawing.drawing.drawInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, "Opal Games");
+			Drawing.drawing.setInterfaceFontSize(100 * (1 + (-frac + 0.5) * 0.8));
+			Drawing.drawing.drawInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, "Opal Games :)");
+
 			return;
 		}
 
 		if (this.frameStartTime - startTime < introTime + introAnimationTime)
 		{
-			Drawing.drawing.forceRedrawTerrain();
 			double frac = ((this.frameStartTime - startTime - introTime) / introAnimationTime);
 
 			if (Game.enable3d && Game.fancyTerrain)
@@ -780,11 +841,29 @@ public class Panel
 			return;
 		}
 
-		if (!this.introFinished)
+		if (Drawing.drawing.terrainRenderer == null)
+			Drawing.drawing.terrainRenderer = new TerrainRenderer();
+
+		if (Drawing.drawing.trackRenderer == null)
+			Drawing.drawing.trackRenderer = new TrackRenderer();
+
+		if (lastDrawnScreen != Game.screen)
 		{
-			Drawing.drawing.forceRedrawTerrain();
-			this.introFinished = true;
+			lastDrawnScreen = Game.screen;
+			Drawing.drawing.trackRenderer.reset();
+			Drawing.drawing.terrainRenderer.reset();
 		}
+
+		if (!(Game.screen instanceof ScreenGame))
+		{
+			Drawing.drawing.scale = Math.min(Panel.windowWidth / Game.currentSizeX, (Panel.windowHeight - Drawing.drawing.statsHeight) / Game.currentSizeY) / 50.0;
+			Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
+			Drawing.drawing.scale = Game.screen.getScale();
+			Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Panel.windowWidth / 28, (Panel.windowHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
+		}
+
+		if (!this.introFinished)
+            this.introFinished = true;
 
 		double t = 3;
 		skylight = (t - Math.pow(t, 1 - Level.currentLightIntensity)) / (t - 1) * 0.95;
@@ -801,6 +880,12 @@ public class Panel
 
 		Drawing.drawing.setLighting(Level.currentLightIntensity, Level.currentShadowIntensity);
 
+		this.lights.clear();
+
+		Game.screen.setupLights();
+
+		Game.game.window.createLights(this.lights, Drawing.drawing.scale);
+
 		if (!Game.game.window.drawingShadow)
 		{
 			long time = (long) (System.currentTimeMillis() * frameSampling / 1000);
@@ -810,10 +895,11 @@ public class Panel
 				frames = 0;
 			}
 
-            lastFrameSec = time;
-            frames++;
-            ageFrames++;
-        }
+			lastFrameSec = time;
+			frames++;
+			ageFrames++;
+			Game.screen.screenAge += Panel.frameFrequency;
+		}
 
         if (onlinePaused)
             this.onlineOverlay.draw();

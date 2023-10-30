@@ -106,8 +106,6 @@ public class OverlayGenerateTeams extends ScreenLevelEditorOverlay
     @Override
     public void update()
     {
-        super.update();
-
         name.update();
         generate.update();
         changeChar.update();
@@ -116,7 +114,10 @@ public class OverlayGenerateTeams extends ScreenLevelEditorOverlay
         amount.update();
 
         back.update();
-    }    Button teamColors = new Button(this.centerX, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Team colors: " + ScreenOptions.offText, new Runnable()
+        super.update();
+    }
+
+    Button teamColors = new Button(this.centerX, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Team colors: " + ScreenOptions.offText, new Runnable()
     {
         @Override
         public void run()

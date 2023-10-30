@@ -36,7 +36,7 @@ public class TankSpawnMarker extends Tank
         this.teamSelector.id = "player_team";
         this.teamSelector.defaultTeamIndex = 0;
 
-        if (!this.teamSelector.modified())
+        if (!this.teamSelector.modified)
             this.teamSelector.setChoice(0);
     }
 }

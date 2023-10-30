@@ -4,14 +4,15 @@ import tanks.*;
 import tanks.gui.TextWithStyling;
 import tanks.network.event.EventCreateScoreboard;
 import tanks.network.event.EventScoreboardUpdateScore;
+import tanks.tank.Tank;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A scoreboard that displays a list of players and their scores, as well as the name of the objective.<br>
  * Highly customizable, and most variable names are self-explanatory.
  */
+@SuppressWarnings("unused")
 public class Scoreboard extends FixedMenu
 {
     public enum SortOrder {ascending, descending}
@@ -19,20 +20,21 @@ public class Scoreboard extends FixedMenu
     public enum SortBy {name, score}
 
     public TextWithStyling title = new TextWithStyling("Scoreboard", 255, 255, 0, 255, 24);
+    public TextWithStyling subtitle = new TextWithStyling("", 255, 255, 255, 255, 20);
     public TextWithStyling namesStyle = new TextWithStyling("", 255, 255, 255, 255, 20);
     public TextWithStyling scoreStyle = new TextWithStyling("", 255, 64, 64, 255, 20);
 
-    public HashMap<Player, Double> playerPoints = new HashMap<>();
+    public HashMap<Tank, Double> tankPoints = new HashMap<>();
     public HashMap<Team, Double> teamPoints = new HashMap<>();
     public ArrayList<Entry> pointsDisplay = new ArrayList<>();
 
     public SortOrder sortOrder = SortOrder.ascending;
     public SortBy sortBy = SortBy.score;
-    protected Comparator<Map.Entry<Player, Double>> playerComparator;
+    protected Comparator<Map.Entry<Tank, Double>> tankComparator;
     protected Comparator<Map.Entry<Team, Double>> teamComparator;
 
     public enum objectiveTypes
-    {custom, kills, deaths, items_used, shots_fired, mines_placed, shots_fired_no_multiple_fire}
+    {custom, kills, deaths, items_used, shots_fired, mines_placed}
 
     public objectiveTypes objectiveType;
 
@@ -43,14 +45,14 @@ public class Scoreboard extends FixedMenu
         setSorting(SortBy.score, SortOrder.ascending);
     }
 
-    /** The <code>isPlayer</code> variable is used so the constructor does not clash with the constructor below, and does nothing. */
-    public Scoreboard(String objectiveName, objectiveTypes objectiveType, ArrayList<Player> players, boolean isPlayer)
+    /** The <code>isPlayer</code> variable is used so the constructor does not clash with the team constructor, and does nothing. */
+    public Scoreboard(String objectiveName, objectiveTypes objectiveType, ArrayList<Tank> tanks, boolean isTank)
     {
         this.title.text = objectiveName;
         this.objectiveType = objectiveType;
 
-        for (Player p : players)
-            this.playerPoints.put(p, 0.0);
+        for (Tank p : tanks)
+            this.tankPoints.put(p, 0.0);
 
         setSorting(SortBy.score, SortOrder.ascending);
         refreshOrder();
@@ -73,17 +75,17 @@ public class Scoreboard extends FixedMenu
         this.sortBy = sortBy;
         this.sortOrder = sortOrder;
         this.teamComparator = sortBy == SortBy.name ? Map.Entry.comparingByKey(Comparator.comparing(team -> team.name)) : Map.Entry.comparingByValue();
-        this.playerComparator = sortBy == SortBy.name ? Map.Entry.comparingByKey(Comparator.comparing(player -> player.username)) : Map.Entry.comparingByValue();
+        this.tankComparator = sortBy == SortBy.name ? Map.Entry.comparingByKey(Comparator.comparing(this::getName)) : Map.Entry.comparingByValue();
 
         if (sortBy == SortBy.score)
         {
-            this.playerComparator = this.playerComparator.reversed();
+            this.tankComparator = this.tankComparator.reversed();
             this.teamComparator = this.teamComparator.reversed();
         }
 
         if (sortOrder == SortOrder.descending)
         {
-            this.playerComparator = this.playerComparator.reversed();
+            this.tankComparator = this.tankComparator.reversed();
             this.teamComparator = this.teamComparator.reversed();
         }
     }
@@ -101,29 +103,29 @@ public class Scoreboard extends FixedMenu
         return this;
     }
 
-    public void addPlayer(Player player)
+    public void addTank(Tank player)
     {
-        addPlayerScore(player, 0);
+        addTankScore(player, 0);
     }
 
-    public void addPlayerScore(Player p, double value)
+    public void addTankScore(Tank t, double value)
     {
-        playerPoints.putIfAbsent(p, 0D);
-        playerPoints.put(p, value + teamPoints.get(p));
+        tankPoints.putIfAbsent(t, 0D);
+        tankPoints.put(t, value + tankPoints.get(t));
 
-        sortAndSendEvent(p.username);
+        sortAndSendEvent(getName(t));
     }
 
-    public boolean addPlayerScore(String playerName, double value)
+    public boolean addTankScore(String playerName, double value)
     {
-        for (Player p : this.playerPoints.keySet())
+        for (Tank p : this.tankPoints.keySet())
         {
-            if (p.username.equals(playerName))
+            if (getName(p).equals(playerName))
             {
-                playerPoints.putIfAbsent(p, 0D);
-                playerPoints.put(p, value + playerPoints.get(p));
+                tankPoints.putIfAbsent(p, 0D);
+                tankPoints.put(p, value + tankPoints.get(p));
 
-                sortAndSendEvent(p.username);
+                sortAndSendEvent(getName(p));
                 return true;
             }
         }
@@ -192,7 +194,7 @@ public class Scoreboard extends FixedMenu
         if (!teamPoints.isEmpty())
         {
             List<Map.Entry<Team, Double>> sorted = teamPoints.entrySet().stream().limit(8)
-                    .sorted(teamComparator).collect(Collectors.toList());
+                    .sorted(teamComparator).toList();
 
             for (int i = 0; i < sorted.size(); i++)
             {
@@ -209,20 +211,20 @@ public class Scoreboard extends FixedMenu
         }
         else
         {
-            List<Map.Entry<Player, Double>> sorted = playerPoints.entrySet().stream().limit(8)
-                    .sorted(playerComparator).collect(Collectors.toList());
+            List<Map.Entry<Tank, Double>> sorted = tankPoints.entrySet().stream().limit(8)
+                    .sorted(tankComparator).toList();
 
             for (int i = 0; i < sorted.size(); i++)
             {
-                Map.Entry<Player, Double> e = sorted.get(i);
+                Map.Entry<Tank, Double> e = sorted.get(i);
 
-                if (e.getKey().username.equals(changed))
+                if (getName(e.getKey()).equals(changed))
                 {
                     end = i;
                     value = e.getValue();
                 }
 
-                pointsDisplay.add(new Entry(e.getKey().username, ModAPI.convertToString(e.getValue())));
+                pointsDisplay.add(new Entry(getName(e.getKey()), ModAPI.convertToString(e.getValue())));
             }
         }
 
@@ -233,25 +235,38 @@ public class Scoreboard extends FixedMenu
     @Override
     public void draw()
     {
-        double[] sizes = drawScoreboard(title, namesStyle, scoreStyle, pointsDisplay, sizeX, sizeY);
+        double[] sizes = drawScoreboard(title, subtitle, namesStyle, scoreStyle, pointsDisplay, sizeX, sizeY);
         sizeX = sizes[0];
         sizeY = sizes[1];
     }
 
-    public static double[] drawScoreboard(TextWithStyling title, TextWithStyling namesStyle, TextWithStyling scoreStyle, ArrayList<Entry> pointsDisplay, double sizeX, double sizeY)
+    public static double[] drawScoreboard(TextWithStyling title, TextWithStyling subtitle, TextWithStyling namesStyle, TextWithStyling scoreStyle, ArrayList<Entry> pointsDisplay, double sizeX, double sizeY)
     {
+        double subtitleSize = (subtitle.text.isEmpty() ? 0 : subtitle.fontSize + 8);
+
         Drawing.drawing.setColor(0, 0, 0, 128);
-        ModAPI.fixedShapes.fillRect(Panel.windowWidth - sizeX, Panel.windowHeight / 2 - sizeY, sizeX, sizeY);
+        ModAPI.fixedShapes.fillRect(Panel.windowWidth - sizeX, Panel.windowHeight / 2 - sizeY / 2, sizeX, sizeY);
 
         double titleSize = ModAPI.fixedText.getStringSizeX(title.fontSize / 40, title.text);
-        Drawing.drawing.setColor(title.colorR, title.colorG, title.colorB);
+        double subtitleSizeX = ModAPI.fixedText.getStringSizeX(subtitle.fontSize / 40, subtitle.text);
+        title.setColor();
         ModAPI.fixedText.drawString(
-                Panel.windowWidth - sizeX + 20,
-                Panel.windowHeight / 2 - sizeY * 0.9,
+                Panel.windowWidth - sizeX / 2 - titleSize / 2,
+                Panel.windowHeight / 2 - sizeY / 2 + 15,
                 title.fontSize / 40, title.fontSize / 40,
-                title.text);
+                title.text
+        );
+
+        subtitle.setColor();
+        ModAPI.fixedText.drawString(
+                Panel.windowWidth - sizeX / 2 - subtitleSizeX / 2,
+                Panel.windowHeight / 2 - sizeY / 2 + 15 + subtitleSize,
+                subtitle.fontSize / 40, subtitle.fontSize / 40,
+                subtitle.text
+        );
 
         int index = 0;
+        double startY = Panel.windowHeight / 2 - sizeY / 2 + title.fontSize + 35 + subtitleSize;
         double maxSX = 0;
         double maxSY = 0;
 
@@ -259,20 +274,20 @@ public class Scoreboard extends FixedMenu
         {
             double textSX = ModAPI.fixedText.getStringSizeX(namesStyle.fontSize / 40, entry.name);
 
-            Drawing.drawing.setColor(namesStyle.colorR, namesStyle.colorG, namesStyle.colorB);
+            namesStyle.setColor();
             ModAPI.fixedText.drawString(
                     Panel.windowWidth - sizeX + 20,
-                    Panel.windowHeight / 2 - sizeY / 2 + index * (namesStyle.fontSize + 10),
+                    startY + index * (namesStyle.fontSize + 10),
                     namesStyle.fontSize / 40, namesStyle.fontSize / 40,
                     entry.name
             );
 
             double valueSX = ModAPI.fixedText.getStringSizeX(namesStyle.fontSize / 40, entry.value);
 
-            Drawing.drawing.setColor(scoreStyle.colorR, scoreStyle.colorG, scoreStyle.colorB);
+            scoreStyle.setColor();
             ModAPI.fixedText.drawString(
                     Panel.windowWidth - 15 - valueSX,
-                    Panel.windowHeight / 2 - sizeY / 2 + index * (namesStyle.fontSize + 10),
+                    startY + index * (namesStyle.fontSize + 10),
                     namesStyle.fontSize / 40, namesStyle.fontSize / 40,
                     entry.value
             );
@@ -280,10 +295,15 @@ public class Scoreboard extends FixedMenu
             index++;
 
             maxSX = Math.max(textSX + valueSX + 100, maxSX);
-            maxSY = Math.max(index * 30 + title.fontSize + namesStyle.fontSize + 30, maxSY);
+            maxSY = Math.max(index * 30 + title.fontSize + subtitleSize + namesStyle.fontSize + 30, maxSY);
         }
 
-        return new double[] {Math.max(titleSize * 1.25, maxSX), maxSY};
+        return new double[] {Math.max(titleSize + 50, Math.max(subtitleSize + 50, maxSX)), maxSY};
+    }
+
+    public String getName(Tank t)
+    {
+        return Minigame.getName(t);
     }
 
     public static class Entry

@@ -51,16 +51,16 @@ public class EventArcadeHit extends PersonalEvent
     @Override
     public void execute()
     {
-        if (clientID == null && Game.currentGame instanceof Arcade)
+        if (clientID == null && Game.currentGame instanceof Arcade a)
         {
-            ((Arcade) Game.currentGame).chain = power;
-            ((Arcade) Game.currentGame).lastHit = ((Arcade) Game.currentGame).age;
+            a.chain = power;
+            a.lastHit = a.age;
 
             Effect e = Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.chain);
             e.radius = power;
             Game.effects.add(e);
 
-            ((Arcade) Game.currentGame).score += points;
+            a.score += points;
             Drawing.drawing.playSound("hit_chain.ogg", (float) Math.pow(2, Math.min(Arcade.max_power * 3 - 1, power - 1) / 12.0), 0.5f);
         }
     }

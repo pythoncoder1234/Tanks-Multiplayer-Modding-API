@@ -34,8 +34,6 @@ public class ScreenTestModel extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         double frac = 0.02;
 
         if (Game.game.window.pressedKeys.contains(InputCodes.KEY_RIGHT))
@@ -95,6 +93,8 @@ public class ScreenTestModel extends ScreenOptionsOverlay
 
         //animation.apply(model, System.currentTimeMillis() / 10.0, 1);
         //pose.apply(model, 1);
+
+        super.update();
     }
 
     @Override

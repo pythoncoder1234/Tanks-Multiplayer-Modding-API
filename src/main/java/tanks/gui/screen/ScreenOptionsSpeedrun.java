@@ -75,11 +75,11 @@ public class ScreenOptionsSpeedrun extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         back.update();
         timer.update();
         deterministic.update();
+
+        super.update();
     }
 
     @Override

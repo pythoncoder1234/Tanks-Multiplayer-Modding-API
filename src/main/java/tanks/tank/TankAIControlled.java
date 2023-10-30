@@ -22,6 +22,8 @@ import static tanks.tank.TankProperty.Category.*;
  *  Also, the behavior is split into many methods which are intended to be overridden easily.*/
 public class TankAIControlled extends Tank
 {
+	protected static TankAIControlled compare;
+
 	/** The type which shows what direction the tank is moving. Clockwise and Counterclockwise are for idle, while Aiming is for when the tank aims.*/
 	protected enum RotationPhase {clockwise, counterClockwise, aiming}
 
@@ -272,6 +274,8 @@ public class TankAIControlled extends Tank
 	/** True for when a tank just laid a mine*/
 	protected boolean laidMine = false;
 
+	protected boolean shotMine = false;
+
 	/** Alternates for tanks with the alternate AI. Tells tanks to shoot with reflection and then to shoot straight.*/
 	protected boolean straightShoot = false;
 
@@ -369,6 +373,7 @@ public class TankAIControlled extends Tank
      * Time until the tank will continue motion
      */
     protected double motionPauseTimer = 0;
+
     /** Normally the nearest tank not on this tank's team. This is the tank that this tank will fight.*/
 	protected Movable targetEnemy;
 
@@ -379,7 +384,7 @@ public class TankAIControlled extends Tank
 	public boolean suicidal = false;
 
 	/** Direction to strafe around target enemy, if set to strafe mode on sight*/
-	protected double strafeDirection = Math.PI / 2;
+	protected double strafeDirection = Math.PI * 0.45;
 
 	/** True while the tank is actively seeking out an enemy*/
 	protected boolean currentlySeeking = false;
@@ -530,7 +535,7 @@ public class TankAIControlled extends Tank
 
 		this.justTransformed = false;
 
-		if (this.spawnedTankEntries.size() > 0 && !ScreenGame.finishedQuick && !this.destroy)
+		if (!this.spawnedTankEntries.isEmpty() && !ScreenGame.finishedQuick && !this.destroy)
 			this.updateSpawningAI();
 
 		this.vX *= Math.pow(1 - (this.friction * this.frictionModifier), Panel.frameFrequency);
@@ -589,7 +594,7 @@ public class TankAIControlled extends Tank
 	/** Prepare to fire a bullet*/
 	public void shoot()
 	{
-		if (this.suicidal)
+		if (this.suicidal || this.destroy)
 			return;
 
 		this.cooldownIdleTime = 0;
@@ -715,11 +720,14 @@ public class TankAIControlled extends Tank
 
 		Movable m = a.getTarget();
 
-		if (this.isSupportTank() || (!Team.isAllied(this, m) && this.isTargetSafe(a.posX, a.posY)))
+		if ((this.isSupportTank() || ((!Team.isAllied(this, m) || m instanceof Mine) && this.isTargetSafe(a.posX, a.posY, m))))
 		{
 			this.shotOffset = offset;
 			this.bullet.attemptUse(this);
 		}
+
+		if (this.targetEnemy instanceof Mine)
+			this.targetEnemy = null;
 	}
 
 	public void finalCheckAndShootFan(double offset)
@@ -749,6 +757,12 @@ public class TankAIControlled extends Tank
 			this.shots = 0;
 			this.fanDirection = this.random.nextDouble() < 0.5 ? 1 : -1;
 			this.fanOffset = offset;
+		}
+
+		if (this.targetEnemy instanceof Mine)
+		{
+			this.targetEnemy = null;
+			this.shotMine = true;
 		}
 	}
 
@@ -955,14 +969,6 @@ public class TankAIControlled extends Tank
 
 	public void updateTarget()
 	{
-		if (this.targetEnemy instanceof Mine)
-		{
-			if (this.targetEnemy.destroy)
-				this.seekPause -= ((Mine) this.targetEnemy).timer;
-			else if (Movable.distanceBetween(this, this.targetEnemy) < ((Mine) this.targetEnemy).radius * this.mineAvoidSensitivity)
-				return;
-		}
-
 		if (this.transformMimic)
 			if (this.updateTargetMimic())
 				return;
@@ -970,6 +976,7 @@ public class TankAIControlled extends Tank
 		double nearestDist = Double.MAX_VALUE;
 		Movable nearest = null;
 		Movable nearestVisible = null;
+		Movable secondary = null;
 		this.hasTarget = false;
 
 		for (int i = 0; i < Game.movables.size(); i++)
@@ -977,29 +984,35 @@ public class TankAIControlled extends Tank
 			Movable m = Game.movables.get(i);
 
 			boolean correctTeam = (this.isSupportTank() && Team.isAllied(this, m)) || (!this.isSupportTank() && !Team.isAllied(this, m));
-			if (m instanceof Tank && correctTeam && !((Tank) m).hidden && ((Tank) m).targetable && m != this)
+			if ((m instanceof Tank t && correctTeam && !t.hidden && t.targetable && m != this &&
+					!(BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) && t.health - t.baseHealth >= 1)) ||
+					(m instanceof Mine && !BulletAir.class.isAssignableFrom(this.bullet.bulletClass) && !this.isSupportTank() && isTargetSafe(m.posX, m.posY, m)))
 			{
-				if (BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) && ((Tank) m).health - ((Tank) m).baseHealth >= 1)
-					continue;
-
-				boolean reachable = !this.shootAIType.equals(ShootAI.straight) ||
-						new Ray(this.posX, this.posY, this.getAngleInDirection(m.posX, m.posY),0, this).getTarget() == m;
+				boolean reachable = new Ray(this.posX, this.posY, this.getAngleInDirection(m.posX, m.posY), this.bullet.bounces, this).getTarget() == m;
 
 				double dist = Movable.distanceBetween(this, m);
 				if (dist < nearestDist)
 				{
 					this.hasTarget = true;
-					nearest = m;
-					nearestDist = dist;
 
-					if (reachable)
-						nearestVisible = m;
+					if (m instanceof Tank)
+					{
+						nearest = m;
+						nearestDist = dist;
+
+						if (reachable)
+							nearestVisible = m;
+					}
+					else if (reachable)
+                        secondary = m;
 				}
 			}
 		}
 
 		if (nearestVisible != null)
 			nearest = nearestVisible;
+		else if (secondary != null)
+			nearest = secondary;
 
 		if (this.targetEnemy != nearest)
 			this.cooldownStacks = 0;
@@ -1007,13 +1020,24 @@ public class TankAIControlled extends Tank
 		this.targetEnemy = nearest;
 	}
 
-	public boolean isTargetSafe(double posX, double posY)
+	public boolean isTargetSafe(double x, double y, Movable m)
 	{
+		double size = -99;
 		if (BulletExplosive.class.isAssignableFrom(this.bullet.bulletClass))
+			size = Mine.mine_size;
+		else if (m instanceof IAvoidObject)
+			size = ((IAvoidObject) m).getRadius() + 30;
+
+		boolean mine = m instanceof Mine;
+
+		if (size > 0)
         {
             for (Movable m2 : Game.movables)
             {
-                if (Team.isAllied(m2, this) && m2 instanceof Tank && !((Tank) m2).resistExplosions && this.team != null && this.team.friendlyFire && Math.pow(m2.posX - posX, 2) + Math.pow(m2.posY - posY, 2) <= Math.pow(Mine.mine_size, 2))
+				if (mine && m2 instanceof TankAIControlled t && m2 != this && Team.isAllied(this, t) && t.targetEnemy == m && this.random.nextDouble() < 0.2)
+					return false;
+
+                if (Team.isAllied(m2, this) && m2 instanceof Tank t && !t.resistExplosions && this.team != null && this.team.friendlyFire && Math.pow(m2.posX - x, 2) + Math.pow(m2.posY - y, 2) <= size * size)
 					return false;
 			}
 		}
@@ -1295,19 +1319,18 @@ public class TankAIControlled extends Tank
 		if (currX < 0 || currX >= Game.currentSizeX || currY < 0 || currY >= Game.currentSizeY)
 			return;
 
-		Tank target = null;
+		ArrayList<Tank> targets = new ArrayList<>();
 
 		for (Movable m : Game.movables)
 		{
 			if (this.isInterestingPathTarget(m))
-			{
-				target = (Tank) m;
-				break;
-			}
+                targets.add((Tank) m);
 		}
 
-		if (target == null)
+		if (targets.isEmpty())
 			return;
+
+		Tank target = targets.get((int) (Math.random() * targets.size()));
 
 		int endX = (int) (target.posX / Game.tile_size);
 		int endY = (int) (target.posY / Game.tile_size);
@@ -1345,7 +1368,7 @@ public class TankAIControlled extends Tank
 				if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
                     continue;
 
-                if (visited[x][y] || t.type == Tile.Type.solid || t.unfavorability >= 100 || (t.type == Tile.Type.destructible && !this.enableMineLaying))
+                if (visited[x][y] || t.type == Tile.Type.solid || t.unfavorability >= 75 || (t.type == Tile.Type.destructible && !this.enableMineLaying))
 					continue;
 
 				visited[x][y] = true;
@@ -1398,7 +1421,7 @@ public class TankAIControlled extends Tank
 
 		double mul = 1;
 
-		if (this.path.size() > 0 && this.path.getFirst().type == Tile.Type.destructible)
+		if (!this.path.isEmpty() && this.path.getFirst().type == Tile.Type.destructible)
 			mul = 3;
 		else if (this.path.size() > 1 && this.path.get(1).type == Tile.Type.destructible)
 			mul = 2;
@@ -1411,7 +1434,7 @@ public class TankAIControlled extends Tank
 			{
 				this.mine.attemptUse(this);
 				this.seekTimer = this.seekTimerBase * 2;
-				this.seekPause += this.mine.timer;
+				this.seekPause += this.mine.radius / this.maxSpeed + 100;
 			}
 
 			this.path.removeFirst();
@@ -1437,9 +1460,9 @@ public class TankAIControlled extends Tank
 				if (!(b.tank == this && b.age < 20) && !(this.team != null && Team.isAllied(b, this) && !this.team.friendlyFire) && b.shouldDodge && Math.abs(b.posX - this.posX) < Game.tile_size * 10 && Math.abs(b.posY - this.posY) < Game.tile_size * 10 && (b.getMotionInDirection(b.getAngleInDirection(this.posX, this.posY)) > 0 || dist < this.size * 3))
 				{
 					Ray r = b.getRay();
-					r.tankHitSizeMul = 4;
+					r.tankHitSizeMul = 3;
 
-					Movable m = r.getTarget(3, this);
+					Movable m = r.getTarget(2, this);
 					if (dist < this.size * 3 || (m != null && m.equals(this)))
 					{
 						avoid = true;
@@ -1496,7 +1519,7 @@ public class TankAIControlled extends Tank
 			return;
 		}
 
-		if (this.enableLookingAtTargetEnemy || this.straightShoot || this.sightTransformTank != null)
+		if ((this.enableLookingAtTargetEnemy || this.straightShoot || this.sightTransformTank != null) && this.targetEnemy instanceof Tank)
 			this.lookAtTargetEnemy();
 
 		if (this.shootAIType.equals(ShootAI.homing))
@@ -2050,11 +2073,11 @@ public class TankAIControlled extends Tank
         if (this.transformMimic)
             return m instanceof Tank && !(m.getClass().equals(this.getClass())) && m.size == this.size;
         else if (this.isSupportTank())
-            return m instanceof Tank && Team.isAllied(m, this) && m != this
-                    && (((Tank) m).health - ((Tank) m).baseHealth < 1 || !BulletHealing.class.isAssignableFrom(this.bullet.bulletClass))
+            return m instanceof Tank t && Team.isAllied(m, this) && m != this
+                    && (t.health - t.baseHealth < 1 || !BulletHealing.class.isAssignableFrom(this.bullet.bulletClass))
                     && !(m.getClass().equals(this.getClass()));
         else
-            return m instanceof Tank && !Team.isAllied(m, this)
+            return m instanceof Tank t && !Team.isAllied(m, this) && t.targetable
                     && m.posX >= 0 && m.posX / Game.tile_size < Game.currentSizeX
                     && m.posY >= 0 && m.posY / Game.tile_size < Game.currentSizeY;
     }
@@ -2400,8 +2423,6 @@ public class TankAIControlled extends Tank
 						nearest = o;
 					}
 				}
-				else if (o instanceof Mine && ((Mine) o).tank == this && !this.seesTargetEnemy)
-					this.targetEnemy = (Movable) o;
 			}
 		}
 
@@ -2768,6 +2789,9 @@ public class TankAIControlled extends Tank
 	@Override
 	public String toString()
 	{
+		if (compare == null)
+			compare = new TankAIControlled();
+
 		if (fromRegistry)
 			return "<" + this.name + ">";
 
@@ -2778,26 +2802,30 @@ public class TankAIControlled extends Tank
 			for (Field f : this.getClass().getFields())
 			{
 				TankProperty a = f.getAnnotation(TankProperty.class);
-				if (a != null)
-				{
-					s.append(a.id());
-					s.append("=");
+				if (a == null)
+					continue;
 
-					if (f.get(this) != null)
+				Object obj = f.get(this);
+				if (Objects.equals(obj, f.get(compare)))
+					continue;
+
+				s.append(a.id());
+				s.append("=");
+
+				if (obj != null)
+				{
+					if (a.miscType() == TankProperty.MiscType.description)
 					{
-						if (a.miscType() == TankProperty.MiscType.description)
-						{
-							String desc = (String) f.get(this);
-							s.append("<").append(desc.length()).append(">").append(desc);
-						}
-						else
-							s.append(f.get(this));
+						String desc = (String) obj;
+						s.append("<").append(desc.length()).append(">").append(desc);
 					}
 					else
-						s.append("*");
-
-					s.append(";");
+						s.append(obj);
 				}
+				else
+					s.append("*");
+
+				s.append(";");
 			}
 
 			return s.append("]").toString();

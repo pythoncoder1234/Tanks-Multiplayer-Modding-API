@@ -1,13 +1,13 @@
 package tanks.obstacle;
 
 import basewindow.IBatchRenderableObject;
+import basewindow.ShaderGroup;
 import tanks.*;
-import tanks.editorselector.GroupIdSelector;
-import tanks.editorselector.LevelEditorSelector;
-import tanks.editorselector.RotationSelector;
-import tanks.editorselector.StackHeightSelector;
+import tanks.editorselector.*;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
+import tanks.rendering.ShaderGroundObstacle;
+import tanks.rendering.ShaderObstacle;
 import tanks.tank.TankAIControlled;
 
 public class Obstacle extends GameObject implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IBatchRenderableObject
@@ -56,6 +56,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	 * If set to true, the obstacle (if batch rendered) will be redrawn.
 	 */
 	public boolean colorChanged = false;
+	public Class<? extends ShaderGroup> renderer = ShaderObstacle.class;
+	public Class<? extends ShaderGroup> tileRenderer = ShaderGroundObstacle.class;
 
 	public double posX;
 	public double posY;
@@ -171,7 +173,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 		if (Game.enable3d)
 		{
-			for (int i = 0; i < Math.min(this.stackHeight, 100); i++)
+			for (int i = 0; i < Math.min(this.stackHeight, 25); i++)
 			{
 				int in = i % default_max_height;
 				drawing.setColor(this.stackColorR[in], this.stackColorG[in], this.stackColorB[in], this.colorA, this.glow);
@@ -180,11 +182,11 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 				if (Obstacle.draw_size >= Game.tile_size)
 				{
-					if (i > 0)
-						option += 1;
+//					if (i > 0)
+//						option += 1;
 
-					if (i < Math.min(this.stackHeight, 100) - 1)
-						option += 2;
+//					if (i < Math.min(this.stackHeight, default_max_height) - 1)
+//						option += 2;
 				}
 
 				double cutoff = -Math.min((i - 1 + stackHeight % 1.0) * Game.tile_size, 0);
@@ -226,12 +228,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public void drawOutline(double r, double g, double b, double a)
 	{
-		Drawing drawing = Drawing.drawing;
-		drawing.setColor(r, g, b, a);
-		drawing.fillRect(this.posX - Game.tile_size * 0.4, this.posY, Game.tile_size * 0.2, Game.tile_size);
-		drawing.fillRect(this.posX + Game.tile_size * 0.4, this.posY, Game.tile_size * 0.2, Game.tile_size);
-		drawing.fillRect(this.posX, this.posY - Game.tile_size * 0.4, Game.tile_size, Game.tile_size * 0.2);
-		drawing.fillRect(this.posX, this.posY + Game.tile_size * 0.4, Game.tile_size, Game.tile_size * 0.2);
+		Drawing.drawing.setColor(r, g, b, a);
+		Drawing.drawing.drawRect(this.posX, this.posY, draw_size, draw_size, Game.tile_size * 0.2);
 	}
 
 
@@ -258,7 +256,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			sizeZ = Game.screen instanceof ILevelPreviewScreen ? 15 : 50;
 
 		Drawing.drawing.setColor(r, g, b, a, 0.5);
-		Drawing.drawing.fillBox(this, this.posX, this.posY, this.startHeight * Game.tile_size,
+		Drawing.drawing.fillBox(this.posX, this.posY, this.startHeight * Game.tile_size,
 				Game.tile_size + 1, Game.tile_size + 1, sizeZ + 1, this.getOptionsByte(this.getTileHeight()));
 	}
 
@@ -361,13 +359,10 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	 * @param d Tile height
 	 * @param extra The deepest tile next to the current tile, used to render sides underground
 	 */
-	public void drawTile(double r, double g, double b, double d, double extra)
+	public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
 	{
-		if (Obstacle.draw_size < Game.tile_size || extra != 0 || this.startHeight > 0)
-		{
-			Drawing.drawing.setColor(r, g, b);
-			Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d * (1 - Obstacle.draw_size / Game.tile_size));
-		}
+		Drawing.drawing.setColor(r, g, b);
+		Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
 	}
 
 	public void postOverride()
@@ -457,8 +452,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public boolean[] getValidHorizontalFaces(boolean unbreakable)
 	{
-		this.validFaces[0] = !this.hasNeighbor(0, -1, unbreakable) || this.startHeight >= 1;
-		this.validFaces[1] = !this.hasNeighbor(0, 1, unbreakable) || this.startHeight >= 1;
+		this.validFaces[0] = (!this.hasNeighbor(0, -1, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
+		this.validFaces[1] = (!this.hasNeighbor(0, 1, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
 		return this.validFaces;
 	}
 
@@ -478,8 +473,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public boolean[] getValidVerticalFaces(boolean unbreakable)
 	{
-		this.validFaces[0] = !this.hasNeighbor(-1, 0, unbreakable) || this.startHeight >= 1;
-		this.validFaces[1] = !this.hasNeighbor(1, 0, unbreakable) || this.startHeight >= 1;
+		this.validFaces[0] = (!this.hasNeighbor(-1, 0, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
+		this.validFaces[1] = (!this.hasNeighbor(1, 0, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
 		return this.validFaces;
 	}
 
@@ -507,6 +502,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	 */
 	public int unfavorability(TankAIControlled t)
 	{
+		if (this.startHeight > 1)
+			return 0;
+
 		if (this.destructible)
 			return 10;
 		else
@@ -515,7 +513,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public byte getOptionsByte(double h)
 	{
-		byte o = 0;
+		return 0;
+
+		/*byte o = 0;
 
 		if (Obstacle.draw_size < Game.tile_size || this.startHeight > 0)
 			return 0;
@@ -532,7 +532,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		if (Game.sampleObstacleHeight(this.posX + Game.tile_size, this.posY) >= h)
 			o += 32;
 
-		return o;
+		return o;*/
 	}
 
 	public void onDestroy(Movable source)
@@ -618,35 +618,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		}
 	}
 
-	@Override
-	public boolean positionChanged()
-	{
-		if (removed)
-			return true;
-
-		boolean r = requiresRedraw;
-		requiresRedraw = false;
-
-		for (int i = 0; i < Math.min(this.stackHeight, default_max_height); i++)
-		{
-			if (options[i] != lastOptions[i])
-				r = true;
-
-			lastOptions[i] = options[i];
-		}
-
-		return r || lastDrawSize != draw_size;
-	}
-
-	@Override
-	public boolean colorChanged()
-	{
-		boolean b = colorChanged;
-		colorChanged = false;
-
-		return this.removed || b;
-	}
-
 	public void registerSelectors()
 	{
 		if (this.enableStacking)
@@ -664,13 +635,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		return this.bouncy ? this.bounciness : 0;
 	}
 
-	public boolean wasRedrawn()
+	public Effect getCompanionEffect()
 	{
-		return this.redrawn;
-	}
-
-	public void setRedrawn(boolean b)
-	{
-		this.redrawn = b;
+		return null;
 	}
 }

@@ -24,7 +24,6 @@ public class ScreenUploadLevel extends ScreenOnline
     @Override
     public void update()
     {
-        super.update();
         this.levels.update();
         ScreenSavedLevels.page = this.levels.page;
     }

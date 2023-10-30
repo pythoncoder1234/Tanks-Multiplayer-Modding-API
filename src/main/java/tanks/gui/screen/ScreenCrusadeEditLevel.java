@@ -349,7 +349,8 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
             drawables[m.drawLevel].add(m);
 
         for (Obstacle o: Game.obstacles)
-            drawables[o.drawLevel].add(o);
+            if (!o.batchDraw)
+                drawables[o.drawLevel].add(o);
 
         for (Effect e: Game.effects)
             drawables[7].add(e);

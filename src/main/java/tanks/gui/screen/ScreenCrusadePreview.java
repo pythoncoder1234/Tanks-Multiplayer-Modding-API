@@ -1,12 +1,15 @@
 package tanks.gui.screen;
 
 import basewindow.BaseFile;
-import tanks.*;
-import tanks.network.event.EventShareCrusade;
+import tanks.Crusade;
+import tanks.Drawing;
+import tanks.Game;
+import tanks.Level;
 import tanks.gui.Button;
 import tanks.gui.ButtonList;
 import tanks.gui.TextBox;
 import tanks.hotbar.item.Item;
+import tanks.network.event.EventShareCrusade;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,15 +92,7 @@ public class ScreenCrusadePreview extends Screen implements IItemScreen
         }
     });
 
-    public Button quit = new Button(this.centerX, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.screen = previous;
-        }
-    }
-    );
+    public Button quit = new Button(this.centerX, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", () -> Game.screen = previous);
 
     public Button options = new Button(this.centerX - this.objXSpace, 60, this.objWidth, this.objHeight, "Overview", () -> mode = Mode.options);
 
@@ -118,9 +113,7 @@ public class ScreenCrusadePreview extends Screen implements IItemScreen
         this.crusade = c;
 
         for (Item i: c.crusadeItems)
-        {
             i.importProperties();
-        }
 
         if (Drawing.drawing.interfaceScaleZoom > 1)
         {
@@ -148,8 +141,9 @@ public class ScreenCrusadePreview extends Screen implements IItemScreen
 
         crusadeName = new TextBox(this.centerX, this.centerY + this.objYSpace * 3, this.objWidth, this.objHeight, "Crusade save name", () ->
         {
-            if (crusadeName.inputText.equals(""))
+            if (crusadeName.inputText.isEmpty())
                 crusadeName.inputText = crusadeName.previousInputText;
+
             updateDownloadButton();
         }
                 , crusade.name.replace("_", " "));

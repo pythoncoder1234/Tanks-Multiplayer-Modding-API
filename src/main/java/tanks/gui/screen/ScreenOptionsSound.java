@@ -77,12 +77,11 @@ public class ScreenOptionsSound extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         soundVolume.update();
         musicVolume.update();
 
         back.update();
+        super.update();
     }
 
     @Override

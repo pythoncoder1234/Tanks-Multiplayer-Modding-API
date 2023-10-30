@@ -37,7 +37,7 @@ public class EventSetObstacle extends PersonalEvent
 
             o.stackHeight = stackHeight;
             o.startHeight = startHeight;
-            Game.obstacles.add(o);
+            Game.addObstacle(o);
         }
         catch (Exception e)
         {

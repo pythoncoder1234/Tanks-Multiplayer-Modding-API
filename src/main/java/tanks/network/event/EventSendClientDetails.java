@@ -146,6 +146,7 @@ public class EventSendClientDetails extends PersonalEvent implements IServerThre
 
 		s.sendEvent(new EventConnectionSuccess());
 		s.sendEvent(new EventAnnounceConnection(new ConnectedPlayer(Game.clientID, Game.player.username), true));
+		s.sendEvent(new EventUpdateTankColors(Game.player));
 
 		if (Crusade.currentCrusade != null)
 			s.sendEvent(new EventBeginCrusade(Crusade.currentCrusade));
@@ -172,6 +173,7 @@ public class EventSendClientDetails extends PersonalEvent implements IServerThre
 			if (h != s && h.clientID != null)
 			{
 				s.sendEvent(new EventAnnounceConnection(new ConnectedPlayer(h.clientID, h.rawUsername), true));
+				s.sendEvent(new EventUpdateTankColors(h.player));
 			}
 		}
 

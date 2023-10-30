@@ -43,7 +43,9 @@ public class EventSendTankColors extends PersonalEvent
         b.writeInt(this.colorR2);
         b.writeInt(this.colorG2);
         b.writeInt(this.colorB2);
-        b.writeBoolean(this.chroma);
+
+        if (!Game.vanillaMode)
+            b.writeBoolean(this.chroma);
     }
 
     @Override
@@ -55,7 +57,9 @@ public class EventSendTankColors extends PersonalEvent
         this.colorR2 = b.readInt();
         this.colorG2 = b.readInt();
         this.colorB2 = b.readInt();
-        this.chroma = b.readBoolean();
+
+        if (!Game.vanillaMode)
+            this.chroma = b.readBoolean();
     }
 
     @Override
@@ -76,6 +80,8 @@ public class EventSendTankColors extends PersonalEvent
                         p.turretColorG = this.colorG2;
                         p.turretColorB = this.colorB2;
                         p.chromaaa = this.chroma;
+
+                        Game.eventsOut.add(new EventUpdateTankColors(p));
                     }
                 }
             }

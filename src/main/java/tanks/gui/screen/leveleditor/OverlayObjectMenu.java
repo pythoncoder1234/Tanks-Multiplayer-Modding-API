@@ -70,7 +70,11 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
         ScreenLevelEditor.currentPlaceable = ScreenLevelEditor.Placeable.obstacle;
         loadSelectors(editor.mouseObstacle, this);
     });
-    public Button editTank = new Button(0, 0, 40, 40, "", () -> Game.screen = new ScreenTankEditor(editor.level.customTanks.get(editor.tankNum - Game.registryTank.tankEntries.size()), this), "Edit custom tank");
+    public Button editTank = new Button(0, 0, 40, 40, "", () ->
+    {
+        Game.screen = new ScreenTankEditor(editor.level.customTanks.get(editor.tankNum - Game.registryTank.tankEntries.size()), this);
+        editor.modified = true;
+    }, "Edit custom tank");
     public ButtonObject playerSpawnsButton = new ButtonObject(new TankSpawnMarker("player", 0, 0, 0), this.centerX + 50, this.centerY, 75, 75, () -> editor.movePlayer = false, "Add multiple player spawn points");
 
     public ButtonObject movePlayerButton;

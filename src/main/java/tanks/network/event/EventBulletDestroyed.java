@@ -6,7 +6,7 @@ import tanks.bullet.BulletInstant;
 
 public class EventBulletDestroyed extends PersonalEvent
 {
-    public int bullet;
+    public Bullet bullet;
     public double posX;
     public double posY;
 
@@ -17,7 +17,7 @@ public class EventBulletDestroyed extends PersonalEvent
 
     public EventBulletDestroyed(Bullet b)
     {
-        this.bullet = b.networkID;
+        this.bullet = b;
         this.posX = b.posX;
         this.posY = b.posY;
     }
@@ -28,32 +28,32 @@ public class EventBulletDestroyed extends PersonalEvent
         if (this.clientID != null)
             return;
 
-        Bullet b = Bullet.idMap.get(bullet);
-
-        if (b == null)
+        if (bullet == null)
             return;
 
-        if (b instanceof BulletInstant)
-            ((BulletInstant) b).remoteShoot();
+        if (bullet instanceof BulletInstant i)
+        {
+            i.remoteShoot();
+        }
         else
         {
-            b.posX = posX;
-            b.posY = posY;
+            bullet.posX = posX;
+            bullet.posY = posY;
         }
 
-        b.destroy = true;
+        bullet.destroy = true;
 
-        if (!Bullet.freeIDs.contains(b.networkID))
+        if (!Bullet.freeIDs.contains(bullet.networkID))
         {
-            Bullet.freeIDs.add(b.networkID);
-            Bullet.idMap.remove(b.networkID);
+            Bullet.freeIDs.add(bullet.networkID);
+            Bullet.idMap.remove(bullet.networkID);
         }
     }
 
     @Override
     public void write(ByteBuf b)
     {
-        b.writeInt(this.bullet);
+        b.writeInt(this.bullet.networkID);
         b.writeDouble(this.posX);
         b.writeDouble(this.posY);
     }
@@ -61,7 +61,7 @@ public class EventBulletDestroyed extends PersonalEvent
     @Override
     public void read(ByteBuf b)
     {
-        this.bullet = b.readInt();
+        this.bullet = Bullet.idMap.get(b.readInt());
         this.posX = b.readDouble();
         this.posY = b.readDouble();
     }

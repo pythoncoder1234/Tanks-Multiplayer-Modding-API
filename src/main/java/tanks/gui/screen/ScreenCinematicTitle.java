@@ -89,25 +89,14 @@ public class ScreenCinematicTitle extends Screen implements ISeparateBackgroundS
 
         }
 
-        for (int i = 0; i < Game.tracks.size(); i++)
-        {
-            Game.tracks.get(i).draw();
-        }
-
         for (int i = Game.movables.size() - 1; i >= 0; i--)
-        {
             Game.movables.get(i).draw();
-        }
 
         for (int i = 0; i < Game.effects.size(); i++)
-        {
             Game.effects.get(i).draw();
-        }
 
         for (int i = 0; i < Game.effects.size(); i++)
-        {
             Game.effects.get(i).drawGlow();
-        }
     }
 
     @Override

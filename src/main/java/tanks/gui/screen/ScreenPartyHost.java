@@ -1,14 +1,16 @@
 package tanks.gui.screen;
 
 import tanks.*;
-import tanks.network.event.EventPlayerChat;
 import tanks.generator.LevelGeneratorVersus;
 import tanks.gui.Button;
 import tanks.gui.ChatBox;
 import tanks.gui.ChatMessage;
 import tanks.network.Server;
+import tanks.network.ServerHandler;
 import tanks.network.SynchronizedList;
+import tanks.network.event.EventPlayerChat;
 import tanks.network.event.EventSendClientDetails;
+import tanks.tank.Tank;
 import tanks.translation.Translation;
 
 import java.net.Inet4Address;
@@ -276,30 +278,33 @@ public class ScreenPartyHost extends Screen
 
                 n = "\u00A7000127255255" + n;
 
+                Drawing.drawing.setBoundedInterfaceFontSize(this.textSize, 250, Game.player.username);
                 Drawing.drawing.drawInterfaceText(this.centerX - 190, this.centerY + username_y_offset, n);
+                Tank.drawTank(this.centerX - Drawing.drawing.getStringWidth(n) / 2 - 300, this.centerY + username_y_offset, Game.player.colorR, Game.player.colorG, Game.player.colorB, Game.player.turretColorR, Game.player.turretColorG, Game.player.turretColorB);
             }
 
             if (server.connections != null)
             {
                 for (int i = this.usernamePage * entries_per_page; i < Math.min(((this.usernamePage + 1) * entries_per_page), server.connections.size()); i++)
                 {
-                    if (server.connections.get(i).username != null)
+                    ServerHandler h = server.connections.get(i);
+                    if (h.username != null)
                     {
                         try
                         {
-                            Drawing.drawing.setInterfaceFontSize(this.textSize);
+                            double y = this.centerY + (1 + i - this.usernamePage * entries_per_page) * username_spacing + username_y_offset;
+                            Drawing.drawing.setBoundedInterfaceFontSize(this.textSize, 250, server.connections.get(i).username);
+                            double w = Drawing.drawing.getStringWidth(h.username) / 2;
                             Drawing.drawing.setColor(0, 0, 0);
-                            Drawing.drawing.drawInterfaceText(this.centerX - 190,
-                                    this.centerY + (1 + i - this.usernamePage * entries_per_page) * username_spacing + username_y_offset,
-                                    server.connections.get(i).username);
+                            Drawing.drawing.drawInterfaceText(this.centerX - 190, y, server.connections.get(i).username);
+
+                            Tank.drawTank(this.centerX - w - 300, y, h.player.colorR, h.player.colorG, h.player.colorB, h.player.turretColorR, h.player.turretColorG, h.player.turretColorB);
 
                             this.kickButtons[i - this.usernamePage * entries_per_page].draw();
 
                             Drawing.drawing.setInterfaceFontSize(this.textSize / 2);
                             Drawing.drawing.setColor(0, 0, 0);
-                            Drawing.drawing.drawInterfaceText(this.centerX - 370,
-                                    this.centerY + (1 + i - this.usernamePage * entries_per_page) * username_spacing + username_y_offset,
-                                    server.connections.get(i).latency + "ms");
+                            Drawing.drawing.drawUncenteredInterfaceText(this.centerX - w - 260, y - Drawing.drawing.fontSize * 18, server.connections.get(i).latency + "ms");
                         }
                         catch (Exception e)
                         {

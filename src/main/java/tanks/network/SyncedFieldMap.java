@@ -70,7 +70,8 @@ public class SyncedFieldMap
      * <ul>
      *  <li>the field's class is in {@link NetworkUtils#supportedTypes supportedTypes}</li>
      *  <li>the field's name is not in the <code>excludedNames</code> parameter</li>
-     *  <li>the field's name is not <code>syncEnabled</code> or <code>changedByAnimation</code></li>
+     *  <li>the field's name is not <code>syncEnabled</code> or <code>changedByAnimation</code>
+     *  (variables used internally in many objects)</li>
      * </ul>
      *
      * @param excludedNames The names of the fields that are excluded from being added

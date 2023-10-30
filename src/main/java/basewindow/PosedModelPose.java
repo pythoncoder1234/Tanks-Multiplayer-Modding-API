@@ -43,7 +43,7 @@ public class PosedModelPose implements IPosedModelFrame
         return this.bones.get(name);
     }
 
-    public void apply(PosedModel m, double frac)
+    public void apply(basewindow.PosedModel m, double frac)
     {
         for (PosedBone b: this.bones.values())
             b.apply(m, frac);
@@ -65,9 +65,9 @@ public class PosedModelPose implements IPosedModelFrame
             this.animation = anim;
         }
 
-        public void apply(PosedModel m, double frac)
+        public void apply(basewindow.PosedModel m, double frac)
         {
-            PosedModel.PoseBone b = m.bonesByName.get(this.name);
+            basewindow.PosedModel.PoseBone b = m.bonesByName.get(this.name);
             this.rotation.apply(b, frac);
             this.translation.apply(b, frac);
         }
@@ -81,7 +81,7 @@ public class PosedModelPose implements IPosedModelFrame
                 this.time = time;
             }
 
-            public abstract void apply(PosedModel.PoseBone b, double frac);
+            public abstract void apply(basewindow.PosedModel.PoseBone b, double frac);
         }
 
         public static class BoneRotationPose extends BonePose
@@ -99,7 +99,7 @@ public class PosedModelPose implements IPosedModelFrame
             }
 
             @Override
-            public void apply(PosedModel.PoseBone b, double frac)
+            public void apply(basewindow.PosedModel.PoseBone b, double frac)
             {
                 b.yaw += this.yaw * frac;
                 b.pitch += this.pitch * frac;

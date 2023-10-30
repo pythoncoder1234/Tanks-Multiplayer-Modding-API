@@ -23,24 +23,24 @@ public class ScreenOptionsPartyHost extends ScreenOptionsOverlay
         @Override
         public void run()
         {
-            if (timer.inputText.length() == 0)
+            if (timer.inputText.isEmpty())
                 timer.inputText = Game.partyStartTime / 100.0 + "";
             else
                 Game.partyStartTime = Double.parseDouble(timer.inputText) * 100;
         }
-    }, Game.partyStartTime / 100.0 + "", "The wait time in seconds after---all players are ready before---the battle begins.");;
+    }, Game.partyStartTime / 100.0 + "", "The wait time in seconds after---all players are ready before---the battle begins.");
 
     TextBox tps = new TextBox(this.centerX, this.centerY, this.objWidth, this.objHeight, "Updates per second", new Runnable()
     {
         @Override
         public void run()
         {
-            if (tps.inputText.length() != 0)
+            if (!tps.inputText.isEmpty())
                 Tank.updatesPerSecond = Integer.parseInt(tps.inputText);
             else
                 tps.inputText = tps.previousInputText;
         }
-    }, Tank.updatesPerSecond + "", "The number of update events---tanks send each second.------Smaller values work better with---less stable connections.");
+    }, Tank.updatesPerSecond + "", "The number of update events---tanks send each second.------Smaller values work better with---less stable connections, but---may result in a less smooth---experience.");
 
     Button anticheat = new Button(this.centerX, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
     {
@@ -86,22 +86,11 @@ public class ScreenOptionsPartyHost extends ScreenOptionsOverlay
     },
             "Disables all friendly fire in the party.---Useful for co-op in bigger parties.");
 
-    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () ->
-    {
-        if (ScreenPartyHost.isServer)
-        {
-            Game.screen = ScreenPartyHost.activeScreen;
-            ScreenOptions.saveOptions(Game.homedir);
-        }
-        else
-            Game.screen = new ScreenOptionsMultiplayer();
-    }
-    );
+    Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () -> Game.screen = prevScreen);
 
 
     public ScreenOptionsPartyHost()
     {
-
         if (!TankPlayerRemote.checkMotion)
             anticheat.setText(anticheatText, ScreenOptions.offText);
         else if (!TankPlayerRemote.weakTimeCheck)
@@ -131,13 +120,13 @@ public class ScreenOptionsPartyHost extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         back.update();
         timer.update();
         tps.update();
         anticheat.update();
         disableFriendlyFire.update();
+
+        super.update();
     }
 
     @Override

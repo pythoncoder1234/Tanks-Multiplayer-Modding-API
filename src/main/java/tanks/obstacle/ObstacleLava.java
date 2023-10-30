@@ -1,5 +1,6 @@
 package tanks.obstacle;
 
+import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Mine;
@@ -112,7 +113,7 @@ public class ObstacleLava extends ObstacleLiquid
     }
 
     @Override
-    public void drawTile(double r, double g, double b, double d, double extra)
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         double frac = Obstacle.draw_size / Game.tile_size;
         double prog = Math.sin(System.currentTimeMillis() / 700. + offset) * 10;
@@ -122,12 +123,6 @@ public class ObstacleLava extends ObstacleLiquid
         else
             Drawing.drawing.setColor(this.colorR, this.colorG + prog, this.colorB + prog);
 
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * (1 - frac) + extra, (byte) 61);
-    }
-
-    @Override
-    public boolean colorChanged()
-    {
-        return true;
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * (1 - frac) + extra, (byte) 61);
     }
 }

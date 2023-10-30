@@ -4,6 +4,7 @@ import tanks.*;
 import tanks.bullet.Bullet;
 import tanks.gui.screen.*;
 import tanks.network.event.EventObstacleSnowMelt;
+import tanks.rendering.ShaderSnow;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
 
@@ -18,7 +19,6 @@ public class ObstacleSnow extends Obstacle
     public double visualDepth = 1;
 
     protected double finalHeight;
-    protected double previousFinalHeight;
 
     public ObstacleSnow(String name, double posX, double posY)
     {
@@ -50,6 +50,8 @@ public class ObstacleSnow extends Obstacle
         this.baseColorG = this.colorG;
         this.baseColorB = this.colorB;
 
+        this.renderer = ShaderSnow.class;
+
         this.description = "A thick, melting pile of snow that slows tanks and bullets down";
     }
 
@@ -77,6 +79,12 @@ public class ObstacleSnow extends Obstacle
     {
         if (Game.effectsEnabled && !ScreenGame.finished)
         {
+            if (!ScreenPartyLobby.isClient)
+            {
+                this.depth = Math.max(0.05, this.depth - Panel.frameFrequency * 0.005);
+                Game.redrawObstacles.add(this);
+            }
+
             double speed = Math.sqrt((Math.pow(m.vX, 2) + Math.pow(m.vY, 2)));
 
             double mul = 0.0625 / 4;
@@ -158,7 +166,6 @@ public class ObstacleSnow extends Obstacle
 
                 double frac = z / (this.depth * 0.8 * (Game.tile_size - base));
                 Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-                Drawing.drawing.setShrubberyMode();
                 Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul, Game.tile_size, Game.tile_size, z * this.visualDepth, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
             }
         }
@@ -176,14 +183,6 @@ public class ObstacleSnow extends Obstacle
             shrubScale = ((ScreenGame) Game.screen).shrubberyScale;
 
         return shrubScale * (this.finalHeight + this.baseGroundHeight);
-    }
-
-    public boolean positionChanged()
-    {
-        boolean r = this.previousFinalHeight != this.finalHeight;
-        this.previousFinalHeight = this.finalHeight;
-
-        return r || super.positionChanged();
     }
 
     public int unfavorability(TankAIControlled t)

@@ -1,6 +1,7 @@
 package tanks.gui.screen.leveleditor;
 
 import tanks.Drawing;
+import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 import tanks.gui.TextBoxSlider;
@@ -15,24 +16,25 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
     public TextBox colorVarGreen;
     public TextBox colorVarBlue;
 
-    public OverlayLevelOptionsColor(Screen previous, ScreenLevelEditor screenLevelEditor)
+    public OverlayLevelOptionsColor(Screen previous, ScreenLevelEditor editor)
     {
-        super(previous, screenLevelEditor);
+        super(previous, editor);
 
         colorRed = new TextBoxSlider(this.centerX - objXSpace / 2, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "Red", () ->
         {
             if (colorRed.inputText.length() <= 0)
                 colorRed.inputText = colorRed.previousInputText;
 
-            screenLevelEditor.level.colorR = Integer.parseInt(colorRed.inputText);
+            editor.level.colorR = Integer.parseInt(colorRed.inputText);
 
-            colorVarRed.maxValue = 255 - screenLevelEditor.level.colorR;
+            colorVarRed.maxValue = 255 - editor.level.colorR;
             colorVarRed.performValueCheck();
 
-            screenLevelEditor.level.colorVarR = Integer.parseInt(colorVarRed.inputText);
-            screenLevelEditor.level.reloadTiles();
+            editor.level.colorVarR = Integer.parseInt(colorVarRed.inputText);
+            editor.level.reloadTiles();
+            Game.redrawTiles = true;
         }
-                , screenLevelEditor.level.colorR, 0, 255, 1);
+                , editor.level.colorR, 0, 255, 1);
 
         colorRed.allowLetters = false;
         colorRed.allowSpaces = false;
@@ -46,15 +48,16 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
             if (colorGreen.inputText.length() <= 0)
                 colorGreen.inputText = colorGreen.previousInputText;
 
-            screenLevelEditor.level.colorG = Integer.parseInt(colorGreen.inputText);
+            editor.level.colorG = Integer.parseInt(colorGreen.inputText);
 
-            colorVarGreen.maxValue = 255 - screenLevelEditor.level.colorG;
+            colorVarGreen.maxValue = 255 - editor.level.colorG;
             colorVarGreen.performValueCheck();
 
-            screenLevelEditor.level.colorVarG = Integer.parseInt(colorVarGreen.inputText);
-            screenLevelEditor.level.reloadTiles();
+            editor.level.colorVarG = Integer.parseInt(colorVarGreen.inputText);
+            Game.redrawTiles = true;
+            editor.level.reloadTiles();
         }
-                , screenLevelEditor.level.colorG, 0, 255, 1);
+                , editor.level.colorG, 0, 255, 1);
 
         colorGreen.allowLetters = false;
         colorGreen.allowSpaces = false;
@@ -68,15 +71,16 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
             if (colorBlue.inputText.length() <= 0)
                 colorBlue.inputText = colorBlue.previousInputText;
 
-            screenLevelEditor.level.colorB = Integer.parseInt(colorBlue.inputText);
+            editor.level.colorB = Integer.parseInt(colorBlue.inputText);
 
-            colorVarBlue.maxValue = 255 - screenLevelEditor.level.colorB;
+            colorVarBlue.maxValue = 255 - editor.level.colorB;
             colorVarBlue.performValueCheck();
 
-            screenLevelEditor.level.colorVarB = Integer.parseInt(colorVarBlue.inputText);
-            screenLevelEditor.level.reloadTiles();
+            editor.level.colorVarB = Integer.parseInt(colorVarBlue.inputText);
+            Game.redrawTiles = true;
+            editor.level.reloadTiles();
         }
-                , screenLevelEditor.level.colorB, 0, 255, 1);
+                , editor.level.colorB, 0, 255, 1);
 
         colorBlue.allowLetters = false;
         colorBlue.allowSpaces = false;
@@ -90,11 +94,12 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
             if (colorVarRed.inputText.length() <= 0)
                 colorVarRed.inputText = colorVarRed.previousInputText;
 
-            screenLevelEditor.level.colorVarR = Integer.parseInt(colorVarRed.inputText);
+            editor.level.colorVarR = Integer.parseInt(colorVarRed.inputText);
 
-            screenLevelEditor.level.reloadTiles();
+            Game.redrawTiles = true;
+            editor.level.reloadTiles();
         }
-                , screenLevelEditor.level.colorVarR + "");
+                , editor.level.colorVarR + "");
 
         colorVarRed.allowLetters = false;
         colorVarRed.allowSpaces = false;
@@ -106,11 +111,12 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
             if (colorVarGreen.inputText.length() <= 0)
                 colorVarGreen.inputText = colorVarGreen.previousInputText;
 
-            screenLevelEditor.level.colorVarG = Integer.parseInt(colorVarGreen.inputText);
+            editor.level.colorVarG = Integer.parseInt(colorVarGreen.inputText);
 
-            screenLevelEditor.level.reloadTiles();
+            Game.redrawTiles = true;
+            editor.level.reloadTiles();
         }
-                , screenLevelEditor.level.colorVarG + "");
+                , editor.level.colorVarG + "");
 
         colorVarGreen.allowLetters = false;
         colorVarGreen.allowSpaces = false;
@@ -122,20 +128,21 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
             if (colorVarBlue.inputText.length() <= 0)
                 colorVarBlue.inputText = colorVarBlue.previousInputText;
 
-            screenLevelEditor.level.colorVarB = Integer.parseInt(colorVarBlue.inputText);
+            editor.level.colorVarB = Integer.parseInt(colorVarBlue.inputText);
 
-            screenLevelEditor.level.reloadTiles();
+            Game.redrawTiles = true;
+            editor.level.reloadTiles();
         }
-                , screenLevelEditor.level.colorVarB + "");
+                , editor.level.colorVarB + "");
 
         colorVarBlue.allowLetters = false;
         colorVarBlue.allowSpaces = false;
         colorVarBlue.maxChars = 3;
         colorVarBlue.checkMaxValue = true;
 
-        colorVarRed.maxValue = 255 - screenLevelEditor.level.colorR;
-        colorVarGreen.maxValue = 255 - screenLevelEditor.level.colorG;
-        colorVarBlue.maxValue = 255 - screenLevelEditor.level.colorB;
+        colorVarRed.maxValue = 255 - editor.level.colorR;
+        colorVarGreen.maxValue = 255 - editor.level.colorG;
+        colorVarBlue.maxValue = 255 - editor.level.colorB;
     }
 
     public Button back = new Button(this.centerX, (int) (this.centerY + this.objYSpace * 3), this.objWidth, this.objHeight, "Back", this::escape);

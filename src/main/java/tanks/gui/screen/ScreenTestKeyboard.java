@@ -12,7 +12,6 @@ public class ScreenTestKeyboard extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
         back.update();
     }
 

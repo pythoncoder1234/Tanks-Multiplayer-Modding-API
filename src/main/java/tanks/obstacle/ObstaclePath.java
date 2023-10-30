@@ -1,5 +1,6 @@
 package tanks.obstacle;
 
+import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Tank;
@@ -78,7 +79,7 @@ public class ObstaclePath extends Obstacle
     }
 
     @Override
-    public void drawTile(double r, double g, double b, double d, double extra)
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         double frac = Obstacle.draw_size / Game.tile_size;
 
@@ -87,18 +88,18 @@ public class ObstaclePath extends Obstacle
             if (frac < 1 || extra != 0)
             {
                 Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-                Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * frac + extra);
+                Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * frac + extra);
             }
             else
             {
                 Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
-                Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d + extra);
+                Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d + extra);
             }
         }
         else if (this.groupID == 1)
         {
             Drawing.drawing.setColor(50, 50, 50);
-            Drawing.drawing.fillBox(this, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, 12 + extra, this.getOptionsByte(12 + extra));
+            Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, 12 + extra, this.getOptionsByte(12 + extra));
         }
     }
 

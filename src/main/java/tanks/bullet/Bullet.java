@@ -1,11 +1,7 @@
 package tanks.bullet;
 
 import tanks.*;
-import tanks.gui.ChatMessage;
-import tanks.gui.menus.FixedMenu;
-import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.ScreenPartyHost;
 import tanks.hotbar.item.ItemBullet;
 import tanks.network.event.*;
 import tanks.obstacle.Obstacle;
@@ -143,8 +139,10 @@ public class Bullet extends Movable implements IDrawable
 
 		if (!this.tank.isRemote)
 		{
-			if (freeIDs.size() > 0)
+			if (!freeIDs.isEmpty())
+			{
 				this.networkID = freeIDs.remove(0);
+			}
 			else
 			{
 				this.networkID = currentID;
@@ -155,26 +153,6 @@ public class Bullet extends Movable implements IDrawable
 		}
 
 		this.drawLevel = 8;
-
-		for (FixedMenu m : ModAPI.fixedMenus)
-		{
-			if (m instanceof Scoreboard)
-			{
-				Scoreboard s = (Scoreboard) m;
-
-				if (s.objectiveType.equals(Scoreboard.objectiveTypes.shots_fired) ||
-						(s.objectiveType.equals(Scoreboard.objectiveTypes.shots_fired_no_multiple_fire)
-								&& !(this instanceof BulletHealing || this instanceof BulletFlame)))
-				{
-					if (!s.teamPoints.isEmpty())
-						s.addTeamScore(this.team, 1);
-					else if (this.tank instanceof TankPlayer)
-						s.addPlayerScore(((TankPlayer) this.tank).player, 1);
-					else if (this.tank instanceof TankPlayerRemote)
-						s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
-				}
-			}
-		}
 	}
 
 	public void moveOut(double amount)
@@ -212,35 +190,6 @@ public class Bullet extends Movable implements IDrawable
 				if (!this.heavy)
 					this.destroy = true;
 
-				if (Game.currentGame != null)
-				{
-					Game.currentGame.onKill(this.tank, t);
-
-					if (Game.currentGame.enableKillMessages && ScreenPartyHost.isServer)
-					{
-						String message = Game.currentGame.generateKillMessage(t, this.tank, true);
-						ScreenPartyHost.chat.add(0, new ChatMessage(message));
-						Game.eventsOut.add(new EventChat(message));
-					}
-
-					for (FixedMenu m : ModAPI.fixedMenus)
-					{
-						if (m instanceof Scoreboard && ((Scoreboard) m).objectiveType.equals(Scoreboard.objectiveTypes.kills))
-						{
-							Scoreboard s = (Scoreboard) m;
-
-							if (!(s.teamPoints.isEmpty()))
-								s.addTeamScore(this.tank.team, 1);
-
-							else if (this.tank instanceof TankPlayer)
-								s.addPlayerScore(((TankPlayer) this.tank).player, 1);
-
-							else if (this.tank instanceof TankPlayerRemote)
-								s.addPlayerScore(((TankPlayerRemote) this.tank).player, 1);
-						}
-					}
-				}
-
 				if (this.tank.equals(Game.playerTank))
 				{
 					if (Game.currentGame != null && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
@@ -253,7 +202,7 @@ public class Bullet extends Movable implements IDrawable
 					((TankPlayerRemote) this.tank).player.hotbar.coins += t.coinValue;
 					Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
 				}
-				else if ((Game.currentLevel.shop.size() > 0 || Game.currentLevel.startingItems.size() > 0) && !(t instanceof TankPlayer || t instanceof TankPlayerRemote))
+				else if ((!Game.currentLevel.shop.isEmpty() || !Game.currentLevel.startingItems.isEmpty()) && !(t instanceof TankPlayer || t instanceof TankPlayerRemote))
 				{
 					if (this.tank instanceof TankPlayerRemote)
 					{
@@ -371,10 +320,10 @@ public class Bullet extends Movable implements IDrawable
 		{
             double t = Game.tile_size;
 
-            int x1 = (int) Math.min(Math.max(0, (this.posX - this.size / 2) / t - 1), Game.currentSizeX - 1);
-            int y1 = (int) Math.min(Math.max(0, (this.posY - this.size / 2) / t - 1), Game.currentSizeY - 1);
-            int x2 = (int) Math.min(Math.max(0, (this.posX + this.size / 2) / t + 1), Game.currentSizeX - 1);
-            int y2 = (int) Math.min(Math.max(0, (this.posY + this.size / 2) / t + 1), Game.currentSizeY - 1);
+            int x1 = (int) Math.min(Math.max(0, (this.posX - this.size) / t - 1), Game.currentSizeX - 1);
+            int y1 = (int) Math.min(Math.max(0, (this.posY - this.size) / t - 1), Game.currentSizeY - 1);
+            int x2 = (int) Math.min(Math.max(0, (this.posX + this.size) / t + 1), Game.currentSizeX - 1);
+            int y2 = (int) Math.min(Math.max(0, (this.posY + this.size) / t + 1), Game.currentSizeY - 1);
 
             int output = 0;
 
@@ -445,12 +394,10 @@ public class Bullet extends Movable implements IDrawable
             if (m.posZ > 25 || m.posZ < -Tank.disabledZ)
                 continue;
 
-            if (m instanceof Tank && !m.destroy)
+            if (m instanceof Tank t && t.enableCollision && !m.destroy)
             {
                 double horizontalDist = Math.abs(this.posX - m.posX);
                 double verticalDist = Math.abs(this.posY - m.posY);
-
-                Tank t = ((Tank) m);
 
                 double bound = this.size / 2 + t.size * t.hitboxSize / 2;
 
@@ -619,6 +566,12 @@ public class Bullet extends Movable implements IDrawable
 			this.addTrail();
 		}
 
+		double s = this.getSpeed();
+		if (s < this.speed)
+			this.addPolarMotion(this.getPolarDirection(), Panel.frameFrequency / 50);
+		else if (s > this.speed)
+			this.setPolarMotion(this.getPolarDirection(), this.speed);
+
 		boolean noTrails = true;
 
 		for (ArrayList<Trail> trails : this.trails)
@@ -655,9 +608,7 @@ public class Bullet extends Movable implements IDrawable
 				idMap.remove(this.networkID);
 
 				if (this.affectsMaxLiveBullets)
-				{
-					this.item.liveBullets--;
-				}
+                    this.item.liveBullets--;
 
 				if (!this.isRemote)
 					this.onDestroy();
@@ -820,7 +771,7 @@ public class Bullet extends Movable implements IDrawable
 
 		for (ArrayList<Trail> trail : this.trails)
 		{
-			if (trail.size() > 0)
+			if (!trail.isEmpty())
 			{
 				Trail t = trail.get(0);
 				t.spawning = false;
@@ -858,7 +809,7 @@ public class Bullet extends Movable implements IDrawable
 	{
 		Trail old = null;
 
-		if (this.trails[group].size() > 0)
+		if (!this.trails[group].isEmpty())
 			old = this.trails[group].get(0);
 
 		this.trails[group].add(0, t);
@@ -933,13 +884,16 @@ public class Bullet extends Movable implements IDrawable
 
 			Drawing.drawing.setColor(this.outlineColorR, this.outlineColorG, this.outlineColorB, opacity * opacity * opacity * 255.0, glow);
 
-			if (Game.enable3d)
+			if (Game.xrayBullets)
 			{
-				Drawing.drawing.fillOval(posX, posY, posZ - 0.5, size + sizeModifier, size + sizeModifier, false, true);
-				Drawing.drawing.fillOval(posX, posY, posZ, size + sizeModifier, size + sizeModifier);
+				if (Game.enable3d)
+				{
+					Drawing.drawing.fillOval(posX, posY, posZ - 0.5, size + sizeModifier, size + sizeModifier, false, true);
+					Drawing.drawing.fillOval(posX, posY, posZ, size + sizeModifier, size + sizeModifier);
+				}
+				else
+					Drawing.drawing.fillOval(posX, posY, size + sizeModifier, size + sizeModifier);
 			}
-			else
-				Drawing.drawing.fillOval(posX, posY, size + sizeModifier, size + sizeModifier);
 
 			Drawing.drawing.setColor(this.baseColorR, this.baseColorG, this.baseColorB, opacity * opacity * opacity * 255.0, glow);
 

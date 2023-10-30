@@ -1,5 +1,6 @@
 package tanks.obstacle;
 
+import basewindow.IBatchRenderableObject;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Level;
@@ -32,10 +33,10 @@ public class ObstacleHill extends Obstacle
     }
 
     @Override
-    public void drawTile(double r, double g, double b, double d, double extra)
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         Drawing.drawing.setColor(r + 10, g + 10, b + 10);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -extra + this.startHeight * 50,
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra + this.startHeight * 50,
                 Game.tile_size, Game.tile_size, (this.startHeight + this.stackHeight) * 50 + d);
     }
 }

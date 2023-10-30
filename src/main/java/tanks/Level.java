@@ -14,10 +14,7 @@ import tanks.network.event.INetworkEvent;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Random;
+import java.util.*;
 
 public class Level 
 {
@@ -65,7 +62,9 @@ public class Level
     public int colorVarG = 20;
     public int colorVarB = 20;
 
-    public double light = 1.0;
+	public int tilesRandomSeed = 0;
+
+	public double light = 1.0;
 	public double shadow = 0.5;
 
 	public HashMap<String, Team> teamsMap = new HashMap<>();
@@ -80,6 +79,7 @@ public class Level
 	public ArrayList<Team> playerSpawnsTeam = new ArrayList<>();
 
 	public ArrayList<Player> includedPlayers = new ArrayList<>();
+	public HashSet<String> properties = new HashSet<>();
 
 	public int startingCoins;
 	public ArrayList<Item> shop = new ArrayList<>();
@@ -88,6 +88,7 @@ public class Level
 
 	public double startTime = 400;
 	public boolean disableFriendlyFire = false;
+	public boolean updateModify = true;
 
 	/**
 	 * A level string is structured like this:
@@ -109,59 +110,55 @@ public class Level
 
 		for (String s: lines)
 		{
-			switch (s.toLowerCase())
-			{
-				case "level":
-					parsing = 0;
-					break;
-				case "items":
-					parsing = 1;
-					break;
-				case "shop":
-					parsing = 2;
-					break;
-				case "coins":
-					parsing = 3;
-					break;
-				case "tanks":
-					parsing = 4;
-					break;
-				default:
-					if (parsing == 0)
-					{
-						preset = s.substring(s.indexOf('{') + 1, s.indexOf('}')).split("\\|");
-						screen = preset[0].split(",");
-						obstaclesPos = preset[1].split(",");
-						tanks = preset[2].split(",");
+            switch (s.toLowerCase())
+            {
+                case "level" -> parsing = 0;
+                case "items" -> parsing = 1;
+                case "shop" -> parsing = 2;
+                case "coins" -> parsing = 3;
+                case "tanks" -> parsing = 4;
+                case "properties" -> parsing = 5;
+                default ->
+                {
+                    if (parsing == 0)
+                    {
+                        preset = s.substring(s.indexOf('{') + 1, s.indexOf('}')).split("\\|");
+                        screen = preset[0].split(",");
+                        obstaclesPos = preset[1].split(",");
+                        tanks = preset[2].split(",");
 
-						if (preset.length >= 4)
-						{
-							teams = preset[3].split(",");
-							enableTeams = true;
-						}
+                        if (preset.length >= 4)
+                        {
+                            teams = preset[3].split(",");
+                            enableTeams = true;
+                        }
 
-						if (screen[0].startsWith("*"))
-						{
-							editable = false;
-							screen[0] = screen[0].substring(1);
-						}
-					}
-					else if (parsing == 4)
-					{
-						TankAIControlled t = TankAIControlled.fromString(s);
-						this.customTanks.add(t);
-					}
-					else if (!ScreenPartyLobby.isClient)
-					{
-						if (parsing == 1)
-							this.startingItems.add(Item.parseItem(null, s));
-						else if (parsing == 2)
-							this.shop.add(Item.parseItem(null, s));
+                        if (screen[0].startsWith("*"))
+                        {
+                            editable = false;
+                            screen[0] = screen[0].substring(1);
+                        }
+                    }
+                    else if (parsing == 4)
+                    {
+                        TankAIControlled t = TankAIControlled.fromString(s);
+                        this.customTanks.add(t);
+                    }
+                    else if (parsing == 5)
+                    {
+                        properties.add(s);
+                    }
+                    else if (!ScreenPartyLobby.isClient)
+                    {
+                        if (parsing == 1)
+                            this.startingItems.add(Item.parseItem(null, s));
+                        else if (parsing == 2)
+                            this.shop.add(Item.parseItem(null, s));
                         else
-							this.startingCoins = Integer.parseInt(s);
-					}
-					break;
-			}
+                            this.startingCoins = Integer.parseInt(s);
+                    }
+                }
+            }
 		}
 
 		if (ScreenPartyHost.isServer && Game.disablePartyFriendlyFire)
@@ -217,7 +214,7 @@ public class Level
 		if (sc == null)
 			Obstacle.draw_size = 0;
 		else
-			Obstacle.draw_size = 50;
+			Obstacle.draw_size = Game.tile_size;
 
 		this.remote = remote;
 
@@ -495,7 +492,7 @@ public class Level
 
 					if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks && Crusade.currentCrusade.retry && !Crusade.currentCrusade.livingTankIDs.contains(t.crusadeID))
 						tanksToRemove.add(t);
-					else if (metadata.length() > 0)
+					else if (!metadata.isEmpty())
 						t.setMetadata(metadata.toString());
 				}
 
@@ -521,13 +518,13 @@ public class Level
 		if (ScreenPartyHost.isServer && ScreenPartyHost.server != null && sc == null)
 			playerCount += ScreenPartyHost.server.connections.size();
 
-		if (this.includedPlayers.size() > 0)
+		if (!this.includedPlayers.isEmpty())
 			playerCount = this.includedPlayers.size();
 		else
 			this.includedPlayers.addAll(Game.players);
 
 		int extraSpawns = 0;
-		if (playerCount > playerSpawnsX.size() && playerSpawnsX.size() > 0)
+		if (playerCount > playerSpawnsX.size() && !playerSpawnsX.isEmpty())
 		{
 			extraSpawns = playerCount / playerSpawnsX.size() - 1;
 
@@ -639,7 +636,7 @@ public class Level
 		{
 			for (int i = 0; i < playerCount; i++)
 			{
-				if (this.availablePlayerSpawns.size() == 0)
+				if (this.availablePlayerSpawns.isEmpty())
 				{
 					for (int j = 0; j < this.playerSpawnsTeam.size(); j++)
 					{
@@ -670,12 +667,15 @@ public class Level
 		}
 		else
 		{
+			updateModify();
+
 			for (int i = 0; i < playerSpawnsTeam.size(); i++)
 			{
 				TankSpawnMarker t = new TankSpawnMarker("player", this.playerSpawnsX.get(i), this.playerSpawnsY.get(i), this.playerSpawnsAngle.get(i));
+				t.team = this.playerSpawnsTeam.get(i);
 				t.registerSelectors();
 				t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
-				t.team = this.playerSpawnsTeam.get(i);
+				t.refreshSelectorValue();
 				Game.movables.add(t);
 
 				if (sc != null)
@@ -700,10 +700,22 @@ public class Level
 			Game.eventsOut.add(new EventEnterLevel());
 	}
 
+	public void updateModify()
+	{
+		Team prev = playerSpawnsTeam.get(0);
+
+		for (Team t : playerSpawnsTeam)
+		{
+			if (t != prev)
+			{
+				updateModify = false;
+				break;
+			}
+		}
+	}
+
 	public void reloadTiles()
 	{
-		Drawing.drawing.forceRedrawTerrain();
-
 		Game.currentSizeX = (int) (sizeX * Game.bgResMultiplier);
 		Game.currentSizeY = (int) (sizeY * Game.bgResMultiplier);
 
@@ -825,6 +837,6 @@ public class Level
 		if (Game.framework == Game.Framework.lwjgl)
 			sum *= currentLightIntensity;
 
-		return sum <= (forText ? 90 : 75) * 3;
+		return sum <= (forText ? 110 : 75) * 3;
 	}
 }

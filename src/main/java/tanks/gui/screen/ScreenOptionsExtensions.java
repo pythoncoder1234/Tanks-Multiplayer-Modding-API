@@ -46,6 +46,8 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
         }
     });
 
+    private boolean click = false;
+
     public ScreenOptionsExtensions()
     {
         try
@@ -106,12 +108,14 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
+        click = Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1);
 
         description.update();
         enabled.update();
         autoLoad.update();
         back.update();
+
+        super.update();
     }
 
     @Override
@@ -123,7 +127,7 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 5, "Extension list");
 
-        Drawing.drawing.setFontSize(this.textSize);
+        Drawing.drawing.setInterfaceFontSize(this.textSize);
 
         double mx = Drawing.drawing.getInterfaceMouseX();
         double my = Drawing.drawing.getInterfaceMouseY();
@@ -144,11 +148,10 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
             {
                 Drawing.drawing.setColor(100, Math.min(230, Drawing.drawing.currentColorG + 100), 100);
 
-                if (Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1))
+                if (click)
                 {
                     selectedExtensions[i] = !selectedExtensions[i];
                     modified = true;
-                    Game.game.window.validPressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
                 }
             }
             Drawing.drawing.drawInterfaceText(x, y, s);
@@ -160,8 +163,4 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
         back.draw();
         description.draw();
     }
-
-
-
-
 }

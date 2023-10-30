@@ -13,25 +13,20 @@ import java.util.ArrayList;
 public class BulletArc extends Bullet
 {
     public static String bullet_name = "arc";
-
-    public double maxAge;
-
-    public double angle;
-
     public static final double gravity = 0.1;
 
+    public double maxAge;
+    public double angle;
+
     public ArrayList<Double> pastPosX = new ArrayList<>();
-
     public ArrayList<Double> pastPosY = new ArrayList<>();
-
     public ArrayList<Double> pastPosZ = new ArrayList<>();
-
     public ArrayList<Double> pastTime = new ArrayList<>();
 
     public BulletArc(double x, double y, Tank t, int bounces, boolean affectsMaxLiveBullets, ItemBullet ib)
     {
         super(x, y, bounces, t, affectsMaxLiveBullets, ib);
-        this.playPopSound = false;
+
         this.name = bullet_name;
         //this.effect = BulletEffect.trail;
         this.itemSound = "arc.ogg";

@@ -54,6 +54,7 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 
 	public int drawLevel = 3;
 	public boolean isRemote = false;
+	public boolean managedMotion = true;
 
 	public ArrayList<AttributeModifier> attributes = new ArrayList<>();
 	public HashMap<StatusEffect, StatusEffect.Instance> statusEffects = new HashMap<>();

@@ -32,7 +32,6 @@ public abstract class BaseWindow
     public double absoluteMouseY;
 
     public boolean constrainMouse;
-    public boolean moveMouseToOtherSide = false;
 
     public double colorR;
     public double colorG;
@@ -41,6 +40,7 @@ public abstract class BaseWindow
     public double glow;
 
     public boolean fullscreen;
+    public boolean focused;
 
     public HashMap<Integer, InputPoint> touchPoints = new HashMap<>();
 
@@ -52,6 +52,8 @@ public abstract class BaseWindow
 
     public ArrayList<Integer> pressedButtons = new ArrayList<>();
     public ArrayList<Integer> validPressedButtons = new ArrayList<>();
+
+    public ArrayList<Character> inputCodepoints = new ArrayList<>();
 
     public boolean validScrollUp;
     public boolean validScrollDown;
@@ -68,15 +70,13 @@ public abstract class BaseWindow
     public double keyboardFraction = 1;
 
     public ArrayList<Long> framesList = new ArrayList<>();
-    public ArrayList<Double> frameFrequencies = new ArrayList<>();
-    public long lastFrame = System.currentTimeMillis();
+    public long lastFrame = System.nanoTime();
     public double frameFrequency = 1;
-    public final double frameFreqThreshold = 100;
 
     public String name;
 
     public IDrawer drawer;
-    public IUpdater updater;
+    public basewindow.IUpdater updater;
     public IWindowHandler windowHandler;
 
     public ArrayList<Transformation> transformations = new ArrayList<>();
@@ -91,6 +91,7 @@ public abstract class BaseWindow
 
     public Transformation[] baseTransformations = new Transformation[]{new Translation(this, -0.5, -0.5, -1)};
     public Transformation[] lightBaseTransformation = new Transformation[]{new ScaleAboutPoint(this, 0.8, 0.8, 0.8, 0.5, 0.5, 0.5), new Shear(this, 0, 0, 0, 0, 0.5, 0.5)};
+    public double[] lightVec = new double[]{-0.66666666, 0.66666666, -0.33333333};
 
     public BaseSoundPlayer soundPlayer;
     public boolean soundsEnabled = false;
@@ -108,9 +109,14 @@ public abstract class BaseWindow
     public BasePlatformHandler platformHandler;
 
     public ModelPart.ShapeDrawer shapeDrawer;
+    public ShaderGroup shaderDefault;
+    public ShaderBones shaderBaseBones;
+    public ShaderShadowMapBones shaderShadowMapBones;
+    public ShaderGroup currentShaderGroup;
+    public ShaderProgram currentShader;
 
-    public boolean focused = true;
     public boolean allowGlipping = false;
+    public boolean moveMouseToOtherSide = false;
 
     // capsLock and numLock do not work on mac (glfw limitation) :(
     public boolean shift = false;
@@ -139,7 +145,7 @@ public abstract class BaseWindow
     {
         long milliTime = System.currentTimeMillis();
 
-        this.framesList.add(milliTime);
+        this.framesList.add(System.nanoTime());
 
         ArrayList<Long> removeList = new ArrayList<>();
 
@@ -157,25 +163,12 @@ public abstract class BaseWindow
 
     public void stopTiming()
     {
-        long time = System.currentTimeMillis();
+        long time = System.nanoTime();
         long lastFrameTime = lastFrame;
         lastFrame = time;
 
-        double freq =  (time - lastFrameTime) / 10.0;
-        frameFrequencies.add(freq);
-
-        if (frameFrequencies.size() > 5)
-            frameFrequencies.remove(0);
-
-        double totalFrequency = 0;
-
-        for (Double frequency : frameFrequencies)
-            totalFrequency += frequency;
-
-        //frameFrequency = Math.max(0, totalFrequency / frameFrequencies.size());
-        frameFrequency = freq;
-
-        if (frameFrequency > frameFreqThreshold && !allowGlipping)
+        frameFrequency = Math.max(0, (time - lastFrameTime) / 10000000.0);
+        if (!allowGlipping && frameFrequency > 100 && absoluteMouseY > 50)
             frameFrequency = 100 / 60.;
     }
 
@@ -213,7 +206,7 @@ public abstract class BaseWindow
 
     public abstract void setVsync(boolean enable);
 
-    public abstract ArrayList<Integer> getRawTextKeys();
+    public abstract ArrayList<Character> getRawTextKeys();
 
     public abstract String getKeyText(int key);
 
@@ -230,6 +223,8 @@ public abstract class BaseWindow
     public abstract double getEdgeBounds();
 
     public abstract void createImage(String image, InputStream in);
+
+    public abstract void setUpscaleImages(boolean upscaleImages);
 
     public abstract void setTextureCoords(double u, double v);
 
@@ -251,6 +246,16 @@ public abstract class BaseWindow
 
     public abstract void setLighting(double light, double glowLight, double shadow, double glowShadow);
 
+    public abstract void setMaterialLights(float[] ambient, float[] diffuse, float[] specular, double shininess);
+
+    public abstract void setMaterialLights(float[] ambient, float[] diffuse, float[] specular, double shininess, double minBound, double maxBound, boolean enableNegative);
+
+    public abstract void disableMaterialLights();
+
+    public abstract void setCelShadingSections(float sections);
+
+    public abstract void createLights(ArrayList<double[]> lights, double scale);
+
     public abstract void addMatrix();
 
     public abstract void removeMatrix();
@@ -265,7 +270,17 @@ public abstract class BaseWindow
 
     public abstract PosedModel createPosedModel(Model m);
 
+    public abstract BaseStaticBatchRenderer createStaticBatchRenderer(ShaderGroup shader, boolean color, String texture, boolean normal, int vertices);
+
     public abstract BaseShapeBatchRenderer createShapeBatchRenderer();
+
+    public abstract BaseShapeBatchRenderer createShapeBatchRenderer(ShaderGroup shader);
+
+    public abstract BaseShaderUtil getShaderUtil(ShaderProgram p);
+
+    public abstract void setShader(ShaderBase s);
+
+    public abstract void setShader(ShaderShadowMap s);
 
     public void setupKeyCodes()
     {

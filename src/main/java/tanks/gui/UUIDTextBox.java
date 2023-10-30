@@ -64,7 +64,7 @@ public class UUIDTextBox extends TextBox
             }
         }
 
-        ArrayList<Integer> texts = Game.game.window.getRawTextKeys();
+        ArrayList<Character> texts = Game.game.window.getRawTextKeys();
 
         for (int key : texts)
         {

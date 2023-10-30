@@ -1,5 +1,6 @@
 package tanks.obstacle;
 
+import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.editorselector.LevelEditorSelector;
 import tanks.gui.screen.ScreenGame;

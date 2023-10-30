@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 public abstract class ModelPart implements IModel
 {
-    public Model.Material material = null;
+    public basewindow.Model.Material material = null;
     public Shape[] shapes;
-    public Model parent;
+    public basewindow.Model parent;
 
     public static abstract class Shape
     {
@@ -23,7 +23,7 @@ public abstract class ModelPart implements IModel
         public double y;
         public double z;
 
-        public Model.Bone[] bones;
+        public basewindow.Model.Bone[] bones;
         public double[] boneWeights;
 
         public Point(double x, double y, double z)
@@ -107,25 +107,12 @@ public abstract class ModelPart implements IModel
         }
     }
 
-    @Deprecated
-    public static class LegacySquare extends Shape
-    {
-        public double width;
-        public double height;
-
-        public LegacySquare(double width, double height)
-        {
-           this.width = width;
-           this.height = height;
-        }
-    }
-
-    public ModelPart(BaseWindow window)
+    public ModelPart(basewindow.BaseWindow window)
     {
         this.setWindow(window);
     }
 
-    public ModelPart(BaseWindow window, Model model, ArrayList<Shape> shapes, Model.Material material)
+    public ModelPart(basewindow.BaseWindow window, basewindow.Model model, ArrayList<Shape> shapes, Model.Material material)
     {
         this.setWindow(window);
         this.parent = model;

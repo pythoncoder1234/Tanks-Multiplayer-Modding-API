@@ -2,7 +2,6 @@ package tanks.gui.screen.leveleditor;
 
 import tanks.Drawing;
 import tanks.Game;
-import tanks.Level;
 import tanks.gui.Button;
 import tanks.gui.SpeedrunTimer;
 import tanks.gui.screen.Screen;
@@ -35,13 +34,13 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
     public Button delete = new Button(this.centerX, (int) (this.centerY + this.objYSpace), this.objWidth, this.objHeight, "Delete level", () -> Game.screen = new OverlayConfirmDelete(Game.screen, editor)
     );
 
-    public OverlayEditorMenu(Screen previous, ScreenLevelEditor screenLevelEditor)
+    public OverlayEditorMenu(Screen previous, ScreenLevelEditor editor)
     {
-        super(previous, screenLevelEditor);
+        super(previous, editor);
 
         this.allowClose = false;
 
-        if (!screenLevelEditor.level.editable)
+        if (!editor.level.editable)
         {
             play.posY += 60;
             delete.posY -= 60;
@@ -64,12 +63,12 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
         delete.update();
         quit.update();
 
-        if (editor.spawns.size() > 0)
+        if (!editor.spawns.isEmpty())
             play.update();
         else
             playUnavailable.update();
 
-        if (Game.game.input.editorPlay.isValid() && editor.spawns.size() > 0)
+        if (Game.game.input.editorPlay.isValid() && !editor.spawns.isEmpty())
         {
             editor.play();
             Game.game.input.play.invalidate();
@@ -78,11 +77,6 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
 
     public void draw()
     {
-        if (Level.isDark())
-            this.editor.fontBrightness = 255;
-        else
-            this.editor.fontBrightness = 0;
-
         super.draw();
 
         if (editor.level.editable)
@@ -94,7 +88,7 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
         delete.draw();
         quit.draw();
 
-        if (editor.spawns.size() > 0)
+        if (!editor.spawns.isEmpty())
             play.draw();
         else
             playUnavailable.draw();

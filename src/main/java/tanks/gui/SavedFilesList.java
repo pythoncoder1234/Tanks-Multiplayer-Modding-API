@@ -8,7 +8,6 @@ import tanks.Game;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 
 
@@ -42,9 +41,7 @@ public class SavedFilesList extends ButtonList
 
         BaseFile directory = Game.game.fileManager.getFile(dir);
         if (!directory.exists())
-        {
             directory.mkdirs();
-        }
 
         ArrayList<String> files = new ArrayList<>();
 

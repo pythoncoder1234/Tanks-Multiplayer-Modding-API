@@ -1,6 +1,7 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Game;
 
 public class EventPing implements INetworkEvent
 {
@@ -16,13 +17,15 @@ public class EventPing implements INetworkEvent
 	@Override
 	public void write(ByteBuf b)
 	{
-		b.writeInt(iteration);
+		if (!Game.vanillaMode)
+			b.writeInt(iteration);
 	}
 
 	@Override
 	public void read(ByteBuf b)
 	{
-		this.iteration = b.readInt();
+		if (!Game.vanillaMode)
+			this.iteration = b.readInt();
 	}
 
 	@Override
@@ -30,5 +33,4 @@ public class EventPing implements INetworkEvent
 	{
 		
 	}
-
 }

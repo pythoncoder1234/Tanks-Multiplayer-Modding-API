@@ -8,6 +8,7 @@ import tanks.gui.menus.Scoreboard;
 import tanks.network.NetworkUtils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class EventCreateScoreboard extends PersonalEvent
 {
@@ -15,7 +16,7 @@ public class EventCreateScoreboard extends PersonalEvent
     public boolean sortOrder;
     public boolean sortBy;
     public double id;
-    public TextWithStyling[] texts = new TextWithStyling[3];
+    public TextWithStyling[] texts = new TextWithStyling[4];
 
     public boolean syncEnabled = false;
 
@@ -34,8 +35,9 @@ public class EventCreateScoreboard extends PersonalEvent
         this.syncEnabled = scoreboard.syncEnabled;
 
         texts[0] = scoreboard.title;
-        texts[1] = scoreboard.namesStyle;
-        texts[2] = scoreboard.scoreStyle;
+        texts[1] = scoreboard.subtitle;
+        texts[2] = scoreboard.namesStyle;
+        texts[3] = scoreboard.scoreStyle;
     }
 
     @Override
@@ -67,7 +69,7 @@ public class EventCreateScoreboard extends PersonalEvent
         for (int i = 0; i < texts.length; i++)
             texts[i] = TextWithStyling.readFrom(b);
 
-        String[] read = NetworkUtils.readString(b).split("\n\n");
+        String[] read = Objects.requireNonNull(NetworkUtils.readString(b)).split("\n\n");
         for (String s : read)
         {
             String[] pair = s.split("\n");
@@ -84,6 +86,7 @@ public class EventCreateScoreboard extends PersonalEvent
                 sortBy ? Scoreboard.SortBy.score : Scoreboard.SortBy.name
         );
         scoreboard.title = texts[0];
+        scoreboard.subtitle = texts[1];
         scoreboard.namesStyle = texts[1];
         scoreboard.scoreStyle = texts[2];
         scoreboard.syncEnabled = syncEnabled;

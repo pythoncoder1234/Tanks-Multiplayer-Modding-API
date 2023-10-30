@@ -17,8 +17,6 @@ public class ScreenControlsTank extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         moveUp.update();
         moveDown.update();
         moveLeft.update();
@@ -28,6 +26,7 @@ public class ScreenControlsTank extends ScreenOptionsOverlay
         aim.update();
 
         ScreenOverlayControls.overlay.update();
+        super.update();
     }
 
     @Override

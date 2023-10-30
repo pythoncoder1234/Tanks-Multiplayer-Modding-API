@@ -14,13 +14,14 @@ import tanks.registry.RegistryModelTank;
 import tanks.tank.*;
 import tanks.translation.Translation;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 
+@SuppressWarnings({"unused", "SuspiciousNameCombination"})
 public class ScreenTankEditor extends Screen implements IItemScreen
 {
     public Tab currentTab;
@@ -34,7 +35,6 @@ public class ScreenTankEditor extends Screen implements IItemScreen
     public Field lastItemField;
     public ScreenEditItem lastItemScreen;
     public SelectorDrawable lastItemButton;
-    public String message = null;
 
     public boolean drawBehindScreen;
 
@@ -56,7 +56,400 @@ public class ScreenTankEditor extends Screen implements IItemScreen
     }
     );
 
-    public Button save = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace * 6.5, this.objWidth, this.objHeight, "Save to template", new Runnable()
+    public ITrigger getUIElementForField(Field f, TankProperty p, TankAIControlled tank)
+    {
+        try
+        {
+            if (f.getType().equals(int.class))
+            {
+                TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
+                t.function = () ->
+                {
+                    try
+                    {
+                        if (t.inputText.isEmpty())
+                            t.inputText = f.get(tank) + "";
+                        else
+                            f.set(tank, Integer.parseInt(t.inputText));
+                    }
+                    catch (Exception e)
+                    {
+                        Game.exitToCrash(e);
+                    }
+                };
+
+                t.hoverText = formatDescription(p);
+                t.enableHover = !p.desc().isEmpty();
+                t.maxChars = 9;
+                t.allowLetters = false;
+                t.allowSpaces = false;
+
+                return t;
+            }
+            else if (f.getType().equals(double.class))
+            {
+                TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
+                t.function = () ->
+                {
+                    try
+                    {
+                        if (t.inputText.isEmpty())
+                            t.inputText = f.get(tank) + "";
+                        else
+                            f.set(tank, Double.parseDouble(t.inputText));
+                    }
+                    catch (Exception e)
+                    {
+                        Game.exitToCrash(e);
+                    }
+                };
+
+                t.hoverText = formatDescription(p);
+                t.enableHover = !p.desc().isEmpty();
+                t.allowDoubles = true;
+                t.allowLetters = false;
+                t.allowSpaces = false;
+
+                return t;
+            }
+            else if (p.miscType().equals(TankProperty.MiscType.emblem))
+            {
+                final String[] emblems = RegistryModelTank.toStringArray(Game.registryModelTank.tankEmblems);
+                SelectorImage t = new SelectorImage(0, 0, this.objWidth, this.objHeight, p.name(), emblems, () -> {}, "");
+
+                String selected = (String) f.get(tank);
+                int selIndex = 0;
+                for (int i = 0; i < emblems.length; i++)
+                {
+                    if ((selected == null && emblems[i] == null) ||
+                            (!(selected != null && emblems[i] == null) &&
+                            !(selected == null && emblems[i] != null) &&
+                            emblems[i].equals(selected)))
+                    {
+                        selIndex = i;
+                    }
+                }
+
+                t.selectedOption = selIndex;
+
+                t.function = () ->
+                {
+                    try
+                    {
+                        f.set(tank, emblems[t.selectedOption]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Game.exitToCrash(ex);
+                    }
+                };
+
+                t.enableHover = !p.desc().isEmpty();
+                t.hoverText = formatDescription(p);
+                t.images = emblems;
+                t.imageR = 127;
+                t.imageG = 180;
+                t.imageB = 255;
+                return t;
+            }
+            else if (f.getType().equals(String.class))
+            {
+                TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
+                t.function = () ->
+                {
+                    try
+                    {
+                        if (t.inputText.isEmpty() && p.miscType() != TankProperty.MiscType.description)
+                            t.inputText = f.get(tank) + "";
+                        else
+                            f.set(tank, t.inputText);
+                    }
+                    catch (Exception e)
+                    {
+                        Game.exitToCrash(e);
+                    }
+                };
+
+                t.hoverText = formatDescription(p);
+                t.enableHover = !p.desc().isEmpty();
+                t.lowerCase = true;
+                t.allowSpaces = true;
+                t.enableSpaces = false;
+
+                return t;
+            }
+            else if (f.getType().equals(boolean.class))
+            {
+                Selector t = new Selector(0, 0, this.objWidth, this.objHeight, p.name(), new String[]{"Yes", "No"}, () -> {}, "");
+
+                if ((boolean) f.get(tank))
+                    t.selectedOption = 0;
+                else
+                    t.selectedOption = 1;
+
+                t.function = () ->
+                {
+                    try
+                    {
+                        f.set(tank, t.selectedOption == 0);
+                    }
+                    catch (Exception e)
+                    {
+                        Game.exitToCrash(e);
+                    }
+                };
+
+                t.enableHover = !p.desc().isEmpty();
+                t.hoverText = formatDescription(p);
+                return t;
+            }
+            else if (f.getType().isEnum())
+            {
+                Class<? extends Enum> e = (Class<? extends Enum>) f.getType();
+                Enum<?>[] values = e.getEnumConstants();
+                String[] options = new String[values.length];
+                for (int i = 0; i < options.length; i++)
+                {
+                    options[i] = Game.formatString(values[i].name());
+                }
+
+                Selector t = new Selector(0, 0, this.objWidth, this.objHeight, p.name(), options, () -> {}, "");
+                t.selectedOption = ((Enum<?>) f.get(tank)).ordinal();
+
+                t.function = () ->
+                {
+                    try
+                    {
+                        f.set(tank, values[t.selectedOption]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Game.exitToCrash(ex);
+                    }
+                };
+
+                t.enableHover = !p.desc().isEmpty();
+                t.hoverText = formatDescription(p);
+                return t;
+            }
+            else if (Item.class.isAssignableFrom(f.getType()))
+            {
+                Item i = (Item) f.get(tank);
+                i.importProperties();
+                SelectorDrawable b = new SelectorDrawable(0, 0, 350, 40, p.name(), () -> {});
+                b.function = () ->
+                {
+                    this.lastItem = i;
+                    this.lastItemField = f;
+                    this.resetLayout();
+                    ScreenEditItem editItem = new ScreenEditItem(i, this);
+                    editItem.delete.setText("Load from template");
+                    Game.screen = editItem;
+                    this.lastItemScreen = editItem;
+                    this.lastItemButton = b;
+                };
+                b.enableHover = !p.desc().isEmpty();
+                b.hoverText = formatDescription(p);
+                b.image = i.icon;
+                b.imageXOffset = - b.sizeX / 2 + b.sizeY / 2 + 10;
+                b.imageSizeX = b.sizeY;
+                b.imageSizeY = b.sizeY;
+                b.optionText = i.name;
+
+                return b;
+            }
+            else if (Tank.class.isAssignableFrom(f.getType()))
+            {
+                SelectorDrawable b = new SelectorDrawable(0, 0, 350, 40, p.name(), () -> {});
+                b.tank = (Tank) f.get(tank);
+                b.function = () ->
+                {
+                    ArrayList<TankAIControlled> tanks = new ArrayList<>();
+
+                    if (this.tankScreen instanceof OverlayObjectMenu)
+                        tanks = ((OverlayObjectMenu) this.tankScreen).editor.level.customTanks;
+
+                    this.resetLayout();
+
+                    ScreenSelectorTank s = new ScreenSelectorTank("Select " + p.name().toLowerCase(), b.tank, this, tanks, (t) ->
+                    {
+                        try
+                        {
+                            f.set(tank, t);
+                            b.tank = t;
+
+                            if (b.tank != null)
+                                b.optionText = b.tank.name;
+                            else
+                                b.optionText = "\u00A7127000000255none";
+                        }
+                        catch (IllegalAccessException e)
+                        {
+                            Game.exitToCrash(e);
+                        }
+                    }, true);
+
+                    s.drawBehindScreen = true;
+                    Game.screen = s;
+                };
+
+                if (b.tank != null)
+                    b.optionText = b.tank.name;
+                else
+                    b.optionText = "\u00A7127000000255none";
+
+                b.enableHover = !p.desc().isEmpty();
+                b.hoverText = formatDescription(p);
+
+                return b;
+            }
+            else if (IModel.class.isAssignableFrom(f.getType()))
+            {
+                IModel[] models = null;
+                String[] modelDirs;
+
+                if (p.miscType().equals(TankProperty.MiscType.baseModel))
+                    models = RegistryModelTank.toModelArray(Game.registryModelTank.tankBaseModels);
+                else if (p.miscType().equals(TankProperty.MiscType.colorModel))
+                    models = RegistryModelTank.toModelArray(Game.registryModelTank.tankColorModels);
+                else if (p.miscType().equals(TankProperty.MiscType.turretBaseModel))
+                    models = RegistryModelTank.toModelArray(Game.registryModelTank.turretBaseModels);
+                else if (p.miscType().equals(TankProperty.MiscType.turretModel))
+                    models = RegistryModelTank.toModelArray(Game.registryModelTank.turretModels);
+
+                String selected = f.get(tank).toString();
+                int selIndex = 0;
+                modelDirs = new String[models.length];
+                for (int i = 0; i < models.length; i++)
+                {
+                    modelDirs[i] = models[i].toString();
+                    if (models[i].toString().equals(selected))
+                        selIndex = i;
+                }
+
+                final IModel[] finalModels = models;
+
+                SelectorImage t = new SelectorImage(0, 0, this.objWidth, this.objHeight, p.name(), modelDirs, () -> {}, "");
+                t.selectedOption = selIndex;
+
+                t.function = () ->
+                {
+                    try
+                    {
+                        f.set(tank, finalModels[t.selectedOption]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Game.exitToCrash(ex);
+                    }
+                };
+
+                t.enableHover = !p.desc().isEmpty();
+                t.hoverText = formatDescription(p);
+                t.models = models;
+
+                return t;
+            }
+            else if (p.miscType() == TankProperty.MiscType.music)
+            {
+                HashSet<String> a = ((HashSet<String>) f.get(tank));
+                ArrayList<String> musics = new ArrayList<>();
+
+                for (HashSet<String> s: Game.registryTank.tankMusics.values())
+                {
+                    for (String m: s)
+                    {
+                        if (!musics.contains(m))
+                            musics.add(m);
+                    }
+                }
+
+                musics.sort(String::compareTo);
+
+                String[] musicsArray = new String[musics.size()];
+                boolean[] selectedMusicsArray = new boolean[musics.size()];
+                for (int i = 0; i < musics.size(); i++)
+                {
+                    musicsArray[i] = musics.get(i);
+                    if (a.contains(musicsArray[i]))
+                        selectedMusicsArray[i] = true;
+                }
+
+                SelectorMusic s = new SelectorMusic(0, 0, 350, 40, p.name(), musicsArray, () ->
+                {
+                    tank.musicTracks.clear();
+                    for (int i = 0; i < musicsArray.length; i++)
+                    {
+                        if (selectedMusicsArray[i])
+                            tank.musicTracks.add(musicsArray[i]);
+                    }
+                }, this);
+
+                s.selectedOptions = selectedMusicsArray;
+                return s;
+            }
+            else if (p.miscType() == TankProperty.MiscType.spawnedTanks)
+            {
+                SelectorDrawable s = new SelectorDrawable(0, 0, 350, 40, p.name());
+                ArrayList<TankAIControlled.SpawnedTankEntry> a = ((ArrayList<TankAIControlled.SpawnedTankEntry>) f.get(tank));
+
+                s.function = () ->
+                {
+                    this.resetLayout();
+                    ScreenArrayListSelector sc = new ScreenArrayListSelector(this, "Select " + p.name().toLowerCase());
+                    Game.screen = sc;
+
+                    ArrayList<ScreenArrayListSelector.Entry> entries = new ArrayList<>();
+                    for (TankAIControlled.SpawnedTankEntry e: a)
+                    {
+                        entries.add(getSpawnedTankEntry(e, sc));
+                    }
+
+                    a.clear();
+                    s.multiTanks.clear();
+                    s.tank = null;
+                    s.optionText = Translation.translate("\u00A7127000000255none");
+
+                    sc.setContent(entries,
+                    () -> getSpawnedTankEntry(new TankAIControlled.SpawnedTankEntry((TankAIControlled) Game.registryTank.getEntry("dummy").getTank(0, 0, 0), 1.0), sc),
+                    (entry) ->
+                    {
+                        SelectorDrawable sel = ((SelectorDrawable) entry.element1);
+                        a.add(new TankAIControlled.SpawnedTankEntry((TankAIControlled) sel.tank, Double.parseDouble(((TextBox) entry.element2).inputText)));
+                        s.multiTanks.add(sel.tank);
+                        s.tank = sel.tank;
+                        if (s.multiTanks.size() == 1)
+                            s.optionText = sel.tank.name;
+                        else
+                            s.optionText = "";
+                    });
+                };
+                s.enabled = true;
+
+                s.optionText = Translation.translate("\u00A7127000000255none");
+                for (TankAIControlled.SpawnedTankEntry e: a)
+                {
+                    s.multiTanks.add(e.tank);
+                    s.tank = e.tank;
+                    if (s.multiTanks.size() == 1)
+                        s.optionText = e.tank.name;
+                    else
+                        s.optionText = "";
+                }
+
+                s.enableHover = !p.desc().isEmpty();
+                s.hoverText = formatDescription(p);
+
+                return s;
+            }
+        }
+        catch (Exception e)
+        {
+            Game.exitToCrash(e);
+        }
+
+        return new Button(0, 0, 350, 40, p.name(), "This option is not available yet");
+    }    public Button save = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace * 6.5, this.objWidth, this.objHeight, "Save to template", new Runnable()
     {
         @Override
         public void run()
@@ -72,7 +465,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     f.println(tank.toString());
                     f.stopWriting();
 
-                    message = "Tank added to templates!";
+                    save.setText("Done!");
                 }
                 catch (IOException e)
                 {
@@ -80,12 +473,22 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 }
             }
             else
-                message = "A tank template with this name already exists!";
+                Game.screen = new ScreenConfirmOverwrite("Overwrite tank template \"" + tank.name + "\"?", () ->
+                {
+                    try
+                    {
+                        f.startWriting();
+                        f.println(tank.toString());
+                        f.stopWriting();
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        throw new RuntimeException(e);
+                    }
+                });
         }
     }
     );
-
-    public Button dismissMessage = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + Drawing.drawing.objHeight, Drawing.drawing.objWidth, Drawing.drawing.objHeight, "Ok", () -> message = null);
 
     public Button quit = new Button(this.centerX, this.centerY + this.objYSpace * 6.5, this.objWidth, this.objHeight, "Done", () ->
     {
@@ -231,194 +634,51 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         this.lastItemButton.optionText = this.lastItem.name;
     }
 
-    public static class Tab
+    public ScreenArrayListSelector.Entry getSpawnedTankEntry(TankAIControlled.SpawnedTankEntry e, ScreenArrayListSelector s)
     {
-        public ScreenTankEditor screen;
-        public ArrayList<Tab> subMenus = new ArrayList<>();
-        public ArrayList<ITrigger> uiElements = new ArrayList<>();
-        public String name;
-        public TankProperty.Category category;
-        public Tab parent;
-
-        public int rows = 4;
-        public int yoffset = -120;
-        public int page = 0;
-
-        public Button next = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 240, 350, 40, "Next page", () -> page++);
-
-        public Button previous = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 240, 350, 40, "Previous page", () -> page--);
-
-        public Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 300, 350, 40, "Back", () -> {screen.setTab(screen.currentTab.parent);});
-
-        public Tab(ScreenTankEditor screen, String name, TankProperty.Category category)
+        SelectorDrawable b = new SelectorDrawable(0, 0, 350, 40, "Spawned tank", () -> {});
+        b.tank = e.tank;
+        b.function = () ->
         {
-            this(screen, null, name, category);
-        }
+            ArrayList<TankAIControlled> tanks = new ArrayList<>();
 
-        public Tab(ScreenTankEditor screen, Tab parent, String name, TankProperty.Category category)
+            if (this.tankScreen instanceof OverlayObjectMenu)
+                tanks = ((OverlayObjectMenu) this.tankScreen).editor.level.customTanks;
+
+            ScreenSelectorTank screen = new ScreenSelectorTank("Select spawned tank", b.tank, Game.screen, tanks, (t) ->
+            {
+                e.tank = t;
+                b.tank = t;
+
+                if (b.tank != null)
+                    b.optionText = b.tank.name;
+                else
+                    b.optionText = "\u00A7127000000255none";
+            }, false);
+
+            screen.drawBehindScreen = true;
+            Game.screen = screen;
+        };
+
+        if (b.tank != null)
+            b.optionText = b.tank.name;
+        else
+            b.optionText = "\u00A7127000000255none";
+
+        TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, "Spawn weight", () -> {}, e.weight + "", "Bigger numbers relative to---other spawned tanks increase---the likelihood of this tank---being spawned");
+        t.function = () ->
         {
-            if (parent == null)
-                screen.topLevelMenus.add(this);
+            if (t.inputText.isEmpty())
+                t.inputText = e.weight + "";
             else
-                parent.addSubMenu(this);
+                e.weight = Double.parseDouble(t.inputText);
+        };
 
-            this.parent = parent;
-            this.screen = screen;
-            this.name = name;
-            this.category = category;
+        t.allowDoubles = true;
+        t.allowLetters = false;
+        t.allowSpaces = false;
 
-            this.next.image = "icons/forward.png";
-            this.next.imageSizeX = 25;
-            this.next.imageSizeY = 25;
-            this.next.imageXOffset = 145;
-
-            this.previous.image = "icons/back.png";
-            this.previous.imageSizeX = 25;
-            this.previous.imageSizeY = 25;
-            this.previous.imageXOffset = -145;
-
-            this.addFields();
-        }
-
-        public void set()
-        {
-
-        }
-
-        public void addFields()
-        {
-            for (Field f: this.screen.fields)
-            {
-                TankProperty p = f.getAnnotation(TankProperty.class);
-                if (p != null && p.category() == this.category && p.miscType() != TankProperty.MiscType.color)
-                {
-                    if (p.miscType() == TankProperty.MiscType.description)
-                    {
-                        TextBox t = (TextBox) screen.getUIElementForField(f, p, screen.tank);
-                        t.posX = this.screen.centerX;
-                        t.posY = this.screen.centerY + 270;
-                        t.enableCaps = true;
-                        t.allowSpaces = true;
-                        t.enableSpaces = true;
-                        t.enablePunctuation = true;
-                        t.maxChars = 100;
-                        t.sizeX *= 3;
-                        ((TabGeneral) this).description = t;
-                    }
-                    else if (!(p.miscType() == TankProperty.MiscType.music && Game.framework == Game.Framework.libgdx))
-                        this.uiElements.add(screen.getUIElementForField(f, p, screen.tank));
-                }
-            }
-        }
-
-        public void addSubMenu(Tab t)
-        {
-            this.subMenus.add(t);
-        }
-
-        public void sortUIElements()
-        {
-            int in = 0;
-            for (Tab t: this.subMenus)
-            {
-                this.uiElements.add(in, new Button(0, 0, 350, 40, t.name, () -> screen.setTab(t)));
-                in++;
-            }
-
-            while (in % 4 != 0)
-            {
-                this.uiElements.add(in, new EmptySpace());
-                in++;
-            }
-
-            for (int i = 0; i < this.uiElements.size(); i++)
-            {
-                int page = i / (rows * 3);
-                int offset = 0;
-
-                if (page * rows * 3 + rows < this.uiElements.size())
-                    offset = -190;
-
-                if (page * rows * 3 + rows * 2 < this.uiElements.size())
-                    offset = -380;
-
-                double posY = Drawing.drawing.interfaceSizeY / 2 + yoffset + (i % rows) * 90;
-
-                if (i / rows % 3 == 0)
-                    this.uiElements.get(i).setPosition(Drawing.drawing.interfaceSizeX / 2 + offset, posY);
-                else if (i / rows % 3 == 1)
-                    this.uiElements.get(i).setPosition(Drawing.drawing.interfaceSizeX / 2 + offset + 380, posY);
-                else
-                    this.uiElements.get(i).setPosition(Drawing.drawing.interfaceSizeX / 2 + offset + 380 * 2, posY);
-            }
-
-            for (Tab t: this.subMenus)
-            {
-                t.sortUIElements();
-            }
-        }
-
-        public Tab getRoot()
-        {
-            if (this.parent == null)
-                return this;
-
-            return this.parent.getRoot();
-        }
-
-        public void updateUIElements()
-        {
-            for (int i = page * rows * 3; i < Math.min(page * rows * 3 + rows * 3, this.uiElements.size()); i++)
-            {
-                this.uiElements.get(i).update();
-            }
-        }
-
-        public void update()
-        {
-            this.updateUIElements();
-
-            if (parent != null)
-                back.update();
-
-            if (rows * 3 < uiElements.size())
-            {
-                previous.update();
-                next.update();
-            }
-        }
-
-        public void drawUIElements()
-        {
-            for (int i = Math.min(page * rows * 3 + rows * 3, this.uiElements.size()) - 1; i >= page * rows * 3; i--)
-                this.uiElements.get(i).draw();
-        }
-
-        public void draw()
-        {
-            this.drawUIElements();
-
-            previous.enabled = page > 0;
-            next.enabled = (uiElements.size() > (1 + page) * rows * 3);
-
-            if (parent != null)
-                back.draw();
-
-            if (rows * 3 < uiElements.size())
-            {
-                previous.draw();
-                next.draw();
-
-                if (Level.isDark())
-                    Drawing.drawing.setColor(255, 255, 255);
-                else
-                    Drawing.drawing.setColor(0, 0, 0);
-
-                Drawing.drawing.setInterfaceFontSize(this.screen.textSize);
-                Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 200,
-                        "Page %d of %d", (page + 1), (uiElements.size() / (rows * 3) + Math.min(1, uiElements.size() % (rows * 3))));
-            }
-        }
+        return new ScreenArrayListSelector.Entry(b, t, s);
     }
 
     public static class TabGeneral extends Tab
@@ -943,446 +1203,75 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         return text.toArray(s);
     }
 
-    public ITrigger getUIElementForField(Field f, TankProperty p, TankAIControlled tank)
+    @Override
+    public void update()
     {
-        try
+        this.setupLayoutParameters();
+
+        if (this.tankScreen instanceof ScreenLevelEditorOverlay)
+            this.updateMusic();
+
+        for (Button b : this.topLevelButtons)
         {
-            if (f.getType().equals(int.class))
-            {
-                TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
-                t.function = () ->
-                {
-                    try
-                    {
-                        if (t.inputText.length() == 0)
-                            t.inputText = f.get(tank) + "";
-                        else
-                            f.set(tank, Integer.parseInt(t.inputText));
-                    }
-                    catch (Exception e)
-                    {
-                        Game.exitToCrash(e);
-                    }
-                };
-
-                t.hoverText = formatDescription(p);
-                t.enableHover = !p.desc().equals("");
-                t.maxChars = 9;
-                t.allowLetters = false;
-                t.allowSpaces = false;
-
-                return t;
-            }
-            else if (f.getType().equals(double.class))
-            {
-                TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
-                t.function = () ->
-                {
-                    try
-                    {
-                        if (t.inputText.length() == 0)
-                            t.inputText = f.get(tank) + "";
-                        else
-                            f.set(tank, Double.parseDouble(t.inputText));
-                    }
-                    catch (Exception e)
-                    {
-                        Game.exitToCrash(e);
-                    }
-                };
-
-                t.hoverText = formatDescription(p);
-                t.enableHover = !p.desc().equals("");
-                t.allowDoubles = true;
-                t.allowLetters = false;
-                t.allowSpaces = false;
-
-                return t;
-            }
-            else if (p.miscType().equals(TankProperty.MiscType.emblem))
-            {
-                final String[] emblems = RegistryModelTank.toStringArray(Game.registryModelTank.tankEmblems);
-                SelectorImage t = new SelectorImage(0, 0, this.objWidth, this.objHeight, p.name(), emblems, () -> {}, "");
-
-                String selected = (String) f.get(tank);
-                int selIndex = 0;
-                for (int i = 0; i < emblems.length; i++)
-                {
-                    if ((selected == null && emblems[i] == null) ||
-                            (!(selected != null && emblems[i] == null) &&
-                            !(selected == null && emblems[i] != null) &&
-                            emblems[i].equals(selected)))
-                    {
-                        selIndex = i;
-                    }
-                }
-
-                t.selectedOption = selIndex;
-
-                t.function = () ->
-                {
-                    try
-                    {
-                        f.set(tank, emblems[t.selectedOption]);
-                    }
-                    catch (Exception ex)
-                    {
-                        Game.exitToCrash(ex);
-                    }
-                };
-
-                t.enableHover = !p.desc().equals("");
-                t.hoverText = formatDescription(p);
-                t.images = emblems;
-                t.imageR = 127;
-                t.imageG = 180;
-                t.imageB = 255;
-                return t;
-            }
-            else if (f.getType().equals(String.class))
-            {
-                TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
-                t.function = () ->
-                {
-                    try
-                    {
-                        if (t.inputText.length() == 0 && p.miscType() != TankProperty.MiscType.description)
-                            t.inputText = f.get(tank) + "";
-                        else
-                            f.set(tank, t.inputText);
-                    }
-                    catch (Exception e)
-                    {
-                        Game.exitToCrash(e);
-                    }
-                };
-
-                t.hoverText = formatDescription(p);
-                t.enableHover = !p.desc().equals("");
-                t.lowerCase = true;
-                t.allowSpaces = true;
-                t.enableSpaces = false;
-
-                return t;
-            }
-            else if (f.getType().equals(boolean.class))
-            {
-                Selector t = new Selector(0, 0, this.objWidth, this.objHeight, p.name(), new String[]{"Yes", "No"}, () -> {}, "");
-
-                if ((boolean) f.get(tank))
-                    t.selectedOption = 0;
-                else
-                    t.selectedOption = 1;
-
-                t.function = () ->
-                {
-                    try
-                    {
-                        f.set(tank, t.selectedOption == 0);
-                    }
-                    catch (Exception e)
-                    {
-                        Game.exitToCrash(e);
-                    }
-                };
-
-                t.enableHover = !p.desc().equals("");
-                t.hoverText = formatDescription(p);
-                return t;
-            }
-            else if (f.getType().isEnum())
-            {
-                Class<? extends Enum> e = (Class<? extends Enum>) f.getType();
-                Enum<?>[] values = e.getEnumConstants();
-                String[] options = new String[values.length];
-                for (int i = 0; i < options.length; i++)
-                {
-                    options[i] = Game.formatString(values[i].name());
-                }
-
-                Selector t = new Selector(0, 0, this.objWidth, this.objHeight, p.name(), options, () -> {}, "");
-                t.selectedOption = ((Enum<?>) f.get(tank)).ordinal();
-
-                t.function = () ->
-                {
-                    try
-                    {
-                        f.set(tank, values[t.selectedOption]);
-                    }
-                    catch (Exception ex)
-                    {
-                        Game.exitToCrash(ex);
-                    }
-                };
-
-                t.enableHover = !p.desc().equals("");
-                t.hoverText = formatDescription(p);
-                return t;
-            }
-            else if (Item.class.isAssignableFrom(f.getType()))
-            {
-                Item i = (Item) f.get(tank);
-                i.importProperties();
-                SelectorDrawable b = new SelectorDrawable(0, 0, 350, 40, p.name(), () -> {});
-                b.function = () ->
-                {
-                    this.lastItem = i;
-                    this.lastItemField = f;
-                    this.resetLayout();
-                    ScreenEditItem editItem = new ScreenEditItem(i, this);
-                    editItem.delete.setText("Load from template");
-                    Game.screen = editItem;
-                    this.lastItemScreen = editItem;
-                    this.lastItemButton = b;
-                };
-                b.enableHover = !p.desc().equals("");
-                b.hoverText = formatDescription(p);
-                b.image = i.icon;
-                b.imageXOffset = - b.sizeX / 2 + b.sizeY / 2 + 10;
-                b.imageSizeX = b.sizeY;
-                b.imageSizeY = b.sizeY;
-                b.optionText = i.name;
-
-                return b;
-            }
-            else if (Tank.class.isAssignableFrom(f.getType()))
-            {
-                SelectorDrawable b = new SelectorDrawable(0, 0, 350, 40, p.name(), () -> {});
-                b.tank = (Tank) f.get(tank);
-                b.function = () ->
-                {
-                    ArrayList<TankAIControlled> tanks = new ArrayList<>();
-
-                    if (this.tankScreen instanceof OverlayObjectMenu)
-                        tanks = ((OverlayObjectMenu) this.tankScreen).editor.level.customTanks;
-
-                    this.resetLayout();
-
-                    ScreenSelectorTank s = new ScreenSelectorTank("Select " + p.name().toLowerCase(), b.tank, this, tanks, (t) ->
-                    {
-                        try
-                        {
-                            f.set(tank, t);
-                            b.tank = t;
-
-                            if (b.tank != null)
-                                b.optionText = b.tank.name;
-                            else
-                                b.optionText = "\u00A7127000000255none";
-                        }
-                        catch (IllegalAccessException e)
-                        {
-                            Game.exitToCrash(e);
-                        }
-                    }, true);
-
-                    s.drawBehindScreen = true;
-                    Game.screen = s;
-                };
-
-                if (b.tank != null)
-                    b.optionText = b.tank.name;
-                else
-                    b.optionText = "\u00A7127000000255none";
-
-                b.enableHover = !p.desc().equals("");
-                b.hoverText = formatDescription(p);
-
-                return b;
-            }
-            else if (IModel.class.isAssignableFrom(f.getType()))
-            {
-                IModel[] models = null;
-                String[] modelDirs;
-
-                if (p.miscType().equals(TankProperty.MiscType.baseModel))
-                    models = RegistryModelTank.toModelArray(Game.registryModelTank.tankBaseModels);
-                else if (p.miscType().equals(TankProperty.MiscType.colorModel))
-                    models = RegistryModelTank.toModelArray(Game.registryModelTank.tankColorModels);
-                else if (p.miscType().equals(TankProperty.MiscType.turretBaseModel))
-                    models = RegistryModelTank.toModelArray(Game.registryModelTank.turretBaseModels);
-                else if (p.miscType().equals(TankProperty.MiscType.turretModel))
-                    models = RegistryModelTank.toModelArray(Game.registryModelTank.turretModels);
-
-                String selected = f.get(tank).toString();
-                int selIndex = 0;
-                modelDirs = new String[models.length];
-                for (int i = 0; i < models.length; i++)
-                {
-                    modelDirs[i] = models[i].toString();
-                    if (models[i].toString().equals(selected))
-                        selIndex = i;
-                }
-
-                final IModel[] finalModels = models;
-
-                SelectorImage t = new SelectorImage(0, 0, this.objWidth, this.objHeight, p.name(), modelDirs, () -> {}, "");
-                t.selectedOption = selIndex;
-
-                t.function = () ->
-                {
-                    try
-                    {
-                        f.set(tank, finalModels[t.selectedOption]);
-                    }
-                    catch (Exception ex)
-                    {
-                        Game.exitToCrash(ex);
-                    }
-                };
-
-                t.enableHover = !p.desc().equals("");
-                t.hoverText = formatDescription(p);
-                t.models = models;
-
-                return t;
-            }
-            else if (p.miscType() == TankProperty.MiscType.music)
-            {
-                HashSet<String> a = ((HashSet<String>) f.get(tank));
-                ArrayList<String> musics = new ArrayList<>();
-
-                for (HashSet<String> s: Game.registryTank.tankMusics.values())
-                {
-                    for (String m: s)
-                    {
-                        if (!musics.contains(m))
-                            musics.add(m);
-                    }
-                }
-
-                Collections.sort(musics, (o1, o2) -> o1.compareTo(o2));
-
-                String[] musicsArray = new String[musics.size()];
-                boolean[] selectedMusicsArray = new boolean[musics.size()];
-                for (int i = 0; i < musics.size(); i++)
-                {
-                    musicsArray[i] = musics.get(i);
-                    if (a.contains(musicsArray[i]))
-                        selectedMusicsArray[i] = true;
-                }
-
-                SelectorMusic s = new SelectorMusic(0, 0, 350, 40, p.name(), musicsArray, () ->
-                {
-                    tank.musicTracks.clear();
-                    for (int i = 0; i < musicsArray.length; i++)
-                    {
-                        if (selectedMusicsArray[i])
-                            tank.musicTracks.add(musicsArray[i]);
-                    }
-                }, this);
-
-                s.selectedOptions = selectedMusicsArray;
-                return s;
-            }
-            else if (p.miscType() == TankProperty.MiscType.spawnedTanks)
-            {
-                SelectorDrawable s = new SelectorDrawable(0, 0, 350, 40, p.name());
-                ArrayList<TankAIControlled.SpawnedTankEntry> a = ((ArrayList<TankAIControlled.SpawnedTankEntry>) f.get(tank));
-
-                s.function = () ->
-                {
-                    this.resetLayout();
-                    ScreenArrayListSelector sc = new ScreenArrayListSelector(this, "Select " + p.name().toLowerCase());
-                    Game.screen = sc;
-
-                    ArrayList<ScreenArrayListSelector.Entry> entries = new ArrayList<>();
-                    for (TankAIControlled.SpawnedTankEntry e: a)
-                    {
-                        entries.add(getSpawnedTankEntry(e, sc));
-                    }
-
-                    a.clear();
-                    s.multiTanks.clear();
-                    s.tank = null;
-                    s.optionText = Translation.translate("\u00A7127000000255none");
-
-                    sc.setContent(entries,
-                    () -> getSpawnedTankEntry(new TankAIControlled.SpawnedTankEntry((TankAIControlled) Game.registryTank.getEntry("dummy").getTank(0, 0, 0), 1.0), sc),
-                    (entry) ->
-                    {
-                        SelectorDrawable sel = ((SelectorDrawable) entry.element1);
-                        a.add(new TankAIControlled.SpawnedTankEntry((TankAIControlled) sel.tank, Double.parseDouble(((TextBox) entry.element2).inputText)));
-                        s.multiTanks.add(sel.tank);
-                        s.tank = sel.tank;
-                        if (s.multiTanks.size() == 1)
-                            s.optionText = sel.tank.name;
-                        else
-                            s.optionText = "";
-                    });
-                };
-                s.enabled = true;
-
-                s.optionText = Translation.translate("\u00A7127000000255none");
-                for (TankAIControlled.SpawnedTankEntry e: a)
-                {
-                    s.multiTanks.add(e.tank);
-                    s.tank = e.tank;
-                    if (s.multiTanks.size() == 1)
-                        s.optionText = e.tank.name;
-                    else
-                        s.optionText = "";
-                }
-
-                s.enableHover = !p.desc().equals("");
-                s.hoverText = formatDescription(p);
-
-                return s;
-            }
-        }
-        catch (Exception e)
-        {
-            Game.exitToCrash(e);
+            b.enabled = !currentTab.getRoot().name.equals(b.text);
+            b.update();
         }
 
-        return new Button(0, 0, 350, 40, p.name(), "This option is not available yet");
+        this.currentTab.update();
+
+        this.quit.update();
+        this.delete.update();
+        this.save.update();
+
+        if (Game.game.input.editorPause.isValid())
+        {
+            Game.game.input.editorPause.invalidate();
+            this.quit.function.run();
+        }
     }
 
-    public ScreenArrayListSelector.Entry getSpawnedTankEntry(TankAIControlled.SpawnedTankEntry e, ScreenArrayListSelector s)
+    @Override
+    public void draw()
     {
-        SelectorDrawable b = new SelectorDrawable(0, 0, 350, 40, "Spawned tank", () -> {});
-        b.tank = e.tank;
-        b.function = () ->
-        {
-            ArrayList<TankAIControlled> tanks = new ArrayList<>();
+        Drawing.drawing.setLighting(Level.currentLightIntensity, Math.max(Level.currentLightIntensity * 0.75, Level.currentShadowIntensity));
+        this.drawDefaultBackground();
 
-            if (this.tankScreen instanceof OverlayObjectMenu)
-                tanks = ((OverlayObjectMenu) this.tankScreen).editor.level.customTanks;
+        //Drawing.drawing.setColor(127, 178, 228, 64);
+        //Game.game.window.shapeRenderer.fillRect(0, 0, Game.game.window.absoluteWidth + 1, Game.game.window.absoluteHeight + 1);
 
-            ScreenSelectorTank screen = new ScreenSelectorTank("Select spawned tank", b.tank, Game.screen, tanks, (t) ->
-            {
-                e.tank = t;
-                b.tank = t;
-
-                if (b.tank != null)
-                    b.optionText = b.tank.name;
-                else
-                    b.optionText = "\u00A7127000000255none";
-            }, false);
-
-            screen.drawBehindScreen = true;
-            Game.screen = screen;
-        };
-
-        if (b.tank != null)
-            b.optionText = b.tank.name;
+        if (Game.screen != this)
+            return;
         else
-            b.optionText = "\u00A7127000000255none";
+            this.setupLayoutParameters();
 
-        TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, "Spawn weight", () -> {}, e.weight + "", "Bigger numbers relative to---other spawned tanks increase---the likelihood of this tank---being spawned");
-        t.function = () ->
-        {
-            if (t.inputText.length() == 0)
-                t.inputText = e.weight + "";
-            else
-                e.weight = Double.parseDouble(t.inputText);
-        };
+        double extraHeight = ((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2;
+        double width = Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale;
 
-        t.allowDoubles = true;
-        t.allowLetters = false;
-        t.allowSpaces = false;
+        Drawing.drawing.setColor(0, 0, 0, 127);
+        Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, -extraHeight / 2, width, extraHeight);
+        Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, 105, width, 210);
 
-        return new ScreenArrayListSelector.Entry(b, t, s);
+        Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY + extraHeight / 2, width, extraHeight);
+        Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY - 60, width, 120);
+
+        Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.setColor(255, 255, 255);
+        Drawing.drawing.displayInterfaceText(this.centerX, 30, "Edit tank");
+
+        if (Level.isDark())
+            Drawing.drawing.setColor(255, 255, 255);
+        else
+            Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 200, this.currentTab.name);
+
+        for (Button b : this.topLevelButtons)
+            b.draw();
+
+        this.currentTab.draw();
+
+        this.quit.draw();
+        this.delete.draw();
+        this.save.draw();
     }
 
     public void sortTopLevelTabs()
@@ -1424,36 +1313,193 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         this.currentTab = t;
     }
 
-    @Override
-    public void update()
+    public static class Tab
     {
-        this.setupLayoutParameters();
+        public ScreenTankEditor screen;
+        public ArrayList<Tab> subMenus = new ArrayList<>();
+        public ArrayList<ITrigger> uiElements = new ArrayList<>();
+        public String name;
+        public TankProperty.Category category;
+        public Tab parent;
 
-        if (this.tankScreen instanceof ScreenLevelEditorOverlay)
-            this.updateMusic();
+        public int rows = 4;
+        public int yoffset = -120;
+        public int page = 0;
 
-        if (this.message != null)
-            this.dismissMessage.update();
-        else
+        public Button next = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 + 240, 350, 40, "Next page", () -> page++);
+
+        public Button previous = new Button(Drawing.drawing.interfaceSizeX / 2 - 190, Drawing.drawing.interfaceSizeY / 2 + 240, 350, 40, "Previous page", () -> page--);
+
+        public Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 300, 350, 40, "Back", () -> screen.setTab(screen.currentTab.parent));
+
+        public Tab(ScreenTankEditor screen, String name, TankProperty.Category category)
         {
-            for (Button b : this.topLevelButtons)
+            this(screen, null, name, category);
+        }
+
+        public Tab(ScreenTankEditor screen, Tab parent, String name, TankProperty.Category category)
+        {
+            if (parent == null)
+                screen.topLevelMenus.add(this);
+            else
+                parent.addSubMenu(this);
+
+            this.parent = parent;
+            this.screen = screen;
+            this.name = name;
+            this.category = category;
+
+            this.next.image = "icons/forward.png";
+            this.next.imageSizeX = 25;
+            this.next.imageSizeY = 25;
+            this.next.imageXOffset = 145;
+
+            this.previous.image = "icons/back.png";
+            this.previous.imageSizeX = 25;
+            this.previous.imageSizeY = 25;
+            this.previous.imageXOffset = -145;
+
+            this.addFields();
+        }
+
+        public void set()
+        {
+
+        }
+
+        public void addFields()
+        {
+            for (Field f: this.screen.fields)
             {
-                b.enabled = !currentTab.getRoot().name.equals(b.text);
-                b.update();
+                TankProperty p = f.getAnnotation(TankProperty.class);
+                if (p != null && p.category() == this.category && p.miscType() != TankProperty.MiscType.color)
+                {
+                    if (p.miscType() == TankProperty.MiscType.description)
+                    {
+                        TextBox t = (TextBox) screen.getUIElementForField(f, p, screen.tank);
+                        t.posX = this.screen.centerX;
+                        t.posY = this.screen.centerY + 270;
+                        t.enableCaps = true;
+                        t.allowSpaces = true;
+                        t.enableSpaces = true;
+                        t.enablePunctuation = true;
+                        t.maxChars = 100;
+                        t.sizeX *= 3;
+                        ((TabGeneral) this).description = t;
+                    }
+                    else if (!(p.miscType() == TankProperty.MiscType.music && Game.framework == Game.Framework.libgdx))
+                        this.uiElements.add(screen.getUIElementForField(f, p, screen.tank));
+                }
+            }
+        }
+
+        public void addSubMenu(Tab t)
+        {
+            this.subMenus.add(t);
+        }
+
+        public void sortUIElements()
+        {
+            int in = 0;
+            for (Tab t: this.subMenus)
+            {
+                this.uiElements.add(in, new Button(0, 0, 350, 40, t.name, () -> screen.setTab(t)));
+                in++;
             }
 
-            this.currentTab.update();
-
-            this.quit.update();
-            this.delete.update();
-            this.save.update();
-
-            if (Game.game.input.editorPause.isValid())
+            while (in % 4 != 0)
             {
-                Game.game.input.editorPause.invalidate();
-                this.quit.function.run();
+                this.uiElements.add(in, new EmptySpace());
+                in++;
             }
 
+            for (int i = 0; i < this.uiElements.size(); i++)
+            {
+                int page = i / (rows * 3);
+                int offset = 0;
+
+                if (page * rows * 3 + rows < this.uiElements.size())
+                    offset = -190;
+
+                if (page * rows * 3 + rows * 2 < this.uiElements.size())
+                    offset = -380;
+
+                double posY = Drawing.drawing.interfaceSizeY / 2 + yoffset + (i % rows) * 90;
+
+                if (i / rows % 3 == 0)
+                    this.uiElements.get(i).setPosition(Drawing.drawing.interfaceSizeX / 2 + offset, posY);
+                else if (i / rows % 3 == 1)
+                    this.uiElements.get(i).setPosition(Drawing.drawing.interfaceSizeX / 2 + offset + 380, posY);
+                else
+                    this.uiElements.get(i).setPosition(Drawing.drawing.interfaceSizeX / 2 + offset + 380 * 2, posY);
+            }
+
+            for (Tab t: this.subMenus)
+            {
+                t.sortUIElements();
+            }
+        }
+
+        public Tab getRoot()
+        {
+            if (this.parent == null)
+                return this;
+
+            return this.parent.getRoot();
+        }
+
+        public void updateUIElements()
+        {
+            for (int i = page * rows * 3; i < Math.min(page * rows * 3 + rows * 3, this.uiElements.size()); i++)
+            {
+                this.uiElements.get(i).update();
+            }
+        }
+
+        public void update()
+        {
+            this.updateUIElements();
+
+            if (parent != null)
+                back.update();
+
+            if (rows * 3 < uiElements.size())
+            {
+                previous.update();
+                next.update();
+            }
+        }
+
+        public void drawUIElements()
+        {
+            for (int i = Math.min(page * rows * 3 + rows * 3, this.uiElements.size()) - 1; i >= page * rows * 3; i--)
+                this.uiElements.get(i).draw();
+        }
+
+        public void draw()
+        {
+            this.drawUIElements();
+
+            previous.enabled = page > 0;
+            next.enabled = (uiElements.size() > (1 + page) * rows * 3);
+
+            if (parent != null)
+                back.draw();
+
+            if (rows * 3 < uiElements.size())
+            {
+                previous.draw();
+                next.draw();
+
+                if (Level.isDark())
+                    Drawing.drawing.setColor(255, 255, 255);
+                else
+                    Drawing.drawing.setColor(0, 0, 0);
+
+                Drawing.drawing.setInterfaceFontSize(this.screen.textSize);
+                Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + 200,
+                        "Page %d of %d", (page + 1), (uiElements.size() / (rows * 3) + Math.min(1, uiElements.size() % (rows * 3))));
+            }
         }
     }
 
@@ -1479,64 +1525,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         }
     }
 
-    @Override
-    public void draw()
-    {
-        Drawing.drawing.setLighting(Level.currentLightIntensity, Math.max(Level.currentLightIntensity * 0.75, Level.currentShadowIntensity));
-        this.drawDefaultBackground();
 
-        //Drawing.drawing.setColor(127, 178, 228, 64);
-        //Game.game.window.shapeRenderer.fillRect(0, 0, Game.game.window.absoluteWidth + 1, Game.game.window.absoluteHeight + 1);
-
-        if (Game.screen != this)
-            return;
-        else
-            this.setupLayoutParameters();
-
-        if (this.message != null)
-        {
-            this.dismissMessage.draw();
-
-            if (Level.isDark())
-                Drawing.drawing.setColor(255, 255, 255);
-            else
-                Drawing.drawing.setColor(0, 0, 0);
-
-            Drawing.drawing.setInterfaceFontSize(Drawing.drawing.textSize);
-            Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 60, this.message);
-        }
-        else
-        {
-            double extraHeight = ((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2;
-            double width = Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale;
-
-            Drawing.drawing.setColor(0, 0, 0, 127);
-            Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, -extraHeight / 2, width, extraHeight);
-            Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, 105, width, 210);
-
-            Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY + extraHeight / 2, width, extraHeight);
-            Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY - 60, width, 120);
-
-            Drawing.drawing.setInterfaceFontSize(this.titleSize);
-            Drawing.drawing.setColor(255, 255, 255);
-            Drawing.drawing.displayInterfaceText(this.centerX, 30, "Edit tank");
-
-            if (Level.isDark())
-                Drawing.drawing.setColor(255, 255, 255);
-            else
-                Drawing.drawing.setColor(0, 0, 0);
-            Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 200, this.currentTab.name);
-
-            for (Button b : this.topLevelButtons)
-                b.draw();
-
-            this.currentTab.draw();
-
-            this.quit.draw();
-            this.delete.draw();
-            this.save.draw();
-        }
-    }
 
     @Override
     public void onAttemptClose()

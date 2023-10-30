@@ -1,6 +1,24 @@
 Older Changelogs
 ---
 
+**Mod API v1.2.a**:
+- `LevelEditorSelector`: Customizable and modular editor properties
+- `ScreenLevelEditor.buttons`: Made adding buttons to the editor much simpler.
+- A variety of selectors already added in
+- Registered `ObstacleText`: ability to add text to level editor
+- Made some super smooth transitions
+- Extensions menu in options!
+- Minimap input screen is finally back
+  - default panning controls: u, h, j, and k
+
+- Many hotbar improvements:
+  - Shows individual item, mine, and shield cooldown
+- Mine collision! This means throwable mines, blowable mines, freezable mines, and more!
+- Implemented lava obstacle
+- Many, many bug fixes
+  
+<br>
+
 **Mod API v1.1.4**:
 - Revamped multiplayer crusades
 - Fixed multiplayer crusade bugs

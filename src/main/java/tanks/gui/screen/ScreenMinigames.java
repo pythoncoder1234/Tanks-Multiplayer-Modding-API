@@ -53,7 +53,7 @@ public class ScreenMinigames extends Screen
 				{
 					ScreenInterlevel.fromMinigames = true;
 					Game.currentGame = Game.registryMinigame.getEntry(name).getConstructor().newInstance();
-					Game.currentGame.start();
+                    Game.currentGame.startBase();
 				}
 				catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
 				{

@@ -85,8 +85,6 @@ public class ScreenDownloadLevel extends ScreenOnline implements ILevelPreviewSc
     @Override
     public void update()
     {
-        super.update();
-
         this.download.update();
 
         if (!this.downloaded)

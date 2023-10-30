@@ -3,6 +3,7 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
 import tanks.Player;
+import tanks.hotbar.ItemBar;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemEmpty;
@@ -88,6 +89,9 @@ public class EventSetItem extends PersonalEvent
 
             if (i.stackSize == 0)
                 i = new ItemEmpty();
+
+            if (Game.player.hotbar.itemBar == null)
+                Game.player.hotbar.itemBar = new ItemBar(Game.player);
 
             Game.player.hotbar.itemBar.slots[slot] = i;
         }

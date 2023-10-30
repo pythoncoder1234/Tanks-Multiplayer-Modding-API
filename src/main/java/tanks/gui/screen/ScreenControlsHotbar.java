@@ -17,8 +17,6 @@ public class ScreenControlsHotbar extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
         hotbarToggle.update();
         hotbar1.update();
         hotbar2.update();
@@ -28,6 +26,7 @@ public class ScreenControlsHotbar extends ScreenOptionsOverlay
         hotbarDeselect.update();
 
         ScreenOverlayControls.overlay.update();
+        super.update();
     }
 
     @Override

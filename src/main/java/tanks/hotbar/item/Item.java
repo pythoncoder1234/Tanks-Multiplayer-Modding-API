@@ -96,9 +96,7 @@ public abstract class Item extends GameObject
 		int l = 7;
 
 		for (int j = 0; j < 7; j++)
-		{
-			l += p[j].length();
-		}
+            l += p[j].length();
 
 		i.fromString(s.substring(l));
 		
@@ -217,8 +215,6 @@ public abstract class Item extends GameObject
 
 	public void updateCooldown(double reload)
 	{
-		Tank t = this.getUser();
-
 		this.cooldown = Math.max(0, this.cooldown - Panel.frameFrequency * reload);
 	}
 
@@ -228,5 +224,6 @@ public abstract class Item extends GameObject
 		i.unlimitedStack = this.unlimitedStack;
 		return i;
 	}
+
 	public abstract String getTypeName();
 }

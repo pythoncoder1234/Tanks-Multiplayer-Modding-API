@@ -6,7 +6,7 @@ import tanks.gui.Button;
 import tanks.gui.TextBox;
 import tanks.gui.screen.Screen;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"rawtypes"})
 public class OverlaySelectNumber extends ScreenLevelEditorOverlay
 {
     public TextBox textBox;
@@ -51,7 +51,8 @@ public class OverlaySelectNumber extends ScreenLevelEditorOverlay
         textBox.allowSpaces = false;
         textBox.allowDoubles = this.selector.allowDecimals;
         textBox.maxChars = 9;
-        textBox.minValue = 0;
+        textBox.minValue = selector.min;
+        textBox.maxValue = selector.max;
         textBox.checkMaxValue = true;
         textBox.checkMinValue = true;
     }
@@ -91,7 +92,7 @@ public class OverlaySelectNumber extends ScreenLevelEditorOverlay
 
     public void submit()
     {
-        if (textBox.inputText.length() == 0 || textBox.inputText.equals(textBox.previousInputText))
+        if (textBox.inputText.isEmpty() || textBox.inputText.equals(textBox.previousInputText))
         {
             textBox.inputText = textBox.previousInputText;
             return;

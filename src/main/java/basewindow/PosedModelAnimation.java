@@ -63,7 +63,7 @@ public class PosedModelAnimation implements IPosedModelFrame
         return this.bones.get(name);
     }
 
-    public void apply(PosedModel m, double time, double frac)
+    public void apply(basewindow.PosedModel m, double time, double frac)
     {
         if (this.looped)
             time %= this.duration;
@@ -88,14 +88,14 @@ public class PosedModelAnimation implements IPosedModelFrame
             this.animation = anim;
         }
 
-        public void apply(PosedModel m, double time, double frac)
+        public void apply(basewindow.PosedModel m, double time, double frac)
         {
-            PosedModel.PoseBone b = m.bonesByName.get(this.name);
+            basewindow.PosedModel.PoseBone b = m.bonesByName.get(this.name);
             this.applyRotation(b, time, frac);
             this.applyTranslation(b, time, frac);
         }
 
-        public void applyRotation(PosedModel.PoseBone b, double time, double frac)
+        public void applyRotation(basewindow.PosedModel.PoseBone b, double time, double frac)
         {
             if (this.rotationFrames.size() <= 0)
                 return;
@@ -118,7 +118,7 @@ public class PosedModelAnimation implements IPosedModelFrame
                 index++;
             }
 
-            AnimatedBoneRotationFrame next = this.rotationFrames.get(getIndex(lastIndex + 1, this.rotationFrames.size()));;
+            AnimatedBoneRotationFrame next = this.rotationFrames.get(getIndex(lastIndex + 1, this.rotationFrames.size()));
 
             if (next == last)
                 last.apply(b, frac);
@@ -143,7 +143,7 @@ public class PosedModelAnimation implements IPosedModelFrame
                 if (this.animation.cubic)
                 {
                     AnimatedBoneRotationFrame beforeLast = this.rotationFrames.get(getIndex(lastIndex - 1, this.rotationFrames.size()));
-                    AnimatedBoneRotationFrame afterNext = this.rotationFrames.get(getIndex(lastIndex + 2, this.rotationFrames.size()));;
+                    AnimatedBoneRotationFrame afterNext = this.rotationFrames.get(getIndex(lastIndex + 2, this.rotationFrames.size()));
 
                     beforeLast.applyCubic(b, frac2, frac, 0);
                     last.applyCubic(b, frac2, frac, 1);
@@ -158,7 +158,7 @@ public class PosedModelAnimation implements IPosedModelFrame
             }
         }
 
-        public void applyTranslation(PosedModel.PoseBone b, double time, double frac)
+        public void applyTranslation(basewindow.PosedModel.PoseBone b, double time, double frac)
         {
             if (this.translationFrames.size() <= 0)
                 return;
@@ -181,7 +181,7 @@ public class PosedModelAnimation implements IPosedModelFrame
                 index++;
             }
 
-            AnimatedBoneTranslationFrame next = this.translationFrames.get(getIndex(lastIndex + 1, this.translationFrames.size()));;
+            AnimatedBoneTranslationFrame next = this.translationFrames.get(getIndex(lastIndex + 1, this.translationFrames.size()));
 
             if (next == last)
                 last.apply(b, frac);
@@ -206,7 +206,7 @@ public class PosedModelAnimation implements IPosedModelFrame
                 if (this.animation.cubic)
                 {
                     AnimatedBoneTranslationFrame beforeLast = this.translationFrames.get(getIndex(lastIndex - 1, this.translationFrames.size()));
-                    AnimatedBoneTranslationFrame afterNext = this.translationFrames.get(getIndex(lastIndex + 2, this.translationFrames.size()));;
+                    AnimatedBoneTranslationFrame afterNext = this.translationFrames.get(getIndex(lastIndex + 2, this.translationFrames.size()));
 
                     beforeLast.applyCubic(b, frac2, frac, 0);
                     last.applyCubic(b, frac2, frac, 1);
@@ -244,9 +244,9 @@ public class PosedModelAnimation implements IPosedModelFrame
                 this.time = time;
             }
 
-            public abstract void apply(PosedModel.PoseBone b, double frac);
+            public abstract void apply(basewindow.PosedModel.PoseBone b, double frac);
 
-            public void applyCubic(PosedModel.PoseBone b, double frac, double frac2, int index)
+            public void applyCubic(basewindow.PosedModel.PoseBone b, double frac, double frac2, int index)
             {
                 if (index == 0)
                     this.apply(b, (-0.5 * Math.pow(frac, 3) + Math.pow(frac, 2) - 0.5 * frac) * frac2);
@@ -274,7 +274,7 @@ public class PosedModelAnimation implements IPosedModelFrame
             }
 
             @Override
-            public void apply(PosedModel.PoseBone b, double frac)
+            public void apply(basewindow.PosedModel.PoseBone b, double frac)
             {
                 b.yaw += this.yaw * frac;
                 b.pitch += this.pitch * frac;

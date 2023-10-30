@@ -5,10 +5,10 @@ import com.codedisaster.steamworks.SteamNetworking;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
-import tanks.network.event.EventSendClientDetails;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 import tanks.network.Client;
+import tanks.network.event.EventSendClientDetails;
 
 import java.util.UUID;
 
@@ -16,27 +16,15 @@ public class ScreenJoinParty extends Screen
 {
 	public Thread clientThread;
 
-	public ScreenJoinParty()
-	{
-		this.music = "menu_2.ogg";
-		this.musicID = "menu";
-
-		ip.allowDots = true;
-		ip.maxChars = 100;
-		ip.allowColons = true;
-		ip.lowerCase = true;
-	}
-	
 	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", new Runnable()
 	{
-		@SuppressWarnings("deprecation")
 		@Override
-		public void run() 
+		public void run()
 		{
 			try
 			{
 				if (clientThread != null && clientThread.isAlive())
-					clientThread.stop();
+                    clientThread.interrupt();
 			}
 			catch (Exception ignored) {}
 
@@ -44,14 +32,10 @@ public class ScreenJoinParty extends Screen
 		}
 	}
 	);
-
-	Button steam = new Button(this.centerX, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "Join Steam friends", () -> Game.screen = new ScreenJoinSteamFriends((ScreenJoinParty) Game.screen)
-	);
-	
-	Button join = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Join", new Runnable()
+    Button join = new Button(this.centerX, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "Join", new Runnable()
 	{
 		@Override
-		public void run() 
+        public void run()
 		{
 			Game.lastOfflineScreen = Game.screen;
 
@@ -162,7 +146,7 @@ public class ScreenJoinParty extends Screen
 						port = Integer.parseInt(ip.inputText.substring(colon + 1));
 					}
 
-					if (ip.inputText.equals(""))
+                    if (ip.inputText.isEmpty())
 						Client.connect("localhost", Game.port, false, connectionID);
 					else
 						Client.connect(ipaddress, port, false, connectionID);
@@ -185,12 +169,48 @@ public class ScreenJoinParty extends Screen
 					}
 				}
 			});
-			
+
 			clientThread.setDaemon(true);
-			clientThread.start();		
+            clientThread.start();
 		}
 	}
 	);
+
+	Button steam = new Button(this.centerX, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "Join Steam friends", () -> Game.screen = new ScreenJoinSteamFriends((ScreenJoinParty) Game.screen)
+	);
+
+	public ScreenJoinParty()
+	{
+		this.music = "menu_2.ogg";
+		this.musicID = "menu";
+
+		ip.allowDots = true;
+		ip.maxChars = 100;
+		ip.allowColons = true;
+		ip.lowerCase = true;
+
+        vanillaMode.setText("Vanilla mode: ", Game.vanillaMode ? ScreenOptions.onText : ScreenOptions.offText);
+	}    Button vanillaMode = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.vanillaMode = !Game.vanillaMode;
+            vanillaMode.setText("Vanilla mode: ", Game.vanillaMode ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+	@Override
+	public void update()
+	{
+		ip.update();
+		join.update();
+        vanillaMode.update();
+		back.update();
+
+		if (Game.steamNetworkHandler.initialized)
+			steam.update();
+	}
 	
 	TextBox ip = new TextBox(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth * 16 / 7, this.objHeight, "Party IP Address", new Runnable()
 	{
@@ -204,22 +224,12 @@ public class ScreenJoinParty extends Screen
 			, Game.lastParty, "You can find this on the---party host's screen");
 	
 	@Override
-	public void update() 
-	{
-		ip.update();
-		join.update();
-		back.update();
-
-		if (Game.steamNetworkHandler.initialized)
-			steam.update();
-	}
-
-	@Override
 	public void draw()
 	{
 		this.drawDefaultBackground();
 		join.draw();
 		ip.draw();
+        vanillaMode.draw();
 		back.draw();
 
 		if (Game.steamNetworkHandler.initialized)
@@ -229,4 +239,6 @@ public class ScreenJoinParty extends Screen
 		Drawing.drawing.setInterfaceFontSize(this.titleSize);
 		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 3.5, "Join a party");
 	}
+
+
 }

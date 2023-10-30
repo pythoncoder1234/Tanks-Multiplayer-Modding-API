@@ -19,8 +19,7 @@ public class ScreenControlsGame extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        super.update();
-
+        
         pause.update();
         play.update();
         chat.update();
@@ -28,6 +27,7 @@ public class ScreenControlsGame extends ScreenOptionsOverlay
         fullscreen.update();
 
         ScreenOverlayControls.overlay.update();
+        super.update();
     }
 
     @Override

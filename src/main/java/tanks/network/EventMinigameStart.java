@@ -43,7 +43,7 @@ public class EventMinigameStart extends PersonalEvent
             }
 
             Game.currentGame = cls.getConstructor().newInstance();
-            Game.currentGame.start();
+            Game.currentGame.startBase();
             Game.currentGame.remote = true;
         }
         catch (Exception e)

@@ -1,9 +1,11 @@
 package tanks.obstacle;
 
+import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
+import tanks.tank.TankAIControlled;
 
 public class ObstacleWater extends ObstacleLiquid
 {
@@ -19,7 +21,7 @@ public class ObstacleWater extends ObstacleLiquid
         this.checkForObjects = true;
 
         this.isSurfaceTile = false;
-        this.batchDraw = false;
+        this.batchDraw = true;
 
         if (Game.enable3d)
             this.drawLevel = 6;
@@ -39,7 +41,7 @@ public class ObstacleWater extends ObstacleLiquid
             this.colorB = 255;
         }
 
-        this.colorA = 175;
+        this.colorA = 125;
 
         for (int i = 0; i < default_max_height; i++)
         {
@@ -164,9 +166,15 @@ public class ObstacleWater extends ObstacleLiquid
     }
 
     @Override
-    public void drawTile(double r, double g, double b, double d, double extra)
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         Drawing.drawing.setColor(r, g, b);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, -Game.tile_size * this.stackHeight + d, Game.tile_size, Game.tile_size, -extra);
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -Game.tile_size * this.stackHeight + d, Game.tile_size, Game.tile_size, -extra);
+    }
+
+    @Override
+    public int unfavorability(TankAIControlled t)
+    {
+        return 5;
     }
 }

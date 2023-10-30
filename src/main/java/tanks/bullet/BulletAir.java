@@ -66,9 +66,9 @@ public class BulletAir extends Bullet
         double mul = 10.0;
 
         if (o instanceof Bullet)
-            mul = 400 / Math.pow(((Bullet) o).size, 2);
+            mul = 400 / Math.pow(o.size, 2);
         else if (o instanceof Tank)
-            mul *= Game.tile_size * Game.tile_size / Math.pow(((Tank) o).size, 2);
+            mul *= Game.tile_size * Game.tile_size / Math.pow(o.size, 2);
 
         double f = Math.pow(this.frameDamageMultipler, 2);
         double x = this.vX * f * mul / (size * size);
@@ -77,8 +77,8 @@ public class BulletAir extends Bullet
         o.vX += x;
         o.vY += y;
 
-        if (o instanceof TankPlayerRemote)
-            Game.eventsOut.add(new EventTankControllerAddVelocity((Tank) o, x, y));
+        if (o instanceof TankPlayerRemote && Tank.shouldUpdate)
+            Game.eventsOut.add(new EventTankControllerAddVelocity((Tank) o, x, y, false));
     }
 
     public void collidedWithTank(Tank t)

@@ -3,6 +3,7 @@ package tanks.minigames;
 import basewindow.InputCodes;
 import tanks.*;
 import tanks.bullet.Bullet;
+import tanks.eventlistener.EventListener;
 import tanks.gui.screen.IDarkScreen;
 import tanks.gui.screen.ScreenArcadeBonuses;
 import tanks.gui.screen.ScreenGame;
@@ -17,6 +18,7 @@ import tanks.translation.Translation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class Arcade extends Minigame
@@ -81,8 +83,6 @@ public class Arcade extends Minigame
 
     public void start()
     {
-        super.start();
-
         ModAPI.loadLevel("{28,18,235,207,166,20,20,20,0,100,50|" +
                 "10-13-normal-2.5,11-13-normal-2.0,12-13-normal-2.5,15-4-normal-2.5,16-4-normal-2.0,17-4-normal-2.5,4-5-hard-2.5,4-6-hard-2.0,4-7-hard-2.5,4-8-hard-2.0,4-9-hard-2.5,4-10-hard-2.0,7-13-hard-2.0,8-13-hard-2.5,9-4-hard-2.5,9-13-hard-2.0,10-4-hard-2.0,11-4-hard-2.5,12-4-hard-2.0,13-4-hard-2.5,13-13-hard-2.0,14-4-hard-2.0,14-13-hard-2.5,15-13-hard-2.0,16-13-hard-2.5,17-13-hard-2.0,18-4-hard-2.0,18-13-hard-2.5,19-4-hard-2.5,20-4-hard-2.0,23-7-hard-2.0,23-8-hard-2.5,23-9-hard-2.0,23-10-hard-2.5,5...7-10-hole,7-11...12-hole,20-5...7-hole,21...22-7-hole" +
                 "|10-10-player-0,12-10-player-0,14-10-player-0,16-10-player-0,18-10-player-0,17-7-player-2,15-7-player-2,13-7-player-2,11-7-player-2,9-7-player-2}");
@@ -91,12 +91,14 @@ public class Arcade extends Minigame
             timer = 0;
 
         for (Movable m : Game.movables)
-            m.team.friendlyFire = false;
+            if (m.team != null)
+                m.team.friendlyFire = false;
 
         new MusicState("arcade/battle_intro.ogg", "battle.ogg", false).applyMusic();
         ItemBar.setEnabled(true);
 
-        Game.eventListeners.add(new EventListener.BulletListener(this::onBulletFire));
+        if (!ScreenPartyLobby.isClient)
+            EventListener.addBulletListener(this::onBulletFire);
 
         if (Game.deterministicMode)
             this.random = new Random(0);
@@ -137,22 +139,17 @@ public class Arcade extends Minigame
         }
     }
 
-    @Override
-    public void onLevelEnd(boolean levelWon)
+    public void onBulletFire(List<INetworkEvent> list)
     {
+        for (INetworkEvent e : list)
+        {
+            Bullet b = Bullet.idMap.get(((EventShootBullet) e).id);
+            if (b == null)
+                return;
 
-    }
-
-    public boolean onBulletFire(INetworkEvent e)
-    {
-        Bullet b = Bullet.idMap.get(((EventShootBullet) e).id);
-        if (b == null)
-            return false;
-
-        if (b.tank instanceof TankPlayer || b.tank instanceof TankPlayerRemote)
-            bulletsFired++;
-
-        return true;
+            if (b.tank instanceof TankPlayer || b.tank instanceof TankPlayerRemote)
+                bulletsFired++;
+        }
     }
 
     @Override
@@ -346,7 +343,7 @@ public class Arcade extends Minigame
 
             }
 
-            if (this.spawnedTanks.size() <= (Math.min(this.chain, max_power * 6) / 2) + 3 && alivePlayers.size() > 0 && timer > 0)
+            if (this.spawnedTanks.size() <= (Math.min(this.chain, max_power * 6) / 2) + 3 && !alivePlayers.isEmpty() && timer > 0)
             {
                 int count = (int) ((this.random.nextDouble() * 2 + 2));
                 for (int i = 0; i < count; i++)
@@ -362,7 +359,7 @@ public class Arcade extends Minigame
                 }
             }
 
-            if (alivePlayers.size() == 0 && Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing)
+            if (alivePlayers.isEmpty() && Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing)
             {
                 Game.eventsOut.add(new EventClearMovables());
 
@@ -444,7 +441,7 @@ public class Arcade extends Minigame
         playerDeathTimes.remove(p);
 
         int r;
-        if (level.availablePlayerSpawns.size() > 0)
+        if (!level.availablePlayerSpawns.isEmpty())
             r = level.availablePlayerSpawns.remove((int) (Level.random.nextDouble() * level.availablePlayerSpawns.size()));
         else
             r = (int) (level.playerSpawnsX.size() * Level.random.nextDouble());
