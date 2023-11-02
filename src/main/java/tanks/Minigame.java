@@ -77,7 +77,9 @@ public abstract class Minigame
     }
 
     public void startBase()
-    {
+    {;
+        Game.eventListeners.clear();
+        Game.eventListenerSet.clear();
         ModAPI.fixedMenus.clear();
         ScreenInterlevel.fromMinigames = true;
 

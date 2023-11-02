@@ -1,14 +1,15 @@
 package tanks;
 
-import basewindow.*;
-import tanks.rendering.TerrainRenderer;
-import tanks.rendering.TrackRenderer;
-import tanks.network.event.EventPlaySound;
+import basewindow.IBatchRenderableObject;
+import basewindow.IModel;
+import basewindow.Model;
+import basewindow.ModelPart;
 import tanks.gui.Button;
 import tanks.gui.Joystick;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.ScreenOptionsOverlay;
 import tanks.network.event.EventPlaySound;
+import tanks.rendering.TerrainRenderer;
+import tanks.rendering.TrackRenderer;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.translation.Translation;
@@ -1174,7 +1175,7 @@ public class Drawing
 				+ Drawing.drawing.interfaceSizeX - Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale;
 
 		if (x + sizeX + xPadding * 2 - 14 > endX)
-            x -= x + sizeX + xPadding * 2 - 14 - endX;
+            x -= sizeX + xPadding * 2 - 14;
 
         if (y + sizeY + yPadding * 2 * text.length > Drawing.drawing.interfaceSizeY)
             y -= y + sizeY + yPadding * 2 * text.length - Drawing.drawing.interfaceSizeY;

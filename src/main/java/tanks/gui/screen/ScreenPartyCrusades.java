@@ -15,6 +15,7 @@ public class ScreenPartyCrusades extends ScreenCrusades
     @Override
     public void update()
     {
+        super.update();
     }
 
     @Override

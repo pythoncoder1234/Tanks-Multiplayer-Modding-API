@@ -13,9 +13,7 @@ import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemEmpty;
 import tanks.minigames.Arcade;
 import tanks.network.ServerHandler;
-import tanks.network.event.EventSetHotbar;
-import tanks.network.event.EventSetItem;
-import tanks.network.event.EventSetItemBarSlot;
+import tanks.network.event.*;
 
 public class ItemBar
 {
@@ -220,6 +218,12 @@ public class ItemBar
 		checkKey(Game.game.input.hotbar4, 3);
 		checkKey(Game.game.input.hotbar5, 4);
 
+		if (!Game.vanillaMode && Game.game.input.hotbarDrop.isValid() && Game.game.window.shift)
+		{
+			Game.game.input.hotbarDrop.invalidate();
+			dropItem(this.selected);
+		}
+
 		if (Game.autocannon)
 		{
 			for (int i = 0; i < this.slots.length; i++)
@@ -285,12 +289,13 @@ public class ItemBar
 
 	public void checkKey(InputBindingGroup input, int index)
 	{
-		if (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).paused)
-			return;
-
 		if (input.isValid())
 		{
-			this.setItem(index);
+			if (!Game.game.window.shift || Game.vanillaMode)
+				this.setItem(index);
+			else
+				this.swapItem(index);
+
 			input.invalidate();
 		}
 	}
@@ -312,6 +317,38 @@ public class ItemBar
 		if (ScreenPartyLobby.isClient)
 			Game.eventsOut.add(new EventSetItemBarSlot(this.selected));
 	}
+
+	public void swapItem(int index)
+	{
+		if (this.selected < 0)
+			 return;
+
+		Item i = this.slots[this.selected];
+		this.slots[this.selected] = this.slots[index];
+		this.slots[index] = i;
+
+		if (ScreenPartyLobby.isClient)
+			Game.eventsOut.add(new EventSwapItemBarSlot(index));
+	}
+
+	public void dropItem(int index)
+	{
+		if (index < 0 || this.slots[index] instanceof ItemEmpty)
+			return;
+
+        if (!ScreenPartyLobby.isClient)
+        {
+			ItemDrop id = new ItemDrop(this.player.tank.posX, this.player.tank.posY, this.slots[index]);
+			id.cooldown = 200;
+			Game.movables.add(id);
+
+			Game.eventsOut.add(new EventItemDrop(id));
+        }
+        else
+            Game.eventsOut.add(new EventDropItem(index));
+
+		this.slots[index] = new ItemEmpty();
+    }
 
 	public void draw()
 	{

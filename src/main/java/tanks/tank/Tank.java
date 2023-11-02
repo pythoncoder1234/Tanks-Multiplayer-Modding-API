@@ -194,6 +194,7 @@ public abstract class Tank extends Movable implements ISolidObject
 	@TankProperty(category = appearanceEmblem, id = "emblem_b", name = "Blue", miscType = TankProperty.MiscType.color)
 	public double emblemB;
 
+	public double emblemAngle = 0;
 	public double orientation = 0;
 
 	public double hitboxSize = 0.95;
@@ -513,6 +514,8 @@ public abstract class Tank extends Movable implements ISolidObject
         {
             if (this.resistFreeze)
                 this.attributeImmunities.addAll(Arrays.asList("ice_slip", "ice_accel", "ice_max_speed", "freeze"));
+
+			this.emblemAngle = this.angle;
         }
 
         this.age += Panel.frameFrequency;
@@ -908,10 +911,12 @@ public abstract class Tank extends Movable implements ISolidObject
 			}
 			else
 			{
+				double a = age > 0 ? this.angle + this.emblemAngle : 0;
+
 				if (Game.enable3d)
-                    drawing.drawImage(this.angle, this.emblem, this.posX, this.posY, this.posZ + 0.82 * s, s * sizeMod, s * sizeMod);
+                    drawing.drawImage(a, this.emblem, this.posX, this.posY, this.posZ + 0.81 * s, s * sizeMod, s * sizeMod);
 				else
-					drawing.drawImage(this.angle, this.emblem, this.posX, this.posY, s * sizeMod, s * sizeMod);
+					drawing.drawImage(a, this.emblem, this.posX, this.posY, s * sizeMod, s * sizeMod);
 			}
 		}
 

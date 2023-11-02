@@ -73,9 +73,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 	public SymmetryType symmetryType = SymmetryType.none;
 
-	;
-	EditorButton flipHoriz = new EditorButton(buttons.topRight, "flip_horizontal.png", 50, 50, () -> clipboard.flipHorizontal(),
-			() -> false, () -> pasteMode, "Flip horizontal (%s)", Game.game.input.editorFlipHoriz);
 	public double symmetryX1;
 	public double symmetryY1;
 	public double symmetryX2;
@@ -218,9 +215,12 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		pasteMode = true;
 	}, () -> pasteMode, "Paste (%s)", Game.game.input.editorPaste
 	);
+
+	EditorButton flipHoriz = new EditorButton(buttons.topRight, "flip_horizontal.png", 50, 50, () -> clipboard.flipHorizontal(),
+			() -> false, () -> pasteMode, "Flip horizontal (%s)", Game.game.input.editorFlipHoriz);
 	EditorButton flipVert = new EditorButton(buttons.topRight, "flip_vertical.png", 50, 50, () -> clipboard.flipVertical(),
 			() -> false, () -> pasteMode, "Flip vertical (%s)", Game.game.input.editorFlipVert);
-	EditorButton rotate = new EditorButton(buttons.topRight, "rotate_clockwise.png", 50, 50, () -> clipboard.rotate(),
+	EditorButton rotate = new EditorButton(buttons.topRight, "rotate_obstacle.png", 50, 50, () -> clipboard.rotate(),
 			() -> false, () -> pasteMode, "Rotate clockwise (%s)", Game.game.input.editorRotateClockwise);
 
 	@Override

@@ -56,6 +56,8 @@ public class ScreenCrusadeAddLevel extends ScreenPlaySavedLevels
     @Override
     public void update()
     {
+        super.update();
+
         if (Game.game.input.editorPause.isValid())
         {
             quit.function.run();

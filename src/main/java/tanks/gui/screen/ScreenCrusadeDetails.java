@@ -130,14 +130,17 @@ public class ScreenCrusadeDetails extends Screen
         {
             if (!c.started)
             {
-                begin.posY -= this.objYSpace;
                 if (!ScreenPartyHost.isServer)
+                {
                     begin.posY -= this.objYSpace;
 
-                edit.posY -= this.objYSpace;
-                delete.posY -= this.objYSpace;
-                back.posY -= this.objYSpace;
-                back2.posY -= this.objYSpace;
+                    edit.posY -= this.objYSpace;
+                    delete.posY -= this.objYSpace;
+                    back.posY -= this.objYSpace;
+
+                    back2.posY -= this.objYSpace;
+                    begin.posY -= this.objYSpace;
+                }
             }
             else
                 sizeY += 2;
@@ -160,7 +163,7 @@ public class ScreenCrusadeDetails extends Screen
 
             this.textOffset -= addY / 3;
 
-            if (!crusade.internal)
+            if (!crusade.internal && !ScreenPartyHost.isServer)
                 begin.posY += addY;
 
             resume.posY += addY;

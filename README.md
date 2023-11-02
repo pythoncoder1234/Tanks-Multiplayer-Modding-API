@@ -22,28 +22,15 @@ To create a custom game or level, the source code is needed.
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21242&authkey=!AMjRy_a-R7zaYtQ).
+You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21243&authkey=!AHq2AV2qVnt0b_g).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
 New Features:
 ---
 
-- Implemented new renderer
-- A bit of multiplayer testing
-- "Import from crusade" button in level options
-  - And also un-import button
-- You can edit a crusade without resetting its progress now
-- Crusade descriptions
-- Press shift in editor and drag to pan, or scroll to zoom
-- Flip and rotate buttons in editor
-- "Sync levels" and "Sync item" buttons in crusade editor
-- Option to overwrite item and tank templates on save
-- Tanks that can lay mines now shoot their own mines
-- Custom tank compression
-- Fixed conveyor belts
-- Press shift + your copy keybind while in level options to copy the level's level string
-- Fixed event listeners
-- Scoreboards use event listeners now
+- Hotbar swap item and drop item
+- Added images for horizontal flip and vertical flip
+- Bug fixes
 
 [Older Changelogs](changelog.md)

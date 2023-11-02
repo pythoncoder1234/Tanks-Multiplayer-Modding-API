@@ -16,6 +16,8 @@ public class ItemDrop extends Movable
     public static ArrayList<Integer> freeIDs = new ArrayList<>();
     public static HashMap<Integer, ItemDrop> idMap = new HashMap<>();
 
+    public double cooldown = 0;
+
     public Item item;
     public double height;
     public double size = Game.tile_size * 1.5;
@@ -139,14 +141,14 @@ public class ItemDrop extends Movable
     {
         if (this.destroy)
         {
-            if (this.destroyTime <= 0 && this.pickup == null)
+            if (this.destroyTime <= 0 && this.pickup == null && !ScreenPartyLobby.isClient)
                 Game.eventsOut.add(new EventItemDropDestroy(this));
 
             this.destroyTime += Panel.frameFrequency;
             if (this.destroyTime > this.maxDestroyTime)
                 Game.removeMovables.add(this);
         }
-        else
+        else if (cooldown <= 0 && !ScreenPartyLobby.isClient)
         {
             for (Movable m: Game.movables)
             {
@@ -161,9 +163,12 @@ public class ItemDrop extends Movable
                         Game.eventsOut.add(new EventItemPickup(this, this.pickup));
                         this.unregisterNetworkID();
                         Drawing.drawing.playSound("bullet_explode.ogg", 1.6f);
+                        break;
                     }
                 }
             }
         }
+        else
+            cooldown -= Panel.frameFrequency;
     }
 }

@@ -96,6 +96,7 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
                 controlPlayer = true;
 
                 Game.currentGame = new ScreenTitleMinigame((ScreenTitle) Game.screen);
+				Game.currentGame.startBase();
                 Game.currentLevel = new Level("{28,18||2-8-player}");
                 Game.currentSizeX = 28;
                 Game.currentSizeY = 18;

@@ -107,7 +107,7 @@ public class Game
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
     public static final String version = "Tanks v1.5.1";
-    public static final String ModAPIVersion = "Mod API v1.2.b";
+    public static final String ModAPIVersion = "Mod API v1.2.c";
     public static final int network_protocol = 50;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;
@@ -1311,7 +1311,8 @@ public class Game
         TankNPC.focusedNPC = null;
         resetNetworkIDs();
 
-		Game.player.hotbar = new Hotbar();
+		if (Game.player.hotbar == null)
+			Game.player.hotbar = new Hotbar();
 
 		if (!Crusade.crusadeMode || Game.player.hotbar.itemBar == null)
 		{

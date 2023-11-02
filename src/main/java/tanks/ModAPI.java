@@ -74,6 +74,8 @@ public class ModAPI
         NetworkEventMap.register(EventSortNPCShopButtons.class);
         NetworkEventMap.register(EventSkipCountdown.class);
         NetworkEventMap.register(EventUpdateLevelTime.class);
+        NetworkEventMap.register(EventSwapItemBarSlot.class);
+        NetworkEventMap.register(EventDropItem.class);
 
         fixedShapes = Game.game.window.shapeRenderer;
         fixedText = Game.game.window.fontRenderer;

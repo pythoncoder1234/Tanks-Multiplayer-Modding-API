@@ -1,6 +1,24 @@
 Older Changelogs
 ---
 
+**Mod API v1.2.b**:
+- Implemented new renderer
+- A bit of multiplayer testing
+- "Import from crusade" button in level options
+  - And also un-import button
+- You can edit a crusade without resetting its progress now
+- Crusade descriptions
+- Press shift in editor and drag to pan, or scroll to zoom
+- Flip and rotate buttons in editor
+- "Sync levels" and "Sync item" buttons in crusade editor
+- Option to overwrite item and tank templates on save
+- Tanks that can lay mines now shoot their own mines
+- Custom tank compression
+- Fixed conveyor belts
+- Press shift + your copy keybind while in level options to copy the level's level string
+- Fixed event listeners
+- Scoreboards use event listeners now
+- 
 **Mod API v1.2.a**:
 - `LevelEditorSelector`: Customizable and modular editor properties
 - `ScreenLevelEditor.buttons`: Made adding buttons to the editor much simpler.

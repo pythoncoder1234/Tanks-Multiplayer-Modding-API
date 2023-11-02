@@ -74,7 +74,6 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		this.secondaryColorB = Game.player.turretColorB;
 
 //		this.baseModel = TankModels.arrow.base;
-//		this.colorModel = TankModels.arrow.color;
 
 		if (enableDestroyCheat)
 		{

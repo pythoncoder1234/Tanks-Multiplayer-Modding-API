@@ -12,6 +12,7 @@ public class EventItemDrop extends PersonalEvent
     public String item;
     public double posX;
     public double posY;
+    public double cooldown;
 
     public EventItemDrop()
     {
@@ -24,6 +25,7 @@ public class EventItemDrop extends PersonalEvent
         this.id = id.networkID;
         this.posX = id.posX;
         this.posY = id.posY;
+        this.cooldown = id.cooldown;
     }
 
 
@@ -34,6 +36,7 @@ public class EventItemDrop extends PersonalEvent
         NetworkUtils.writeString(b, item);
         b.writeDouble(this.posX);
         b.writeDouble(this.posY);
+        b.writeDouble(this.cooldown);
     }
 
     @Override
@@ -43,6 +46,7 @@ public class EventItemDrop extends PersonalEvent
         this.item = NetworkUtils.readString(b);
         this.posX = b.readDouble();
         this.posY = b.readDouble();
+        this.cooldown = b.readDouble();
     }
 
     @Override
@@ -51,6 +55,7 @@ public class EventItemDrop extends PersonalEvent
         if (this.clientID == null)
         {
             ItemDrop id = new ItemDrop(this.posX, this.posY, Item.parseItem(null, this.item));
+            id.cooldown = cooldown;
             id.setNetworkID(this.id);
             Game.movables.add(id);
         }
