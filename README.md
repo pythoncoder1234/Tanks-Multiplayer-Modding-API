@@ -29,8 +29,9 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-- Hotbar swap item and drop item
-- Added images for horizontal flip and vertical flip
-- Bug fixes
+- New Tank AI (black tanks are really op now)
+- Smartness parameter in custom tanks
+- Stole the respawn player function from arcade mode
+- Bug fixes and other minor improvements
 
 [Older Changelogs](changelog.md)

@@ -125,7 +125,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
             this.maxAge = Math.random() * 100 + 50;
         else if (type == EffectType.obstaclePiece3d)
         {
-            this.size = Math.random() * 10;
+            this.size = Math.random() * 20;
             this.maxAge = Math.random() * 150 + 75;
             this.force = true;
         }

@@ -3,6 +3,7 @@ package tanks.tank;
 import basewindow.IModel;
 import tanks.*;
 import tanks.bullet.*;
+import tanks.bullet.BulletAir;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
@@ -13,8 +14,6 @@ import tanks.registry.RegistryTank;
 import java.lang.reflect.Field;
 import java.util.*;
 
-import static tanks.Game.dirX;
-import static tanks.Game.dirY;
 import static tanks.tank.TankProperty.Category.*;
 
 /** This class is the 'skeleton' tank class.
@@ -22,6 +21,8 @@ import static tanks.tank.TankProperty.Category.*;
  *  Also, the behavior is split into many methods which are intended to be overridden easily.*/
 public class TankAIControlled extends Tank
 {
+	public static int[] dirX = {1, -1, 0, 0, 1, -1, 1, -1};
+	public static int[] dirY = {0, 0, 1, -1, -1, 1, 1, -1};
 	protected static TankAIControlled compare;
 
 	/** The type which shows what direction the tank is moving. Clockwise and Counterclockwise are for idle, while Aiming is for when the tank aims.*/
@@ -211,6 +212,10 @@ public class TankAIControlled extends Tank
 	/** Spread of a round*/
 	@TankProperty(category = firingPattern, id = "shot_round_spread", name = "Round spread", desc = "Total angle of spread of a round")
 	public double shotRoundSpread = 36;
+
+	/** 0 is old tank AI, 1 is new tank AI */
+	@TankProperty(category = movementIdle, id = "aggressiveness", name = "Aggressiveness", desc = "How big brain your tank is. 0 is old tank AI, 1 is new tank AI")
+	public double smartness = 0;
 
 	public static class SpawnedTankEntry
 	{
@@ -451,6 +456,9 @@ public class TankAIControlled extends Tank
 	protected double baseColorG;
 	protected double baseColorB;
 	protected double baseMaxSpeed;
+
+	protected double spaceFrac = 0;
+	protected boolean[][] visited = new boolean[10][10];
 
 	/** Set if tank transformed in the last frame */
 	public boolean justTransformed = false;
@@ -1058,6 +1066,8 @@ public class TankAIControlled extends Tank
 		}
 		else
 		{
+			setIQ();
+
 			fleeDirection = -fleeDirection;
 
 			if (this.targetEnemy != null && this.seesTargetEnemy && this.enableTargetEnemyReaction && this.enableLookingAtTargetEnemy)
@@ -1080,6 +1090,28 @@ public class TankAIControlled extends Tank
 		}
 	}
 
+	public void setIQ()
+	{
+		if (Game.grandpaMode)
+		{
+			smartness = 1;
+			return;
+		}
+
+		double sm = Math.min(this.maxSpeed, 2) / 6;
+
+		if (this.enablePathfinding)
+			sm += 0.3;
+
+		if (this.enablePredictiveFiring)
+			sm += 0.1;
+
+		if (this.targetEnemySightBehavior == TargetEnemySightBehavior.strafe)
+			sm += 0.1;
+
+		this.smartness = Math.max(this.smartness, sm);
+	}
+
 	public void reactToTargetEnemySight()
 	{
 		if (this.targetEnemy == null)
@@ -1097,7 +1129,10 @@ public class TankAIControlled extends Tank
 		else if (this.targetEnemySightBehavior == TargetEnemySightBehavior.strafe)
 		{
 			if (this.random.nextDouble() < this.strafeDirectionChangeChance * Panel.frameFrequency)
+			{
 				strafeDirection = -strafeDirection;
+				strafeDirection = (smartness >= 0.5 ? 0.5 : 0.45) * Math.signum(strafeDirection);
+			}
 
 			this.setAccelerationInDirectionWithOffset(this.targetEnemy.posX, this.targetEnemy.posY, this.acceleration * 2, strafeDirection);
 		}
@@ -1235,8 +1270,12 @@ public class TankAIControlled extends Tank
 
         if (turn || space <= 50)
         {
-            this.overrideDirection = false;
-            this.idleSpeed = this.random.nextDouble() / 2;
+			if (this.targetEnemy == null || Movable.distanceBetween(this.targetEnemy, this) > Game.tile_size * 5)
+            	this.idleSpeed = this.random.nextDouble() / 2;
+			else
+				this.idleSpeed = 1;
+
+			this.overrideDirection = false;
 
             double prevDirection = this.direction;
 
@@ -1360,13 +1399,17 @@ public class TankAIControlled extends Tank
 				break;
 			}
 
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < 8; i++)
 			{
 				int x = t.tileX + dirX[i];
 				int y = t.tileY + dirY[i];
 
 				if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
                     continue;
+
+				// corner check
+				if (i >= 4 && (Game.obstacleGrid[x][t.tileY] != null && Game.obstacleGrid[t.tileX][y] != null))
+					continue;
 
                 if (visited[x][y] || t.type == Tile.Type.solid || t.unfavorability >= 75 || (t.type == Tile.Type.destructible && !this.enableMineLaying))
 					continue;
@@ -1392,14 +1435,80 @@ public class TankAIControlled extends Tank
 		}
 	}
 
+	@Override
+	public void checkObstacleCollision()
+	{
+		int x = (int) (this.posX / Game.tile_size);
+		int y = (int) (this.posY / Game.tile_size);
+
+		int s = (int) Math.max(5, size / Game.tile_size + 10);
+		if (visited.length == s)
+		{
+			for (int i = 0; i < s; i++)
+				Arrays.fill(visited[i], false);
+		}
+		else
+			visited = new boolean[s][s];
+
+		spaceFrac = getSpace(x, y, x, y, 0) / ((double) s*(s-1)/2);
+	}
+
+	public int getSpace(int x, int y, int cx, int cy, int steps)
+	{
+		int space = 0;
+
+		for (int i = 0; i < 4; i++)
+		{
+			int d = visited.length;
+
+			int newX = x + dirX[i];
+			int newY = y + dirY[i];
+			int rx = newX - cx + d/2;
+			int ry = newY - cy + d/2;
+
+			if (newX < 0 || newX >= Game.currentSizeX || newY < 0 || newY >= Game.currentSizeY) continue;
+
+			Obstacle o = Game.obstacleGrid[newX][newY];
+			if (o != null)
+			{
+				checkCollisionWith(o);
+				continue;
+			}
+
+			if (rx < 0 || rx >= d || ry < 0 || ry >= d || Math.abs(rx - d/2) + Math.abs(ry - d/2) >= d / 2 || visited[rx][ry])
+				continue;
+
+			visited[rx][ry] = true;
+			space += getSpace(newX, newY, cx, cy, steps+1) + 1;
+		}
+
+		return space;
+	}
+
+	/** How aggressive a tank should be.
+	 * 0 - Least aggressive, 1 - Most aggressive */
+	public double aggressiveFrac(Bullet nearest)
+	{
+		if (smartness == 0)
+			return 0;
+
+		return smartness * spaceFrac * (TankPlayer.default_bullet.speed / nearest.speed * this.maxSpeed / 2 * 0.6 + 0.3);
+	}
+
 	public void followPath()
 	{
 		this.seekTimer -= Panel.frameFrequency;
 
 		if (Game.showPathfinding && !ScreenGame.finishedQuick)
 		{
+			Drawing.drawing.setColor(0, 0, 0);
+			Drawing.drawing.setInterfaceFontSize(24);
 			for (Tile t : this.path)
+			{
 				Game.effects.add(Effect.createNewEffect(t.shiftedX, t.shiftedY, 25, Effect.EffectType.laser));
+
+				Drawing.drawing.drawText(t.posX, t.posY, 50, t.surrounded + "");
+			}
 		}
 
 		if (this.path.isEmpty())
@@ -1430,7 +1539,7 @@ public class TankAIControlled extends Tank
 		{
 			this.seekTimer = this.seekTimerBase;
 
-			if (this.path.getFirst().type == Tile.Type.destructible)
+			if (this.path.getFirst().type == Tile.Type.destructible && spaceFrac > 0.5)
 			{
 				this.mine.attemptUse(this);
 				this.seekTimer = this.seekTimerBase * 2;
@@ -1449,65 +1558,64 @@ public class TankAIControlled extends Tank
 		boolean avoid = false;
 
 		ArrayList<Bullet> toAvoid = new ArrayList<>();
-		ArrayList<Ray> toAvoidTargets = new ArrayList<>();
 
 		for (int i = 0; i < Game.movables.size(); i++)
 		{
-			if (Game.movables.get(i) instanceof Bullet && !Game.movables.get(i).destroy)
+			if (Game.movables.get(i) instanceof Bullet b && !b.destroy)
 			{
-				Bullet b = (Bullet) Game.movables.get(i);
 				double dist = Movable.distanceBetween(this, b);
 				if (!(b.tank == this && b.age < 20) && !(this.team != null && Team.isAllied(b, this) && !this.team.friendlyFire) && b.shouldDodge && Math.abs(b.posX - this.posX) < Game.tile_size * 10 && Math.abs(b.posY - this.posY) < Game.tile_size * 10 && (b.getMotionInDirection(b.getAngleInDirection(this.posX, this.posY)) > 0 || dist < this.size * 3))
 				{
 					Ray r = b.getRay();
 					r.tankHitSizeMul = 3;
 
-					Movable m = r.getTarget(2, this);
-					if (dist < this.size * 3 || (m != null && m.equals(this)))
+					Movable m = r.getTarget(smartness * -2 + 5 - this.maxSpeed / 2, this);
+					if (m != null && m.equals(this))
 					{
 						avoid = true;
 						toAvoid.add(b);
-						toAvoidTargets.add(r);
 					}
 				}
 			}
 		}
 
-		if (avoid)
+		if (avoid && this.enableMovement)
 		{
 			Bullet nearest = null;
 			double nearestDist = Double.MAX_VALUE;
-			int nearestIndex = -1;
-			for (int i = 0; i < toAvoid.size(); i++)
+            for (Bullet b : toAvoid)
+            {
+                double dist = Movable.distanceBetween(b, this);
+                if (dist < nearestDist)
+                {
+                    nearest = b;
+                    nearestDist = dist;
+                }
+            }
+
+			if (nearest == null)
+				return;
+
+			double nearestDir = nearest.getAngleInDirection(this.posX, this.posY);
+			double direction = nearest.getPolarDirection();
+			double distance = Movable.distanceBetween(this, nearest);
+			double diff = Movable.angleBetween(direction, nearestDir);
+
+			double scaledAggro = smartness >= 0.4 ? aggressiveFrac(nearest) : 0.2;
+
+			if (smartness >= 0.8)
 			{
-				double dist = Movable.distanceBetween(this, toAvoid.get(i));
-				if (dist < nearestDist)
-				{
-					nearest = toAvoid.get(i);
-					nearestDist = dist;
-					nearestIndex = i;
-				}
+				if (distance < Game.tile_size * smartness * 5)
+					scaledAggro = 0.5;
 			}
 
-			double targetX = toAvoidTargets.get(nearestIndex).targetX;
-			double targetY = toAvoidTargets.get(nearestIndex).targetY;
-
 			this.avoidTimer = this.bulletAvoidTimerBase;
-			this.avoidDirection = this.getAngleInDirection(targetX, targetY) + Math.PI;//nearest.getPolarDirection() + fleeDirection;
-			double direction = nearest.getPolarDirection();
-			double diff = Movable.angleBetween(this.avoidDirection, direction);
-
-			if (Math.abs(diff) < Math.PI / 4)
-				this.avoidDirection = direction + Math.signum(diff) * Math.PI / 4;
-
-			Ray r = new Ray(this.posX, this.posY, this.avoidDirection, 0, this, Game.tile_size);
-			r.size = Game.tile_size * this.hitboxSize - 1;
-			double d = r.getDist();
-
-			if (d < Game.tile_size * 2)
-				this.avoidDirection = direction - diff;
-
+			this.avoidDirection = (smartness >= 0.4 ? direction : nearestDir) + Math.PI * scaledAggro * -Math.signum(diff);
 			this.nearestBullet = nearest;
+
+			Ray r = new Ray(this.posX, this.posY, this.avoidDirection, 0, this);
+			r.trace = true;
+			r.getTarget();
 		}
 	}
 
@@ -2452,9 +2560,8 @@ public class TankAIControlled extends Tank
 				while (i < Game.movables.size())
 				{
 					Movable m = Game.movables.get(i);
-					if (m instanceof Tank && Team.isAllied(this, m) && m != this)
+					if (m instanceof Tank t && Team.isAllied(this, m) && m != this)
 					{
-						Tank t = (Tank) m;
 						if (Math.pow(t.posX - this.posX, 2) + Math.pow(t.posY - this.posY, 2) <= Math.pow(200, 2))
 						{
 							layMine = false;
@@ -2865,6 +2972,8 @@ public class TankAIControlled extends Tank
 		public int tileX;
         public int tileY;
 
+		public int surrounded = 0;
+
         public Type type;
 
         public int unfavorability = 0;
@@ -2884,6 +2993,20 @@ public class TankAIControlled extends Tank
 
 			Obstacle o = Game.obstacleGrid[x][y];
 			t.setPathfindingTileProperties(this, o);
+
+			for (int i = 0; i < 4; i++)
+			{
+				int x1 = x + dirX[i];
+				int y1 = y + dirY[i];
+
+				if (x1 < 0 || x1 >= Game.currentSizeX || y1 < 0 || y1 >= Game.currentSizeY)
+					surrounded++;
+				else if (Game.obstacleGrid[x1][y1] != null && Game.obstacleGrid[x1][y1].tankCollision)
+                    surrounded++;
+			}
+
+			if (surrounded >= 2)
+                unfavorability += 2;
 		}
 
         public double shiftSides(Random r, boolean x)

@@ -111,8 +111,12 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         double cvx = this.getAttributeValue(AttributeModifier.velocity, this.currentKnownVX) * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
         double cvy = this.getAttributeValue(AttributeModifier.velocity, this.currentKnownVY) * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
 
-        this.posX = TankRemote.cubicInterpolationVelocity(this.prevKnownPosX, pvx, this.currentKnownPosX, cvx, this.timeSinceRefresh, this.interpolationTime);
-        this.posY = TankRemote.cubicInterpolationVelocity(this.prevKnownPosY, pvy, this.currentKnownPosY, cvy, this.timeSinceRefresh, this.interpolationTime);
+        if (!ScreenGame.finishedQuick && !this.destroy)
+        {
+            this.posX = TankRemote.cubicInterpolationVelocity(this.prevKnownPosX, pvx, this.currentKnownPosX, cvx, this.timeSinceRefresh, this.interpolationTime);
+            this.posY = TankRemote.cubicInterpolationVelocity(this.prevKnownPosY, pvy, this.currentKnownPosY, cvy, this.timeSinceRefresh, this.interpolationTime);
+        }
+
         double frac = Math.min(1, this.timeSinceRefresh / this.interpolationTime);
         this.vX = (1 - frac) * this.prevKnownVX + frac * this.currentKnownVX;
         this.vY = (1 - frac) * this.prevKnownVY + frac * this.currentKnownVY;

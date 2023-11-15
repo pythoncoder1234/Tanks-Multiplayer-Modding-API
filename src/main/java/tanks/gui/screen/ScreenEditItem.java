@@ -139,9 +139,10 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
                         p.value = t.inputText;
                 };
 
+                t.enablePunctuation = true;
                 t.enableCaps = true;
                 t.allowSpaces = true;
-                t.maxChars = 18;
+                t.maxChars = 35;
 
                 properties.add(t);
             }

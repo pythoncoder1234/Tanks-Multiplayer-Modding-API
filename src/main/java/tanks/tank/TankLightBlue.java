@@ -36,6 +36,8 @@ public class TankLightBlue extends TankAIControlled
 		this.bullet.bounces = 0;
 		this.bullet.effect = Bullet.BulletEffect.none;
 		this.bullet.name = "Air";
+		this.bullet.damage = 0;
+		this.bullet.heavy = true;
 
 		this.coinValue = 8;
 

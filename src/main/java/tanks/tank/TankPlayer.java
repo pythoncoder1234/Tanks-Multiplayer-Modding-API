@@ -73,7 +73,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
 
-//		this.baseModel = TankModels.arrow.base;
+		this.baseModel = TankModels.arrow.base;
 
 		if (enableDestroyCheat)
 		{
@@ -124,8 +124,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (this.destroy)
 			return;
 
-//        Drawing.drawing.setColor(0, 0, 0);
-//        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
+        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
     }
 
     @Override
@@ -144,11 +144,11 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_H);
 
 			headlight = !headlight;
-			double multiplier = headlight ? (1 - Level.currentLightIntensity) * 4.25 : 0;
+			double multiplier = headlight ? Math.pow(1 - Level.currentLightIntensity, 1.5) * 4 : 0;
 			this.glowSize = 0;
-			this.lightSize = 10 * multiplier;
+			this.lightSize = 20 * multiplier;
 			this.lightIntensity = multiplier;
-			this.luminance = multiplier / 2;
+			this.luminance = multiplier / 4;
 		}
 
 		if (Game.game.input.aim.isValid())

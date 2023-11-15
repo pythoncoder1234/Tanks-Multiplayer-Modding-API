@@ -25,7 +25,6 @@ public class EventChat extends PersonalEvent
 	@Override
 	public void execute() 
 	{
-
 		if (this.clientID == null)
 			ScreenPartyLobby.chat.add(0, new ChatMessage(this.message));
 		else

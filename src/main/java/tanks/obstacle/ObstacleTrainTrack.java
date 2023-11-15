@@ -1,7 +1,6 @@
 
 package tanks.obstacle;
 
-import basewindow.IBatchRenderableObject;
 import basewindow.Model;
 import tanks.Drawing;
 import tanks.Game;
@@ -28,7 +27,7 @@ public class ObstacleTrainTrack extends Obstacle
     public int turn = 0;
     protected boolean firstFrame = true;
 
-    public ObstacleTrainTrack(String name, double posX, double posY)
+    public ObstacleTrainTrack(String name,π double posX, double posY)
     {
         super(name, posX, posY);
 
@@ -77,6 +76,23 @@ public class ObstacleTrainTrack extends Obstacle
             Drawing.drawing.fillInterfaceRect(this.posX + offX, this.posY + offY, offY * 3 + 5, offX * 3 + 5);
             Drawing.drawing.fillInterfaceRect(this.posX - offX, this.posY - offY, offY * 3 + 5, offX * 3 + 5);
         }
+        else
+        {
+            double d = Game.fancyTerrain ? 5 : 0;
+
+            double offX = this.horizontal ? 0 : 15;
+            double offY = this.horizontal ? 15 : 0;
+
+            Drawing.drawing.setColor(192, 192, 192);
+            Drawing.drawing.fillBox(this, this.posX + offX, this.posY + offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
+            Drawing.drawing.fillBox(this, this.posX - offX, this.posY - offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
+
+            for (int i = -1; i <= 1; i++)
+            {
+                Drawing.drawing.setColor(this.stackColorR[i + 1], this.stackColorG[i + 1], this.stackColorB[i + 1]);
+                Drawing.drawing.fillBox(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d + startHeight * 50, offX * 2.86 + 7, offY * 2.86 + 7, 6);
+            }
+        }
     }
 
     public static boolean exists(Obstacle o)
@@ -91,35 +107,6 @@ public class ObstacleTrainTrack extends Obstacle
             return false;
 
         return Game.obstacleGrid[x][y] == o;
-    }
-
-    @Override
-    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
-    {
-        if (firstFrame)
-            setOrientation();
-
-        d = Game.fancyTerrain ? 5 : 0;
-
-        Drawing.drawing.setColor(r, g, b);
-
-        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
-
-        if (turn > 0)
-            return;
-
-        double offX = this.horizontal ? 0 : 15;
-        double offY = this.horizontal ? 15 : 0;
-
-        Drawing.drawing.setColor(192, 192, 192);
-        Drawing.drawing.fillBox(tile, this.posX + offX, this.posY + offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
-        Drawing.drawing.fillBox(tile, this.posX - offX, this.posY - offY, d + startHeight * 50, offY * 3 + 5, offX * 3 + 5, 10);
-
-        for (int i = -1; i <= 1; i++)
-        {
-            Drawing.drawing.setColor(this.stackColorR[i + 1], this.stackColorG[i + 1], this.stackColorB[i + 1]);
-            Drawing.drawing.fillBox(tile, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d + startHeight * 50, offX * 2.86 + 7, offY * 2.86 + 7, 6);
-        }
     }
 
     @Override

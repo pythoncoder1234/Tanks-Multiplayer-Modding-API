@@ -286,6 +286,10 @@ public class Arcade extends Minigame
     {
         age += Panel.frameFrequency;
 
+        for (Movable m : Game.movables)
+            if (m instanceof TankAIControlled t)
+                t.enableBulletAvoidance = false;
+
         if (chain > 0)
             chainOpacity = Math.min(1, chainOpacity + Panel.frameFrequency / 20);
         else
@@ -299,14 +303,7 @@ public class Arcade extends Minigame
             Game.movables.addAll(drops);
             drops.clear();
 
-            for (int i = 0; i < level.includedPlayers.size(); i++)
-            {
-                if (!Game.players.contains(level.includedPlayers.get(i)))
-                {
-                    level.includedPlayers.remove(i);
-                    i--;
-                }
-            }
+            level.includedPlayers.removeIf(p -> !Game.players.contains(p));
 
             if (age - lastHit > rampage_duration && !frenzy)
                 setRampage(0);
@@ -379,7 +376,7 @@ public class Arcade extends Minigame
                     deathCount++;
 
                     for (Player p : level.includedPlayers)
-                        this.respawnPlayer(p);
+                        ModAPI.respawnPlayer(p);
                 }
             }
 
@@ -400,7 +397,7 @@ public class Arcade extends Minigame
                     for (Player p: level.includedPlayers)
                     {
                         if (!totalPlayers.contains(p))
-                            respawnPlayer(p);
+                            ModAPI.respawnPlayer(p);
                     }
                 }
             }
@@ -409,7 +406,7 @@ public class Arcade extends Minigame
                 for (Player p: level.includedPlayers)
                 {
                     if (playerDeathTimes.get(p) != null && age - playerDeathTimes.get(p) >= 500)
-                        respawnPlayer(p);
+                        ModAPI.respawnPlayer(p);
                 }
             }
         }
@@ -434,29 +431,6 @@ public class Arcade extends Minigame
             if (seconds > newSeconds && (newSeconds == 10 || newSeconds == 30 || newSeconds == 60))
                 Drawing.drawing.playSound("timer.ogg");
         }
-    }
-
-    public void respawnPlayer(Player p)
-    {
-        playerDeathTimes.remove(p);
-
-        int r;
-        if (!level.availablePlayerSpawns.isEmpty())
-            r = level.availablePlayerSpawns.remove((int) (Level.random.nextDouble() * level.availablePlayerSpawns.size()));
-        else
-            r = (int) (level.playerSpawnsX.size() * Level.random.nextDouble());
-
-        TankPlayer t = new TankPlayer(level.playerSpawnsX.get(r), level.playerSpawnsY.get(r), level.playerSpawnsAngle.get(r));
-        t.team = Game.playerTeamNoFF;
-        t.player = p;
-        t.colorR = p.colorR;
-        t.colorG = p.colorG;
-        t.colorB = p.colorB;
-        t.secondaryColorR = p.turretColorR;
-        t.secondaryColorG = p.turretColorG;
-        t.secondaryColorB = p.turretColorB;
-        Game.movables.add(new Crate(t));
-        Game.eventsOut.add(new EventAirdropTank(t));
     }
 
     public String getRampageTitle()

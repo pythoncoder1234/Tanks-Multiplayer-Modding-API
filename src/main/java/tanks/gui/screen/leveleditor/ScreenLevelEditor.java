@@ -629,7 +629,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 			{
 				Game.redrawGroundTiles.add(new int[]{x, y});
+
 				Game.obstacleGrid[x][y] = null;
+				Game.surfaceTileGrid[x][y] = null;
 
 				if (o.bulletCollision)
 				{
@@ -1149,7 +1151,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						for (int i = 0; i < Game.obstacles.size(); i++)
 						{
 							Obstacle m = Game.obstacles.get(i);
-							if (m.posX == mouseTank.posX && m.posY == mouseTank.posY)
+							if (Movable.distanceBetween(m, mouseTank) < 50)
 							{
 								skip = true;
 								this.undoActions.add(new Action.ActionObstacle(m, false));
@@ -1209,18 +1211,23 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 					if (!skip)
 					{
-						if ((!mouseObstacle.isSurfaceTile && mouseObstacleStartHeight == 0) || currentPlaceable != Placeable.obstacle)
+						if (mouseObstacleStartHeight == 0 || currentPlaceable != Placeable.obstacle)
 						{
-							Obstacle o = Game.obstacleGrid[(int) (mx / 50)][(int) (my / 50)];
-							if (o != null)
+							Obstacle o = Game.obstacleGrid[(int) (mx / Game.tile_size)][(int) (my / Game.tile_size)];
+							Obstacle s = Game.surfaceTileGrid[(int) (mx / Game.tile_size)][(int) (my / Game.tile_size)];
+
+							if (o != null || s != null)
 							{
+								if (o == null)
+									o = s;
+
 								if (!validRight)
 								{
 									if (currentPlaceable == Placeable.obstacle)
 									{
-										if (o.tankCollision || mouseObstacle.tankCollision || o.getClass() == mouseObstacle.getClass())
+										if (o.tankCollision || mouseObstacle.tankCollision || o.isSurfaceTile == mouseObstacle.isSurfaceTile || o.getClass() == mouseObstacle.getClass())
 										{
-											if (mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight < o.stackHeight + o.startHeight)
+											if (o.isSurfaceTile || mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight < o.stackHeight + o.startHeight)
 												skip = true;
 										}
 									}

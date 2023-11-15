@@ -113,6 +113,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         else
             invulnerable.setText(invulnerableText, ScreenOptions.offText);
 
+        grandpaMode.setText("Grandpa mode: ", Game.grandpaMode ? ScreenOptions.onText : ScreenOptions.offText);
         glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
         tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
@@ -177,6 +178,16 @@ public class ScreenDebug extends ScreenOptionsOverlay
         }
     });
 
+    Button grandpaMode = new Button(this.centerX, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.grandpaMode = !Game.grandpaMode;
+            grandpaMode.setText("Grandpa mode: ", Game.grandpaMode ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
     @Override
     public void update()
     {
@@ -186,6 +197,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         firstPerson.update();
         invulnerable.update();
         glipping.update();
+        grandpaMode.update();
         autocannon.update();
         tankIDs.update();
         tankHitboxes.update();
@@ -224,6 +236,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         followingCam.draw();
         traceAllRays.draw();
         allNums.draw();
+        grandpaMode.draw();
         obstacleHitboxes.draw();
         tankHitboxes.draw();
         pathfinding.draw();

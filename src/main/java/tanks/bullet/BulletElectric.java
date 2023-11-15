@@ -5,8 +5,8 @@ import tanks.AttributeModifier.Operation;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.item.ItemBullet;
 import tanks.network.event.EventBulletDestroyed;
-import tanks.network.event.EventBulletStunEffect;
 import tanks.network.event.EventBulletInstantWaypoint;
+import tanks.network.event.EventBulletStunEffect;
 import tanks.network.event.EventShootBullet;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
@@ -122,8 +122,6 @@ public class BulletElectric extends BulletInstant
 	public void move()
 	{
 		this.invulnerability -= Panel.frameFrequency;
-		if (this.invulnerability < -1e5)
-			this.destroy = true;
 		super.superUpdate();
 	}
 
@@ -208,25 +206,30 @@ public class BulletElectric extends BulletInstant
             }
 		}
 
-        if (validTarget && movable instanceof Tank)
+        if (validTarget)
         {
-            Game.eventsOut.add(new EventBulletStunEffect(this.posX, this.posY, this.posZ, 1));
+			if (movable instanceof Tank)
+			{
+				Game.eventsOut.add(new EventBulletStunEffect(this.posX, this.posY, this.posZ, 1));
 
-            if (Game.effectsEnabled)
-            {
-                for (int i = 0; i < 25 * Game.effectMultiplier; i++)
-                {
-                    Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.stun);
-                    double var = 50;
-                    e.colR = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
-					e.colG = Math.min(255, Math.max(0, 255 + Math.random() * var - var / 2));
-					e.colB = Math.min(255, Math.max(0, 255 + Math.random() * var - var / 2));
-					e.glowR = 0;
-					e.glowG = 128;
-					e.glowB = 128;
-					Game.effects.add(e);
+				if (Game.effectsEnabled)
+				{
+					for (int i = 0; i < 25 * Game.effectMultiplier; i++)
+					{
+						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.stun);
+						double var = 50;
+						e.colR = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
+						e.colG = Math.min(255, Math.max(0, 255 + Math.random() * var - var / 2));
+						e.colB = Math.min(255, Math.max(0, 255 + Math.random() * var - var / 2));
+						e.glowR = 0;
+						e.glowG = 128;
+						e.glowB = 128;
+						Game.effects.add(e);
+					}
 				}
 			}
+			else
+				movable.destroy = true;
 		}
 	}
 
@@ -292,15 +295,6 @@ public class BulletElectric extends BulletInstant
 			}
 		}
 
-		this.segments.add(new Laser(this.lastX, this.lastY, this.lastZ, this.collisionX, this.collisionY, this.posZ, this.size / 2, this.getAngleInDirection(this.lastX, this.lastY), this.baseColorR, this.baseColorG, this.baseColorB));
-		this.lastX = this.collisionX;
-		this.lastY = this.collisionY;
-		this.lastZ = this.posZ;
-
-		if (!this.isRemote)
-		{
-			this.xTargets.add(this.collisionX);
-			this.yTargets.add(this.collisionY);
-		}
+		super.collided();
 	}
 }

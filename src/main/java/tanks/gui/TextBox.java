@@ -5,6 +5,7 @@ import basewindow.InputPoint;
 import tanks.*;
 import tanks.gui.input.InputBindingGroup;
 import tanks.gui.screen.ScreenInfo;
+import tanks.gui.screen.ScreenInputColor;
 import tanks.translation.Translation;
 
 import java.util.ArrayList;
@@ -389,12 +390,10 @@ public class TextBox implements IDrawable, ITrigger
 				selected = true;
 				this.previousInputText = this.inputText;
 
-				TextBox prev = Panel.selectedTextBox;
+				if (Panel.selectedTextBox != null)
+					Panel.selectedTextBox.submit();
 
 				Panel.selectedTextBox = this;
-
-				if (prev != null)
-					prev.submit();
 
 				Drawing.drawing.playVibration("click");
 				Drawing.drawing.playSound("bounce.ogg", 0.5f, 0.7f);
@@ -522,14 +521,13 @@ public class TextBox implements IDrawable, ITrigger
 		if (Game.game.window.textPressedKeys.contains(InputCodes.KEY_LEFT_CONTROL) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_RIGHT_CONTROL) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_LEFT_SUPER) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_RIGHT_SUPER))
 		{
 			if (Game.game.window.textPressedKeys.contains(InputCodes.KEY_C))
-			{
-				this.copy();
-			}
+                this.copy();
 
 			if (Game.game.window.textPressedKeys.contains(InputCodes.KEY_V))
-			{
-				this.paste();
-			}
+                this.paste();
+
+			if (Game.game.window.textPressedKeys.contains(InputCodes.KEY_K) && !(Game.screen instanceof ScreenInputColor))
+				Game.screen = new ScreenInputColor(this);
 
 			if (Game.game.window.textPressedKeys.contains(InputCodes.KEY_BACKSPACE) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_DELETE))
 			{
@@ -542,9 +540,7 @@ public class TextBox implements IDrawable, ITrigger
 		}
 
 		for (char key : texts)
-		{
-			inputKey(key);
-		}
+            inputKey(key);
 
 		texts.clear();
 	}
@@ -594,13 +590,13 @@ public class TextBox implements IDrawable, ITrigger
 						inputText += key;
 				}
 
-				if (allowNegatives && inputText.length() == 0)
+				if ((allowNegatives || Game.allowAllNumbers) && inputText.isEmpty())
 				{
 					if ('-' == key)
 						inputText += key;
 				}
 
-				if (allowDoubles && !inputText.contains("."))
+				if ((allowDoubles || Game.allowAllNumbers) && !inputText.contains("."))
 				{
 					if ('.' == key)
 						inputText += key;

@@ -3,6 +3,8 @@ package tanks.obstacle;
 import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
+import tanks.rendering.ShaderGroundWater;
+import tanks.rendering.ShaderWater;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
@@ -49,6 +51,9 @@ public class ObstacleWater extends ObstacleLiquid
             this.stackColorB[i] = this.colorB;
             this.stackColorG[i] = this.colorG;
         }
+
+        this.renderer = ShaderWater.class;
+        this.tileRenderer = ShaderGroundWater.class;
 
         this.description = "A pool of water that can slow and drown tanks";
     }
@@ -169,7 +174,7 @@ public class ObstacleWater extends ObstacleLiquid
     public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
         Drawing.drawing.setColor(r, g, b);
-        Drawing.drawing.fillBox(tile, this.posX, this.posY, -Game.tile_size * this.stackHeight + d, Game.tile_size, Game.tile_size, -extra);
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -Game.tile_size * this.stackHeight + d, Game.tile_size, Game.tile_size, -d-extra);
     }
 
     @Override

@@ -3,6 +3,8 @@ package lwjglwindow;
 import basewindow.BaseFontRenderer;
 import org.lwjgl.opengl.GL11;
 
+import java.util.regex.Pattern;
+
 public class FontRenderer extends BaseFontRenderer
 {
 	public String chars;
@@ -101,6 +103,8 @@ public class FontRenderer extends BaseFontRenderer
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 	}
 
+	Pattern color = Pattern.compile("§\\d{12}");
+
 	public void drawString(double x, double y, double sX, double sY, String s)
 	{
 		double curX = x;
@@ -110,7 +114,7 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-			else if (c[i] == '\u00A7')
+			else if (c[i] == '\u00A7' && color.matcher(s.substring(i, i+13)).matches())
 			{
 				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + "" + c[i + 3]);
 				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + "" + c[i + 6]);

@@ -119,6 +119,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
     public boolean playedIntro = false;
     @SuppressWarnings("unchecked")
     public ArrayList<IDrawable>[] drawables = (ArrayList<IDrawable>[]) (new ArrayList[10]);
+	@SuppressWarnings("unchecked")
+    public ArrayList<IDrawable>[] drawBeforeObstacles = (ArrayList<IDrawable>[]) (new ArrayList[10]);
     public MapLoader mapLoader = null;
     public boolean freecam = false;
     public double x = 0;
@@ -620,6 +622,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		for (int i = 0; i < this.drawables.length; i++)
 			this.drawables[i] = new ArrayList<>();
 
+		for (int i = 0; i < this.drawBeforeObstacles.length; i++)
+			this.drawBeforeObstacles[i] = new ArrayList<>();
+
 		slantRotation = new RotationAboutPoint(Game.game.window, 0, 0, 0, 0.5, 0.5, -1);
 		slantTranslation = new Translation(Game.game.window, 0, 0, 0);
 
@@ -939,10 +944,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			if (Game.game.window.validScrollUp)
 			{
 				zoomScrolled = true;
-				Drawing.drawing.movingCamera = true;
-
-				if (Panel.zoomTarget == -1)
-					Panel.zoomTarget = Panel.panel.zoomTimer;
 
 				Game.game.window.validScrollUp = false;
 				Panel.zoomTarget = Math.min(1, Panel.zoomTarget + 0.1 * Drawing.drawing.unzoomedScale);
@@ -951,13 +952,17 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			if (Game.game.window.validScrollDown)
 			{
 				zoomScrolled = true;
+
+				Game.game.window.validScrollDown = false;
+				Panel.zoomTarget = Math.max(0, Panel.zoomTarget - 0.1 * Drawing.drawing.unzoomedScale);
+			}
+
+			if (zoomScrolled)
+			{
 				Drawing.drawing.movingCamera = true;
 
 				if (Panel.zoomTarget == -1)
 					Panel.zoomTarget = Panel.panel.zoomTimer;
-
-				Game.game.window.validScrollDown = false;
-				Panel.zoomTarget = Math.max(0, Panel.zoomTarget - 0.1 * Drawing.drawing.unzoomedScale);
 			}
 		}
 		else if (zoomPressed)
@@ -1097,7 +1102,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 			this.musicID = null;
 
-			if (!(Game.currentGame != null && this.endMusic))
+			if (this.endMusic && name == null)
 			{
 				if (Panel.win && this.finishQuickTimer >= 75)
 					this.music = "waiting_win.ogg";
@@ -1571,6 +1576,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				System.out.println(Game.verticalFaces);
 				Game.exitToCrash(e);
 			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_F3) && Game.game.window.pressedKeys.contains(InputCodes.KEY_F4))
+				Game.movables.add(new Crate(new TankPlayer(Game.playerTank.posX, Game.playerTank.posY, Game.playerTank.angle)));
 
 			for (int i = 0; i < Game.movables.size(); i++)
 				Game.movables.get(i).preUpdate();
@@ -2186,31 +2194,23 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
         Drawing.drawing.fillShadedInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2,
 				mul * Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale, mul * Game.game.window.absoluteHeight / Drawing.drawing.interfaceScale);
 
-		this.drawDefaultBackground();
-
 		Drawing drawing = Drawing.drawing;
 
 //		drawables[0].addAll(Game.tracks);
 
 		for (Movable m : Game.movables)
 		{
-			drawables[m.drawLevel].add(m);
+			ArrayList<IDrawable>[] arr = Game.enable3d && m.drawBeforeObstacles() && Game.sampleTerrainGroundHeight(m.posX, m.posY) < 0 ? drawBeforeObstacles : drawables;
+			arr[m.drawLevel].add(m);
 
 			if (m.showName)
-				drawables[m.nameTag.drawLevel].add(m.nameTag);
+				arr[m.nameTag.drawLevel].add(m.nameTag);
 		}
 
-		if (Game.enable3d && /*(Obstacle.draw_size <= 0 || Obstacle.draw_size >= Game.tile_size) && */Game.game.window.shapeRenderer.supportsBatching)
+		boolean batch = Game.enable3d && /*(Obstacle.draw_size <= 0 || Obstacle.draw_size >= Game.tile_size) && */Game.game.window.shapeRenderer.supportsBatching;
+		for (Obstacle o : Game.obstacles)
 		{
-			for (Obstacle o : Game.obstacles)
-			{
-				if (!o.batchDraw)
-					drawables[o.drawLevel].add(o);
-			}
-		}
-		else
-		{
-			for (Obstacle o : Game.obstacles)
+			if (!batch || !o.batchDraw)
 				drawables[o.drawLevel].add(o);
 		}
 
@@ -2227,6 +2227,19 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			if (TankPlayer.shootStickEnabled && !TankPlayer.shootStickHidden)
 				drawables[9].add(TankPlayer.shootStick);
 		}
+
+        for (ArrayList<IDrawable> arr : this.drawBeforeObstacles)
+		{
+			for (IDrawable a : arr)
+			{
+				if (a != null)
+					a.draw();
+			}
+
+			arr.clear();
+		}
+
+		this.drawDefaultBackground();
 
 		for (int i = 0; i < this.drawables.length; i++)
 		{

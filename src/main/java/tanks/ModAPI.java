@@ -128,12 +128,34 @@ public class ModAPI
     }
 
     /**
-     * <b>WIP Function</b><br>
      * Respawns a player in one of its team's spawn points.
+     * Stolen from aehmttw's arcade code.
      */
     public static void respawnPlayer(Player p)
     {
-        respawnPlayer(p.tank);
+        if (ScreenPartyLobby.isClient)
+            return;
+
+        Game.removeMovables.add(p.tank);
+
+        Level l = Game.currentLevel;
+        int r;
+        if (!l.availablePlayerSpawns.isEmpty())
+            r = l.availablePlayerSpawns.remove((int) (Level.random.nextDouble() * l.availablePlayerSpawns.size()));
+        else
+            r = (int) (l.playerSpawnsX.size() * Level.random.nextDouble());
+
+        TankPlayer t = new TankPlayer(l.playerSpawnsX.get(r), l.playerSpawnsY.get(r), l.playerSpawnsAngle.get(r));
+        t.team = Game.playerTeamNoFF;
+        t.player = p;
+        t.colorR = p.colorR;
+        t.colorG = p.colorG;
+        t.colorB = p.colorB;
+        t.secondaryColorR = p.turretColorR;
+        t.secondaryColorG = p.turretColorG;
+        t.secondaryColorB = p.turretColorB;
+        Game.movables.add(new Crate(t));
+        Game.eventsOut.add(new EventAirdropTank(t));
     }
 
 
@@ -331,34 +353,6 @@ public class ModAPI
         }
         else
             return new ArrayList<>(tanks.entrySet());
-    }
-
-    /**
-     * <b>WIP Function</b><br>
-     * Respawns a player in one of its team's spawn points.
-     */
-    public static void respawnPlayer(Tank t)
-    {
-        Game.removeMovables.add(t);
-
-        for (int attemptNo = 0; attemptNo < 10; attemptNo++)
-        {
-            int spawnIndex = (int) (Math.random() * Game.currentLevel.playerSpawnsX.size());
-
-            if (!Game.currentLevel.playerSpawnsTeam.get(spawnIndex).equals(t.team))
-                continue;
-
-            double x = Game.currentLevel.playerSpawnsX.get(spawnIndex);
-            double y = Game.currentLevel.playerSpawnsY.get(spawnIndex);
-            double angle = Game.currentLevel.playerSpawnsAngle.get(spawnIndex);
-
-            TankPlayer p = new TankPlayer(x, y, angle);
-            p.team = t.team;
-            Game.movables.add(new Crate(p));
-            Game.playerTank = p;
-
-            break;
-        }
     }
 
     /**

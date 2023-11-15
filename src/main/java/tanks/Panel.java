@@ -1037,7 +1037,6 @@ public class Panel
 			Game.game.window.shapeRenderer.setBatchMode(false, false, true, true, false);
 			Game.game.window.shapeRenderer.setBatchMode(true, true, true, true, false);
 
-
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - size, y - thickness, 0);
 			Drawing.drawing.setColor(r, g, b, a, 1);
@@ -1172,7 +1171,7 @@ public class Panel
 			String s = "Connected to party";
 
 			if (Game.showIP)
-				s = "In party: " + (Game.lastParty.equals("") ? "localhost" : Game.lastParty) + (!Game.lastParty.contains(":") ? ":" + Game.port : "");
+				s = "In party: " + (Game.lastParty.isEmpty() ? "localhost" : Game.lastParty) + (!Game.lastParty.contains(":") ? ":" + Game.port : "");
 
 			partyIpLen = Game.game.window.fontRenderer.getStringSizeX(0.4, s) + 10 + offset;
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);

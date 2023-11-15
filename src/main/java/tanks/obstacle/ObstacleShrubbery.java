@@ -1,9 +1,8 @@
 package tanks.obstacle;
 
-import basewindow.IBatchRenderableObject;
 import tanks.*;
+import tanks.bullet.Bullet;
 import tanks.bullet.BulletAir;
-import tanks.bullet.BulletFlame;
 import tanks.bullet.BulletInstant;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.IOverlayScreen;
@@ -94,12 +93,6 @@ public class ObstacleShrubbery extends Obstacle
 	}
 
 	@Override
-	public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
-	{
-		super.drawTile(tile, r, g, b, d, extra + 0.1);
-	}
-
-	@Override
 	public void drawForInterface(double x, double y)
 	{
 		Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, 127);
@@ -135,7 +128,7 @@ public class ObstacleShrubbery extends Obstacle
 		//m.hiddenTimer = Math.min(100, m.hiddenTimer + (this.opacity - 127) / 255);
 		//m.canHide = true;
 
-		if (m instanceof BulletFlame)
+		if (m instanceof Bullet && ((Bullet) m).burnsBushes)
 		{
 			Game.removeObstacles.add(this);
 

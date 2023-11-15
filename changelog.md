@@ -1,6 +1,11 @@
 Older Changelogs
 ---
 
+**Mod API v1.2.c**
+- Hotbar swap item and drop item
+- Added images for horizontal flip and vertical flip
+- Bug fixes
+
 **Mod API v1.2.b**:
 - Implemented new renderer
 - A bit of multiplayer testing

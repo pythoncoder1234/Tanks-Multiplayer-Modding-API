@@ -25,7 +25,8 @@ public class StatusEffect
     public static final StatusEffect boost_tank = new StatusEffect("boost_tank", new AttributeModifier("boost_speed", AttributeModifier.velocity, AttributeModifier.Operation.multiply, 3),
             new AttributeModifier("boost_glow", AttributeModifier.glow, AttributeModifier.Operation.multiply, 1),
             new AttributeModifier("boost_slip", AttributeModifier.friction, AttributeModifier.Operation.multiply, -0.75),
-            new AttributeModifier("boost_effect", AttributeModifier.ember_effect, AttributeModifier.Operation.add, 1));
+            new AttributeModifier("boost_effect", AttributeModifier.ember_effect, AttributeModifier.Operation.add, 1),
+            new AttributeModifier("boost_bullet", AttributeModifier.bullet_boost, AttributeModifier.Operation.add, 1));
 
     public static final StatusEffect boost_bullet = new StatusEffect("boost_bullet", new AttributeModifier("boost_speed", AttributeModifier.velocity, AttributeModifier.Operation.multiply, 1),
             new AttributeModifier("boost_glow", AttributeModifier.glow, AttributeModifier.Operation.multiply, 1));

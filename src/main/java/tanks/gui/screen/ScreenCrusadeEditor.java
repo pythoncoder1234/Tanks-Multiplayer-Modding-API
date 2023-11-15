@@ -40,7 +40,9 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         else
             c = new Crusade(Game.game.fileManager.getFile(crusade.fileName), crusade.name);
         Game.screen = new ScreenCrusadeDetails(c);
-    });    public Button toggleNames = new Button(this.centerX, this.centerY + 120, this.objWidth, this.objHeight, "", new Runnable()
+    });
+
+    public Button toggleNames = new Button(this.centerX, this.centerY + 120, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -60,7 +62,9 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         mode = Mode.options;
         levelButtons.reorder = false;
         itemButtons.reorder = false;
-    });    public Button toggleRespawns = new Button(this.centerX, this.centerY + 180, this.objWidth, this.objHeight, "", new Runnable()
+    });
+
+    public Button toggleRespawns = new Button(this.centerX, this.centerY + 180, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -85,24 +89,20 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         levelButtons.reorder = false;
         itemButtons.reorder = false;
     });
+
     public Button items = new Button(this.centerX + 380, 60, this.objWidth, this.objHeight, "Shop", () ->
     {
         mode = Mode.items;
         levelButtons.reorder = false;
         itemButtons.reorder = false;
     });
+
     public Button addLevel = new Button(this.centerX + 380, this.centerY + 300, this.objWidth, this.objHeight, "Add level", () -> Game.screen = new ScreenCrusadeAddLevel((ScreenCrusadeEditor) Game.screen)
     );
+
     public Button description = new Button(this.centerX, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Crusade description", () -> Game.screen = new ScreenCrusadeDescription(crusade));
-    public Button addItem = new Button(this.centerX + 380, this.centerY + 300, this.objWidth, this.objHeight, "Add item", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            itemSelector.setScreen();
-        }
-    }
-    );
+
+    public Button addItem = new Button(this.centerX + 380, this.centerY + 300, this.objWidth, this.objHeight, "Add item", () -> itemSelector.setScreen());
 
     public ScreenCrusadeEditor(Crusade c)
     {
@@ -180,7 +180,7 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
                 , crusade.name.split("\\.")[0].replace("_", " "));
 
         crusadeName.enableCaps = true;
-        crusadeName.maxChars = 18;
+        crusadeName.maxChars = 100;
 
         startingLives = new TextBox(this.centerX, this.centerY - 30, this.objWidth, this.objHeight, "Starting lives", () ->
         {
@@ -247,7 +247,9 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         this.refreshItemButtons();
 
         this.levelButtons.indexPrefix = true;
-    }    public Button syncLevels = new Button(this.centerX, this.centerY + 300, this.objWidth, this.objHeight, "Sync levels", new Runnable()
+    }
+
+    public Button syncLevels = new Button(this.centerX, this.centerY + 300, this.objWidth, this.objHeight, "Sync levels", new Runnable()
     {
         @Override
         public void run()
@@ -493,6 +495,11 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
 
                 for (TankAIControlled t: tanks)
                 {
+                    t.maxSpeed = Math.min(1.5, t.maxSpeed);
+
+                    if (t.sightTransformTank != null)
+                        t.sightTransformTank.maxSpeed *= 2;
+
                     customTanks.put(t.name, t);
                     HashSet<Integer> a = customTankLevels.get(t.name);
 
@@ -521,7 +528,9 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         {
             Game.exitToCrash(e);
         }
-    }    public Button reorderLevels = new Button(this.centerX - 380, this.centerY + 300, this.objWidth, this.objHeight, "Reorder levels", new Runnable()
+    }
+
+    public Button reorderLevels = new Button(this.centerX - 380, this.centerY + 300, this.objWidth, this.objHeight, "Reorder levels", new Runnable()
     {
         @Override
         public void run()

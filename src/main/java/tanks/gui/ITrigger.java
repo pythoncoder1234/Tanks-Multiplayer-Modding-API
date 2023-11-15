@@ -6,7 +6,7 @@ public interface ITrigger
 
     void draw();
 
-    void updateKeybind();
+    default void updateKeybind() {}
 
     void setPosition(double x, double y);
 }

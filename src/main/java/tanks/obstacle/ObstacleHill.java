@@ -1,9 +1,6 @@
 package tanks.obstacle;
 
-import basewindow.IBatchRenderableObject;
-import tanks.Drawing;
 import tanks.Game;
-import tanks.Level;
 
 public class ObstacleHill extends Obstacle
 {
@@ -13,30 +10,21 @@ public class ObstacleHill extends Obstacle
 
         this.destructible = false;
         this.description = "A tile that is the same color as the level";
-
-        this.colorR = Level.currentColorR + 20;
-        this.colorG = Level.currentColorG + 20;
-        this.colorB = Level.currentColorB + 20;
     }
 
     @Override
     public void draw()
     {
-        int x = (int) (this.posX / 50);
-        int y = (int) (this.posY / 50);
+        int x = (int) Math.max(0, Math.min(Game.currentSizeX, this.posX / Game.tile_size));
+        int y = (int) Math.max(0, Math.min(Game.currentSizeY, this.posY / Game.tile_size));
 
-        if (!Game.enable3d && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+        for (int i = 0; i < default_max_height; i++)
         {
-            Drawing.drawing.setColor(Game.tilesR[x][y], Game.tilesG[x][y], Game.tilesB[x][y]);
-            Drawing.drawing.fillRect(this, this.posX, this.posY, Game.tile_size, Game.tile_size);
+            this.stackColorR[i] = Game.tilesR[x][y];
+            this.stackColorG[i] = Game.tilesG[x][y];
+            this.stackColorB[i] = Game.tilesB[x][y];
         }
-    }
 
-    @Override
-    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
-    {
-        Drawing.drawing.setColor(r + 10, g + 10, b + 10);
-        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra + this.startHeight * 50,
-                Game.tile_size, Game.tile_size, (this.startHeight + this.stackHeight) * 50 + d);
+        super.draw();
     }
 }

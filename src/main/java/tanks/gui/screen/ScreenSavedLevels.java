@@ -58,8 +58,7 @@ public class ScreenSavedLevels extends Screen
 		Level l = new Level("{28,18||2-8-player}");
 		Game.screen = new ScreenLevelEditor(name, l);
 		l.loadLevel((ILevelPreviewScreen) Game.screen);
-	}
-	);
+	});
 
 	public ScreenSavedLevels()
 	{

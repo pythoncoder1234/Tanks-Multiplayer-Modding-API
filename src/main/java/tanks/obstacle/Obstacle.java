@@ -559,7 +559,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 					{
 						for (double l = 0; l < Game.tile_size * this.stackHeight; l += s)
 						{
-							if (Math.random() > this.destroyEffectAmount * freq * freq * Game.effectMultiplier)
+							if (Math.random() > this.destroyEffectAmount * freq * freq * 0.2 * Game.effectMultiplier)
 								continue;
 
 							Effect e = Effect.createNewEffect(this.posX + j + s / 2 - Game.tile_size / 2, this.posY + k + s / 2 - Game.tile_size / 2, l, effect);

@@ -42,6 +42,10 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 	public double lastVY;
 	public double lastVZ;
 
+	public double lastOriginalVX;
+	public double lastOriginalVY;
+	public double lastOriginalVZ;
+
 	public boolean destroy = false;
 	public boolean dealsDamage = true;
 
@@ -82,6 +86,10 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		this.lastVY = (this.posY - this.lastPosY) / Panel.frameFrequency;
 		this.lastVZ = (this.posZ - this.lastPosZ) / Panel.frameFrequency;
 
+		this.lastOriginalVX = this.vX;
+		this.lastOriginalVY = this.vY;
+		this.lastOriginalVZ = this.vZ;
+
 		this.lastPosX = this.posX;
 		this.lastPosY = this.posY;
 		this.lastPosZ = this.posZ;
@@ -109,17 +117,20 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 
 			this.updateStatusEffects();
 
-			vX2 = this.getAttributeValue(AttributeModifier.velocity, vX2);
-			vY2 = this.getAttributeValue(AttributeModifier.velocity, vY2);
-			vZ2 = this.getAttributeValue(AttributeModifier.velocity, vZ2);
+			if (this.managedMotion)
+			{
+				vX2 = this.getAttributeValue(AttributeModifier.velocity, vX2);
+				vY2 = this.getAttributeValue(AttributeModifier.velocity, vY2);
+				vZ2 = this.getAttributeValue(AttributeModifier.velocity, vZ2);
 
 			this.lastFinalVX = vX2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
 			this.lastFinalVY = vY2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
 			this.lastFinalVZ = vZ2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
 
-			this.posX += this.lastFinalVX * Panel.frameFrequency;
-			this.posY += this.lastFinalVY * Panel.frameFrequency;
-			this.posZ += this.lastFinalVZ * Panel.frameFrequency;
+				this.posX += this.lastFinalVX * Panel.frameFrequency;
+				this.posY += this.lastFinalVY * Panel.frameFrequency;
+				this.posZ += this.lastFinalVZ * Panel.frameFrequency;
+			}
 		}
 	}
 
@@ -195,6 +206,14 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		this.vY = velY;
 	}
 
+	static double pi_over_4 = Math.PI / 4;
+	static double fastAtan(double a)
+	{
+		if (a < -1 || a > 1)
+			return Math.atan(a);
+
+		return pi_over_4 * a - a * (Math.abs(a) - 1) * (0.2447 + 0.0663 * Math.abs(a));
+	}
 
 	public double getAngleInDirection(double x, double y)
 	{
@@ -203,9 +222,9 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 
 		double angle = 0;
 		if (x > 0)
-			angle = Math.atan(y/x);
+			angle = fastAtan(y/x);
 		else if (x < 0)
-			angle = Math.atan(y/x) + Math.PI;
+			angle = fastAtan(y/x) + Math.PI;
 		else
 		{
 			if (y > 0)
@@ -215,6 +234,13 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		}
 
 		return angle;
+	}
+
+	/** Override to draw this movable before obstacles, so that it works with transparency (i.e. works with water).
+	 * Only override if the object drawn has depth test on (i.e. 3D objects). */
+	public boolean drawBeforeObstacles()
+	{
+		return false;
 	}
 
 	public double getPolarDirection()
@@ -287,6 +313,12 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 	{
 		this.posX += amount * x;
 		this.posY += amount * y;
+	}
+
+	public void moveInAngle(double a, double amount)
+	{
+		this.posX += amount * Math.cos(a);
+		this.posY += amount * Math.sin(a);
 	}
 
 	public double getSpeed()

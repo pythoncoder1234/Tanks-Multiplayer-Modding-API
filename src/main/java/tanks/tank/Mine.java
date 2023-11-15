@@ -195,9 +195,15 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
         }
     }
 
+    @Override
+    public boolean drawBeforeObstacles()
+    {
+        return true;
+    }
+
     public void checkCollision()
     {
-        if (Tank.checkCollisionWithBorder(this))
+        if (Tank.checkBorderCollision(this))
             onCollidedWith(null);
 
         double t = Game.tile_size;

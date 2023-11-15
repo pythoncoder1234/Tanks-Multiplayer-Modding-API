@@ -25,18 +25,20 @@ public class OverlayCrusadeImport extends ScreenLevelEditorOverlay
     public static int coins = 50;
 
     public Button selected = null;
-    public boolean undo = false;
-    public Button back = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", this::escape
+    public boolean undo;
+    public Button back = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 6, this.objWidth, this.objHeight, "Back", this::escape
     );
     public SavedFilesList fullCrusadesList;
     public SavedFilesList crusadesList;
     HashSet<String> internalCrusades = new HashSet<>();
-    public Button importFromCrusade = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Import", () -> new Thread(this::importFunc).start());
+    public Button importFromCrusade = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 6, this.objWidth, this.objHeight, "Import", () -> new Thread(this::importFunc).start());
 
     public OverlayCrusadeImport(Screen previous, ScreenLevelEditor editor)
     {
         this(previous, editor, false);
-    }    public Selector itemsLocation = new Selector(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Import items to", new String[]{"Shop", "Starting items"}, new Runnable()
+    }
+
+    public Selector itemsLocation = new Selector(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Import items to", new String[]{"Shop", "Starting items"}, new Runnable()
     {
         @Override
         public void run()
@@ -88,7 +90,7 @@ public class OverlayCrusadeImport extends ScreenLevelEditorOverlay
             sort.setHoverText("Sorting by name");
 
         createNewCrusadesList();
-    }    public TextBox shopCoins = new TextBox(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Shop coins", new Runnable()
+    }    public TextBox shopCoins = new TextBox(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Shop coins", new Runnable()
     {
         @Override
         public void run()

@@ -20,10 +20,7 @@ import tanks.obstacle.Face;
 import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static tanks.tank.TankProperty.Category.*;
 
@@ -328,31 +325,34 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		this.size *= this.hitboxSize;
 
-		checkCollisionWithBorder(this);
-
-        double t = Game.tile_size;
+		checkBorderCollision(this);
 
         if (size > 1)
-        {
-            int x1 = (int) Math.min(Math.max(0, (this.posX - this.size / 2) / t - 1), Game.currentSizeX - 1);
-            int y1 = (int) Math.min(Math.max(0, (this.posY - this.size / 2) / t - 1), Game.currentSizeY - 1);
-            int x2 = (int) Math.min(Math.max(0, (this.posX + this.size / 2) / t + 1), Game.currentSizeX - 1);
-            int y2 = (int) Math.min(Math.max(0, (this.posY + this.size / 2) / t + 1), Game.currentSizeY - 1);
-
-            for (int x = x1; x <= x2; x++)
-            {
-                for (int y = y1; y <= y2; y++)
-                {
-                    checkCollisionWith(Game.obstacleGrid[x][y]);
-                    checkCollisionWith(Game.surfaceTileGrid[x][y]);
-                }
-            }
-        }
+			checkObstacleCollision();
 
         this.size /= this.hitboxSize;
     }
 
-	public static boolean checkCollisionWithBorder(Movable m)
+	public void checkObstacleCollision()
+	{
+		double t = Game.tile_size;
+
+		int x1 = (int) Math.min(Math.max(0, (this.posX - this.size / 2) / t - 1), Game.currentSizeX - 1);
+		int y1 = (int) Math.min(Math.max(0, (this.posY - this.size / 2) / t - 1), Game.currentSizeY - 1);
+		int x2 = (int) Math.min(Math.max(0, (this.posX + this.size / 2) / t + 1), Game.currentSizeX - 1);
+		int y2 = (int) Math.min(Math.max(0, (this.posY + this.size / 2) / t + 1), Game.currentSizeY - 1);
+
+		for (int x = x1; x <= x2; x++)
+		{
+			for (int y = y1; y <= y2; y++)
+			{
+				checkCollisionWith(Game.obstacleGrid[x][y]);
+				checkCollisionWith(Game.surfaceTileGrid[x][y]);
+			}
+		}
+	}
+
+	public static boolean checkBorderCollision(Movable m)
 	{
 		boolean hasCollided = false;
 
@@ -1159,10 +1159,9 @@ public abstract class Tank extends Movable implements ISolidObject
 	{
 		if (Game.enable3d && Game.enable3dBg && Game.glowEnabled)
 		{
-			e.posZ = Math.max(e.posZ, Game.sampleTerrainGroundHeight(e.posX - e.size / 2, e.posY - e.size / 2));
-			e.posZ = Math.max(e.posZ, Game.sampleTerrainGroundHeight(e.posX + e.size / 2, e.posY - e.size / 2));
-			e.posZ = Math.max(e.posZ, Game.sampleTerrainGroundHeight(e.posX - e.size / 2, e.posY + e.size / 2));
-			e.posZ = Math.max(e.posZ, Game.sampleTerrainGroundHeight(e.posX + e.size / 2, e.posY + e.size / 2));
+			e.posZ = this.posZ;
+			for (int i = 0; i < Game.dirX.length; i++)
+				e.posZ = Math.max(e.posZ, Game.sampleTerrainGroundHeight(e.posX + e.size / 2 * Game.dirX[i], e.posY + e.size / 2 * Game.dirY[i]));
 			e.posZ++;
 		}
 		else
@@ -1176,7 +1175,13 @@ public abstract class Tank extends Movable implements ISolidObject
         this.registerSelector(new RotationSelector<Tank>());
     }
 
-    public void updatePossessing()
+	@Override
+	public boolean drawBeforeObstacles()
+	{
+		return true;
+	}
+
+	public void updatePossessing()
     {
 
     }

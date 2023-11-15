@@ -1,6 +1,5 @@
 package tanks.obstacle;
 
-import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.editorselector.LevelEditorSelector;
 import tanks.gui.screen.ScreenGame;
@@ -133,9 +132,9 @@ public class ObstacleTeleporter extends Obstacle
 			{
 				Movable m = Game.movables.get(i);
 
-				if (m instanceof Tank && ((Tank) m).targetable && Movable.distanceBetween(this, m) < m.size)
+				if (m instanceof Tank t1 && !t1.hidden && Movable.distanceBetween(this, m) < m.size)
 				{
-					t = (Tank) m;
+					t = t1;
 
 					if (this.cooldown > 0)
 					{

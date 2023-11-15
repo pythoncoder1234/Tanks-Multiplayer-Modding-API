@@ -27,9 +27,8 @@ public class BulletHoming extends Bullet
 
         for (Movable m: Game.movables)
         {
-            if (m instanceof Tank && !Team.isAllied(this, m) && !m.destroy)
+            if (m instanceof Tank t && !Team.isAllied(this, m) && !m.destroy)
             {
-                Tank t = (Tank) m;
                 double d = Movable.distanceBetween(this, m);
 
                 if (d < nearestDist)

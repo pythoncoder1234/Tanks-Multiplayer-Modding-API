@@ -186,13 +186,6 @@ public class InputSelector implements IDrawable, ITrigger
             }
         }
     }
-
-    @Override
-    public void updateKeybind()
-    {
-
-    }
-
     @Override
     public void setPosition(double x, double y)
     {

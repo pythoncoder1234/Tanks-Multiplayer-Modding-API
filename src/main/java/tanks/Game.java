@@ -2,6 +2,8 @@ package tanks;
 
 import basewindow.*;
 import tanks.bullet.*;
+import tanks.bullet.BulletAir;
+import tanks.bullet.BulletFlame;
 import tanks.eventlistener.EventListener;
 import tanks.extension.Extension;
 import tanks.extension.ExtensionRegistry;
@@ -107,7 +109,7 @@ public class Game
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
     public static final String version = "Tanks v1.5.1";
-    public static final String ModAPIVersion = "Mod API v1.2.c";
+    public static final String ModAPIVersion = "Mod API v1.2.d";
     public static final int network_protocol = 50;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;
@@ -129,6 +131,8 @@ public class Game
 	public static boolean allowAllNumbers = false;
 	public static final boolean cinematic = false;
 	public static boolean recordMode = false;
+
+	public static boolean grandpaMode = false;
 
 	public static boolean autocannon = false;
 	public static float cannonSpeed = 1f;
