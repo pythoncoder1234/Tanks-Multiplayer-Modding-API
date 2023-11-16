@@ -73,7 +73,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
 
-		this.baseModel = TankModels.arrow.base;
+//		this.baseModel = TankModels.arrow.base;
 
 		if (enableDestroyCheat)
 		{
@@ -124,8 +124,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (this.destroy)
 			return;
 
-        Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
+//        Drawing.drawing.setColor(0, 0, 0);
+//        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
     }
 
     @Override
