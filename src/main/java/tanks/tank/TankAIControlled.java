@@ -1613,9 +1613,9 @@ public class TankAIControlled extends Tank
 			this.avoidDirection = (smartness >= 0.4 ? direction : nearestDir) + Math.PI * scaledAggro * -Math.signum(diff);
 			this.nearestBullet = nearest;
 
-			Ray r = new Ray(this.posX, this.posY, this.avoidDirection, 0, this);
-			r.trace = true;
-			r.getTarget();
+//			Ray r = new Ray(this.posX, this.posY, this.avoidDirection, 0, this);
+//			r.trace = true;
+//			r.getTarget();
 		}
 	}
 

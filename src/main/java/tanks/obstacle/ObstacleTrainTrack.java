@@ -27,7 +27,7 @@ public class ObstacleTrainTrack extends Obstacle
     public int turn = 0;
     protected boolean firstFrame = true;
 
-    public ObstacleTrainTrack(String name,π double posX, double posY)
+    public ObstacleTrainTrack(String name, double posX, double posY)
     {
         super(name, posX, posY);
 

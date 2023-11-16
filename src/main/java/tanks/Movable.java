@@ -7,6 +7,7 @@ import tanks.network.event.EventStatusEffectBegin;
 import tanks.network.event.EventStatusEffectDeteriorate;
 import tanks.network.event.EventStatusEffectEnd;
 import tanks.obstacle.Obstacle;
+import tanks.tank.IAvoidObject;
 import tanks.tank.NameTag;
 import tanks.tank.Tank;
 import tanks.tank.TankProperty;

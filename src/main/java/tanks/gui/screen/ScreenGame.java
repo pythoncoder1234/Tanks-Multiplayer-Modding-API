@@ -1599,9 +1599,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 				m.update();
 
-				if (m instanceof IAvoidObject)
-					((IAvoidObject) m).updateAvoidance();
-
 				if (m instanceof Crate)
 					m = ((Crate) m).tank;
 
@@ -1631,9 +1628,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 			for (Obstacle o : Game.obstacles)
 			{
-				if (o instanceof IAvoidObject)
-					((IAvoidObject) o).updateAvoidance();
-
 				if (o.update)
 					o.update();
 			}
@@ -1962,6 +1956,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		for (Obstacle o: Game.removeObstacles)
 		{
+			if (o instanceof IAvoidObject)
+				IAvoidObject.avoidances.remove(o);
+
 			o.removed = true;
 			Drawing.drawing.terrainRenderer.remove(o);
 

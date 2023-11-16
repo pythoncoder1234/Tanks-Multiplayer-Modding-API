@@ -427,6 +427,9 @@ public abstract class Tank extends Movable implements ISolidObject
         if (o == null)
             return false;
 
+		if (o instanceof IAvoidObject a)
+            IAvoidObject.avoidances.add(a);
+
         if ((o.isSurfaceTile || !o.enableStacking) && m.posZ > 25)
             return false;
 

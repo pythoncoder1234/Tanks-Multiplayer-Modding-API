@@ -147,6 +147,8 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
     @Override
     public void update()
     {
+        IAvoidObject.avoidances.add(this);
+
         this.timer -= Panel.frameFrequency;
 
         this.frictionModifier = this.getAttributeValue(AttributeModifier.friction, 1);

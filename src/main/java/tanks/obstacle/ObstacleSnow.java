@@ -63,12 +63,16 @@ public class ObstacleSnow extends Obstacle
             m.addStatusEffect(StatusEffect.snow_velocity, 0, 20, 30);
             m.addStatusEffect(StatusEffect.snow_friction, 0, 5, 10);
 
-            this.depth -= Panel.frameFrequency * 0.005;
+            int amt = 5;
+            int lastDepth = (int) Math.ceil(this.depth * amt);
+            this.depth -= Panel.frameFrequency * 0.005 * (m instanceof Bullet b && b.burnsBushes ? 5 : 1);
+            Game.redrawObstacles.add(this);
 
             if (this.depth <= 0)
                 Game.removeObstacles.add(this);
 
-            Game.eventsOut.add(new EventObstacleSnowMelt(this.posX, this.posY, this.depth));
+            if (lastDepth > Math.ceil(this.depth * amt))
+                Game.eventsOut.add(new EventObstacleSnowMelt(this.posX, this.posY, this.depth));
         }
 
         this.onObjectEntryLocal(m);
@@ -79,7 +83,7 @@ public class ObstacleSnow extends Obstacle
     {
         if (Game.effectsEnabled && !ScreenGame.finished)
         {
-            if (!ScreenPartyLobby.isClient)
+            if (ScreenPartyLobby.isClient)
             {
                 this.depth = Math.max(0.05, this.depth - Panel.frameFrequency * 0.005);
                 Game.redrawObstacles.add(this);
@@ -149,24 +153,9 @@ public class ObstacleSnow extends Obstacle
 
             if (z > 0)
             {
-                this.finalHeight = z * this.visualDepth;
-                int x = Math.min(Game.currentSizeX - 1, (int) Math.max(0, this.posX / Game.tile_size));
-                int y = Math.min(Game.currentSizeY - 1, (int) Math.max(0, this.posY / Game.tile_size));
-
-                double r = Game.tilesR[x][y];
-                double g = Game.tilesG[x][y];
-                double b = Game.tilesB[x][y];
-
-                if (!Game.fancyTerrain)
-                {
-                    r = Level.currentColorR;
-                    g = Level.currentColorG;
-                    b = Level.currentColorB;
-                }
-
-                double frac = z / (this.depth * 0.8 * (Game.tile_size - base));
-                Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-                Drawing.drawing.fillBox(this, this.posX, this.posY, this.baseGroundHeight * mul, Game.tile_size, Game.tile_size, z * this.visualDepth, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
+                this.finalHeight = z;
+                Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
+                Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Game.tile_size, Game.tile_size, z * this.visualDepth, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
             }
         }
     }
