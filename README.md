@@ -22,14 +22,15 @@ To create a custom game or level, the source code is needed.
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21244&authkey=!ACyclUOE9MTa9yo).
+You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21245&authkey=!AHlFely4GoxIfhA).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
 New Features:
 ---
 
-- **Reference spawns** (off by default)
+- **Reference spawns**
+  - Hold shift on the exit buttons for level and crusade editor to save without tank references (info icon should appear while doing so) 
 - Getting closer and closer to full 1.5.2d multiplayer compatibility!
 - Crusade Import overhaul
 - Minimap overhaul

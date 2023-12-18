@@ -1,5 +1,6 @@
 package tanks.gui.screen.leveleditor;
 
+import basewindow.InputCodes;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
@@ -24,11 +25,15 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
 
     public Button quit = new Button(this.centerX, (int) (this.centerY + this.objYSpace * 2), this.objWidth, this.objHeight, "Exit", () ->
     {
+        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+            editor.modified = true;
+
         editor.save();
 
         Game.cleanUp();
         Game.screen = new ScreenSavedLevels();
-    }
+    },
+            "Shift click to force save---with no tank references"
     );
 
     public Button delete = new Button(this.centerX, (int) (this.centerY + this.objYSpace), this.objWidth, this.objHeight, "Delete level", () -> Game.screen = new OverlayConfirmDelete(Game.screen, editor)
@@ -59,6 +64,8 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
             options.update();
             super.update();
         }
+
+        quit.enableHover = Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT);
 
         delete.update();
         quit.update();

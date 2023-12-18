@@ -1,6 +1,7 @@
 package tanks.gui.screen;
 
 import basewindow.BaseFile;
+import basewindow.InputCodes;
 import tanks.*;
 import tanks.gui.*;
 import tanks.hotbar.item.Item;
@@ -40,7 +41,8 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         else
             c = new Crusade(Game.game.fileManager.getFile(crusade.fileName), crusade.name);
         Game.screen = new ScreenCrusadeDetails(c);
-    });
+    },
+            "Shift click to force save---with no tank references");
 
     public Button toggleNames = new Button(this.centerX, this.centerY + 120, this.objWidth, this.objHeight, "", new Runnable()
     {
@@ -324,12 +326,14 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         options.update();
         levels.update();
         items.update();
+        quit.update();
+
+        quit.enableHover = Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT);
 
         if (mode == Mode.levels)
         {
             levelButtons.update();
 
-            quit.update();
             syncLevels.update();
             addLevel.update();
             reorderLevels.update();
@@ -342,13 +346,11 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
             toggleNames.update();
             toggleRespawns.update();
             description.update();
-            quit.update();
         }
         else if (mode == Mode.items)
         {
             itemButtons.update();
 
-            quit.update();
             addItem.update();
             syncItems.update();
             reorderItems.update();
@@ -469,6 +471,10 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
 
     public void save()
     {
+        boolean prev = TankAIControlled.useTankReferences;
+        if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+            TankAIControlled.useTankReferences = false;
+
         for (Item i: this.crusade.crusadeItems)
             i.exportProperties();
 
@@ -523,6 +529,8 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         {
             Game.exitToCrash(e);
         }
+
+        TankAIControlled.useTankReferences = prev;
     }
 
     public Button reorderLevels = new Button(this.centerX - 380, this.centerY + 300, this.objWidth, this.objHeight, "Reorder levels", new Runnable()
@@ -554,10 +562,6 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
         }
     }
     );
-
-
-
-
 
     public void refreshLevelButtons()
     {

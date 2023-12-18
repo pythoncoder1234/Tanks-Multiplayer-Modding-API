@@ -1386,6 +1386,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		if (undoActions.isEmpty() && redoActions.isEmpty() && !modified)
 			return;
 
+		boolean prev = TankAIControlled.useTankReferences;
+		if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+			TankAIControlled.useTankReferences = false;
+
 		StringBuilder level = new StringBuilder("{");
 
 		level.append(this.level.sizeX).append(",").append(this.level.sizeY).append(",").append(this.level.colorR).append(",").append(this.level.colorG).append(",").append(this.level.colorB).append(",").append(this.level.colorVarR).append(",").append(this.level.colorVarG).append(",").append(this.level.colorVarB)
@@ -1580,6 +1584,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		{
 			Game.exitToCrash(e);
 		}
+
+		TankAIControlled.useTankReferences = prev;
 	}
 
 	public void paste()
@@ -3055,5 +3061,4 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			}
 		}
 	}
-
 }
