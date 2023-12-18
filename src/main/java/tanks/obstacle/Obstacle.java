@@ -3,12 +3,14 @@ package tanks.obstacle;
 import basewindow.IBatchRenderableObject;
 import basewindow.ShaderGroup;
 import tanks.*;
-import tanks.editorselector.*;
+import tanks.editorselector.GroupIdSelector;
+import tanks.editorselector.LevelEditorSelector;
+import tanks.editorselector.RotationSelector;
+import tanks.editorselector.StackHeightSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.rendering.ShaderGroundObstacle;
 import tanks.rendering.ShaderObstacle;
-import tanks.tank.IAvoidObject;
 import tanks.tank.TankAIControlled;
 
 public class Obstacle extends GameObject implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IBatchRenderableObject
@@ -362,8 +364,11 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	 */
 	public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
 	{
-		Drawing.drawing.setColor(r, g, b);
-		Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
+		if (Obstacle.draw_size < Game.tile_size || extra != 0)
+		{
+			Drawing.drawing.setColor(r, g, b);
+			Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
+		}
 	}
 
 	public void postOverride()
@@ -510,6 +515,12 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			return 10;
 		else
 			return 0;
+	}
+
+	/** Return true if objects must render before this obstacle to support transparency. */
+	public boolean isTransparent()
+	{
+		return false;
 	}
 
 	public byte getOptionsByte(double h)

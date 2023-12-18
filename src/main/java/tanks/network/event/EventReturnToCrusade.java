@@ -3,8 +3,10 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Crusade;
 import tanks.Panel;
+import tanks.gui.screen.ScreenInterlevel;
 import tanks.network.NetworkUtils;
 
+/** Not used in Mod API, gotta keep it for backwards compatability. */
 public class EventReturnToCrusade extends PersonalEvent
 {
     public String msg1;
@@ -46,7 +48,10 @@ public class EventReturnToCrusade extends PersonalEvent
     @Override
     public void execute()
     {
-
+        ScreenInterlevel.title = msg1;
+        ScreenInterlevel.topText = msg2;
+        Crusade.currentCrusade.win = win;
+        Crusade.currentCrusade.lose = lose;
     }
 
     @Override

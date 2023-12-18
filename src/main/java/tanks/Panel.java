@@ -5,6 +5,8 @@ import basewindow.InputCodes;
 import basewindow.transformation.Translation;
 import tanks.eventlistener.EventListener;
 import tanks.extension.Extension;
+import tanks.gui.Button;
+import tanks.gui.ChatMessage;
 import tanks.gui.ScreenElement.CenterMessage;
 import tanks.gui.ScreenElement.Notification;
 import tanks.gui.TextBox;
@@ -14,9 +16,11 @@ import tanks.hotbar.Hotbar;
 import tanks.network.Client;
 import tanks.network.ClientHandler;
 import tanks.network.MessageReader;
+import tanks.network.NetworkEventMap;
 import tanks.network.event.EventBeginLevelCountdown;
 import tanks.network.event.EventPing;
 import tanks.network.event.INetworkEvent;
+import tanks.network.event.IStackableEvent;
 import tanks.network.event.online.IOnlineServerEvent;
 import tanks.obstacle.Obstacle;
 import tanks.rendering.ShaderGroundOutOfBounds;
@@ -27,12 +31,14 @@ import tanks.tank.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Panel
 {
     public static boolean onlinePaused;
     public static Notification currentNotification;
 	public static CenterMessage currentMessage;
+	public static String lastWindowTitle = "";
 
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
@@ -54,7 +60,9 @@ public class Panel
 	public static boolean win = false;
 	public static double darkness = 0;
 	public static double skylight;
+
 	public static TextBox selectedTextBox;
+	public static Button draggedButton;
 
 	public Translation zoomTranslation = new Translation(Game.game.window, 0, 0, 0);
 
@@ -106,6 +114,7 @@ public class Panel
 	protected Screen lastDrawnScreen = null;
 
 	public ArrayList<double[]> lights = new ArrayList<>();
+	HashMap<Integer, IStackableEvent> stackedEventsIn = new HashMap<>();
 
 	public static void initialize()
 	{
@@ -256,6 +265,12 @@ public class Panel
 
         firstFrame = false;
 
+		if (Game.screen == Game.prevScreen && !Game.screen.windowTitle.equals(lastWindowTitle))
+		{
+			lastWindowTitle = Game.screen.windowTitle;
+			Game.game.window.setWindowTitle("Tanks" + lastWindowTitle);
+		}
+
         Game.prevScreen = Game.screen;
         Obstacle.lastDrawSize = Obstacle.draw_size;
 
@@ -386,33 +401,39 @@ public class Panel
 
 		synchronized (Game.eventsIn)
 		{
-			try
-			{
-				for (int i = 0; i < Game.eventsIn.size(); i++)
-				{
-					INetworkEvent e = Game.eventsIn.get(i);
+			stackedEventsIn.clear();
 
-					if (ScreenPartyLobby.isClient)
+			for (int i = 0; i < Game.eventsIn.size(); i++)
+			{
+				INetworkEvent e = Game.eventsIn.get(i);
+
+				if (ScreenPartyLobby.isClient)
+				{
+					ArrayList<EventListener> arr = Game.eventListeners.get(e.getClass());
+					if (arr != null)
 					{
-						ArrayList<EventListener> arr = Game.eventListeners.get(e.getClass());
-						if (arr != null)
+						for (EventListener l : arr)
 						{
-							for (EventListener l : arr)
-							{
-								if (l != null)
-									l.eventsThisFrame.add(e);
-							}
+							if (l != null)
+								l.eventsThisFrame.add(e);
 						}
 					}
+				}
 
-					if (!(e instanceof IOnlineServerEvent))
+				if (!(e instanceof IOnlineServerEvent))
+				{
+					if (e instanceof IStackableEvent)
+						stackedEventsIn.put(IStackableEvent.f(NetworkEventMap.get(e.getClass()) + IStackableEvent.f(((IStackableEvent) e).getIdentifier())), (IStackableEvent) e);
+					else
 						e.execute();
 				}
 			}
-			finally
-			{
-				Game.eventsIn.clear();
-			}
+
+			for (INetworkEvent e : stackedEventsIn.values())
+                e.execute();
+
+			stackedEventsIn.clear();
+			Game.eventsIn.clear();
 
 			if (ScreenPartyLobby.isClient)
 			{
@@ -720,6 +741,7 @@ public class Panel
 			Drawing.drawing.interfaceSizeY = Drawing.drawing.baseInterfaceSizeY / Drawing.drawing.interfaceScaleZoom;
 
 			Panel.selectedTextBox = null;
+			Panel.draggedButton = null;
 		}
 
 		if (forceRefreshMusic || (prevScreen != null && prevScreen != Game.screen && Game.screen != null && !Game.stringsEqual(prevScreen.music, Game.screen.music) && !(Game.screen instanceof IOnlineScreen)))
@@ -737,6 +759,9 @@ public class Panel
 			Game.game.window.validPressedKeys.clear();
 			Game.exitToCrash(new Exception("Manually initiated crash"));
 		}
+
+		if (!ScreenPartyHost.isServer && !ScreenPartyLobby.isClient)
+			Game.eventsOut.clear();
 	}
 
 	public void playScreenMusic(long fadeTime)
@@ -860,6 +885,7 @@ public class Panel
 			Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
 			Drawing.drawing.scale = Game.screen.getScale();
 			Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Panel.windowWidth / 28, (Panel.windowHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
+			Game.game.window.absoluteDepth = Drawing.drawing.interfaceScale * Game.absoluteDepthBase;
 		}
 
 		if (!this.introFinished)
@@ -940,6 +966,23 @@ public class Panel
 			{
 				System.out.println(Game.screen.getClass().getSimpleName());
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_S);
+			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_D))
+			{
+				ArrayList<ChatMessage> chat = null;
+
+				if (ScreenPartyLobby.isClient)
+                    chat = ScreenPartyLobby.chat;
+				else if (ScreenPartyHost.isServer)
+                    chat = ScreenPartyHost.chat;
+
+				synchronized (chat)
+				{
+					chat.clear();
+				}
+
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_D);
 			}
 
 			int brightness = 0;

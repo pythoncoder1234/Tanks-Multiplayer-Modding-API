@@ -1,7 +1,6 @@
 package tanks.bullet;
 
 import tanks.gui.screen.ScreenPartyLobby;
-import tanks.network.event.EventLayMine;
 import tanks.hotbar.item.ItemBullet;
 import tanks.tank.Explosion;
 import tanks.tank.Mine;
@@ -19,12 +18,12 @@ public class BulletExplosive extends Bullet
     public BulletExplosive(double x, double y, int bounces, Tank t, boolean affectsLiveBulletCount, ItemBullet ib)
     {
         super(x, y, bounces, t, affectsLiveBulletCount, ib);
+        this.name = bullet_name;
+        this.playPopSound = false;
+
         this.outlineColorR = 255;
         this.outlineColorG = 255;
         this.outlineColorB = 0;
-        this.name = bullet_name;
-
-        this.playPopSound = false;
     }
 
     @Override

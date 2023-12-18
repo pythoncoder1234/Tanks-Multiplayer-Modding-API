@@ -3,6 +3,7 @@ package tanks;
 import basewindow.IBatchRenderableObject;
 import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenGame;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.minigames.Arcade;
 import tanks.obstacle.Obstacle;
 import tanks.rendering.TrackRenderer;
@@ -298,6 +299,10 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         {
             double size = (radius * 2);
             double opacity = (100 - this.age * 5);
+
+            if (Game.vanillaMode && ScreenPartyLobby.isClient)
+                size += Game.tile_size;
+
             drawing.setColor(255, 0, 0, opacity, 1);
             drawing.fillForcedOval(this.posX, this.posY, size, size);
             drawing.setColor(255, 255, 255);

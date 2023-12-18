@@ -1,7 +1,13 @@
 Older Changelogs
 ---
 
-**Mod API v1.2.c**
+**Mod API v1.2.d**
+- New Tank AI (black tanks are really op now)
+- Smartness parameter in custom tanks
+- Stole the respawn player function from arcade mode
+- Bug fixes and other minor improvements
+
+- **Mod API v1.2.c**
 - Hotbar swap item and drop item
 - Added images for horizontal flip and vertical flip
 - Bug fixes

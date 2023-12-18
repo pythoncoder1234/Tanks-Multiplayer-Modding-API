@@ -110,16 +110,18 @@ public class ObstacleShrubbery extends Obstacle
 	@Override
 	public void onObjectEntry(Movable m)
 	{
-		if (m instanceof Tank)
+		if (m instanceof Tank t)
 		{
+			t.hiddenStatusChanged = true;
+
 			for (int x = -1; x <= 1; x++)
 			{
 				for (int y = -1; y <= 1; y++)
 				{
-                    ((Tank) m).canHidePoints[x + 1][y + 1] = ((Tank) m).canHidePoints[x + 1][y + 1] ||
+                    t.canHidePoints[x + 1][y + 1] = t.canHidePoints[x + 1][y + 1] ||
                             this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x);
 
-                    ((Tank) m).hiddenPoints[x + 1][y + 1] = ((Tank) m).hiddenPoints[x + 1][y + 1] ||
+                    t.hiddenPoints[x + 1][y + 1] = t.hiddenPoints[x + 1][y + 1] ||
                             (this.height >= 255 && this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x));
 				}
 			}

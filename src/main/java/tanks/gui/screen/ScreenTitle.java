@@ -284,10 +284,8 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 		{
 			for (Movable m: Game.movables)
 			{
-				if (m instanceof TankAIControlled)
+				if (m instanceof TankAIControlled t)
 				{
-					TankAIControlled t = (TankAIControlled) m;
-
 					if (!t.suicidal)
 						t.timeUntilDeath = 500;
 

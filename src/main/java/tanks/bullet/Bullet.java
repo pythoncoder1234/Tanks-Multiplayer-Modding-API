@@ -93,6 +93,12 @@ public class Bullet extends Movable implements IDrawableLightSource
 	@BulletProperty(id = "knockback_bullet", name = "Bullet knockback", category = BulletProperty.Category.impact)
 	public double bulletHitKnockback = 0;
 
+	@BulletProperty(id = "max_kb_speed", name = "Max knockback speed", category = BulletProperty.Category.impact)
+	public double maxKnockbackSpeed = 20;
+
+	@BulletProperty(id = "knockback_mine", name = "Mine knockback", category = BulletProperty.Category.impact)
+	public double mineHitKnockback = 0;
+
 	@BulletProperty(id = "explosion", name = "Explosion", category = BulletProperty.Category.impact)
 	public Explosion hitExplosion = null;
 
@@ -108,6 +114,9 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 	@BulletProperty(id = "collide_bullets", name = "Bullet collision", category = BulletProperty.Category.travel)
 	public boolean bulletCollision = true;
+
+	@BulletProperty(id = "explode_mines", name = "Detonate mines", category = BulletProperty.Category.travel)
+	public boolean explodeMines = true;
 
 	public boolean destroyBullets = true;
 
@@ -128,7 +137,10 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 	public boolean useCustomWallCollision = false;
 	public double wallCollisionSize = 10;
+
+	@BulletProperty(id = "heavy", name = "Heavy", category = BulletProperty.Category.travel)
 	public boolean heavy = false;
+
 	public ItemBullet item;
 
 	@BulletProperty(id = "max_live_bullets", name = "Max live bullets", category = BulletProperty.Category.firing)
@@ -161,6 +173,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 	public boolean enableCollision = true;
 
 	public boolean externalBulletCollision = true;
+	public boolean externalMineCollision = true;
 
 	public boolean affectsMaxLiveBullets;
 
@@ -277,11 +290,15 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 		if (!(Team.isAllied(this, t) && !this.team.friendlyFire) && !ScreenGame.finishedQuick && t.getDamageMultiplier(this) > 0)
 		{
-			if (this.tankHitKnockback > 0)
+			if (this.tankHitKnockback > 0 && t.collisionPush)
 			{
-				double mul = Game.tile_size * Game.tile_size / Math.pow(t.size, 2) * this.tankHitKnockback;
-				t.vX += this.vX * mul;
-				t.vY += this.vY * mul;
+				double mul = Game.tile_size * Game.tile_size / Math.max(1, Math.pow(t.size, 2)) * this.tankHitKnockback;
+
+				if (t.getSpeed() < this.tankHitKnockback * maxKnockbackSpeed)
+				{
+					t.vX += this.vX * mul;
+					t.vY += this.vY * mul;
+				}
 
 				t.recoilSpeed = t.getSpeed();
 				if (t.recoilSpeed > t.maxSpeed)
@@ -351,11 +368,16 @@ public class Bullet extends Movable implements IDrawableLightSource
 			this.collidedWithBullet((Bullet) o);
 	}
 
-	public void push(Bullet b)
+	public void push(Movable m, double kb)
 	{
-		b.vX += this.vX * Math.pow(this.size, 2) / Math.pow(b.size, 2) * this.bulletHitKnockback * Panel.frameFrequency;
-		b.vY += this.vY * Math.pow(this.size, 2) / Math.pow(b.size, 2) * this.bulletHitKnockback * Panel.frameFrequency;
-		b.addTrail();
+		if (m.getSpeed() < this.maxKnockbackSpeed)
+		{
+			m.vX += this.vX * Math.pow(this.size, 2) / Math.max(1, Math.pow(m.size, 2)) * frameDamageMultipler * frameDamageMultipler * kb * Panel.frameFrequency;
+			m.vY += this.vY * Math.pow(this.size, 2) / Math.max(1, Math.pow(m.size, 2)) * frameDamageMultipler * frameDamageMultipler * kb * Panel.frameFrequency;
+		}
+
+		if (m instanceof Bullet b)
+			b.addTrail();
 	}
 
 	protected void pop()
@@ -389,11 +411,11 @@ public class Bullet extends Movable implements IDrawableLightSource
 		b.collisionX = b.posX;
 		b.collisionY = b.posY;
 
-		double co1 = (ourSpeed * Math.cos(ourDir - toAngle) * (ourMass - theirMass) + 2 * theirMass * theirSpeed * Math.cos(theirDir - toAngle)) / (ourMass + theirMass);
+		double co1 = (ourSpeed * Math.cos(ourDir - toAngle) * (ourMass - theirMass) + 2 * theirMass * theirSpeed * Math.cos(theirDir - toAngle)) / Math.max(1, ourMass + theirMass);
 		double vX1 = co1 * Math.cos(toAngle) + ourSpeed * Math.sin(ourDir - toAngle) * Math.cos(toAngle + Math.PI / 2);
 		double vY1 = co1 * Math.sin(toAngle) + ourSpeed * Math.sin(ourDir - toAngle) * Math.sin(toAngle + Math.PI / 2);
 
-		double co2 = (theirSpeed * Math.cos(theirDir - toAngle) * (theirMass - ourMass) + 2 * ourMass * ourSpeed * Math.cos(ourDir - toAngle)) / (theirMass + ourMass);
+		double co2 = (theirSpeed * Math.cos(theirDir - toAngle) * (theirMass - ourMass) + 2 * ourMass * ourSpeed * Math.cos(ourDir - toAngle)) / Math.max(1, theirMass + ourMass);
 		double vX2 = co2 * Math.cos(toAngle) + theirSpeed * Math.sin(theirDir - toAngle) * Math.cos(toAngle + Math.PI / 2);
 		double vY2 = co2 * Math.sin(toAngle) + theirSpeed * Math.sin(theirDir - toAngle) * Math.sin(toAngle + Math.PI / 2);
 
@@ -429,13 +451,13 @@ public class Bullet extends Movable implements IDrawableLightSource
 			}
 			else if (this.bulletHitKnockback > 0 && b.bulletHitKnockback <= 0)
 			{
-				this.push(b);
+				this.push(b, this.bulletHitKnockback);
 				if (this.destroyBullets)
 					this.pop();
 			}
 			else if (this.bulletHitKnockback <= 0)
 			{
-				b.push(this);
+				b.push(this, b.bulletHitKnockback);
 				if (this.destroyBullets)
 					b.pop();
 			}
@@ -464,7 +486,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 				Drawing.drawing.playSound("bump.ogg", (float) (bullet_size / h.size), 1f);
 
 			if (h.bulletHitKnockback > 0)
-				h.push(l);
+				h.push(l, h.bulletHitKnockback);
 			else if (this.destroyBullets)
 				l.pop();
 		}
@@ -472,11 +494,19 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 	public void collidedWithMisc(Movable m)
 	{
-		if (!heavy)
+		if (m instanceof Mine)
 		{
-			this.pop();
-			m.destroy = true;
+			if (this.explodeMines)
+				m.destroy = true;
+			else if (mineHitKnockback > 0)
+				push(m, mineHitKnockback);
+
+			if (!this.externalMineCollision)
+				return;
 		}
+
+		if (!heavy)
+            this.pop();
 	}
 
 	public void checkCollisionLocal()
@@ -509,7 +539,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 	}
 
 	@Override
-	public boolean drawBeforeObstacles()
+	public boolean supportsTransparency()
 	{
 		return !Game.xrayBullets;
 	}
@@ -541,8 +571,8 @@ public class Bullet extends Movable implements IDrawableLightSource
             {
                 for (int y = y1; y <= y2; y++)
                 {
-                    output = output | checkCollisionWith(Game.obstacleGrid[x][y]);
-                    output = output | checkCollisionWith(Game.surfaceTileGrid[x][y]);
+                    output = output | checkCollisionObstacle(Game.obstacleGrid[x][y]);
+                    output = output | checkCollisionObstacle(Game.surfaceTileGrid[x][y]);
                 }
             }
 
@@ -608,14 +638,12 @@ public class Bullet extends Movable implements IDrawableLightSource
 		{
 			Movable o = Game.movables.get(i);
 
-			if (o instanceof Tank && !o.destroy)
+			if (o instanceof Tank t && !o.destroy)
 			{
 				double horizontalDist = Math.abs(this.posX - o.posX);
 				double verticalDist = Math.abs(this.posY - o.posY);
 
-				Tank t = ((Tank) o);
-
-                double bound = this.size / 2 + t.size * t.hitboxSize / 2;
+				double bound = this.size / 2 + t.size * t.hitboxSize / 2;
 
 				if (horizontalDist < bound && verticalDist < bound && t.size > 0)
 				{
@@ -635,12 +663,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 			{
 				double distSq = Math.pow(this.posX - o.posX, 2) + Math.pow(this.posY - o.posY, 2);
 
-				double s;
-
-				if (o instanceof Mine)
-					s = ((Mine) o).size;
-				else
-					s = ((Bullet) o).size;
+				double s = o.size;
 
 				double bound = this.size / 2 + s / 2;
 
@@ -686,15 +709,19 @@ public class Bullet extends Movable implements IDrawableLightSource
 		}
 	}
 
-    public int checkCollisionWith(Obstacle o)
+    public int checkCollisionObstacle(Obstacle o)
     {
         int output = 0;
 
         if (o == null || (!o.bulletCollision && !o.checkForObjects))
             return output;
 
+		double z = this.posZ;
+		if (this.autoZ)
+			z = Math.max(0, this.posZ - this.iPosZ);
+
         if (!(this.posZ < Game.tile_size && o.startHeight < 1) &&
-				(o.enableStacking && !Game.lessThan(true, o.startHeight * Game.tile_size, this.posZ, o.startHeight * Game.tile_size + o.getTileHeight())))
+				(o.enableStacking && !Game.lessThan(true, o.startHeight * Game.tile_size, z, o.startHeight * Game.tile_size + o.getTileHeight())))
             return output;
 
         double dx = this.posX - o.posX;
@@ -921,7 +948,6 @@ public class Bullet extends Movable implements IDrawableLightSource
 						else
 							e.setPolarMotion(Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
 
-
 						Game.effects.add(e);
 					}
 					else if (Game.fancyBulletTrails && (this.effect.equals(BulletEffect.fire) || this.effect.equals(BulletEffect.fireTrail)))
@@ -937,7 +963,6 @@ public class Bullet extends Movable implements IDrawableLightSource
 							e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 12);
 						else
 							e.setPolarMotion(Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
-
 
 						Game.effects.add(e);
 					}

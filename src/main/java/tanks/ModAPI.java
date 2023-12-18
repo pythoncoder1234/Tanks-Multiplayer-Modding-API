@@ -56,7 +56,6 @@ public class ModAPI
         NetworkEventMap.register(EventCreateScoreboard.class);
         NetworkEventMap.register(EventChangeBackgroundColor.class);
         NetworkEventMap.register(EventChangeNPCMessage.class);
-        NetworkEventMap.register(EventCreateTank.class);
         NetworkEventMap.register(EventClearMenuGroup.class);
         NetworkEventMap.register(EventClearNPCShop.class);
         NetworkEventMap.register(EventCustomLevelEndCondition.class);
@@ -110,7 +109,7 @@ public class ModAPI
     }
 
     /**
-     * Returns the level or crusade string of a .tanks file.
+     * Returns the level or crusade string of a .tanks file inside the project directory.
      */
     public static String getInternalLevelString(String filePath)
     {

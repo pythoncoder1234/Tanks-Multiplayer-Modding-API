@@ -1547,8 +1547,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		{
 			level.append("\ntanks");
 
-			for (Tank t : this.level.customTanks)
-				level.append("\n").append(t.toString());
+			for (TankAIControlled t : this.level.customTanks)
+				level.append("\n").append(t.tankString());
 		}
 
 		if (!this.level.properties.isEmpty())
@@ -1735,6 +1735,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			this.fontBrightness = 255;
 		else
 			this.fontBrightness = 0;
+
+		windowTitle = ": " + name + (allowClose ? "" : "*");
 
 		for (Obstacle o : Game.obstacles)
 			o.baseGroundHeight = Game.sampleGroundHeight(o.posX, o.posY);
@@ -3026,7 +3028,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			@Override
 			public void undo()
 			{
-				for (Obstacle o : Game.obstacles)
+				for (Obstacle o : obstacles)
 					Game.addObstacle(o);
 				Game.movables.addAll(this.tanks);
 				this.deselect.undo();

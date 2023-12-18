@@ -3,6 +3,7 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Crusade;
 import tanks.CrusadePlayer;
+import tanks.Game;
 import tanks.Player;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.network.NetworkUtils;
@@ -10,14 +11,12 @@ import tanks.network.NetworkUtils;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class EventSendCrusadeStats extends PersonalEvent
+public class EventShowCrusadeStats extends PersonalEvent
 {
-    public String name;
-    public String levels;
-    public String stats;
-    public String crusade;
+    public String name, levels, stats, crusade;
+    public boolean win;
 
-    public EventSendCrusadeStats()
+    public EventShowCrusadeStats()
     {
         if (ScreenPartyLobby.isClient)
             return;
@@ -57,6 +56,14 @@ public class EventSendCrusadeStats extends PersonalEvent
     {
         Crusade.currentCrusade = new Crusade(this.crusade, this.name);
 
+        if (!Game.vanillaMode)
+        {
+            if (win)
+                Crusade.currentCrusade.win = true;
+            else
+                Crusade.currentCrusade.lose = true;
+        }
+
         String[] levels = this.levels.split("\n");
 
         for (String level: levels)
@@ -94,6 +101,9 @@ public class EventSendCrusadeStats extends PersonalEvent
         NetworkUtils.writeString(b, this.levels);
         NetworkUtils.writeString(b, this.stats);
         NetworkUtils.writeString(b, this.crusade);
+
+        if (!Game.vanillaMode)
+            b.writeBoolean(Crusade.currentCrusade.win);
     }
 
     @Override
@@ -103,5 +113,6 @@ public class EventSendCrusadeStats extends PersonalEvent
         this.levels = NetworkUtils.readString(b);
         this.stats = NetworkUtils.readString(b);
         this.crusade = NetworkUtils.readString(b);
+        this.win = b.readBoolean();
     }
 }

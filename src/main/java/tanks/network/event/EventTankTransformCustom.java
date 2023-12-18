@@ -10,7 +10,7 @@ import tanks.tank.TankRemote;
 
 import java.util.HashSet;
 
-public class EventTankTransform extends PersonalEvent
+public class EventTankTransformCustom extends PersonalEvent
 {
     public int tank;
 
@@ -47,6 +47,9 @@ public class EventTankTransform extends PersonalEvent
     public double lightSize;
     public double luminance;
 
+    public boolean enableTracks;
+    public double trackSpacing;
+
     public boolean requiredKill = false;
 
     public HashSet<String> tankMusic;
@@ -60,12 +63,12 @@ public class EventTankTransform extends PersonalEvent
     public int bulletCount;
     public double bulletSpread;
 
-    public EventTankTransform()
+    public EventTankTransformCustom()
     {
 
     }
 
-    public EventTankTransform(Tank t, Tank newTank, int effect)
+    public EventTankTransformCustom(Tank t, Tank newTank, int effect)
     {
         tank = t.networkID;
 
@@ -107,6 +110,9 @@ public class EventTankTransform extends PersonalEvent
         this.bulletCount = newTank.bullet.shotCount;
         this.bulletSpread = newTank.bullet.shotSpread;
 
+        this.enableTracks = newTank.enableTracks;
+        this.trackSpacing = newTank.trackSpacing;
+
         this.requiredKill = newTank.mandatoryKill;
         this.tankMusic = newTank.musicTracks;
     }
@@ -143,6 +149,12 @@ public class EventTankTransform extends PersonalEvent
 
             t.mandatoryKill = requiredKill;
             t.musicTracks = tankMusic;
+
+            t.enableTracks = enableTracks;
+            t.trackSpacing = trackSpacing;
+
+            ((TankRemote) t).invisible = false;
+            ((TankRemote) t).vanished = false;
 
             if (effect == exclamation)
             {
@@ -234,6 +246,9 @@ public class EventTankTransform extends PersonalEvent
         b.writeInt(this.bulletCount);
         b.writeDouble(this.bulletSpread);
 
+        b.writeBoolean(this.enableTracks);
+        b.writeDouble(this.trackSpacing);
+
         b.writeBoolean(this.requiredKill);
 
         b.writeInt(this.tankMusic.size());
@@ -286,6 +301,9 @@ public class EventTankTransform extends PersonalEvent
 
         this.bulletCount = b.readInt();
         this.bulletSpread = b.readDouble();
+
+        this.enableTracks = b.readBoolean();
+        this.trackSpacing = b.readDouble();
 
         this.requiredKill = b.readBoolean();
 

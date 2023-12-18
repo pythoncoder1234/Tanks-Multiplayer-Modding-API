@@ -225,8 +225,8 @@ void main(void)
             vec4 extraLightSqrt = vec4(sqrt(extraLight.x), sqrt(extraLight.y), sqrt(extraLight.z), 0.0);
             gl_FragColor += extraLightSqrt;
 
-            //float fogFrac = pow(max(0.0, min(1.0, (position.w / depth - 0.2) / 0.8)), 5.0);
-            //gl_FragColor.xyz = gl_FragColor.xyz * (1.0 - fogFrac) + vec3(0.8, 0.8, 0.8) * (fogFrac);
+//            float fogFrac = pow(max(0.0, min(1.0, (position.w / depth - 0.2) / 0.8)), 2.0);
+//            gl_FragColor.a = max(0.3, gl_FragColor.a * (1.0 - fogFrac));
         }
     }
 

@@ -55,5 +55,6 @@ public @interface TankProperty
     String id();
     String name();
     String desc() default "";
+    String[] choiceDesc() default {};
     MiscType miscType() default MiscType.none;
 }

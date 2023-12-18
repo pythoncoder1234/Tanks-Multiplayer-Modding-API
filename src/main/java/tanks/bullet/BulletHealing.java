@@ -15,17 +15,18 @@ public class BulletHealing extends BulletInstant
 	public BulletHealing(double x, double y, int bounces, Tank t, boolean affectsMaxLiveBullets, ItemBullet ib)
 	{
 		super(x, y, bounces, t, affectsMaxLiveBullets, ib);
+
+		this.name = bullet_name;
+		this.itemSound = null;
 		this.playPopSound = false;
 		this.baseColorR = 0;
 		this.baseColorG = 255;
 		this.baseColorB = 0;
-		this.name = bullet_name;
 		this.effect = BulletEffect.none;
 		this.damage = 0.01;
 		this.shouldDodge = false;
 		this.dealsDamage = false;
 
-		this.itemSound = null;
 		// this.itemSound = "heal.ogg";
 	}
 

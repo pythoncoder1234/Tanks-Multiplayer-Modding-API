@@ -19,7 +19,7 @@ import java.util.HashSet;
  * class and register it in {@link ModAPI#registerGames()}. You can test it by going to
  * Singleplayer -> Minigames -> the class name of your minigame.<br><br>
  * <p>
- * The default <code>Minigame</code> class does nothing, so implement functions such as {@link #startBase()}.
+ * The default <code>Minigame</code> class does nothing, so implement functions such as {@link #start()}.
  * <br><br>
  * <p>
  * You can look at {@link tanks.minigames.TeamDeathmatch TeamDeathmatch} for reference.

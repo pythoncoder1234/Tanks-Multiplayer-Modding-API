@@ -54,11 +54,12 @@ public class EventLoadCrusadeHotbar extends PersonalEvent
             Game.player.hotbar.enabledCoins = true;
         }
 
+        ScreenGame g = (ScreenGame) Game.screen;
         if (this.translate)
-            ((ScreenGame)(Game.screen)).title.text = Translation.translate(this.title, this.index);
+            g.title.text = Translation.translate(this.title, this.index);
         else
-            ((ScreenGame)(Game.screen)).title.text = this.title;
+            g.title.text = this.title;
 
-        ((ScreenGame)(Game.screen)).subtitle.text = this.subtitle;
+        g.subtitle.text = this.subtitle;
     }
 }

@@ -12,10 +12,7 @@ import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemMine;
-import tanks.network.event.EventCreateTank;
-import tanks.network.event.EventTankAddAttributeModifier;
-import tanks.network.event.EventTankUpdate;
-import tanks.network.event.EventTankUpdateHealth;
+import tanks.network.event.*;
 import tanks.obstacle.Face;
 import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
@@ -79,7 +76,6 @@ public abstract class Tank extends Movable implements ISolidObject
 	public double baseHealth = 1;
 	public double health = 1;
 
-	@TankProperty(category = general, id = "invulnerable", name = "Invincible")
 	public boolean invulnerable = false;
 
 	@TankProperty(category = general, id = "targetable", name = "Should be targeted")
@@ -91,6 +87,9 @@ public abstract class Tank extends Movable implements ISolidObject
 	public boolean resistExplosions = false;
 	@TankProperty(category = general, id = "resist_freezing", name = "Freezing immunity")
 	public boolean resistFreeze = false;
+
+	@TankProperty(category = general, id = "collision_enabled", name = "Enable Collision")
+	public boolean enableCollision = true;
 
 	public int networkID = -1;
 	public int crusadeID = -1;
@@ -209,11 +208,10 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	@TankProperty(category = general, id = "collision", name = "Pushed during Collision")
 	public boolean collisionPush = true;
-	public boolean enableCollision = true;
 
+	public boolean hiddenStatusChanged = false;
 	public boolean[][] hiddenPoints = new boolean[3][3];
 	public boolean hidden = false;
-
 	public boolean[][] canHidePoints = new boolean[3][3];
 	public boolean canHide = false;
 
@@ -336,6 +334,7 @@ public abstract class Tank extends Movable implements ISolidObject
 	public void checkObstacleCollision()
 	{
 		double t = Game.tile_size;
+		drawTransparent = false;
 
 		int x1 = (int) Math.min(Math.max(0, (this.posX - this.size / 2) / t - 1), Game.currentSizeX - 1);
 		int y1 = (int) Math.min(Math.max(0, (this.posY - this.size / 2) / t - 1), Game.currentSizeY - 1);
@@ -454,6 +453,9 @@ public abstract class Tank extends Movable implements ISolidObject
             if (o.checkForObjects)
                 o.onObjectEntry(m);
 
+			if (o.isTransparent())
+				m.drawTransparent = true;
+
             if (!o.tankCollision)
                 return false;
 
@@ -520,6 +522,9 @@ public abstract class Tank extends Movable implements ISolidObject
 
 			this.emblemAngle = this.angle;
         }
+
+		if (this instanceof IAvoidObject a)
+			IAvoidObject.avoidances.add(a);
 
         this.age += Panel.frameFrequency;
 
@@ -685,30 +690,33 @@ public abstract class Tank extends Movable implements ISolidObject
 		if (!this.isRemote && this.standardUpdateEvent && shouldUpdate && ScreenPartyHost.isServer)
 			sendUpdateEvent();
 
-		this.canHide = true;
-		for (int i = 0; i < this.canHidePoints.length; i++)
+		if (this.hiddenStatusChanged)
 		{
-			for (int j = 0; j < this.canHidePoints[i].length; j++)
+			this.canHide = true;
+			for (int i = 0; i < this.canHidePoints.length; i++)
 			{
-				canHide = canHide && canHidePoints[i][j];
-				canHidePoints[i][j] = false;
+				for (int j = 0; j < this.canHidePoints[i].length; j++)
+				{
+					canHide = canHide && canHidePoints[i][j];
+					canHidePoints[i][j] = false;
+				}
 			}
-		}
 
-		this.hidden = true;
-		for (int i = 0; i < this.hiddenPoints.length; i++)
-		{
-			for (int j = 0; j < this.hiddenPoints[i].length; j++)
+			this.hidden = true;
+			for (int i = 0; i < this.hiddenPoints.length; i++)
 			{
-				hidden = hidden && hiddenPoints[i][j];
-				hiddenPoints[i][j] = false;
+				for (int j = 0; j < this.hiddenPoints[i].length; j++)
+				{
+					hidden = hidden && hiddenPoints[i][j];
+					hiddenPoints[i][j] = false;
+				}
 			}
+
+			this.hiddenStatusChanged = false;
 		}
 
 		if (this.hasCollided)
-		{
-			this.recoilSpeed *= 0.5;
-		}
+            this.recoilSpeed *= 0.5;
 
 		if (this.possessor != null)
 			this.possessor.updatePossessing();
@@ -1019,11 +1027,11 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	public void onDestroy()
 	{
+		if (this instanceof IAvoidObject a)
+			IAvoidObject.avoidances.remove(a);
+
 		if (this.explodeOnDestroy && this.age >= 250)
-		{
-			Explosion e = new Explosion(this.posX, this.posY, Mine.mine_radius, 2, true, this);
-			e.explode();
-		}
+            new Explosion(this.posX, this.posY, Mine.mine_radius, 2, true, this).explode();
 	}
 
 	@Override
@@ -1179,7 +1187,7 @@ public abstract class Tank extends Movable implements ISolidObject
     }
 
 	@Override
-	public boolean drawBeforeObstacles()
+	public boolean supportsTransparency()
 	{
 		return true;
 	}
@@ -1269,7 +1277,7 @@ public abstract class Tank extends Movable implements ISolidObject
 	/** Override this method if both the server and clients support a custom creation event for your modded tank. */
 	public void sendCreateEvent()
 	{
-		Game.eventsOut.add(new EventCreateTank(this));
+		Game.eventsOut.add(new EventTankCreate(this));
 	}
 
 	/** Override this method if both the server and clients support a custom update event for your modded tank. */

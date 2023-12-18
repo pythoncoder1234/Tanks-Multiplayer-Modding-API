@@ -60,9 +60,12 @@ public abstract class Animation
     public Properties update()
     {
         this.age += Panel.frameFrequency;
-        this.currentProperties.initProperties(this.menu);
-        this.currentProperties = apply(this.currentProperties);
 
+        double age1 = reverse ? duration - age : age;
+        age1 = Math.min(duration, age1);
+
+        this.currentProperties.initProperties(this.menu);
+        this.currentProperties = apply(this.currentProperties, age1);
         if (this.withReverse && this.age > this.duration / 2)
         {
             this.withReverse = false;
@@ -106,7 +109,7 @@ public abstract class Animation
         }
     }
 
-    public abstract Properties apply(Properties prev);
+    public abstract Properties apply(Properties prev, double age);
 
 
     public static void registerAnimation(Class<? extends Animation> cls, String... fieldNames)
@@ -189,11 +192,8 @@ public abstract class Animation
             this.changeTo = menu.styling.colorA;
         }
 
-        public Properties apply(Properties p)
+        public Properties apply(Properties p, double age1)
         {
-            double age1 = reverse ? duration - age : age;
-            age1 = Math.min(duration, age1);
-
             p.colorA = (age1 / duration) * changeTo;
 
             return p;
@@ -206,6 +206,38 @@ public abstract class Animation
         {
             super(duration);
             this.reverse = true;
+        }
+    }
+
+    public static class ColorTransition extends Animation
+    {
+        public double fromR, fromG, fromB;
+        public double origR, origG, origB;
+
+        public ColorTransition(double fromR, double fromG, double fromB)
+        {
+            this.fromR = fromR;
+            this.fromG = fromG;
+            this.fromB = fromB;
+        }
+
+        @Override
+        public void init(FixedMenu menu)
+        {
+            super.init(menu);
+            origR = menu.styling.colorR;
+            origG = menu.styling.colorG;
+            origB = menu.styling.colorB;
+        }
+
+        @Override
+        public Properties apply(Properties prev, double age)
+        {
+            double frac = duration / age;
+            prev.colorR = (fromR - origR) * frac;
+            prev.colorG = (fromG - origG) * frac;
+            prev.colorB = (fromB - origB) * frac;
+            return prev;
         }
     }
 
@@ -240,12 +272,9 @@ public abstract class Animation
             this.finalSY = menu.sizeY;
         }
 
-        public Properties apply(Properties p)
+        public Properties apply(Properties p, double age)
         {
-            double age1 = reverse ? age : duration - age;
-            age1 = Math.min(duration, age1);
-
-            double frac = age1 / duration * (1 - this.startPercentage) + this.startPercentage;
+            double frac = age / duration * (1 - this.startPercentage) + this.startPercentage;
 
             p.sizeX = this.finalSX * frac;
             p.sizeY = this.finalSY * frac;
@@ -283,13 +312,10 @@ public abstract class Animation
             this.endY = menu.posY;
         }
 
-        public Properties apply(Properties p)
+        public Properties apply(Properties p, double age)
         {
-            double age1 = reverse ? duration - age : age;
-            age1 = Math.min(duration, age1);
-
-            p.posX = age1 / duration * moveX + endX;
-            p.posY = age1 / duration * moveY + endY;
+            p.posX = age / duration * moveX + endX;
+            p.posY = age / duration * moveY + endY;
 
             return p;
         }

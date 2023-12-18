@@ -15,10 +15,15 @@ public class Explosion extends Movable
 {
     public double damage;
     public boolean destroysObstacles;
+    public boolean destroysBullets = true;
 
     public double radius;
     public Tank tank;
     public Item item;
+
+    public double knockbackRadius;
+    public double bulletKnockback;
+    public double tankKnockback;
 
     public Explosion(double x, double y, double radius, double damage, boolean destroysObstacles, Tank tank, Item item)
     {
@@ -41,6 +46,10 @@ public class Explosion extends Movable
     public Explosion(Mine m)
     {
         this(m.posX, m.posY, m.radius, m.damage, m.destroysObstacles, m.tank, m.item);
+        this.knockbackRadius = m.knockbackRadius;
+        this.bulletKnockback = m.bulletKnockback;
+        this.tankKnockback = m.tankKnockback;
+        this.destroysBullets = m.destroysBullets;
     }
 
     public void explode()
@@ -74,7 +83,32 @@ public class Explosion extends Movable
 
             for (Movable m: Game.movables)
             {
-                if (Math.pow(Math.abs(m.posX - this.posX), 2) + Math.pow(Math.abs(m.posY - this.posY), 2) < Math.pow(radius, 2))
+                double distSq = Math.pow(Math.abs(m.posX - this.posX), 2) + Math.pow(Math.abs(m.posY - this.posY), 2);
+                if (distSq < knockbackRadius * knockbackRadius)
+                {
+                    double power = (1 - distSq / Math.pow(knockbackRadius, 2));
+                    if (m instanceof Bullet b)
+                    {
+                        double angle = this.getAngleInDirection(m.posX, m.posY);
+                        m.addPolarMotion(angle, power * this.bulletKnockback * Math.pow(Bullet.bullet_size, 2) / Math.max(1, Math.pow(b.size, 2)));
+                        b.collisionX = m.posX;
+                        b.collisionY = m.posY;
+                        b.addTrail();
+                    }
+                    else if (m instanceof Tank t)
+                    {
+                        double angle = this.getAngleInDirection(m.posX, m.posY);
+                        m.addPolarMotion(angle, power * this.tankKnockback * Math.pow(Game.tile_size, 2) / Math.max(1, Math.pow(m.size, 2)));
+                        t.recoilSpeed = m.getSpeed();
+                        if (t.recoilSpeed > t.maxSpeed)
+                        {
+                            t.inControlOfMotion = false;
+                            t.tookRecoil = true;
+                        }
+                    }
+                }
+
+                if (withinExplosionRange(m))
                 {
                     if (m instanceof Tank && !m.destroy && ((Tank) m).getDamageMultiplier(this) > 0)
                     {
@@ -128,7 +162,7 @@ public class Explosion extends Movable
         {
             for (Obstacle o: Game.obstacles)
             {
-                if (Math.pow(Math.abs(o.posX - this.posX), 2) + Math.pow(Math.abs(o.posY - this.posY), 2) + Math.pow(o.startHeight * 50, 2) < Math.pow(radius, 2) && o.destructible && !Game.removeObstacles.contains(o))
+                if (o.destructible && !Game.removeObstacles.contains(o) && withinExplosionRange(o))
                 {
                     o.onDestroy(this);
                     o.playDestroyAnimation(this.posX, this.posY, this.radius);
@@ -140,6 +174,25 @@ public class Explosion extends Movable
         Effect e = Effect.createNewEffect(this.posX, this.posY, Effect.EffectType.explosion);
         e.radius = Math.max(this.radius - Game.tile_size * 0.5, 0);
         Game.effects.add(e);
+    }
+
+    public boolean withinExplosionRange(Movable m)
+    {
+        return withinExplosionRange(m, posX, posY, radius);
+    }
+
+    public boolean withinExplosionRange(Obstacle o)
+    {
+        return Movable.distanceBetween(o, this) < radius + Game.tile_size / 2;
+    }
+
+    public static boolean withinExplosionRange(Movable m, double mineX, double mineY, double radius)
+    {
+        double adjustedRadius = m instanceof Tank t ? radius - Game.tile_size * 0.95 + m.size * t.hitboxSize : radius;
+        if (Game.vanillaMode && ScreenPartyLobby.isClient)
+            adjustedRadius = radius + m.size;
+
+        return (m.posX-mineX)*(m.posX-mineX) + (m.posY-mineY)*(m.posY-mineY) < adjustedRadius * adjustedRadius;
     }
 
     @Override

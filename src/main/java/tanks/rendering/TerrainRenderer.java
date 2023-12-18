@@ -1,6 +1,9 @@
 package tanks.rendering;
 
-import basewindow.*;
+import basewindow.BaseShapeBatchRenderer;
+import basewindow.BaseWindow;
+import basewindow.IBatchRenderableObject;
+import basewindow.ShaderGroup;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;

@@ -21,7 +21,7 @@ import tanks.network.event.EventShootBullet;
  */
 public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerTank
 {
-    public static Model sunglassesModel;
+	public static boolean nightVision = true;
 
     public static ItemBullet default_bullet;
     public static ItemMine default_mine;
@@ -45,8 +45,6 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
 	protected double prevDistSq;
 
-	public boolean headlight = false;
-
 	protected long lastTrace = 0;
 	protected static boolean lockTrace = false;
 
@@ -54,6 +52,9 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
 	public double mouseX;
 	public double mouseY;
+
+	public static Model sunglassesModel;
+	public static boolean me = false;
 
 	public TankPlayer(double x, double y, double angle)
     {
@@ -73,7 +74,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
 
-//		this.baseModel = TankModels.arrow.base;
+		if (me)
+			this.baseModel = TankModels.arrow.base;
 
 		if (enableDestroyCheat)
 		{
@@ -121,17 +123,17 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
     {
         super.draw();
 
-		if (this.destroy)
+		if (this.destroy || !me)
 			return;
 
-//        Drawing.drawing.setColor(0, 0, 0);
-//        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
+        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
     }
 
     @Override
     public void update()
     {
-        boolean up = Game.game.input.moveUp.isPressed();
+		boolean up = Game.game.input.moveUp.isPressed();
         boolean down = Game.game.input.moveDown.isPressed();
         boolean left = Game.game.input.moveLeft.isPressed();
         boolean right = Game.game.input.moveRight.isPressed();
@@ -139,16 +141,20 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
         boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
 
-		if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_H))
+		if ((Game.game.window.validPressedKeys.contains(InputCodes.KEY_H) || age == 0) && Level.currentLightIntensity < 0.5)
 		{
-			Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_H);
+			if (age != 0)
+			{
+				Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_H);
+				nightVision = !nightVision;
+			}
 
-			headlight = !headlight;
-			double multiplier = headlight ? Math.pow(1 - Level.currentLightIntensity, 1.5) * 4 : 0;
+			Level.currentLightIntensity = Level.currentLightIntensity == 0.019 ? 0 : Math.max(Level.currentLightIntensity, 0.019);
+			double multiplier = nightVision ? -7 * Level.currentLightIntensity + 3 + 2./3 : 0;
 			this.glowSize = 0;
 			this.lightSize = 20 * multiplier;
 			this.lightIntensity = multiplier;
-			this.luminance = multiplier / 4;
+			this.luminance = nightVision ? multiplier : 0.5;
 		}
 
 		if (Game.game.input.aim.isValid())
@@ -169,10 +175,10 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
 		if (destroy && enableDestroyCheat)
 		{
-			for (int i = 0; i < Game.movables.size(); i++)
+			for (Movable m : Game.movables)
 			{
-				if (!Team.isAllied(this, Game.movables.get(i)))
-					Game.movables.get(i).destroy = true;
+				if (!Team.isAllied(this, m))
+					m.destroy = true;
 			}
 		}
 
@@ -351,7 +357,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 					{
 						InputPoint p = Game.game.window.touchPoints.get(i);
 
-						if (!p.tag.equals("") && !p.tag.equals("aim") && !p.tag.equals("shoot"))
+						if (!p.tag.isEmpty() && !p.tag.equals("aim") && !p.tag.equals("shoot"))
 							continue;
 
 						double px = Drawing.drawing.getInterfacePointerX(p.x);

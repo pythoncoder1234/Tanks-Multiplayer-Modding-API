@@ -84,12 +84,9 @@ public class Crusade
 
 	public String description = null;
 
-	/** Remote crusade constructor */
-	public Crusade(int levelSize, int bonusLifeFrequency)
+	public Crusade()
 	{
 		this.remote = true;
-		this.levelSize = levelSize;
-		this.bonusLifeFrequency = bonusLifeFrequency;
 	}
 
 	public Crusade(ArrayList<String> levelArray, String name, String file)
@@ -212,6 +209,7 @@ public class Crusade
 		}
 		
 		this.name = name;
+		TankAIControlled.solveReferences(customTanks);
 
 		for (TankAIControlled t: tankOccurrences.keySet())
 		{
@@ -242,7 +240,7 @@ public class Crusade
 		disconnectedPlayers.clear();
 		livingTankIDs.clear();
 
-		Game.eventsOut.add(new EventBeginCrusade(this));
+		Game.eventsOut.add(new EventBeginCrusade());
 
 		this.timePassed = 0;
 		this.started = true;

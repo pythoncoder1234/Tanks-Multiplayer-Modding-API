@@ -7,7 +7,6 @@ import tanks.network.event.EventStatusEffectBegin;
 import tanks.network.event.EventStatusEffectDeteriorate;
 import tanks.network.event.EventStatusEffectEnd;
 import tanks.obstacle.Obstacle;
-import tanks.tank.IAvoidObject;
 import tanks.tank.NameTag;
 import tanks.tank.Tank;
 import tanks.tank.TankProperty;
@@ -71,6 +70,7 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 	public Team team;
 
 	protected ArrayList<StatusEffect> removeStatusEffects = new ArrayList<>();
+	public boolean drawTransparent = false;
 
 	public Movable(double x, double y)
 	{
@@ -237,9 +237,13 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		return angle;
 	}
 
-	/** Override to draw this movable before obstacles, so that it works with transparency (i.e. works with water).
-	 * Only override if the object drawn has depth test on (i.e. 3D objects). */
 	public boolean drawBeforeObstacles()
+	{
+		return Game.enable3d && supportsTransparency() && drawTransparent;
+	}
+
+	/** Override to return true if the object is completely 3D and supports depth testing. */
+	public boolean supportsTransparency()
 	{
 		return false;
 	}

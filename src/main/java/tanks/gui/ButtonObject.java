@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 public class ButtonObject extends Button
 {
+	public double bgColA = 0;
+
 	public IDrawableForInterface object;
     public Runnable drawObjectForInterface = () -> object.drawForInterface(this.posX, this.posY);
     public boolean tempDisableHover = false;
@@ -70,22 +72,30 @@ public class ButtonObject extends Button
 		Drawing drawing = Drawing.drawing;
 
         this.drawObjectForInterface.run();
-		
-		if (!enabled)
-			drawing.setColor(this.disabledColR, this.disabledColG, this.disabledColB, 127);	
-		else if (selected && !Game.game.window.touchscreen)
-			drawing.setColor(this.selectedColR, this.selectedColG, this.selectedColB, 127);
-		else
-			drawing.setColor(0, 0, 0, 0);
 
-		drawing.fillInterfaceRect(posX, posY, sizeX, sizeY);
+		if (!isDragging)
+		{
+			if (!enabled)
+				drawing.setColor(this.disabledColR, this.disabledColG, this.disabledColB, 127);
+			else if (selected && !Game.game.window.touchscreen)
+				drawing.setColor(this.selectedColR, this.selectedColG, this.selectedColB, 127);
+			else
+				drawing.setColor(bgColR, bgColG, bgColB, bgColA);
+
+			drawing.fillInterfaceRect(posX, posY, sizeX, sizeY);
+		}
 
 		if (this.drawBeforeTooltip != null)
 			this.drawBeforeTooltip.run();
 
 		this.drawBeforeTooltip = null;
 
-		if (this.enableHover && this.selected && !tempDisableHover)
+		if (isDragging)
+		{
+			if (dragTooltip != null)
+				drawing.drawTooltip(dragTooltip.split("---"));
+		}
+		else if (this.enableHover && this.selected && !tempDisableHover)
 			drawing.drawTooltip(this.hoverText);
 
 		this.tempDisableHover = false;

@@ -188,6 +188,8 @@ public class FixedText extends FixedMenu
         if (this.location == null)
             return;
 
+        double[] pos;
+
         switch (this.location)
         {
             case title:
@@ -212,7 +214,7 @@ public class FixedText extends FixedMenu
                 this.posY = Panel.windowHeight - (this.hasItems ? 190 - Game.player.hotbar.percentHidden * 0.9 : 100);
                 break;
             case topLeft:
-                double[] pos = ModAPI.topCoords(true);
+                pos = ModAPI.topCoords(true);
                 this.posX = pos[0];
                 this.posY = pos[1];
 

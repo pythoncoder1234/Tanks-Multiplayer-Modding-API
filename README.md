@@ -29,9 +29,14 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-- New Tank AI (black tanks are really op now)
-- Smartness parameter in custom tanks
-- Stole the respawn player function from arcade mode
-- Bug fixes and other minor improvements
+- **Reference spawns** (off by default)
+- Getting closer and closer to full 1.5.2d multiplayer compatibility!
+- Crusade Import overhaul
+- Minimap overhaul
+- Fixed multiplayer chat
+- F3+D = clear chat (like in minecraft)
+- Improved Tank AI
+- Did some merging
+- Fixed bugs
 
 [Older Changelogs](changelog.md)

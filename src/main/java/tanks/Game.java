@@ -2,8 +2,6 @@ package tanks;
 
 import basewindow.*;
 import tanks.bullet.*;
-import tanks.bullet.BulletAir;
-import tanks.bullet.BulletFlame;
 import tanks.eventlistener.EventListener;
 import tanks.extension.Extension;
 import tanks.extension.ExtensionRegistry;
@@ -27,6 +25,7 @@ import tanks.hotbar.item.ItemShield;
 import tanks.minigames.Arcade;
 import tanks.network.*;
 import tanks.network.event.*;
+import tanks.network.event.online.EventSetMusic;
 import tanks.network.event.online.*;
 import tanks.obstacle.*;
 import tanks.registry.*;
@@ -108,9 +107,9 @@ public class Game
 
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
-    public static final String version = "Tanks v1.5.1";
-    public static final String ModAPIVersion = "Mod API v1.2.d";
-    public static final int network_protocol = 50;
+    public static final String version = "Tanks v1.5.2d";
+    public static final String ModAPIVersion = "Mod API v1.2.e";
+    public static final int network_protocol = 53;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;
     public static int tileOffsetY = 0;
@@ -322,7 +321,7 @@ public class Game
 		NetworkEventMap.register(EventReturnToLobby.class);
 		NetworkEventMap.register(EventBeginCrusade.class);
 		NetworkEventMap.register(EventReturnToCrusade.class);
-		NetworkEventMap.register(EventSendCrusadeStats.class);
+		NetworkEventMap.register(EventShowCrusadeStats.class);
 		NetworkEventMap.register(EventLoadCrusadeHotbar.class);
 		NetworkEventMap.register(EventSetupHotbar.class);
 		NetworkEventMap.register(EventAddShopItem.class);
@@ -365,7 +364,8 @@ public class Game
 		NetworkEventMap.register(EventTankTeleport.class);
 		NetworkEventMap.register(EventTankUpdateVisibility.class);
 		NetworkEventMap.register(EventTankUpdateColor.class);
-		NetworkEventMap.register(EventTankTransform.class);
+		NetworkEventMap.register(EventTankTransformPreset.class);
+		NetworkEventMap.register(EventTankTransformCustom.class);
 		NetworkEventMap.register(EventTankCharge.class);
 		NetworkEventMap.register(EventTankMimicTransform.class);
 		NetworkEventMap.register(EventTankMimicLaser.class);
@@ -404,6 +404,7 @@ public class Game
 		NetworkEventMap.register(EventAddTextBox.class);
 		NetworkEventMap.register(EventAddMenuButton.class);
 		NetworkEventMap.register(EventAddUUIDTextBox.class);
+		NetworkEventMap.register(EventSetMusic.class);
 		NetworkEventMap.register(EventRemoveShape.class);
 		NetworkEventMap.register(EventRemoveText.class);
 		NetworkEventMap.register(EventRemoveButton.class);
@@ -962,6 +963,7 @@ public class Game
             r.run();
 
         Game.currentGame = null;
+		ModAPI.sendEvents = true;
         ItemBar.overrideState = false;
         ScreenInterlevel.fromMinigames = false;
         ObstacleTeleporter.exitCooldown = 100;

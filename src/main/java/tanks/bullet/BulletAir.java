@@ -15,6 +15,8 @@ public class BulletAir extends BulletGas
     public BulletAir(double x, double y, int bounces, Tank t, boolean affectsLiveBulletCount, ItemBullet ib)
     {
         super(x, y, bounces, t, affectsLiveBulletCount, ib);
+
+        this.name = bullet_name;
         this.itemSound = "wind.ogg";
         this.pitchVariation = 1.0;
 
@@ -37,7 +39,8 @@ public class BulletAir extends BulletGas
 
         this.bulletHitKnockback = 0.04;
         this.tankHitKnockback = 0.1;
-
+        this.mineHitKnockback = 0.1;
+        this.explodeMines = false;
         this.lowersBushes = false;
 
         this.damage = 0;

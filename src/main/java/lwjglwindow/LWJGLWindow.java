@@ -820,6 +820,12 @@ public class LWJGLWindow extends BaseWindow
 	}
 
 	@Override
+	public void setWindowTitle(String s)
+	{
+		glfwSetWindowTitle(window, s);
+	}
+
+	@Override
 	public String getClipboard()
 	{
 		String s = GLFW.glfwGetClipboardString(window);

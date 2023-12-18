@@ -18,6 +18,7 @@ public class ButtonList
 
     public boolean arrowsEnabled = false;
     public boolean reorder = false;
+    public boolean centerAlign = true;
 
     public int page;
 
@@ -46,13 +47,13 @@ public class ButtonList
 
     public BiConsumer<Integer, Integer> reorderBehavior;
 
-    Button next = new Button(Drawing.drawing.interfaceSizeX / 2 + this.objXSpace / 2, Drawing.drawing.interfaceSizeY / 2, this.objWidth, this.objHeight, "Next page", () -> page++);
+    Button next = new Button(Drawing.drawing.interfaceSizeX / 2 + Drawing.drawing.objXSpace / 2, Drawing.drawing.interfaceSizeY / 2, Drawing.drawing.objWidth, Drawing.drawing.objHeight, "Next page", () -> page++);
 
-    Button previous = new Button(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace / 2, 0, this.objWidth, this.objHeight, "Previous page", () -> page--);
+    Button previous = new Button(Drawing.drawing.interfaceSizeX / 2 - Drawing.drawing.objXSpace / 2, 0, Drawing.drawing.objWidth, Drawing.drawing.objHeight, "Previous page", () -> page--);
 
-    Button first = new Button(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace - this.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, this.objHeight, this.objHeight, "", () -> page = 0);
+    Button first = new Button(Drawing.drawing.interfaceSizeX / 2 - Drawing.drawing.objXSpace - Drawing.drawing.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, Drawing.drawing.objHeight, Drawing.drawing.objHeight, "", () -> page = 0);
 
-    Button last = new Button(Drawing.drawing.interfaceSizeX / 2 + this.objXSpace + this.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, this.objHeight, this.objHeight, "", () -> page = (buttons.size() - 1) / rows / columns);
+    Button last = new Button(Drawing.drawing.interfaceSizeX / 2 + Drawing.drawing.objXSpace + Drawing.drawing.objHeight * 2, Drawing.drawing.interfaceSizeY / 2, Drawing.drawing.objHeight, this.objHeight, "", () -> page = (buttons.size() - 1) / rows / columns);
 
     public ButtonList(ArrayList<Button> buttons, int page, double xOffset, double yOffset)
     {
@@ -85,16 +86,16 @@ public class ButtonList
 
     public void sortButtons()
     {
-        this.next.posX = Drawing.drawing.interfaceSizeX / 2 + this.objXSpace / 2 + xOffset;
-        this.next.posY = Drawing.drawing.interfaceSizeY / 2 + ((rows + 3) / 2.0) * this.objYSpace + yOffset + controlsYOffset;
+        this.next.posX = Drawing.drawing.interfaceSizeX / 2 + Drawing.drawing.objXSpace / 2 + xOffset;
+        this.next.posY = Drawing.drawing.interfaceSizeY / 2 + ((rows + 3) / 2.0) * Drawing.drawing.objYSpace + yOffset + controlsYOffset;
 
-        this.previous.posX = Drawing.drawing.interfaceSizeX / 2 - this.objXSpace / 2 + xOffset;
-        this.previous.posY = Drawing.drawing.interfaceSizeY / 2 + ((rows + 3) / 2.0) * this.objYSpace + yOffset + controlsYOffset;
+        this.previous.posX = Drawing.drawing.interfaceSizeX / 2 - Drawing.drawing.objXSpace / 2 + xOffset;
+        this.previous.posY = Drawing.drawing.interfaceSizeY / 2 + ((rows + 3) / 2.0) * Drawing.drawing.objYSpace + yOffset + controlsYOffset;
 
-        this.last.posX = this.next.posX + this.objXSpace / 2 + this.objHeight / 2;
+        this.last.posX = this.next.posX + Drawing.drawing.objXSpace / 2 + Drawing.drawing.objHeight / 2;
         this.last.posY = this.next.posY;
 
-        this.first.posX = this.previous.posX - this.objXSpace / 2 - this.objHeight / 2;
+        this.first.posX = this.previous.posX - Drawing.drawing.objXSpace / 2 - Drawing.drawing.objHeight / 2;
         this.first.posY = this.previous.posY;
 
         this.next.image = "icons/forward.png";
@@ -126,18 +127,28 @@ public class ButtonList
 
             double offset = -this.objXSpace / 2 * (cols - 1);
 
-            buttons.get(i).posY = Drawing.drawing.interfaceSizeY / 2 + yOffset + (i % rows - (rows - 1) / 2.0) * this.objYSpace;
-            buttons.get(i).posX = Drawing.drawing.interfaceSizeX / 2 + offset + ((i / rows) % columns) * this.objXSpace + xOffset;
-            buttons.get(i).sizeX = this.objWidth;
-            buttons.get(i).sizeY = this.objHeight;
-            buttons.get(i).translated = this.translate;
-            buttons.get(i).imageR = this.imageR;
-            buttons.get(i).imageG = this.imageG;
-            buttons.get(i).imageB = this.imageB;
+            Button b = buttons.get(i);
 
+            if (centerAlign)
+            {
+                b.posX = Drawing.drawing.interfaceSizeX / 2 + offset + ((i / rows) % columns) * this.objXSpace + xOffset;
+                b.posY = Drawing.drawing.interfaceSizeY / 2 + yOffset + (i % rows - (rows - 1) / 2.0) * this.objYSpace;
+            }
+            else
+            {
+                b.posX = Drawing.drawing.interfaceSizeX / 2 + xOffset + this.objXSpace * (i % columns - columns / 2. + 0.5);
+                b.posY = Drawing.drawing.interfaceSizeY / 2 + yOffset + this.objYSpace * ((i % (rows * columns)) / columns - rows / 2. + 0.5);
+            }
+
+            b.sizeX = this.objWidth;
+            b.sizeY = this.objHeight;
+            b.translated = this.translate;
+            b.imageR = this.imageR;
+            b.imageG = this.imageG;
+            b.imageB = this.imageB;
 
             if (hideText)
-                buttons.get(i).text = "";
+                b.text = "";
         }
 
         if (this.arrowsEnabled)
@@ -200,7 +211,7 @@ public class ButtonList
                 next.function.run();
         }
 
-        if (this.arrowsEnabled && this.buttons.size() > 0)
+        if (this.arrowsEnabled && !this.buttons.isEmpty())
         {
             upButtons.get(0).enabled = false;
             downButtons.get(downButtons.size() - 1).enabled = false;
@@ -211,13 +222,13 @@ public class ButtonList
             if (this.arrowsEnabled)
                 buttons.get(i).enabled = !this.reorder;
 
-            buttons.get(i).update();
-
             if (this.reorder)
             {
                 upButtons.get(i).update();
                 downButtons.get(i).update();
             }
+
+            buttons.get(i).update();
         }
 
         previous.enabled = page > 0;
@@ -244,7 +255,7 @@ public class ButtonList
         first.enabled = previous.enabled;
         last.enabled = next.enabled;
 
-        if (this.arrowsEnabled && this.buttons.size() > 0)
+        if (this.arrowsEnabled && !this.buttons.isEmpty())
         {
             upButtons.get(0).enabled = false;
             downButtons.get(downButtons.size() - 1).enabled = false;
@@ -252,14 +263,14 @@ public class ButtonList
 
         if (rows * columns < buttons.size())
         {
-            Drawing.drawing.setInterfaceFontSize(objHeight * 0.6);
+            Drawing.drawing.setInterfaceFontSize(Drawing.drawing.objHeight * 0.6);
 
             if (Level.isDark())
                 Drawing.drawing.setColor(255, 255, 255);
             else
                 Drawing.drawing.setColor(0, 0, 0);
 
-            Drawing.drawing.drawInterfaceText(Drawing.drawing.interfaceSizeX / 2 + xOffset, 20 + Drawing.drawing.interfaceSizeY / 2 + yOffset + controlsYOffset + ((rows + 1) / 2.0) * this.objYSpace,
+            Drawing.drawing.drawInterfaceText(Drawing.drawing.interfaceSizeX / 2 + xOffset, previous.posY - Drawing.drawing.objYSpace * 0.75,
                     Translation.translate("Page %d of %d", (page + 1), (buttons.size() / (rows * columns) + Math.min(1, buttons.size() % (rows * columns)))));
 
             previous.draw();

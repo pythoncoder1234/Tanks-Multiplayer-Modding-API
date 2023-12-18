@@ -13,7 +13,7 @@ public class ScreenCrashed extends Screen
 	{
 		super(350, 40, 380, 60);
 
-		Game.currentGame = null;
+		Game.reset();
 		if (Math.random() < 0.01)
 			sadFace = ":)";
 	}

@@ -161,6 +161,8 @@ public class Level
             }
 		}
 
+		TankAIControlled.solveReferences(customTanks);
+
 		if (ScreenPartyHost.isServer && Game.disablePartyFriendlyFire)
 			this.disableFriendlyFire = true;
 

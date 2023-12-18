@@ -17,10 +17,14 @@ public class Button implements IDrawable, ITrigger
 {
     public Runnable function;
     public InputBindingGroup keybind;
-    public double posX;
-	public double posY;
-	public double sizeX;
-	public double sizeY;
+    public double posX, posY, sizeX, sizeY;
+
+	public boolean draggable;
+	public String dragTooltip = null;
+	public double clickX, clickY, origX, origY;
+	public boolean isDragging;
+	public Consumer<Button> whileDragging;
+	public BiConsumer<Button, Boolean> finishDrag;
 
 	public boolean translated = true;
 
@@ -48,9 +52,9 @@ public class Button implements IDrawable, ITrigger
 	public double disabledColG = 200;
 	public double disabledColB = 200;
 
-	public double unselectedColR = 255;
-	public double unselectedColG = 255;
-	public double unselectedColB = 255;
+	public double bgColR = 255;
+	public double bgColG = 255;
+	public double bgColB = 255;
 
 	public double selectedColR = 240;
 	public double selectedColG = 240;
@@ -185,7 +189,7 @@ public class Button implements IDrawable, ITrigger
 		else if (selected && !Game.game.window.touchscreen)
 			drawing.setColor(this.selectedColR, this.selectedColG, this.selectedColB);
 		else
-			drawing.setColor(this.unselectedColR, this.unselectedColG, this.unselectedColB);
+			drawing.setColor(this.bgColR, this.bgColG, this.bgColB);
 
 		drawing.fillInterfaceRect(posX, posY, sizeX - sizeY, sizeY);
 		drawing.fillInterfaceOval(posX - sizeX / 2 + sizeY / 2, posY, sizeY, sizeY);
@@ -223,41 +227,46 @@ public class Button implements IDrawable, ITrigger
 			drawing.drawInterfaceModel2D(model, this.posX + this.imageXOffset, this.posY + this.imageYOffset, 0,this.imageSizeX * 0.75, this.imageSizeY * 0.75, this.imageSizeY * 0.75);
 		}
 
-		if (enableHover)
+		if (!isDragging)
 		{
-			if (Game.glowEnabled && !fullInfo)
+			if (enableHover)
 			{
-				if (infoSelected && !Game.game.window.touchscreen)
+				if (Game.glowEnabled && !fullInfo)
 				{
-					drawGlow(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY + 2.5, this.sizeY * 3 / 4, this.sizeY * 3 / 4, 0.7, 0, 0, 0, 80, false);
-					Drawing.drawing.setColor(0, 0, 255);
-					Drawing.drawing.fillInterfaceGlow(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 9 / 4, this.sizeY * 9 / 4);
+					if (infoSelected && !Game.game.window.touchscreen)
+					{
+						drawGlow(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY + 2.5, this.sizeY * 3 / 4, this.sizeY * 3 / 4, 0.7, 0, 0, 0, 80, false);
+						Drawing.drawing.setColor(0, 0, 255);
+						Drawing.drawing.fillInterfaceGlow(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 9 / 4, this.sizeY * 9 / 4);
+					}
+					else
+						drawGlow(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY + 2.5, this.sizeY * 3 / 4, this.sizeY * 3 / 4, 0.6, 0, 0, 0, 100, false);
 				}
-				else
-					drawGlow(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY + 2.5, this.sizeY * 3 / 4, this.sizeY * 3 / 4, 0.6, 0, 0, 0, 100, false);
-			}
 
-			if ((infoSelected || (selected && fullInfo)) && !Game.game.window.touchscreen)
-			{
-				if (!fullInfo)
+				if ((infoSelected || (selected && fullInfo)) && !Game.game.window.touchscreen)
 				{
-					drawing.setColor(0, 0, 255);
+					if (!fullInfo)
+					{
+						drawing.setColor(0, 0, 255);
+						drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
+						drawing.setColor(255, 255, 255);
+						drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
+					}
+
+					drawing.drawTooltip(this.hoverText);
+				}
+				else if (!fullInfo)
+				{
+					drawing.setColor(0, 150, 255);
 					drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
 					drawing.setColor(255, 255, 255);
 					drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
 				}
-
-				drawing.drawTooltip(this.hoverText);
 			}
-			else if (!fullInfo)
-			{
-				drawing.setColor(0, 150, 255);
-				drawing.fillInterfaceOval(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
-				drawing.setColor(255, 255, 255);
-				drawing.drawInterfaceText(this.posX + this.sizeX / 2 - this.sizeY / 2, this.posY, "i");
-			}
-        }
-    }
+		}
+		else if (dragTooltip != null)
+			drawing.drawTooltip(dragTooltip.split("---"));
+	}
 
     @Override
     public void setPosition(double x, double y)
@@ -287,7 +296,7 @@ public class Button implements IDrawable, ITrigger
             double mx = Drawing.drawing.getInterfaceMouseX();
             double my = Drawing.drawing.getInterfaceMouseY();
 
-            boolean handled = checkMouse(mx, my, Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1));
+            boolean handled = checkMouse(mx, my, Game.game.window.pressedButtons.contains(InputCodes.MOUSE_BUTTON_1), Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1));
 
             if (handled)
                 Game.game.window.validPressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
@@ -298,7 +307,7 @@ public class Button implements IDrawable, ITrigger
 			{
 				InputPoint p = Game.game.window.touchPoints.get(i);
 
-				if (p.tag.equals(""))
+				if (p.tag.isEmpty())
 				{
 					double mx = Drawing.drawing.getInterfacePointerX(p.x);
 					double my = Drawing.drawing.getInterfacePointerY(p.y);
@@ -345,7 +354,16 @@ public class Button implements IDrawable, ITrigger
 
 	public boolean checkMouse(double mx, double my, boolean valid)
 	{
+		return checkMouse(mx, my, false, valid);
+	}
+
+	public boolean checkMouse(double mx, double my, boolean pressed, boolean valid)
+	{
+		if (Panel.draggedButton != null && Panel.draggedButton != this)
+			return false;
+
 		boolean handled = false;
+		boolean cancelDrag = Game.game.window.pressedButtons.contains(InputCodes.MOUSE_BUTTON_2);
 
 		if (Game.game.window.touchscreen)
 		{
@@ -353,14 +371,13 @@ public class Button implements IDrawable, ITrigger
 			sizeY += 20;
 		}
 
-		selected = (mx > posX - sizeX/2 && mx < posX + sizeX/2 && my > posY - sizeY/2  && my < posY + sizeY/2);
-		infoSelected = (mx > posX + sizeX/2 - sizeY && mx < posX + sizeX/2 && my > posY - sizeY/2  && my < posY + sizeY/2);
-
 		if (selected && valid)
 		{
+			clickX = mx;
+			clickY = my;
+
 			if (infoSelected && this.enableHover && Game.game.window.touchscreen && !fullInfo)
 			{
-				handled = true;
 				Drawing.drawing.playSound("bullet_explode.ogg", 2f, 0.3f);
 				//Drawing.drawing.playSound(this.sound, 1f, 1f);
 				Drawing.drawing.playVibration("click");
@@ -372,8 +389,6 @@ public class Button implements IDrawable, ITrigger
 			}
 			else if (enabled)
 			{
-				handled = true;
-
 				function.run();
 
 				if (!this.silent)
@@ -383,8 +398,38 @@ public class Button implements IDrawable, ITrigger
 				}
 
 				this.justPressed = true;
+				handled = true;
 			}
 		}
+		else if (draggable && selected && pressed && !cancelDrag)
+		{
+			if (Math.abs(clickX - mx) + Math.abs(clickY - my) > (sizeX + sizeY) / 4)
+			{
+				isDragging = true;
+				Panel.draggedButton = this;
+				setPosition(mx, my);
+				if (whileDragging != null)
+					whileDragging.accept(this);
+			}
+		}
+		else if (isDragging)
+		{
+			isDragging = false;
+			posX = origX;
+			posY = origY;
+			Panel.draggedButton = null;
+
+			if (finishDrag != null)
+				finishDrag.accept(this, cancelDrag);
+		}
+		else
+		{
+			origX = posX;
+			origY = posY;
+		}
+
+		selected = (mx > posX - sizeX/2 && mx < posX + sizeX/2 && my > posY - sizeY/2  && my < posY + sizeY/2);
+		infoSelected = (mx > posX + sizeX/2 - sizeY && mx < posX + sizeX/2 && my > posY - sizeY/2  && my < posY + sizeY/2);
 
 		if (Game.game.window.touchscreen)
 		{

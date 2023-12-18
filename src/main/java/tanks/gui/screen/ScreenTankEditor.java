@@ -208,13 +208,14 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 Class<? extends Enum> e = (Class<? extends Enum>) f.getType();
                 Enum<?>[] values = e.getEnumConstants();
                 String[] options = new String[values.length];
+
+                String[] choiceDesc = p.choiceDesc();
                 for (int i = 0; i < options.length; i++)
-                {
                     options[i] = Game.formatString(values[i].name());
-                }
 
                 Selector t = new Selector(0, 0, this.objWidth, this.objHeight, p.name(), options, () -> {}, "");
                 t.selectedOption = ((Enum<?>) f.get(tank)).ordinal();
+                t.buttonDescriptions = choiceDesc;
 
                 t.function = () ->
                 {
@@ -449,7 +450,9 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         }
 
         return new Button(0, 0, 350, 40, p.name(), "This option is not available yet");
-    }    public Button save = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace * 6.5, this.objWidth, this.objHeight, "Save to template", new Runnable()
+    }
+
+    public Button save = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace * 6.5, this.objWidth, this.objHeight, "Save to template", new Runnable()
     {
         @Override
         public void run()
@@ -462,7 +465,10 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 {
                     f.create();
                     f.startWriting();
-                    f.println(tank.toString());
+                    boolean prev = TankAIControlled.useTankReferences;
+                    TankAIControlled.useTankReferences = false;
+                    f.println(tank.tankString());
+                    TankAIControlled.useTankReferences = prev;
                     f.stopWriting();
 
                     save.setText("Done!");
@@ -478,7 +484,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     try
                     {
                         f.startWriting();
-                        f.println(tank.toString());
+                        f.println(tank.tankString());
                         f.stopWriting();
                     }
                     catch (FileNotFoundException e)
@@ -1241,8 +1247,8 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
         if (Game.screen != this)
             return;
-        else
-            this.setupLayoutParameters();
+
+        this.setupLayoutParameters();
 
         double extraHeight = ((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2;
         double width = Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale;
@@ -1262,6 +1268,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
             Drawing.drawing.setColor(255, 255, 255);
         else
             Drawing.drawing.setColor(0, 0, 0);
+
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 200, this.currentTab.name);
 
         for (Button b : this.topLevelButtons)

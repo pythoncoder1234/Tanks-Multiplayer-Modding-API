@@ -4,6 +4,7 @@ import basewindow.BaseShapeBatchRenderer;
 import basewindow.IBatchRenderableObject;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.gui.screen.ScreenGame;
 import tanks.obstacle.Obstacle;
 
 import java.util.HashMap;
@@ -67,8 +68,9 @@ public class TrackRenderer
         float a = (float) Drawing.drawing.currentColorA;
         float g = (float) Drawing.drawing.currentGlow;
 
+        double age = Game.screen instanceof ScreenGame game ? game.timePassed : Game.screen.screenAge;
         s.setColor(r1, g1, b1, a, g);
-        s.setAttribute(shader.addTime, (float) Game.screen.screenAge);
+        s.setAttribute(shader.addTime, (float) age);
 
         s.addPoint((float) s.rotateX(-width / 2, -height / 2, x, rotation), (float) s.rotateY(-width / 2, -height / 2, y, rotation), (float) z);
         s.addPoint((float) s.rotateX(width / 2, -height / 2, x, rotation), (float) s.rotateY(width / 2, -height / 2, y, rotation), (float) z);
@@ -82,9 +84,7 @@ public class TrackRenderer
     public void reset()
     {
         for (RegionRenderer r: this.renderers.values())
-        {
             r.renderer.free();
-        }
 
         this.tiles = null;
         this.renderers.clear();
@@ -134,8 +134,9 @@ public class TrackRenderer
     {
         this.shader.set();
 
+        double age = Game.screen instanceof ScreenGame g ? g.timePassed : Game.screen.screenAge;
         float max = (float) getMaxTrackAge();
-        shader.time.set((float) (Game.screen.screenAge + max * (1 - Obstacle.draw_size / Game.tile_size)));
+        shader.time.set((float) (age + max * (1 - Obstacle.draw_size / Game.tile_size)));
         shader.maxAge.set(max);
 
         this.drawMap(this.renderers, 0, 0);

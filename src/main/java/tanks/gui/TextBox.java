@@ -316,7 +316,7 @@ public class TextBox implements IDrawable, ITrigger
 		if (Game.glowEnabled && !Game.game.window.drawingShadow)
 		{
 			if (this.lastFrame < Panel.panel.ageFrames - 1)
-				this.glowEffects.clear();
+				this.glowEffects.remove((Integer) InputCodes.KEY_V);
 
 			this.lastFrame = Panel.panel.ageFrames;
 
@@ -397,7 +397,7 @@ public class TextBox implements IDrawable, ITrigger
 
 				Drawing.drawing.playVibration("click");
 				Drawing.drawing.playSound("bounce.ogg", 0.5f, 0.7f);
-				Game.game.window.getRawTextKeys().clear();
+				Game.game.window.getRawTextKeys().remove((Integer) InputCodes.KEY_V);
 			}
 		}
 
@@ -515,8 +515,8 @@ public class TextBox implements IDrawable, ITrigger
 
 		ArrayList<Character> texts = Game.game.window.getRawTextKeys();
 
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.validPressedKeys.clear();
+		Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_V);
+		Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_V);
 
 		if (Game.game.window.textPressedKeys.contains(InputCodes.KEY_LEFT_CONTROL) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_RIGHT_CONTROL) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_LEFT_SUPER) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_RIGHT_SUPER))
 		{
@@ -645,25 +645,23 @@ public class TextBox implements IDrawable, ITrigger
 
 	public void copy()
 	{
-		Game.game.window.textPressedKeys.clear();
-		Game.game.window.textValidPressedKeys.clear();
-		Game.game.window.getRawTextKeys().clear();
+		Game.game.window.textPressedKeys.remove((Integer) InputCodes.KEY_C);
+		Game.game.window.textValidPressedKeys.remove((Integer) InputCodes.KEY_C);
+		Game.game.window.getRawTextKeys().remove((Character) 'c');
 
 		Game.game.window.setClipboard(this.inputText);
 	}
 
 	public void paste()
 	{
-		Game.game.window.textPressedKeys.clear();
-		Game.game.window.textValidPressedKeys.clear();
-		Game.game.window.getRawTextKeys().clear();
+		Game.game.window.textPressedKeys.remove((Integer) InputCodes.KEY_V);
+		Game.game.window.textValidPressedKeys.remove((Integer) InputCodes.KEY_V);
+		Game.game.window.getRawTextKeys().remove((Character) 'v');
 
 		String s = Game.game.window.getClipboard();
 
 		for (int i = 0; i < s.length(); i++)
-		{
-			this.inputKey(s.charAt(i));
-		}
+            this.inputKey(s.charAt(i));
 	}
 
 	@Override

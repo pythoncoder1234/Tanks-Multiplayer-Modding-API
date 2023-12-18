@@ -2,13 +2,13 @@ package tanks;
 
 public class EndText
 {
-    public static final EndText normal = new EndText();
-    public static final EndText crusade = new EndText("Battle cleared!", "Battle failed!");
+    public static final EndText normal = new EndText().setTranslate(true);
+    public static final EndText crusade = new EndText("Battle cleared!", "Battle failed!").setTranslate(true);
 
     public String winTitle = "Victory!";
     public String loseTitle = "You were destroyed!";
-    public String winSubtitle = "";
-    public String loseSubtitle = "";
+    public String winSubtitle = "", loseSubtitle = "", winTopText = "", loseTopText = "";
+    public boolean translate = false;
 
     public EndText() {}
 
@@ -24,5 +24,18 @@ public class EndText
         this.loseTitle = ls;
         this.winSubtitle = wsub;
         this.loseSubtitle = lsub;
+    }
+
+    public EndText(String ws, String ls, String wsub, String lsub, String wtop, String ltop)
+    {
+        this(ws, ls, wsub, lsub);
+        this.winTopText = wtop;
+        this.loseTopText = ltop;
+    }
+
+    public EndText setTranslate(boolean translate)
+    {
+        this.translate = translate;
+        return this;
     }
 }

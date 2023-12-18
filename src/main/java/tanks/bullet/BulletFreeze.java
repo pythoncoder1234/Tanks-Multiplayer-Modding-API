@@ -18,10 +18,12 @@ public class BulletFreeze extends Bullet
 	public BulletFreeze(double x, double y, int bounces, Tank t, boolean affectsLiveBulletCount, ItemBullet ib)
 	{
 		super(x, y, bounces, t, affectsLiveBulletCount, ib);
+
+		this.name = bullet_name;
+
 		this.outlineColorR = 255;
 		this.outlineColorG = 255;
 		this.outlineColorB = 255;
-		this.name = bullet_name;
 
 		this.playPopSound = false;
 	}

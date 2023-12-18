@@ -29,7 +29,7 @@ public class TeleporterOrb extends Movable
 		this.size = t.size;
 		this.drawLevel = 9;
 		t.invulnerable = true;
-		t.hidden = false;
+		t.hidden = true;
 		this.fX = x;
 		this.fY = y;
 		this.iX = iX;
@@ -93,9 +93,7 @@ public class TeleporterOrb extends Movable
 			this.tank.positionLock = false;
 
 			for (int i = 0; i < 100 * Game.effectMultiplier; i++)
-			{
-				this.createEffect();
-			}
+                this.createEffect();
 
 			this.tank.size = this.size;
 			return;
@@ -144,7 +142,6 @@ public class TeleporterOrb extends Movable
 		double size = Math.max(-this.age / 100, Math.max((this.age - this.maxAge) / (this.endAge - this.maxAge), 0));
 		
 		this.tank.size = size * this.size;
-
 		this.tank.disabled = this.tank.size <= 0;
 
 		if (Math.random() < Panel.frameFrequency * Game.effectMultiplier)

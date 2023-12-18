@@ -17,11 +17,12 @@ public class BulletLaser extends BulletInstant
 	public BulletLaser(double x, double y, int bounces, Tank t, boolean affectsMaxLiveBullets, ItemBullet ib)
 	{
 		super(x, y, bounces, t, affectsMaxLiveBullets, ib);
+
+		this.name = bullet_name;
 		this.playPopSound = false;
 		this.baseColorR = 255;
 		this.baseColorG = 0;
 		this.baseColorB = 0;
-		this.name = bullet_name;
 		this.effect = BulletEffect.none;
 		this.itemSound = "laser.ogg";
 	}

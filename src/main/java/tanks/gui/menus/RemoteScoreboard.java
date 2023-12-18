@@ -12,10 +12,10 @@ public class RemoteScoreboard extends FixedMenu
     public Scoreboard.SortOrder sortOrder;
     public Scoreboard.SortBy sortBy;
 
-    public TextWithStyling title = new TextWithStyling();
-    public TextWithStyling subtitle = new TextWithStyling();
-    public TextWithStyling namesStyle = new TextWithStyling();
-    public TextWithStyling scoreStyle = new TextWithStyling();
+    public TextWithStyling title = new TextWithStyling("Scoreboard", 255, 255, 0, 255, 24);
+    public TextWithStyling subtitle = new TextWithStyling("", 255, 255, 255, 255, 20);
+    public TextWithStyling namesStyle = new TextWithStyling("", 255, 255, 255, 255, 20);
+    public TextWithStyling scoreStyle = new TextWithStyling("", 255, 64, 64, 255, 20);
 
     public RemoteScoreboard(double id, ArrayList<Scoreboard.Entry> names, Scoreboard.SortOrder sortOrder, Scoreboard.SortBy sortBy)
     {

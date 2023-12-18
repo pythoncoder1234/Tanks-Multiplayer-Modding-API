@@ -36,7 +36,9 @@ public class EventItemDrop extends PersonalEvent
         NetworkUtils.writeString(b, item);
         b.writeDouble(this.posX);
         b.writeDouble(this.posY);
-        b.writeDouble(this.cooldown);
+
+        if (!Game.vanillaMode)
+            b.writeDouble(this.cooldown);
     }
 
     @Override
@@ -46,7 +48,9 @@ public class EventItemDrop extends PersonalEvent
         this.item = NetworkUtils.readString(b);
         this.posX = b.readDouble();
         this.posY = b.readDouble();
-        this.cooldown = b.readDouble();
+
+        if (!Game.vanillaMode)
+            this.cooldown = b.readDouble();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package tanks.gui.menus;
 
+import basewindow.IBatchRenderableObject;
 import tanks.IDrawable;
 import tanks.ModAPI;
 import tanks.Panel;
@@ -9,7 +10,7 @@ import tanks.network.SyncedFieldMap;
 
 import java.util.ArrayList;
 
-public abstract class FixedMenu implements ISyncable, IDrawable
+public abstract class FixedMenu implements ISyncable, IBatchRenderableObject, IDrawable
 {
     public double id = Math.random() * Double.MAX_VALUE;
 

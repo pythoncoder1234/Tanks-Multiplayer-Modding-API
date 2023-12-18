@@ -132,7 +132,7 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
                         {
                             file.println("tanks");
                             for (TankAIControlled t : previous2.crusade.customTanks)
-                                file.println(t.toString());
+                                file.println(t.tankString());
                         }
 
                         if (!previous2.crusade.crusadeItems.isEmpty())

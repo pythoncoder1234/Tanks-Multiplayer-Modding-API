@@ -43,7 +43,7 @@ public class ObstacleBoostPanel extends Obstacle
     {
         this.brightness = Math.min(this.brightness + Panel.frameFrequency * 8, 100);
 
-        if (!ScreenGame.finishedQuick && Math.random() < Panel.frameFrequency * Game.effectMultiplier * 0.25)
+        if (!ScreenGame.finishedQuick && (m.vX != 0 || m.vY != 0) && Math.random() < Panel.frameFrequency * Game.effectMultiplier * 0.25)
             this.addEffect(m.posX, m.posY, 0);
     }
 
@@ -67,6 +67,9 @@ public class ObstacleBoostPanel extends Obstacle
     public void addEntryEffect(Movable m)
     {
         if (ScreenGame.finishedQuick)
+            return;
+
+        if (m.vX == 0 && m.vY == 0)
             return;
 
         if (ScreenPartyHost.isServer && (m instanceof Bullet || m instanceof Tank))

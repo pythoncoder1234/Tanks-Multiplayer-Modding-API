@@ -6,6 +6,7 @@ import tanks.Game;
 import tanks.Level;
 import tanks.gui.screen.ScreenFailedToLoadLevel;
 import tanks.gui.screen.ScreenPartyLobby;
+import tanks.network.EventMinigameStart;
 import tanks.network.NetworkUtils;
 import tanks.tank.TankAIControlled;
 
@@ -30,7 +31,7 @@ public class EventLoadLevel extends PersonalEvent
 			StringBuilder s = new StringBuilder("tanks\n");
 
 			for (TankAIControlled t : l.customTanks)
-				s.append(t.toString()).append("\n");
+				s.append(t.tankString()).append("\n");
 
 			s.append("level\n");
 
@@ -57,7 +58,7 @@ public class EventLoadLevel extends PersonalEvent
 			Game.cleanUp();
 
 			if (Game.vanillaMode && level.startsWith("minigame="))
-				Game.currentGame = Game.registryMinigame.minigames.get(level.substring(level.indexOf("=") + 1)).getConstructor().newInstance();
+				new EventMinigameStart(level.substring(level.indexOf("=") + 1)).execute();
 			else
 				Game.currentLevel = new Level(level);
 

@@ -16,6 +16,18 @@ public class ScreenJoinParty extends Screen
 {
 	public Thread clientThread;
 
+	public ScreenJoinParty()
+	{
+		this.music = "menu_2.ogg";
+		this.musicID = "menu";
+
+		vanillaMode.setText("Vanilla mode: ", Game.vanillaMode ? ScreenOptions.onText : ScreenOptions.offText);
+		ip.allowDots = true;
+		ip.maxChars = 100;
+		ip.allowColons = true;
+		ip.lowerCase = true;
+	}
+
 	Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", new Runnable()
 	{
 		@Override
@@ -32,7 +44,11 @@ public class ScreenJoinParty extends Screen
 		}
 	}
 	);
-    Button join = new Button(this.centerX, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "Join", new Runnable()
+
+	Button steam = new Button(this.centerX, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "Join Steam friends", () -> Game.screen = new ScreenJoinSteamFriends((ScreenJoinParty) Game.screen)
+	);
+
+	Button join = new Button(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Join", new Runnable()
 	{
 		@Override
         public void run()
@@ -171,26 +187,12 @@ public class ScreenJoinParty extends Screen
 			});
 
 			clientThread.setDaemon(true);
-            clientThread.start();
+			clientThread.start();
 		}
 	}
 	);
 
-	Button steam = new Button(this.centerX, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "Join Steam friends", () -> Game.screen = new ScreenJoinSteamFriends((ScreenJoinParty) Game.screen)
-	);
-
-	public ScreenJoinParty()
-	{
-		this.music = "menu_2.ogg";
-		this.musicID = "menu";
-
-		ip.allowDots = true;
-		ip.maxChars = 100;
-		ip.allowColons = true;
-		ip.lowerCase = true;
-
-        vanillaMode.setText("Vanilla mode: ", Game.vanillaMode ? ScreenOptions.onText : ScreenOptions.offText);
-	}    Button vanillaMode = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
+	Button vanillaMode = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -199,6 +201,17 @@ public class ScreenJoinParty extends Screen
             vanillaMode.setText("Vanilla mode: ", Game.vanillaMode ? ScreenOptions.onText : ScreenOptions.offText);
         }
     });
+
+	TextBox ip = new TextBox(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth * 16 / 7, this.objHeight, "Party IP Address", new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			Game.lastParty = ip.inputText;
+			ScreenOptions.saveOptions(Game.homedir);
+		}
+	}
+			, Game.lastParty, "You can find this on the---party host's screen");
 
 	@Override
 	public void update()
@@ -211,18 +224,7 @@ public class ScreenJoinParty extends Screen
 		if (Game.steamNetworkHandler.initialized)
 			steam.update();
 	}
-	
-	TextBox ip = new TextBox(this.centerX, this.centerY - this.objYSpace / 2, this.objWidth * 16 / 7, this.objHeight, "Party IP Address", new Runnable()
-	{
-		@Override
-		public void run() 
-		{
-			Game.lastParty = ip.inputText;
-			ScreenOptions.saveOptions(Game.homedir);
-		}
-	}	
-			, Game.lastParty, "You can find this on the---party host's screen");
-	
+
 	@Override
 	public void draw()
 	{

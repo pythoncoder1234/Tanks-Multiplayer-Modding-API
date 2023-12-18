@@ -102,9 +102,9 @@ public class ScreenCrusadeDetails extends Screen
         this.musicID = "menu";
 
         showRecordButton.fullInfo = true;
-        showRecordButton.unselectedColR = 0;
-        showRecordButton.unselectedColG = 127;
-        showRecordButton.unselectedColB = 255;
+        showRecordButton.bgColR = 0;
+        showRecordButton.bgColG = 127;
+        showRecordButton.bgColB = 255;
         showRecordButton.selectedColR = 0;
         showRecordButton.selectedColG = 0;
         showRecordButton.selectedColB = 255;

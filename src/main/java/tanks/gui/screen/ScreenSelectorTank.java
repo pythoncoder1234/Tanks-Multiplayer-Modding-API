@@ -120,8 +120,8 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
 
             if (i >= Game.registryTank.tankEntries.size() + 1)
             {
-                if (t != null && !t.description.equals(""))
-                    desc += " \n \n ";
+                if (t != null && !t.description.isEmpty())
+                    desc += " \n ";
 
                 desc += "\u00A7000255255255Custom tank from this level";
             }
@@ -137,7 +137,7 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
                 }
                         , desc);
 
-                if (desc.equals(""))
+                if (desc.isEmpty())
                     b.enableHover = false;
             }
             else
@@ -151,9 +151,9 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
                 b.fullInfo = true;
                 b.textOffsetY = -2.5;
 
-                b.unselectedColR = 255;
-                b.unselectedColG = 0;
-                b.unselectedColB = 0;
+                b.bgColR = 255;
+                b.bgColG = 0;
+                b.bgColB = 0;
 
                 b.selectedColR = 255;
                 b.selectedColG = 127;
@@ -210,8 +210,8 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
                 final TankAIControlled tt = t;
 
                 String desc = t.description;
-                if (!t.description.equals(""))
-                    desc += " \n \n ";
+                if (!t.description.isEmpty())
+                    desc += " \n ";
 
                 desc += "\u00A7000255000255Saved custom tank template";
 
@@ -222,9 +222,6 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
                 }
                         , desc);
                 b.text = l;
-
-                if (desc.equals(""))
-                    b.enableHover = false;
 
                 this.tankButtons.add(b);
             }

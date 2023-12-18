@@ -200,6 +200,8 @@ public abstract class BaseWindow
 
     public abstract void clearDepth();
 
+    public abstract void setWindowTitle(String s);
+
     public abstract String getClipboard();
 
     public abstract void setClipboard(String s);

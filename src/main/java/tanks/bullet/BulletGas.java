@@ -39,11 +39,14 @@ public abstract class BulletGas extends Bullet implements IDrawableWithGlow
     public BulletGas(double x, double y, int bounces, Tank t, boolean affectsLiveBulletCount, ItemBullet ib)
     {
         super(x, y, bounces, t, affectsLiveBulletCount, ib);
+
         this.useCustomWallCollision = true;
         this.playPopSound = false;
         this.playBounceSound = false;
+        this.canBeCanceled = false;
         this.effect = BulletEffect.none;
         this.externalBulletCollision = false;
+        this.externalMineCollision = false;
         this.destroyBullets = false;
         this.canMultiDamage = true;
     }

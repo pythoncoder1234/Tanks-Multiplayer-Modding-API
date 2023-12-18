@@ -266,6 +266,12 @@ public class TextBoxSlider extends TextBox
 
     public void submit()
     {
+        if (this.inputText.isEmpty())
+        {
+            this.inputText = this.previousInputText;
+            return;
+        }
+
         this.value = Double.parseDouble(this.inputText);
         super.submit();
     }

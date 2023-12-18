@@ -14,7 +14,7 @@ import tanks.tank.TankNPC;
 import java.util.ArrayList;
 
 /**
- * This is the minigame I wrote to test out features of the Mod API.<br><br>
+ * This minigame tests out Mod API features.<br><br>
  * <p>
  * So if things change from time to time, or I forget to remove a
  * piece of code I was testing, that's why.<br><br>
@@ -36,8 +36,8 @@ public class TeamDeathmatch extends Minigame
     };
 
     public static final String[] coolItems = new String[]{
-            "[Blaster,bullet_laser.png,5,0,2000,2000,bullet,laser,none,1.0,0,0.25,1,100.0,16.0,0.0,false,0.0,1,30.0]\n",
-            "[Grenade,mine.png,1,0,1,100,mine,300.0,300.0,200.0,2.0,2,75.0,30.0,true,20.0,0.02]\n"
+            "[Blaster,bullet_laser.png,5,0,2000,2000,bullet,laser,none,1.0,0,0.25,1,20.0,16.0,0.0,false,0.0,1,30.0]\n",
+            "[Grenade,mine.png,1,0,1,100,mine,300.0,300.0,200.0,2.0,2,150.0,30.0,true,20.0,0.02]\n"
     };
 
     public Scoreboard scoreboard;

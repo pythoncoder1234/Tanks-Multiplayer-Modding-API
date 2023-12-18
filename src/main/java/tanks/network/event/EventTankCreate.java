@@ -3,22 +3,17 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
 import tanks.Team;
-import tanks.hotbar.item.Item;
 import tanks.network.NetworkUtils;
 import tanks.tank.Tank;
 import tanks.tank.TankRemote;
 
-import java.util.ArrayList;
-
 public class EventTankCreate extends PersonalEvent
 {
-	public ArrayList<Item> items = new ArrayList<>();
-
 	public String type;
 	public double posX;
 	public double posY;
 	public double angle;
-	public boolean collisionPush = false;
+	public boolean collisionPush = true;
 	public String team;
 	public int id;
 	public double drawAge;
@@ -75,9 +70,11 @@ public class EventTankCreate extends PersonalEvent
 		b.writeDouble(this.posY);
 		b.writeDouble(this.angle);
 		NetworkUtils.writeString(b, this.team);
-		b.writeBoolean(this.collisionPush);
 		b.writeInt(this.id);
 		b.writeDouble(this.drawAge);
+
+		if (!Game.vanillaMode)
+			b.writeBoolean(this.collisionPush);
 	}
 
 	@Override
@@ -88,8 +85,10 @@ public class EventTankCreate extends PersonalEvent
 		this.posY = b.readDouble();
 		this.angle = b.readDouble();
 		this.team = NetworkUtils.readString(b);
-		this.collisionPush = b.readBoolean();
 		this.id = b.readInt();
 		this.drawAge = b.readDouble();
+
+		if (!Game.vanillaMode)
+			this.collisionPush = b.readBoolean();
 	}
 }

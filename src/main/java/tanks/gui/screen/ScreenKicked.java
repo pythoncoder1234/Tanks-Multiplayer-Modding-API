@@ -42,10 +42,8 @@ public class ScreenKicked extends Screen
 
 		ArrayList<String> lines = Drawing.drawing.wrapText(this.reason, Drawing.drawing.interfaceSizeX - 50, this.textSize);
 
-		for (int lineNo = 0; lineNo < lines.size(); lineNo++)
-		{
-			Drawing.drawing.drawInterfaceText(this.centerX, this.centerY - this.objYSpace * 1.5 + lineNo * 35, lines.get(lineNo));
-		}
+		for (int i = 0; i < lines.size(); i++)
+            Drawing.drawing.drawInterfaceText(this.centerX, this.centerY - this.objYSpace * 1.5 + i * 35, lines.get(i));
 
 		back.draw();
 	}

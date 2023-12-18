@@ -19,6 +19,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 	
 	public static String title = "You're not supposed to see this. If you see this, good for you.";
 	public static String subtitle = null;
+	public static String topText = null;
 
 	public boolean showCrusadeResultsNow = false;
 
@@ -96,10 +97,10 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		String ls = Game.currentLevelString;
 
 		StringBuilder tanks = new StringBuilder("\ntanks\n");
-		if (Crusade.crusadeMode && Crusade.currentCrusade.customTanks.size() > 0)
+		if (Crusade.crusadeMode && !Crusade.currentCrusade.customTanks.isEmpty())
 		{
 			for (TankAIControlled t: Crusade.currentCrusade.customTanks)
-				tanks.append(t.toString()).append("\n");
+				tanks.append(t.tankString()).append("\n");
 
 			ls = ls + tanks;
 		}
@@ -512,8 +513,11 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 
 		Drawing.drawing.setInterfaceFontSize(this.textSize);
 
-		if (subtitle != null && subtitle.length() > 0)
+		if (subtitle != null && !subtitle.isEmpty())
 			Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace, subtitle);
+
+		if (topText != null && !topText.isEmpty())
+			Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 25.0 / 6, topText);
 
 		if (Crusade.crusadeMode)
 		{
@@ -526,7 +530,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 				if (Drawing.drawing.interfaceScaleZoom > 1)
 					frac = 23.0 / 6;
 
-				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * frac, "You gained a life for clearing Battle %d!", (Crusade.currentCrusade.currentLevel + (!ScreenPartyLobby.isClient ? 1 : 0)));
+				Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * frac, "You gained a life for clearing Battle %d!", Crusade.currentCrusade.currentLevel + 1);
 			}
 		}
 

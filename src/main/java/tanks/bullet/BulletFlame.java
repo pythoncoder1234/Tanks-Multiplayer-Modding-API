@@ -15,6 +15,8 @@ public class BulletFlame extends BulletGas
     public BulletFlame(double x, double y, int bounces, Tank t, boolean affectsLiveBulletCount, ItemBullet ib)
     {
         super(x, y, bounces, t, affectsLiveBulletCount, ib);
+
+        this.name = bullet_name;
         this.itemSound = "flame.ogg";
         this.pitchVariation = 0.0;
 

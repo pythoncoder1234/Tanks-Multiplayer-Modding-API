@@ -41,6 +41,7 @@ public class Ray
 
 	public double targetX;
 	public double targetY;
+	public boolean acquiredTarget = false;
 
 	public Ray(double x, double y, double angle, int bounces, Tank tank)
 	{
@@ -161,6 +162,7 @@ public class Ray
 	public Movable getTarget()
 	{
 		double remainder = 0;
+		acquiredTarget = true;
 
 		if (isInsideObstacle(this.posX - size / 2, this.posY - size / 2) ||
 				isInsideObstacle(this.posX + size / 2, this.posY - size / 2) ||
@@ -170,9 +172,8 @@ public class Ray
 
 		for (Movable m: Game.movables)
 		{
-			if (m instanceof Tank && m != this.tank)
+			if (m instanceof Tank t && m != this.tank)
 			{
-				Tank t = (Tank) m;
 				if (this.posX + this.size / 2 >= t.posX - t.size / 2 &&
 						this.posX - this.size / 2 <= t.posX + t.size / 2 &&
 						this.posY + this.size / 2 >= t.posY - t.size / 2 &&
@@ -201,13 +202,8 @@ public class Ray
 						size *= tankHitSizeMul;
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle)
-					{
-						Obstacle o = (Obstacle) f.owner;
-
-						if (!o.bouncy)
-							passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-					}
+					if (f.owner instanceof Obstacle o && !o.bouncy)
+						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
 
 					if (f.startX < this.posX + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;
@@ -236,13 +232,8 @@ public class Ray
 
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle)
-					{
-						Obstacle o = (Obstacle) f.owner;
-
-						if (!o.bouncy)
-							passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-					}
+					if (f.owner instanceof Obstacle o && !o.bouncy)
+						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
 
 					if (f.startX > this.posX - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;
@@ -272,13 +263,8 @@ public class Ray
 						size *= tankHitSizeMul;
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle)
-					{
-						Obstacle o = (Obstacle) f.owner;
-
-						if (!o.bouncy)
-							passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-					}
+					if (f.owner instanceof Obstacle o && !o.bouncy)
+						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
 
 					if (f.startY < this.posY + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;
@@ -314,13 +300,8 @@ public class Ray
 						size *= tankHitSizeMul;
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle)
-					{
-						Obstacle o = (Obstacle) f.owner;
-
-						if (!o.bouncy)
-							passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-					}
+					if (f.owner instanceof Obstacle o && !o.bouncy)
+						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
 
 					if (f.startY > this.posY - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;
@@ -424,13 +405,12 @@ public class Ray
 		this.bounceX.add(0, this.posX);
 		this.bounceY.add(0, this.posY);
 
-		this.getTarget();
+		if (!acquiredTarget)
+			this.getTarget();
 
 		double dist = 0;
 		for (int i = 0; i < this.bounceX.size() - 1; i++)
-		{
-			dist += Math.sqrt(Math.pow(this.bounceX.get(i + 1) - this.bounceX.get(i), 2) + Math.pow(this.bounceY.get(i + 1) - this.bounceY.get(i), 2));
-		}
+            dist += Math.sqrt(Math.pow(this.bounceX.get(i + 1) - this.bounceX.get(i), 2) + Math.pow(this.bounceY.get(i + 1) - this.bounceY.get(i), 2));
 
 		return dist;
 	}

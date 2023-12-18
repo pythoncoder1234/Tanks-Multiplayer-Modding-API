@@ -72,6 +72,7 @@ public class ScreenSelector extends Screen implements IConditionalOverlayScreen,
         for (int i = 0; i < selector.options.length; i++)
         {
             String n = selector.options[i];
+            String desc = i < selector.buttonDescriptions.length ? selector.buttonDescriptions[i] : null;
 
             if (selector.music)
                 n = n.substring(n.indexOf("tank/") + "tank/".length(), n.indexOf(".ogg"));
@@ -97,7 +98,7 @@ public class ScreenSelector extends Screen implements IConditionalOverlayScreen,
                     Drawing.drawing.removeSyncedMusic(selector.options[selector.selectedOption], 500);
                     selector.function.run();
                 }
-            }
+            }, desc
             );
 
 

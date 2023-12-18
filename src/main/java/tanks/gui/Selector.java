@@ -28,6 +28,8 @@ public class Selector implements IDrawable, ITrigger
     public String[] hoverText;
     public String hoverTextRaw = "";
 
+    public String[] buttonDescriptions = {};
+
     public String[] options;
     public int selectedOption;
 

@@ -178,6 +178,12 @@ public class ObstacleWater extends ObstacleLiquid
     }
 
     @Override
+    public boolean isTransparent()
+    {
+        return true;
+    }
+
+    @Override
     public int unfavorability(TankAIControlled t)
     {
         return 5;

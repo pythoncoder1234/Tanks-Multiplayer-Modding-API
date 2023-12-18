@@ -495,11 +495,6 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
 
                 for (TankAIControlled t: tanks)
                 {
-                    t.maxSpeed = Math.min(1.5, t.maxSpeed);
-
-                    if (t.sightTransformTank != null)
-                        t.sightTransformTank.maxSpeed *= 2;
-
                     customTanks.put(t.name, t);
                     HashSet<Integer> a = customTankLevels.get(t.name);
 
@@ -512,7 +507,7 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
             }
 
             for (Map.Entry<String, TankAIControlled> s : customTanks.entrySet())
-                f.println(customTankLevels.get(s.getKey()) + " " + s.getValue());
+                f.println(customTankLevels.get(s.getKey()) + " " + s.getValue().tankString());
 
             f.println("levels");
 

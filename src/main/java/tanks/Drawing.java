@@ -357,7 +357,7 @@ public class Drawing
 
 	public void fillRect(IBatchRenderableObject o, double x, double y, double sizeX, double sizeY)
 	{
-		this.fillRect(x, y, sizeX, sizeY);
+		fillRect(x, y, sizeX, sizeY);
 	}
 
 	public void drawImage(String img, double x, double y, double sizeX, double sizeY)
@@ -1619,12 +1619,11 @@ public class Drawing
 		StringBuilder l = new StringBuilder();
 
 		boolean first = true;
-		for (String s : msg.split("[ |\n]"))
+		for (String s : msg.split(" "))
 		{
-			if (s.equals(""))
+			if (s.isEmpty())
 			{
-				lines.add(l.toString());
-				l = new StringBuilder();
+				l.append(" ");
 				first = true;
 				continue;
 			}

@@ -281,9 +281,7 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
             FloatBuffer b = this.attributeBuffers.get(a);
             float[] vals = this.floatAttributes.get(a);
             for (float f : vals)
-            {
                 b.put(f);
-            }
         }
 
         if (this.modifyingSize < 0)

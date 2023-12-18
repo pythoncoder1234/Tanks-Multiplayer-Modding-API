@@ -75,7 +75,9 @@ public class ItemBar
 
 		ItemBar.overrideState = true;
 		ItemBar.enabled = enabled;
-		Game.eventsOut.add(new EventSetHotbar(enabled, -2));
+
+		if (ModAPI.sendEvents)
+			Game.eventsOut.add(new EventSetHotbar(enabled, -2));
 	}
 
 	public boolean addItem(Item item)

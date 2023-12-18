@@ -1,7 +1,6 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
-import tanks.Crusade;
 import tanks.EndText;
 import tanks.Game;
 import tanks.Panel;
@@ -13,16 +12,9 @@ public class EventLevelEnd extends PersonalEvent
 {
 	public String winningTeams;
 	public boolean custom;
-	public String wt;
-	public String lt;
-	public String ws;
-	public String ls;
 
-	public boolean crusade = false;
-	public boolean levelPassed = false;
-	public int currentLevel;
-	public boolean win;
-	public boolean lose;
+	/**Win title, lose title, win subtitle, lose subtitle, win top text, lose top text*/
+	public String wt, lt, ws, ls, wtt, ltt;
 
 	public EventLevelEnd()
 	{
@@ -40,17 +32,9 @@ public class EventLevelEnd extends PersonalEvent
 			this.lt = endText.loseTitle;
 			this.ws = endText.winSubtitle;
 			this.ls = endText.loseSubtitle;
+			this.wtt = endText.winTopText;
+			this.ltt = endText.loseTopText;
 		}
-	}
-
-	/** For crusades */
-	public EventLevelEnd(Crusade c)
-	{
-		this.crusade = true;
-		this.levelPassed = Panel.win;
-		this.currentLevel = c.currentLevel + (Panel.win && !c.replay ? 1 : 0);
-		this.win = c.win;
-		this.lose = c.lose;
 	}
 
 	@Override
@@ -59,33 +43,21 @@ public class EventLevelEnd extends PersonalEvent
 		if (this.clientID != null)
 			return;
 
-		if (!crusade)
-		{
-			String[] teams = winningTeams.split(",");
+		String[] teams = winningTeams.split(",");
 
-			if (Game.listContains(Game.clientID.toString(), teams) || (Game.playerTank != null && Game.playerTank.team != null && Game.listContains(Game.playerTank.team.name, teams)))
-			{
-				Panel.win = true;
-				ScreenInterlevel.title = wt != null ? wt : "Victory!";
-				ScreenInterlevel.subtitle = ws;
-			}
-			else
-			{
-				Panel.win = false;
-				ScreenInterlevel.title = lt != null ? lt : "You were destroyed!";
-				ScreenInterlevel.subtitle = ls;
-			}
+		if (Game.listContains(Game.clientID.toString(), teams) || (Game.playerTank != null && Game.playerTank.team != null && Game.listContains(Game.playerTank.team.name, teams)))
+		{
+			Panel.win = true;
+			ScreenInterlevel.title = wt != null ? wt : "Victory!";
+			ScreenInterlevel.subtitle = ws;
+			ScreenInterlevel.topText = wtt;
 		}
 		else
 		{
-			Panel.win = levelPassed;
-			ScreenInterlevel.title = levelPassed ? "Battle cleared!" : "Battle failed!";
-
-			Crusade.currentCrusade.win = win;
-			Crusade.currentCrusade.lose = lose;
-			Crusade.currentCrusade.currentLevel = currentLevel;
-			Crusade.currentCrusade.lifeGained = levelPassed && !Crusade.currentCrusade.replay && !Crusade.currentCrusade.win
-					&& currentLevel > 0 && currentLevel % Crusade.currentCrusade.bonusLifeFrequency == 0;
+			Panel.win = false;
+			ScreenInterlevel.title = lt != null ? lt : "You were destroyed!";
+			ScreenInterlevel.subtitle = ls;
+			ScreenInterlevel.topText = ltt;
 		}
 
 		Game.silentCleanUp();
@@ -100,61 +72,39 @@ public class EventLevelEnd extends PersonalEvent
 	@Override
 	public void write(ByteBuf b) 
 	{
-		b.writeBoolean(crusade);
-		if (!crusade || Game.vanillaMode)
-		{
-			NetworkUtils.writeString(b, this.winningTeams);
+		NetworkUtils.writeString(b, this.winningTeams);
 
-			if (!Game.vanillaMode)
-			{
-				b.writeBoolean(custom);
-				if (custom)
-				{
-					NetworkUtils.writeString(b, this.wt);
-					NetworkUtils.writeString(b, this.lt);
-					NetworkUtils.writeString(b, this.ws);
-					NetworkUtils.writeString(b, this.ls);
-				}
-			}
-		}
-		else
+		if (!Game.vanillaMode)
 		{
-			b.writeBoolean(this.levelPassed);
-			b.writeInt(this.currentLevel);
-			b.writeBoolean(this.win);
-			b.writeBoolean(this.lose);
+			b.writeBoolean(custom);
+			if (custom)
+			{
+				NetworkUtils.writeString(b, this.wt);
+				NetworkUtils.writeString(b, this.lt);
+				NetworkUtils.writeString(b, this.ws);
+				NetworkUtils.writeString(b, this.ls);
+				NetworkUtils.writeString(b, this.wtt);
+				NetworkUtils.writeString(b, this.ltt);
+			}
 		}
 	}
 
 	@Override
 	public void read(ByteBuf b)
 	{
+		this.winningTeams = NetworkUtils.readString(b);
+
 		if (!Game.vanillaMode)
-			this.crusade = b.readBoolean();
-
-		if (!this.crusade)
 		{
-			this.winningTeams = NetworkUtils.readString(b);
-
-			if (!Game.vanillaMode)
+			if (b.readBoolean())
 			{
-				if (b.readBoolean())
-				{
-					this.wt = NetworkUtils.readString(b);
-					this.lt = NetworkUtils.readString(b);
-					this.ws = NetworkUtils.readString(b);
-					this.ls = NetworkUtils.readString(b);
-				}
+				this.wt = NetworkUtils.readString(b);
+				this.lt = NetworkUtils.readString(b);
+				this.ws = NetworkUtils.readString(b);
+				this.ls = NetworkUtils.readString(b);
+				this.wtt = NetworkUtils.readString(b);
+				this.ltt = NetworkUtils.readString(b);
 			}
 		}
-		else if (!Game.vanillaMode)
-		{
-			this.levelPassed = b.readBoolean();
-			this.currentLevel = b.readInt();
-			this.win = b.readBoolean();
-			this.lose = b.readBoolean();
-		}
-		else
-			winningTeams = NetworkUtils.readString(b);
 	}
 }

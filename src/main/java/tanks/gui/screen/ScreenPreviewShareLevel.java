@@ -64,9 +64,7 @@ public class ScreenPreviewShareLevel extends Screen implements ILevelPreviewScre
         this.name = name;
 
         for (int i = 0; i < drawables.length; i++)
-        {
             drawables[i] = new ArrayList<>();
-        }
 
         Obstacle.draw_size = Game.tile_size;
         this.screen = s;
@@ -105,7 +103,8 @@ public class ScreenPreviewShareLevel extends Screen implements ILevelPreviewScre
             drawables[m.drawLevel].add(m);
 
         for (Obstacle o: Game.obstacles)
-            drawables[o.drawLevel].add(o);
+            if (!o.batchDraw)
+                drawables[o.drawLevel].add(o);
 
         for (Effect e: Game.effects)
             drawables[7].add(e);

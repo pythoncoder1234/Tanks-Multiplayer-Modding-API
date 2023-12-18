@@ -13,6 +13,7 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
     public Screen previous;
     public ScreenLevelEditor editor;
     public boolean musicInstruments = false;
+    public boolean keepTitle = true;
 
     public ScreenLevelEditorOverlay(Screen previous, ScreenLevelEditor screenLevelEditor)
     {
@@ -84,6 +85,9 @@ public abstract class ScreenLevelEditorOverlay extends Screen implements ILevelP
     public void draw()
     {
         this.editor.draw();
+
+        if (keepTitle)
+            windowTitle = editor.windowTitle;
     }
 
     public ArrayList<TankSpawnMarker> getSpawns()

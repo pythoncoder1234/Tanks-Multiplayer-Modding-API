@@ -87,8 +87,8 @@ public class EventCreateScoreboard extends PersonalEvent
         );
         scoreboard.title = texts[0];
         scoreboard.subtitle = texts[1];
-        scoreboard.namesStyle = texts[1];
-        scoreboard.scoreStyle = texts[2];
+        scoreboard.namesStyle = texts[2];
+        scoreboard.scoreStyle = texts[3];
         scoreboard.syncEnabled = syncEnabled;
 
         ModAPI.fixedMenus.add(scoreboard);

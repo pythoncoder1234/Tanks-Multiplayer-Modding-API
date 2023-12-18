@@ -2,12 +2,12 @@ package tanks.bullet;
 
 import tanks.*;
 import tanks.AttributeModifier.Operation;
+import tanks.network.event.EventBulletDestroyed;
+import tanks.network.event.EventBulletStunEffect;
+import tanks.network.event.EventBulletInstantWaypoint;
+import tanks.network.event.EventShootBullet;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.item.ItemBullet;
-import tanks.network.event.EventBulletDestroyed;
-import tanks.network.event.EventBulletInstantWaypoint;
-import tanks.network.event.EventBulletStunEffect;
-import tanks.network.event.EventShootBullet;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
 
@@ -31,8 +31,8 @@ public class BulletElectric extends BulletInstant
 	public BulletElectric(double x, double y, int bounces, Tank t, ArrayList<Movable> targets, boolean affectsLiveBullets, ItemBullet ib)
 	{
 		super(x, y, 0, t, affectsLiveBullets, ib);
-		chain = bounces;
-		this.name = "electric";
+		this.name = bullet_name;
+		this.chain = bounces;
 
 		this.targets = targets;
 		this.damage = 0.125;
@@ -69,7 +69,7 @@ public class BulletElectric extends BulletInstant
 		}
 
 		if (!this.tank.isRemote)
-			this.saveTarget();
+            this.saveTarget();
 
 		while (!this.destroy)
 		{
@@ -86,7 +86,7 @@ public class BulletElectric extends BulletInstant
 			this.saveTarget();
 
 			for (int i = 0; i < this.xTargets.size(); i++)
-				Game.eventsOut.add(new EventBulletInstantWaypoint(this, this.xTargets.get(i), this.yTargets.get(i)));
+                Game.eventsOut.add(new EventBulletInstantWaypoint(this, this.xTargets.get(i), this.yTargets.get(i)));
 
 			Game.eventsOut.add(new EventBulletDestroyed(this));
 		}
@@ -149,34 +149,31 @@ public class BulletElectric extends BulletInstant
 
 	public void collided(Movable movable)
 	{
-        this.destroy = true;
+		this.destroy = true;
 
-        if (movable instanceof BulletElectric)
-            return;
+		if (movable instanceof BulletElectric)
+		{
+			return;
+		}
 
-        this.targets.add(movable);
+		this.targets.add(movable);
 
-        this.posX = movable.posX;
-        this.posY = movable.posY;
+		this.posX = movable.posX;
+		this.posY = movable.posY;
 
-        boolean validTarget = movable != this.tank && !(this.target instanceof Tank && this.tank.team != null && !this.tank.team.friendlyFire && Team.isAllied(this.target, this.tank));
+		AttributeModifier a = new AttributeModifier(AttributeModifier.velocity, Operation.multiply, -1);
+		a.duration = 100;
+		movable.addAttribute(a);
 
-        if (validTarget)
-        {
-            AttributeModifier a = new AttributeModifier(AttributeModifier.velocity, Operation.multiply, -1);
-            a.duration = 100;
-            movable.addAttribute(a);
-        }
+		if (chain > 0 && !this.tank.isRemote)
+		{
+			double nd = Double.MAX_VALUE;
+			Movable n = null;
 
-        if (chain > 0 && !this.tank.isRemote)
-        {
-            double nd = Double.MAX_VALUE;
-            Movable n = null;
-
-            for (int i = 0; i < Game.movables.size(); i++)
-            {
-                Movable m = Game.movables.get(i);
-                if (!Team.isAllied(this, m) && this != m && !m.destroy && !this.targets.contains(m) && ((m instanceof Bullet && ((Bullet) m).enableCollision && ((Bullet) m).bulletCollision) || m instanceof Mine || m instanceof Tank))
+			for (int i = 0; i < Game.movables.size(); i++)
+			{
+				Movable m = Game.movables.get(i);
+				if (!Team.isAllied(this, m) && this != m && !m.destroy && !this.targets.contains(m) && ((m instanceof Bullet && ((Bullet) m).enableCollision && ((Bullet) m).bulletCollision) || m instanceof Mine || m instanceof Tank))
 				{
 					double d = Movable.distanceBetween(this, m);
 					if (d < nd)
@@ -188,26 +185,26 @@ public class BulletElectric extends BulletInstant
 			}
 
 			if (n != null)
-            {
-                BulletElectric b = new BulletElectric(this.posX, this.posY, this.chain - 1, this.tank, this.targets, this.affectsMaxLiveBullets, this.item);
-                b.iPosZ = this.posZ;
-                b.damage = this.damage;
-                b.team = this.team;
-
+			{
+				BulletElectric b = new BulletElectric(this.posX, this.posY, this.chain - 1, this.tank, this.targets, this.affectsMaxLiveBullets, this.item);
+				b.iPosZ = this.posZ;
+				b.damage = this.damage;
+				b.team = this.team;
 				b.delay = 10;
+				b.inside.addAll(this.inside);
 
-                if (movable instanceof Tank)
-                    b.invulnerability = 16;
-                else
-                    b.invulnerability = 2;
+				if (movable instanceof Tank)
+					b.invulnerability = 16;
+				else
+					b.invulnerability = 2;
 
-                b.target = n;
-                Game.movables.add(b);
-            }
+				b.target = n;
+				Game.movables.add(b);
+			}
 		}
 
-        if (validTarget)
-        {
+		if (!this.tank.isRemote)
+		{
 			if (movable instanceof Tank)
 			{
 				Game.eventsOut.add(new EventBulletStunEffect(this.posX, this.posY, this.posZ, 1));
@@ -231,30 +228,7 @@ public class BulletElectric extends BulletInstant
 			else
 				movable.destroy = true;
 		}
-	}
 
-	@Override
-	public void addDestroyEffect()
-	{
-		if (Game.effectsEnabled)
-		{
-			for (int i = 0; i < this.size * 4 * Game.effectMultiplier; i++)
-			{
-				Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
-				double var = 50;
-				e.maxAge /= 2;
-				e.colR = Math.min(255, Math.max(0, this.baseColorR + Math.random() * var - var / 2));
-				e.colG = Math.min(255, Math.max(0, this.baseColorG + Math.random() * var - var / 2));
-				e.colB = Math.min(255, Math.max(0, this.baseColorB + Math.random() * var - var / 2));
-
-				if (Game.enable3d)
-					e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * Math.PI, Math.random() * this.size / 50.0 * 4);
-				else
-					e.setPolarMotion(Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
-
-				Game.effects.add(e);
-			}
-		}
 	}
 
 	@Override
@@ -295,6 +269,15 @@ public class BulletElectric extends BulletInstant
 			}
 		}
 
-		super.collided();
+		this.segments.add(new Laser(this.lastX, this.lastY, this.lastZ, this.collisionX, this.collisionY, this.posZ, this.size / 2, this.getAngleInDirection(this.lastX, this.lastY), this.baseColorR, this.baseColorG, this.baseColorB));
+		this.lastX = this.collisionX;
+		this.lastY = this.collisionY;
+		this.lastZ = this.posZ;
+
+		if (!this.isRemote)
+		{
+			this.xTargets.add(this.collisionX);
+			this.yTargets.add(this.collisionY);
+		}
 	}
 }

@@ -16,11 +16,12 @@ public class BulletBoost extends Bullet
 	public BulletBoost(double x, double y, int bounces, Tank t, boolean affectsLiveBulletCount, ItemBullet ib)
 	{
 		super(x, y, bounces, t, affectsLiveBulletCount, ib);
+
+		this.name = bullet_name;
 		this.outlineColorR = 255;
 		this.outlineColorG = 180;
 		this.outlineColorB = 0;
 		this.damage = 0;
-		this.name = bullet_name;
 		this.shouldDodge = false;
 		this.dealsDamage = false;
 

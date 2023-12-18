@@ -31,6 +31,7 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
     public boolean enableCollision = true;
     public double friction = mine_friction;
     public double frictionModifier = 1;
+    public boolean destroysBullets = true;
 
     public double radius = mine_radius;
     public Tank tank;
@@ -39,8 +40,8 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
     public int lastBeep = Integer.MAX_VALUE;
 
     public double knockbackRadius = this.radius * 2;
-    public double bulletKnockback = 10;
-    public double tankKnockback = 10;
+    public double bulletKnockback = 0;
+    public double tankKnockback = 0;
 
     public int networkID = -1;
 
@@ -71,13 +72,15 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
         this.outlineColorG = outlineCol[1];
         this.outlineColorB = outlineCol[2];
 
-        this.posZ = t.posZ;
+        this.posZ = Game.sampleTerrainGroundHeight(this.posX, this.posY);
         this.team = t.team;
 
         if (!ScreenPartyLobby.isClient)
         {
             if (!freeIDs.isEmpty())
+            {
                 this.networkID = freeIDs.remove(0);
+            }
             else
             {
                 this.networkID = currentID;
@@ -110,11 +113,12 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
         {
             int x = (int) (this.posX / Game.tile_size);
             int y = (int) (this.posY / Game.tile_size);
+            boolean inBounds = x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY;
 
             for (double i = height; i < height + 6; i++)
             {
                 double frac = ((i - height + 1) / 6 + 1) / 2;
-                boolean shouldXRay = i == height + 5 && Game.xrayBullets && Game.obstacleGrid[x][y] == null;
+                boolean shouldXRay = i == height + 5 && Game.xrayBullets && inBounds && Game.obstacleGrid[x][y] == null;
 
                 Drawing.drawing.setColor(this.outlineColorR * frac, this.outlineColorG  * frac, this.outlineColorB * frac, 255, 0.5);
                 Drawing.drawing.fillOval(this.posX, this.posY, this.posZ + i + 1.5, this.size, this.size, !shouldXRay, false);
@@ -178,7 +182,7 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
         boolean allyNear = false;
         for (Movable m : Game.movables)
         {
-            if (Math.pow(Math.abs(m.posX - this.posX), 2) + Math.pow(Math.abs(m.posY - this.posY), 2) < Math.pow(radius, 2))
+            if (withinExplosionRange(m))
             {
                 if (m instanceof Tank && !m.destroy && ((Tank) m).targetable)
                 {
@@ -197,8 +201,7 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
         }
     }
 
-    @Override
-    public boolean drawBeforeObstacles()
+    public boolean supportsTransparency()
     {
         return true;
     }
@@ -231,6 +234,11 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
             onCollidedWith(o);
     }
 
+    public boolean withinExplosionRange(Movable m)
+    {
+        return Explosion.withinExplosionRange(m, posX, posY, radius);
+    }
+
     public void onCollidedWith(Obstacle o)
     {
 
@@ -240,6 +248,7 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
     {
         Game.eventsOut.add(new EventMineRemove(this));
         Game.removeMovables.add(this);
+        IAvoidObject.avoidances.remove(this);
 
         if (!ScreenPartyLobby.isClient)
         {

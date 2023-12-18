@@ -58,7 +58,7 @@ public class FontRenderer extends BaseFontRenderer
 		int col = (int) (i % size);
 		int row = (int) (i / size);
 		int width = charSizes[i];
-		//this.window.shapeRenderer.drawRect(x, y - sY * 16, sX * width * 4, sY * 64);
+//		this.window.shapeRenderer.drawRect(x, y - sY * 16, sX * width * 4, sY * 64);
 
 		if (this.drawBox)
 		{
@@ -88,10 +88,10 @@ public class FontRenderer extends BaseFontRenderer
 				continue;
 			else if (c[i] == '\u00A7')
 			{
-				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + "" + c[i + 3]);
-				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + "" + c[i + 6]);
-				int b = Integer.parseInt(c[i + 7] + "" + c[i + 8] + "" + c[i + 9]);
-				int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + "" + c[i + 12]);
+				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + c[i + 3]);
+				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + c[i + 6]);
+				int b = Integer.parseInt(c[i + 7] + "" + c[i + 8] + c[i + 9]);
+				int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + c[i + 12]);
 				this.window.setColor(r, g, b, a);
 
 				i += 12;
@@ -116,10 +116,10 @@ public class FontRenderer extends BaseFontRenderer
 				continue;
 			else if (c[i] == '\u00A7' && color.matcher(s.substring(i, i+13)).matches())
 			{
-				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + "" + c[i + 3]);
-				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + "" + c[i + 6]);
-				int b = Integer.parseInt(c[i + 7] + "" + c[i + 8] + "" + c[i + 9]);
-				int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + "" + c[i + 12]);
+				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + c[i + 3]);
+				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + c[i + 6]);
+				int b = Integer.parseInt(c[i + 7] + "" + c[i + 8] + c[i + 9]);
+				int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + c[i + 12]);
 				this.window.setColor(r, g, b, a);
 
 				i += 12;

@@ -65,5 +65,4 @@ public class EventAnnounceConnection extends PersonalEvent
 		NetworkUtils.writeString(b, this.clientIdTarget.toString());
 		NetworkUtils.writeString(b, this.name);
 	}
-
 }

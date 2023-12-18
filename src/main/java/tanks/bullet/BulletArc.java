@@ -37,7 +37,6 @@ public class BulletArc extends Bullet
         this.enableCollision = false;
         this.posZ = Game.tile_size / 2;
         this.maxDestroyTimer = 100;
-        this.obstacleCollision = false;
         this.canBeCanceled = false;
         this.moveOut = false;
 
@@ -63,13 +62,14 @@ public class BulletArc extends Bullet
             if (this.bounces > 0)
             {
                 this.bounces--;
-                this.posZ += 2 * ((Game.tile_size / 2) - this.posZ);
-                this.vZ = Math.abs(this.vZ) * 0.75;
 
                 if (!this.tank.isRemote)
                     this.checkCollision();
 
                 this.checkCollisionLocal();
+
+                this.posZ += 2 * ((Game.tile_size / 2) - this.posZ);
+                this.vZ = Math.abs(this.vZ) * 0.75;
             }
             else
             {

@@ -7,15 +7,21 @@ import tanks.hotbar.ItemBar;
 
 public class EventBeginCrusade extends PersonalEvent
 {
-    public int levelSize;
-    public int bonusLifeFreq;
-
-    public EventBeginCrusade() {}
-
-    public EventBeginCrusade(Crusade c)
+    public EventBeginCrusade()
     {
-        this.levelSize = c.levelSize;
-        this.bonusLifeFreq = c.bonusLifeFrequency;
+
+    }
+
+    @Override
+    public void write(ByteBuf b)
+    {
+
+    }
+
+    @Override
+    public void read(ByteBuf b)
+    {
+
     }
 
     @Override
@@ -26,21 +32,7 @@ public class EventBeginCrusade extends PersonalEvent
             Game.player.hotbar.coins = 0;
             Game.player.hotbar.itemBar = new ItemBar(Game.player);
             Crusade.crusadeMode = true;
-            Crusade.currentCrusade = new Crusade(this.levelSize, this.bonusLifeFreq);
+            Crusade.currentCrusade = new Crusade();
         }
-    }
-
-    @Override
-    public void write(ByteBuf b)
-    {
-        b.writeInt(this.levelSize);
-        b.writeInt(this.bonusLifeFreq);
-    }
-
-    @Override
-    public void read(ByteBuf b)
-    {
-        this.levelSize = b.readInt();
-        this.bonusLifeFreq = b.readInt();
     }
 }
