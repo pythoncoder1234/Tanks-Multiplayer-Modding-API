@@ -8,17 +8,15 @@ import java.util.HashSet;
  */
 public class ShaderGroup
 {
-    public basewindow.ShaderBase shaderBase;
-    public basewindow.ShaderShadowMap shaderShadowMap;
+    public ShaderBase shaderBase;
+    public ShaderShadowMap shaderShadowMap;
     public HashSet<Attribute> attributes = new HashSet<>();
-    public basewindow.BaseWindow window;
-
-    public Uniform1b texture;
+    public BaseWindow window;
 
     public String name;
     protected int random = (int) (Math.random() * 100);
 
-    public ShaderGroup(basewindow.BaseWindow w, String name)
+    public ShaderGroup(BaseWindow w, String name)
     {
         this.window = w;
         this.shaderBase = new ShaderBase(w);
@@ -32,10 +30,10 @@ public class ShaderGroup
     {
         this.shaderShadowMap.setUp
                 ("/shaders/shadow_map.vert", new String[]{"/shaders/main_default.vert"},
-                "/shaders/shadow_map.frag", null);
+                        "/shaders/shadow_map.frag", null);
         this.shaderBase.setUp
                 ("/shaders/main.vert", new String[]{"/shaders/main_default.vert"},
-                "/shaders/main.frag", new String[]{"/shaders/main_default.frag"});
+                        "/shaders/main.frag", new String[]{"/shaders/main_default.frag"});
     }
 
     public void setVertexBuffer(int id)
@@ -98,8 +96,8 @@ public class ShaderGroup
     {
         public int count;
 
-        public basewindow.ShaderProgram.Attribute normalAttribute;
-        public basewindow.ShaderProgram.Attribute shadowMapAttribute;
+        public ShaderProgram.Attribute normalAttribute;
+        public ShaderProgram.Attribute shadowMapAttribute;
 
         public Attribute(int count)
         {
@@ -141,17 +139,17 @@ public class ShaderGroup
 
     public interface IGroupUniform
     {
-        void setWindow(basewindow.BaseWindow window);
+        void setWindow(BaseWindow window);
 
         void bind(boolean shadow);
     }
 
-    public static abstract class GroupPrimitiveUniform<T, U extends basewindow.ShaderProgram.IPrimitiveUniform<T>> implements IGroupUniform
+    public static abstract class GroupPrimitiveUniform<T, U extends ShaderProgram.IPrimitiveUniform<T>> implements IGroupUniform
     {
         protected U baseUniform;
         protected U shadowMapUniform;
 
-        protected basewindow.BaseWindow window;
+        protected BaseWindow window;
 
         public void set(T t)
         {
@@ -161,7 +159,7 @@ public class ShaderGroup
                 shadowMapUniform.set(t);
         }
 
-        public void setWindow(basewindow.BaseWindow w)
+        public void setWindow(BaseWindow w)
         {
             this.window = w;
         }
@@ -175,11 +173,11 @@ public class ShaderGroup
         }
     }
 
-    public static abstract class GroupMatrixUniform<T extends basewindow.ShaderProgram.IMatrixUniform>
+    public static abstract class GroupMatrixUniform<T extends ShaderProgram.IMatrixUniform>
     {
         protected T baseUniform;
         protected T shadowMapUniform;
-        protected basewindow.BaseWindow window;
+        protected BaseWindow window;
 
         public void set(float[] f, boolean transpose)
         {
@@ -203,27 +201,27 @@ public class ShaderGroup
         }
     }
 
-    public static class Uniform1b extends GroupPrimitiveUniform<Boolean, basewindow.ShaderProgram.Uniform1b> { }
+    public static class Uniform1b extends GroupPrimitiveUniform<Boolean, ShaderProgram.Uniform1b> { }
 
-    public static class Uniform1i extends GroupPrimitiveUniform<Integer, basewindow.ShaderProgram.Uniform1i> { }
+    public static class Uniform1i extends GroupPrimitiveUniform<Integer, ShaderProgram.Uniform1i> { }
 
-    public static class Uniform2i extends GroupPrimitiveUniform<int[], basewindow.ShaderProgram.Uniform2i> { }
+    public static class Uniform2i extends GroupPrimitiveUniform<int[], ShaderProgram.Uniform2i> { }
 
-    public static class Uniform3i extends GroupPrimitiveUniform<int[], basewindow.ShaderProgram.Uniform3i> { }
+    public static class Uniform3i extends GroupPrimitiveUniform<int[], ShaderProgram.Uniform3i> { }
 
-    public static class Uniform4i extends GroupPrimitiveUniform<int[], basewindow.ShaderProgram.Uniform4i> { }
+    public static class Uniform4i extends GroupPrimitiveUniform<int[], ShaderProgram.Uniform4i> { }
 
-    public static class Uniform1f extends GroupPrimitiveUniform<Float, basewindow.ShaderProgram.Uniform1f> { }
+    public static class Uniform1f extends GroupPrimitiveUniform<Float, ShaderProgram.Uniform1f> { }
 
-    public static class Uniform2f extends GroupPrimitiveUniform<float[], basewindow.ShaderProgram.Uniform2f> { }
+    public static class Uniform2f extends GroupPrimitiveUniform<float[], ShaderProgram.Uniform2f> { }
 
-    public static class Uniform3f extends GroupPrimitiveUniform<float[], basewindow.ShaderProgram.Uniform3f> { }
+    public static class Uniform3f extends GroupPrimitiveUniform<float[], ShaderProgram.Uniform3f> { }
 
-    public static class Uniform4f extends GroupPrimitiveUniform<float[], basewindow.ShaderProgram.Uniform4f> { }
+    public static class Uniform4f extends GroupPrimitiveUniform<float[], ShaderProgram.Uniform4f> { }
 
-    public static class UniformMatrix2 extends GroupMatrixUniform<basewindow.ShaderProgram.UniformMatrix2> { }
+    public static class UniformMatrix2 extends GroupMatrixUniform<ShaderProgram.UniformMatrix2> { }
 
-    public static class UniformMatrix3 extends GroupMatrixUniform<basewindow.ShaderProgram.UniformMatrix3> { }
+    public static class UniformMatrix3 extends GroupMatrixUniform<ShaderProgram.UniformMatrix3> { }
 
     public static class UniformMatrix4 extends GroupMatrixUniform<ShaderProgram.UniformMatrix4> { }
 

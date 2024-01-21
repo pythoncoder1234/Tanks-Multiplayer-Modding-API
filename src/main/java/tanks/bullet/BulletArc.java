@@ -22,6 +22,7 @@ public class BulletArc extends Bullet
     public ArrayList<Double> pastPosY = new ArrayList<>();
     public ArrayList<Double> pastPosZ = new ArrayList<>();
     public ArrayList<Double> pastTime = new ArrayList<>();
+    public double lastAddedAge = -1000;
 
     public BulletArc(double x, double y, Tank t, int bounces, boolean affectsMaxLiveBullets, ItemBullet ib)
     {
@@ -59,7 +60,7 @@ public class BulletArc extends Bullet
 
         if (this.posZ < Game.tile_size / 2 && !this.destroy)
         {
-            if (this.bounces > 0)
+            if (this.bounces > 0 && (this.posX >= 0 && this.posX <= Game.currentSizeX * Game.tile_size && this.posY >= 0 && this.posY <= Game.currentSizeY * Game.tile_size))
             {
                 this.bounces--;
 
@@ -95,15 +96,28 @@ public class BulletArc extends Bullet
         if (!this.destroy)
             this.angle = this.getPolarDirection();
 
-        this.pastPosX.add(this.posX);
+        if (this.age - this.lastAddedAge > 10)
+        {
+            int count = 1;
+            if (this.pastPosX.isEmpty())
+                count = 2;
 
-        if (Game.enable3d)
-            this.pastPosY.add(this.posY);
+            for (int i = 0; i < count; i++)
+            {
+                this.pastPosX.add(this.posX);
+                this.pastPosY.add(this.posY);
+                this.pastPosZ.add(this.posZ);
+                this.pastTime.add(this.age);
+
+                this.lastAddedAge = this.age;
+            }
+        }
         else
-            this.pastPosY.add(this.posY - this.posZ + 25);
-
-        this.pastPosZ.add(this.posZ);
-        this.pastTime.add(this.age);
+        {
+            this.pastPosX.set(this.pastPosX.size() - 1, this.posX);
+            this.pastPosY.set(this.pastPosY.size() - 1, this.posY);
+            this.pastPosZ.set(this.pastPosZ.size() - 1, this.posZ);
+        }
     }
 
     public void draw()
@@ -111,9 +125,6 @@ public class BulletArc extends Bullet
         Drawing.drawing.setColor(this.outlineColorR, this.outlineColorG, this.outlineColorB, 2 * (60 - this.posZ / 32) * (1 - Math.min(this.destroyTimer / 60, 1)), 0.5);
         Drawing.drawing.fillGlow(this.posX, this.posY, this.size * 2, this.size * 2, true);
         Drawing.drawing.fillOval(this.posX, this.posY, this.size, this.size);
-
-        if (!Game.enable3d)
-            this.posY -= this.posZ - Game.tile_size / 2;
 
         if (Game.bulletTrails)
         {
@@ -124,7 +135,7 @@ public class BulletArc extends Bullet
             if (Game.enable3d)
                 Drawing.drawing.fillOval(this.posX, this.posY, this.posZ, this.size, this.size, true, false);
             else
-                Drawing.drawing.fillOval(this.posX, this.posY, this.size, this.size);
+                Drawing.drawing.fillOval(this.posX, this.posY - this.posZ + Game.tile_size / 4, this.size, this.size);
 
             Drawing.drawing.setColor(0, 0, 0, 0, 0.5);
             Game.game.window.shapeRenderer.setBatchMode(true, true, true, false);
@@ -145,6 +156,14 @@ public class BulletArc extends Bullet
                 double x1 = this.pastPosX.get(i - 1);
                 double y1 = this.pastPosY.get(i - 1);
                 double z1 = this.pastPosZ.get(i - 1);
+
+                if (!Game.enable3d)
+                {
+                    y -= z - Game.tile_size / 4;
+                    y1 -= z1 - Game.tile_size / 4;
+                    z = 0;
+                    z1 = 0;
+                }
 
                 double a = Math.PI / 2 + this.angle;
 
@@ -169,6 +188,9 @@ public class BulletArc extends Bullet
             }
             Game.game.window.shapeRenderer.setBatchMode(false, true, true, false);
         }
+
+        if (!Game.enable3d)
+            this.posY -= this.posZ - Game.tile_size / 4;
 
         if (this.destroyTimer <= 60)
             super.draw();
@@ -213,11 +235,11 @@ public class BulletArc extends Bullet
     public void addDestroyEffect()
     {
         if (!Game.enable3d)
-            this.posY -= this.posZ - Game.tile_size / 2;
+            this.posY -= this.posZ - Game.tile_size / 4;
 
         super.addDestroyEffect();
 
         if (!Game.enable3d)
-            this.posY += this.posZ - Game.tile_size / 2;
+            this.posY += this.posZ - Game.tile_size / 4;
     }
 }

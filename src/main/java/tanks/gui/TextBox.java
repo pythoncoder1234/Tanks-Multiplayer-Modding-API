@@ -360,6 +360,12 @@ public class TextBox implements IDrawable, ITrigger
 		return this.hover && !this.selected && this.enabled && !Game.game.window.touchscreen;
 	}
 
+	@Override
+	public void onClick()
+	{
+
+	}
+
 	public boolean checkMouse(double mx, double my, boolean down, boolean valid, InputPoint p)
 	{
 		boolean handled = false;
@@ -377,6 +383,8 @@ public class TextBox implements IDrawable, ITrigger
 
 		if (hover && valid && enabled)
 		{
+			onClick();
+
 			if (infoSelected && enableHover && Game.game.window.touchscreen)
 			{
 				handled = true;
@@ -773,12 +781,8 @@ public class TextBox implements IDrawable, ITrigger
 
 
 	@Override
-	public void updateKeybind()
+	public InputBindingGroup getKeybind()
 	{
-		if (this.keybind != null && this.keybind.isValid())
-		{
-			this.keybind.invalidate();
-			this.function.run();
-		}
+		return keybind;
 	}
 }

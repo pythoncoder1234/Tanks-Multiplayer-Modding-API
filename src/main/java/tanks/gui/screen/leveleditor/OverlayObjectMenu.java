@@ -2,7 +2,8 @@ package tanks.gui.screen.leveleditor;
 
 import basewindow.InputCodes;
 import tanks.*;
-import tanks.editorselector.LevelEditorSelector;
+import tanks.editor.EditorAction;
+import tanks.editor.selector.LevelEditorSelector;
 import tanks.gui.Button;
 import tanks.gui.ButtonObject;
 import tanks.gui.screen.ITankScreen;
@@ -17,7 +18,7 @@ import tanks.tank.TankSpawnMarker;
 
 import java.util.ArrayList;
 
-import static tanks.editorselector.LevelEditorSelector.Position;
+import static tanks.editor.selector.LevelEditorSelector.Position;
 
 public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITankScreen
 {
@@ -566,20 +567,20 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
     public void removeTank(TankAIControlled t)
     {
         this.editor.level.customTanks.remove(t);
-        ArrayList<ScreenLevelEditor.Action> actions = new ArrayList<>();
+        ArrayList<EditorAction> actions = new ArrayList<>();
 
         for (int i = 0; i < Game.movables.size(); i++)
         {
             Movable m = Game.movables.get(i);
             if (m instanceof TankAIControlled && ((TankAIControlled) m).name.equals(t.name))
             {
-                actions.add(new ScreenLevelEditor.Action.ActionTank((Tank) m, false));
+                actions.add(new EditorAction.ActionTank((Tank) m, false));
                 Game.movables.remove(i);
                 i--;
             }
         }
 
-        this.editor.undoActions.add(new ScreenLevelEditor.Action.ActionDeleteCustomTank(this.editor, actions, t));
+        this.editor.undoActions.add(new EditorAction.ActionDeleteCustomTank(this.editor, actions, t));
     }
 
     @Override

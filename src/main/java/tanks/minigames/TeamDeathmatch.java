@@ -52,7 +52,7 @@ public class TeamDeathmatch extends Minigame
     }
 
     @Override
-    public void start()
+    protected void start()
     {
         ModAPI.loadLevel(levelString);
 

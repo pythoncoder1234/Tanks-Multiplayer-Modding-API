@@ -240,13 +240,13 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
 
         if (this.type == EffectType.fire)
         {
-            double size = (this.age * 3 + 10);
-            double rawOpacity = (1.0 - (this.age)/20.0);
+            double size = this.age * 3 + 10;
+            double rawOpacity = 1.0 - this.age / 20.0;
             rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = (rawOpacity * 255) / 4;
+            double opacity = rawOpacity * 255 / 4;
 
-            double green = Math.min(255, (255 - 255.0*(this.age / 20.0)));
-            drawing.setColor(255, green, 0,  Math.min(255, Math.max(0, (opacity * opacityMultiplier))));
+            double green = Math.min(255, 255 - 255.0 * (this.age / 20.0));
+            drawing.setColor(255, green, 0, Math.min(255, Math.max(0, opacity * opacityMultiplier)));
 
             if (Game.enable3d)
                 drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
@@ -257,11 +257,11 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         {
             double opacityModifier = Math.max(0, Math.min(1, this.age / 40.0 - 0.25));
             int size = 20;
-            double rawOpacity = (1.0 - (this.age)/200.0);
+            double rawOpacity = 1.0 - this.age / 200.0;
             rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = (rawOpacity * 100) / 2;
+            double opacity = rawOpacity * 100 / 2;
 
-            drawing.setColor(0, 0, 0, Math.min(255, Math.max(0, (opacity * opacityMultiplier * opacityModifier))));
+            drawing.setColor(0, 0, 0, Math.min(255, Math.max(0, opacity * opacityMultiplier * opacityModifier)));
 
             if (Game.enable3d)
                 drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
@@ -271,10 +271,10 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         else if (this.type == EffectType.trail)
         {
             double size = Math.min(20, this.age / 20.0 + 10);
-            double rawOpacity = (1.0 - (this.age) / 50.0);
+            double rawOpacity = 1.0 - this.age / 50.0;
             rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = (rawOpacity * 50);
-            drawing.setColor(127, 127, 127, Math.min(255, Math.max(0, (opacity * opacityMultiplier))));
+            double opacity = rawOpacity * 50;
+            drawing.setColor(127, 127, 127, Math.min(255, Math.max(0, opacity * opacityMultiplier)));
 
             if (Game.enable3d)
                 drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
@@ -297,8 +297,8 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.explosion)
         {
-            double size = (radius * 2);
-            double opacity = (100 - this.age * 5);
+            double size = radius * 2;
+            double opacity = 100 - this.age * 5;
 
             if (Game.vanillaMode && ScreenPartyLobby.isClient)
                 size += Game.tile_size;
@@ -319,7 +319,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.piece)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
             drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
 
             if (Game.enable3d)
@@ -339,7 +339,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.interfacePiece || this.type == EffectType.interfacePieceSparkle)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
 
             if (this.size > 0)
                 size *= this.size;
@@ -349,21 +349,21 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.obstaclePiece)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
             drawing.setColor(this.colR, this.colG, this.colB);
 
             drawing.fillRect(this.posX, this.posY, size, size);
         }
         else if (this.type == EffectType.obstaclePiece3d)
         {
-            double size = 1 + (this.size * (1 - this.age / this.maxAge));
+            double size = 1 + this.size * (1 - this.age / this.maxAge);
             drawing.setColor(this.colR, this.colG, this.colB);
 
             drawing.fillBox(this.posX, this.posY, this.posZ, size, size, size);
         }
         else if (this.type == EffectType.charge)
         {
-            double size = 1 + (Bullet.bullet_size * (this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (this.age / this.maxAge);
             drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
 
             if (Game.enable3d)
@@ -373,13 +373,13 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.darkFire)
         {
-            double size = (this.age * 3 + 10);
-            double rawOpacity = (1.0 - (this.age)/20.0);
+            double size = this.age * 3 + 10;
+            double rawOpacity = 1.0 - this.age / 20.0;
             rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = (rawOpacity * 255) / 4;
+            double opacity = rawOpacity * 255 / 4;
 
-            double red = Math.min(255, (128 - 128.0 * (this.age / 20.0)));
-            drawing.setColor(red / 2, 0, red,  Math.min(255, Math.max(0, (opacity * opacityMultiplier))));
+            double red = Math.min(255, 128 - 128.0 * (this.age / 20.0));
+            drawing.setColor(red / 2, 0, red, Math.min(255, Math.max(0, opacity * opacityMultiplier)));
 
             if (Game.enable3d)
                 drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
@@ -388,9 +388,9 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.stun)
         {
-            double size = 1 + (this.size * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge)));
+            double size = 1 + this.size * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge));
             double angle = this.angle + this.age / 20;
-            double distance = 1 + (this.distance * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge)));
+            double distance = 1 + this.distance * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge));
 
             drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
             double[] o = Movable.getLocationInDirection(angle, distance);
@@ -442,7 +442,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.glow)
         {
-            double size = 1 + (40 * (1 - this.age / this.maxAge));
+            double size = 1 + 40 * (1 - this.age / this.maxAge);
             drawing.setColor(255, 255, 255, 40);
 
             if (Game.enable3d)
@@ -466,7 +466,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.teleporterPiece)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
             drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
 
             if (Game.enable3d)
@@ -553,7 +553,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
 
             double c = 0.5 - Math.min(Arcade.max_power * 3, this.radius) / 30;
             if (c < 0)
-                c += (int) (-c) + 1;
+                c += (int) -c + 1;
 
             double[] col = Game.getRainbowColor(c);
 
@@ -594,7 +594,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
 
             double c = 0.5 - Math.min(Arcade.max_power * 3, this.radius * 4) / 30;
             if (c < 0)
-                c += (int) (-c) + 1;
+                c += (int) -c + 1;
 
             double[] col = Game.getRainbowColor(c);
 
@@ -647,7 +647,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
 
         if (this.type == EffectType.piece)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
 
             drawing.setColor(this.colR - this.glowR, this.colG - this.glowG, this.colB - this.glowB, 127, 1);
 
@@ -658,7 +658,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         if (this.type == EffectType.interfacePiece)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
 
             if (this.size > 0)
                 size *= this.size;
@@ -669,7 +669,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.interfacePieceSparkle)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
 
             if (this.size > 0)
                 size *= this.size;
@@ -681,7 +681,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.charge)
         {
-            double size = 1 + (Bullet.bullet_size * (this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (this.age / this.maxAge);
 
             drawing.setColor(this.colR - this.glowR, this.colG - this.glowG, this.colB - this.glowB, 127, 1);
 
@@ -692,9 +692,9 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.stun)
         {
-            double size = 1 + (this.size * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge)));
+            double size = 1 + this.size * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge));
             double angle = this.angle + this.age / 20;
-            double distance = 1 + (this.distance * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge)));
+            double distance = 1 + this.distance * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge));
 
             double[] o = Movable.getLocationInDirection(angle, distance);
 
@@ -707,7 +707,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.glow)
         {
-            double size = 1 + (40 * (1 - this.age / this.maxAge));
+            double size = 1 + 40 * (1 - this.age / this.maxAge);
 
             drawing.setColor(255, 255, 255, 40, 1);
 
@@ -718,7 +718,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else if (this.type == EffectType.teleporterPiece)
         {
-            double size = 1 + (Bullet.bullet_size * (1 - this.age / this.maxAge));
+            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
 
             drawing.setColor(this.colR - this.glowR, this.colG - this.glowG, this.colB - this.glowB, 127, 1);
 
@@ -859,7 +859,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
                 if (!collidedX && !collidedY && (x != this.initialGridX || y != initialGridY) && Math.abs(this.posZ - Game.game.lastHeightGrid[x][y]) < Game.tile_size / 2)
                 {
                     this.vZ = -0.6 * this.vZ;
-                    this.posZ = (2 * Game.game.lastHeightGrid[x][y] - this.posZ);
+                    this.posZ = 2 * Game.game.lastHeightGrid[x][y] - this.posZ;
                 }
             }
 
@@ -877,7 +877,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
     @Override
     public boolean lit()
     {
-        return false;
+        return (Game.fancyLights && type == EffectType.explosion);
     }
 
     @Override
@@ -885,8 +885,8 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
     {
         this.lightInfo[3] = 4 * (1 - this.age / this.maxAge);
         this.lightInfo[4] = 255;
-        this.lightInfo[5] = 200;
-        this.lightInfo[6] = 160;
+        this.lightInfo[5] = 50;
+        this.lightInfo[6] = 40;
         return this.lightInfo;
     }
 }

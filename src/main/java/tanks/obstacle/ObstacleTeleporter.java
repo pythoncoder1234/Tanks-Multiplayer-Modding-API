@@ -1,7 +1,7 @@
 package tanks.obstacle;
 
 import tanks.*;
-import tanks.editorselector.LevelEditorSelector;
+import tanks.editor.selector.LevelEditorSelector;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Tank;
 import tanks.tank.TeleporterOrb;

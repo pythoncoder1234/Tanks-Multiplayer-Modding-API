@@ -22,22 +22,24 @@ To create a custom game or level, the source code is needed.
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21245&authkey=!AHlFely4GoxIfhA).
+You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21260&authkey=!AJp3wMJcfvURVhw).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
 New Features:
 ---
 
-- **Reference spawns**
-  - Hold shift on the exit buttons for level and crusade editor to save without tank references (info icon should appear while doing so) 
-- Getting closer and closer to full 1.5.2d multiplayer compatibility!
-- Crusade Import overhaul
-- Minimap overhaul
-- Fixed multiplayer chat
-- F3+D = clear chat (like in minecraft)
-- Improved Tank AI
-- Did some merging
-- Fixed bugs
+- Double-click the editor tool's button or keybind to open its submenu, if it has one.
+- Using +/- on a selection changes it for all objects in the selection
+- Magic wand select
+- Undo/Redo 10x or 50x
+- Circle tool, square tool, line tool
+- Alt/Opt + scroll = zoom, Alt/Opt + drag = pan
+- Added double-click functionality to input bindings and buttons
+- Changed `LevelEditorSelector.init` access to protected, use `initBase` instead
+- Changed `Minigame.start` access to protected, use `startBase` instead
+- Changed `LevelEditorSelector.changeMetadata` access to protected, use `changeMeta` instead
+- Renamed `EndCondition.defaultEndCondition` to `EndCondition.normal`
+- Moved `Game.ModAPIVersion` to `ModAPI.version`
 
 [Older Changelogs](changelog.md)

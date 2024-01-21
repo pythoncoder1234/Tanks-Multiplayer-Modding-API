@@ -1,9 +1,13 @@
 package tanks;
 
-import tanks.editorselector.LevelEditorSelector;
-import tanks.editorselector.LevelEditorSelector.Position;
+import tanks.editor.selector.LevelEditorSelector;
+import tanks.editor.selector.LevelEditorSelector.Position;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.gui.screen.leveleditor.ScreenLevelEditorOverlay;
+import tanks.obstacle.Obstacle;
+import tanks.obstacle.ObstacleConveyor;
+import tanks.tank.Tank;
+import tanks.tank.TankPlayer;
 
 import java.util.ArrayList;
 
@@ -15,6 +19,9 @@ public abstract class GameObject implements Cloneable
     Position extraSelPos /* Position of extra selectors */ = Position.editor_bottom_right;
     int currentPos = 0;
 
+    /** Registers the specified selector. <br>
+     * Examples: {@link Tank#registerSelectors()}, {@link Obstacle#registerSelectors()}
+     * @see #postInitSelectors() */
     public void registerSelector(LevelEditorSelector<?>... s)
     {
         if (selectors == null)
@@ -97,6 +104,11 @@ public abstract class GameObject implements Cloneable
         }
     }
 
+    /**
+     * This function is called after the selectors have been registered and initialized.<br>
+     * Override to modify selector properties.<br>
+     * Examples: {@link TankPlayer#postInitSelectors()}, {@link ObstacleConveyor#postInitSelectors()}
+     * */
     public void postInitSelectors()
     {
 

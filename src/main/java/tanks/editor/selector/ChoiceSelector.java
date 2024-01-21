@@ -1,4 +1,4 @@
-package tanks.editorselector;
+package tanks.editor.selector;
 
 import tanks.Game;
 import tanks.GameObject;
@@ -8,6 +8,7 @@ import tanks.gui.screen.leveleditor.OverlaySelectChoice;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/** @param <V> The class of the object being selected. (e.g. {@code Team} for team selectors) */
 public class ChoiceSelector<T extends GameObject, V> extends LevelEditorSelector<T>
 {
     public ArrayList<V> choices = new ArrayList<>();

@@ -2,18 +2,21 @@ package tanks.gui;
 
 import basewindow.BaseFile;
 import tanks.BiConsumer;
+import tanks.Consumer;
 import tanks.Function;
 import tanks.Game;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 
 public class SavedFilesList extends ButtonList
 {
     public boolean sortedByTime = false;
+    public Consumer<Button> onclick = null;
     public BiConsumer<BaseFile, Button> auxiliarySetup = null;
     HashMap<Button, Long> times = new HashMap<>();
     public ArrayList<Button> fileButtons = new ArrayList<>();
@@ -67,8 +70,16 @@ public class SavedFilesList extends ButtonList
             String name = pathSections[pathSections.length - 1].split("\\.")[0];
             BaseFile file = Game.game.fileManager.getFile(l);
 
-            Button b = new Button(0, 0, this.objWidth, this.objHeight, name.replace("_", " "), () -> behavior.accept(name, file)
-                    , hover.apply(file));
+            Button b = new Button(0, 0, this.objWidth, this.objHeight, name.replace("_", " "),
+                    () -> {}, hover.apply(file));
+
+            b.function = () ->
+            {
+                behavior.accept(name, file);
+
+                if (onclick != null)
+                    onclick.accept(b);
+            };
 
             times.put(b, file.lastModified());
 
@@ -120,7 +131,7 @@ public class SavedFilesList extends ButtonList
         if (byTime)
             Collections.sort(this.fileButtons, (o1, o2) -> (int) Math.signum(times.get(o2) - times.get(o1)));
         else
-            Collections.sort(this.fileButtons, (o1, o2) -> o1.text.toLowerCase().compareTo(o2.text.toLowerCase()));
+            Collections.sort(this.fileButtons, Comparator.comparing(o -> o.text.toLowerCase()));
 
         this.buttons.addAll(this.fileButtons);
     }

@@ -19,6 +19,8 @@ public class EventPing implements INetworkEvent
 	{
 		if (!Game.vanillaMode)
 			b.writeInt(iteration);
+		else
+			b.writeBoolean(iteration > 0);
 	}
 
 	@Override
@@ -26,6 +28,8 @@ public class EventPing implements INetworkEvent
 	{
 		if (!Game.vanillaMode)
 			this.iteration = b.readInt();
+		else
+			this.iteration = b.readBoolean() ? 1 : 0;
 	}
 
 	@Override

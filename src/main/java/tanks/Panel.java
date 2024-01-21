@@ -1,6 +1,5 @@
 package tanks;
 
-import basewindow.BaseFile;
 import basewindow.InputCodes;
 import basewindow.transformation.Translation;
 import tanks.eventlistener.EventListener;
@@ -23,10 +22,7 @@ import tanks.network.event.INetworkEvent;
 import tanks.network.event.IStackableEvent;
 import tanks.network.event.online.IOnlineServerEvent;
 import tanks.obstacle.Obstacle;
-import tanks.rendering.ShaderGroundOutOfBounds;
-import tanks.rendering.ShaderTracks;
-import tanks.rendering.TerrainRenderer;
-import tanks.rendering.TrackRenderer;
+import tanks.rendering.*;
 import tanks.tank.*;
 
 import java.util.ArrayList;
@@ -45,11 +41,11 @@ public class Panel
 	public static boolean autoZoom = true;
 	public static double lastAutoZoomSpeed = 0;
 
+	public double panX, panY, panSpeed, panSpeedTarget;
+	public static double panTargetX, panTargetY;
+
 	public static double windowWidth = 1400;
 	public static double windowHeight = 900;
-
-	public final long splash_duration = Math.random() < 0.01 ? 3000 : 0;
-	public boolean playedTutorialIntroMusic = false;
 
 	public static boolean showMouseTarget = true;
 	public static boolean showMouseTargetHeight = false;
@@ -89,15 +85,8 @@ public class Panel
 
 	protected static boolean initialized = false;
 
-	public Tank dummySpin;
-
 	public boolean firstFrame = true;
-	public boolean firstDraw = true;
-	public boolean introFinished = false;
-	public boolean splashFinished = false;
-
 	public boolean startMusicPlayed = false;
-
 	public long introMusicEnd;
 
 	public ArrayList<Double> pastPlayerX = new ArrayList<>();
@@ -131,11 +120,13 @@ public class Panel
 
 	public void setUp()
 	{
+		Game.game.shaderIntro = new ShaderGroundIntro(Game.game.window);
 		Game.game.shaderOutOfBounds = new ShaderGroundOutOfBounds(Game.game.window);
-		Game.game.shaderTracks = new ShaderTracks(Game.game.window);
+ 		Game.game.shaderTracks = new ShaderTracks(Game.game.window);
 
 		try
 		{
+			Game.game.shaderIntro.initialize();
 			Game.game.shaderOutOfBounds.initialize();
 			Game.game.shaderTracks.initialize();
 		}
@@ -146,6 +137,7 @@ public class Panel
 
 		Drawing.drawing.terrainRenderer = new TerrainRenderer();
 		Drawing.drawing.trackRenderer = new TrackRenderer();
+
 		ModAPI.setUp();
 		Game.resetTiles();
 
@@ -190,27 +182,7 @@ public class Panel
 		for (Extension e : Game.extensionRegistry.extensions)
 			e.loadResources();
 
-		zoomTranslation.window = Game.game.window;
-		zoomTranslation.applyAsShadow = true;
-		dummySpin = new TankDummyLoadingScreen(Drawing.drawing.sizeX / 2, Drawing.drawing.sizeY / 2);
-
-		if (Game.usernameInvalid(Game.player.username))
-			Game.screen = new ScreenUsernameInvalid();
-		else
-		{
-			if (Game.cinematic)
-				Game.screen = new ScreenCinematicTitle();
-			else
-				Game.screen = new ScreenTitle();
-		}
-
-		ScreenChangelog.Changelog.setupLogs();
-
-		ScreenChangelog s = new ScreenChangelog();
-		s.setup();
-
-		if (!s.pages.isEmpty())
-			Game.screen = s;
+		Game.screen = new ScreenIntro();
 
 		Game.loadTankMusic();
 
@@ -277,10 +249,10 @@ public class Panel
         if (!started && (Game.game.window.validPressedKeys.contains(InputCodes.KEY_F) || !Game.cinematic))
         {
             started = true;
-            this.startTime = System.currentTimeMillis() + splash_duration;
 
-			if (splash_duration > 0)
-				Drawing.drawing.playSound("splash_jingle.ogg");
+//			this.startTime = System.currentTimeMillis() + splash_duration;
+//			Drawing.drawing.playSound("splash_jingle.ogg");
+//			Drawing.drawing.playMusic("menu_intro.ogg", Game.musicVolume, false, "intro", 0, false);
 		}
 
 		if (!started)
@@ -303,45 +275,7 @@ public class Panel
 
 		lastFrameNano = System.nanoTime();
 
-		if (System.currentTimeMillis() - this.startTime < 0)
-			return;
-
-		if (!splashFinished)
-		{
-			splashFinished = true;
-
-			boolean tutorial = false;
-
-			BaseFile tutorialFile = Game.game.fileManager.getFile(Game.homedir + Game.tutorialPath);
-			if (!tutorialFile.exists())
-			{
-				tutorial = true;
-				Game.silentCleanUp();
-				Game.lastVersion = Game.version;
-				ScreenOptions.saveOptions(Game.homedir);
-				new Tutorial().loadTutorial(true, Game.game.window.touchscreen);
-				((ScreenGame) Game.screen).introBattleMusicEnd = 0;
-			}
-
-			introMusicEnd = System.currentTimeMillis() + Long.parseLong(Game.game.fileManager.getInternalFileContents("/music/intro_length.txt").get(0));
-
-			introMusicEnd -= 40;
-
-			if (Game.framework == Game.Framework.libgdx)
-				introMusicEnd -= 100;
-
-			if (!tutorial)
-				Drawing.drawing.playMusic("menu_intro.ogg", Game.musicVolume, false, "intro", 0, false);
-		}
-
-		if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_F8))
-		{
-			Game.recordMode = !Game.recordMode;
-			Drawing.drawing.statsHeight = Drawing.drawing.enableStats && !Game.recordMode ? 40 : 0;
-			Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_F8);
-		}
-
-		Game.game.window.constrainMouse = Game.constrainMouse && ((Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).paused) || Game.screen instanceof ScreenLevelEditor);
+		Game.game.window.constrainMouse = Game.constrainMouse && ((Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).paused && ((ScreenGame) Game.screen).playing && Game.playerTank != null && !Game.playerTank.destroy) || Game.screen instanceof ScreenLevelEditor);
 
 		if (!Game.shadowsEnabled)
 			Game.game.window.setShadowQuality(0);
@@ -360,10 +294,9 @@ public class Panel
 		Panel.windowHeight = Game.game.window.absoluteHeight;
 
 		Drawing.drawing.scale = Math.min(Panel.windowWidth / Game.currentSizeX, (Panel.windowHeight - Drawing.drawing.statsHeight) / Game.currentSizeY) / 50.0;
+		Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
 		Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Panel.windowWidth / 28, (Panel.windowHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
 		Game.game.window.absoluteDepth = Drawing.drawing.interfaceScale * Game.absoluteDepthBase;
-
-		Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
 
 		if (Game.deterministicMode && Game.deterministic30Fps)
 			Panel.frameFrequency = 100.0 / 30;
@@ -373,31 +306,6 @@ public class Panel
 			Panel.frameFrequency = Game.game.window.frameFrequency;
 
 		Game.game.window.showKeyboard = false;
-
-		double introTime = 1000;
-		double introAnimationTime = 500;
-
-		if (Game.fancyTerrain && Game.enable3d)
-			introAnimationTime = 1000;
-
-		if (System.currentTimeMillis() - startTime < introTime + introAnimationTime)
-		{
-			if (ScreenInterlevel.tutorialInitial && System.currentTimeMillis() - startTime > introTime + introAnimationTime - 1500 && !playedTutorialIntroMusic)
-			{
-				playedTutorialIntroMusic = true;
-				Drawing.drawing.playSound("battle_intro.ogg", Game.musicVolume, true);
-				introMusicEnd = System.currentTimeMillis() + Long.parseLong(Game.game.fileManager.getInternalFileContents("/music/battle_intro_length.txt").get(0));
-			}
-
-			dummySpin.posX = Drawing.drawing.sizeX / 2;
-			dummySpin.posY = Drawing.drawing.sizeY / 2;
-			dummySpin.angle = Math.PI * 2 * (System.currentTimeMillis() - startTime) / (introTime + introAnimationTime);
-			return;
-		}
-
-		if (settingUp)
-			return;
-
 
 		synchronized (Game.eventsIn)
 		{
@@ -593,6 +501,30 @@ public class Panel
 
 			if (Panel.autoZoom)
 			{
+				double dispX = Panel.panTargetX - panX;
+				double dispY = Panel.panTargetY - panY;
+				double dist = Math.sqrt(dispX*dispX + dispY*dispY);
+
+				panSpeedTarget = Math.min(0.01, dist * 0.5);
+				panSpeed += 0.02 * Panel.frameFrequency * Math.signum(panSpeedTarget - panSpeed);
+
+				Tank t = ScreenGame.focusedTank();
+				if (t != null && Drawing.drawing.isOutOfBounds(t.posX, t.posY))
+				{
+					this.panX /= Math.pow(1.01, Panel.frameFrequency);
+					this.panY /= Math.pow(1.01, Panel.frameFrequency);
+				}
+				else if (Math.abs(dispX) + Math.abs(dispY) < Math.abs(panSpeed) * 2)
+				{
+					this.panX = Panel.panTargetX;
+					this.panY = Panel.panTargetY;
+				}
+				else
+				{
+					this.panX += panSpeed * Math.signum(dispX) * Panel.frameFrequency;
+					this.panY += panSpeed * Math.signum(dispY) * Panel.frameFrequency;
+				}
+
 				speed /= 4;
 
 				if (speed - Panel.lastAutoZoomSpeed > accel * Panel.frameFrequency)
@@ -601,9 +533,9 @@ public class Panel
 				if (-speed + Panel.lastAutoZoomSpeed > accel * Panel.frameFrequency)
 					speed = Panel.lastAutoZoomSpeed - accel * Panel.frameFrequency;
 
-				double dist = Math.abs(this.zoomTimer - Panel.zoomTarget) / Drawing.drawing.unzoomedScale;
-				if (dist < distDampen)
-					speed *= Math.pow(dist / distDampen, Panel.frameFrequency / 20);
+				double zoomDist = Math.abs(this.zoomTimer - Panel.zoomTarget) / Drawing.drawing.unzoomedScale;
+				if (zoomDist < distDampen)
+					speed *= Math.pow(zoomDist / distDampen, Panel.frameFrequency / 20);
 
 				Panel.lastAutoZoomSpeed = speed;
 
@@ -614,20 +546,20 @@ public class Panel
 				else
 				{
 					speed *= Math.signum(Panel.zoomTarget - this.zoomTimer);
-					this.zoomTimer = this.zoomTimer + speed * Panel.frameFrequency;
+					this.zoomTimer += speed * Panel.frameFrequency;
 				}
 			}
 			else
 			{
-				if (this.zoomTimer > Panel.zoomTarget)
-					speed = -0.02;
-				else
-					speed = 0.02;
+				double nzt = this.zoomTimer + 0.02 * Math.signum(Panel.zoomTarget - this.zoomTimer) * Panel.frameFrequency;
 
 				if (this.zoomTimer > Panel.zoomTarget)
-					this.zoomTimer = Math.max(this.zoomTimer + speed * Panel.frameFrequency, Panel.zoomTarget);
+					this.zoomTimer = Math.max(nzt, Panel.zoomTarget);
 				else
-					this.zoomTimer = Math.min(this.zoomTimer + speed * Panel.frameFrequency, Panel.zoomTarget);
+					this.zoomTimer = Math.min(nzt, Panel.zoomTarget);
+
+				this.panX /= 1.01 * Panel.frameFrequency;
+				this.panY /= 1.01 * Panel.frameFrequency;
 			}
 		}
 
@@ -777,95 +709,6 @@ public class Panel
 
 	public void draw()
 	{
-		double introTime = 1000;
-		double introAnimationTime = 500;
-
-		if (Game.fancyTerrain && Game.enable3d)
-			introAnimationTime = 1000;
-
-		if (Game.cinematic)
-			introAnimationTime = 4000;
-
-		if (System.currentTimeMillis() - startTime < splash_duration)
-		{
-			double frac = (startTime - System.currentTimeMillis() * 1.0) / splash_duration;
-			double frac2 = Math.min(frac * 4, 1) * Math.min((1 - frac) * 4, 1);
-			double[] col = Game.getRainbowColor((System.currentTimeMillis() % 1000) / 1000.0);
-
-			Drawing.drawing.scale = Math.min(Game.game.window.absoluteWidth / Game.currentSizeX, (Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Game.currentSizeY) / 50.0;
-			Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
-			Drawing.drawing.scale = Game.screen.getScale();
-			Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Game.game.window.absoluteWidth / 28, (Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
-			Game.game.window.absoluteDepth = Drawing.drawing.interfaceScale * Game.absoluteDepthBase;
-
-			Drawing.drawing.setColor(255, 255, 255, 255 * frac2);
-			Drawing.drawing.drawInterfaceImage(frac * 5,"opal.png", Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, 600 * (1 + (- frac + 0.5) * 2), 600 * (1 + (- frac + 0.5) * 2));
-
-			Drawing.drawing.setColor(1 * frac2 * col[0], 1 * frac2 * col[1], 1 * frac2 * col[2]);
-			Drawing.drawing.setInterfaceFontSize(100 * (1 + (-frac + 0.5) * 0.8));
-			Drawing.drawing.drawInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, "Opal Games :)");
-
-			return;
-		}
-
-		if (this.frameStartTime - startTime < introTime + introAnimationTime)
-		{
-			double frac = ((this.frameStartTime - startTime - introTime) / introAnimationTime);
-
-			if (Game.enable3d && Game.fancyTerrain)
-			{
-				zoomTranslation.z = -0.08 * frac;
-				Game.game.window.transformations.add(zoomTranslation);
-				Game.game.window.loadPerspective();
-			}
-
-			Drawing.drawing.setColor(Level.currentColorR, Level.currentColorG, Level.currentColorB);
-			Drawing.drawing.fillInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2, Game.game.window.absoluteWidth * 1.2 / Drawing.drawing.interfaceScale, Game.game.window.absoluteHeight * 1.2 / Drawing.drawing.interfaceScale);
-
-			if (!Game.cinematic)
-				dummySpin.draw();
-
-			Game.game.window.transformations.clear();
-			Game.game.window.loadPerspective();
-
-			Game.game.window.shapeRenderer.setBatchMode(false, false, false, false);
-
-			if (System.currentTimeMillis() - startTime > introTime)
-			{
-				Game.screen.drawDefaultBackground(frac);
-				drawBar(40 - frac * 40);
-			}
-
-			Game.game.window.shapeRenderer.setBatchMode(false, false, false, false);
-			Game.game.window.shapeRenderer.setBatchMode(false, false, true, false);
-
-			if (Game.screen instanceof ISeparateBackgroundScreen)
-			{
-				zoomTranslation.z = (1 - frac) * 3;
-
-				Game.game.window.transformations.add(zoomTranslation);
-				Game.game.window.loadPerspective();
-
-				((ISeparateBackgroundScreen) Game.screen).drawWithoutBackground();
-
-				Game.game.window.transformations.clear();
-				Game.game.window.loadPerspective();
-			}
-
-			drawMouseTarget();
-
-			firstDraw = false;
-
-			//A fix to some glitchiness on ios
-			Drawing.drawing.setColor(0, 0, 0, 0);
-			Drawing.drawing.fillInterfaceRect(0, 0, 0, 0);
-
-			if (!Game.game.window.drawingShadow)
-				this.frameStartTime = System.currentTimeMillis();
-
-			return;
-		}
-
 		if (Drawing.drawing.terrainRenderer == null)
 			Drawing.drawing.terrainRenderer = new TerrainRenderer();
 
@@ -887,9 +730,6 @@ public class Panel
 			Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Panel.windowWidth / 28, (Panel.windowHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
 			Game.game.window.absoluteDepth = Drawing.drawing.interfaceScale * Game.absoluteDepthBase;
 		}
-
-		if (!this.introFinished)
-            this.introFinished = true;
 
 		double t = 3;
 		skylight = (t - Math.pow(t, 1 - Level.currentLightIntensity)) / (t - 1) * 0.95;
@@ -940,13 +780,15 @@ public class Panel
 
         ScreenOverlayChat.draw(!(Game.screen instanceof IHiddenChatboxScreen));
 
-        if (!(Game.screen instanceof ScreenExit))
-            this.drawBar();
+		if (!(Game.screen instanceof ScreenExit || Game.screen instanceof ScreenIntro))
+			this.drawBar();
 
-        if (Game.screen.showDefaultMouse)
-            this.drawMouseTarget();
+		if (Game.screen.showDefaultMouse)
+			this.drawMouseTarget();
 
-        Drawing.drawing.setColor(0, 0, 0, 0);
+		Drawing.drawing.setColor(255, 255, 255);
+
+		Drawing.drawing.setColor(0, 0, 0, 0);
 		Drawing.drawing.fillInterfaceRect(0, 0, 0, 0);
 
 		Game.screen.drawPostMouse();
@@ -977,12 +819,21 @@ public class Panel
 				else if (ScreenPartyHost.isServer)
                     chat = ScreenPartyHost.chat;
 
-				synchronized (chat)
+				if (chat != null)
 				{
-					chat.clear();
+					synchronized (chat)
+					{
+						chat.clear();
+					}
 				}
 
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_D);
+			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_A))
+			{
+				Drawing.drawing.terrainRenderer.reset();
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_A);
 			}
 
 			int brightness = 0;
@@ -1043,8 +894,15 @@ public class Panel
 			{
 				if (Game.glowEnabled)
 				{
-					Drawing.drawing.setColor(255, 255, 255, 128);
-					Drawing.drawing.fillInterfaceGlow(mx, my, 64, 64);
+					double v = 1;
+					if (Game.screen instanceof ScreenIntro)
+						v = Obstacle.draw_size;
+
+					if (v > 0.05)
+					{
+						Drawing.drawing.setColor(255, 255, 255, 128);
+						Drawing.drawing.fillInterfaceGlow(mx, my, 64 * v, 64 * v);
+					}
 				}
 
 				Drawing.drawing.setColor(0, 0, 0);
@@ -1057,17 +915,14 @@ public class Panel
 		{
 			double c = 127 * Obstacle.draw_size / Game.tile_size;
 
-			double r = c;
-			double g = c;
-			double b = c;
-			double a = 255;
+            double a = 255;
 
 			double r2 = 0;
 			double g2 = 0;
 			double b2 = 0;
 			double a2 = 0;
 
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Game.game.window.shapeRenderer.setBatchMode(true, false, true, true, false);
 
 			double size = 12 * Drawing.drawing.interfaceScale / Drawing.drawing.scale;
@@ -1082,81 +937,81 @@ public class Panel
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - size, y - thickness, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y - thickness, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x + size, y - thickness, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y - thickness, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - size, y + thickness, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y - thickness, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x + size, y + thickness, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y + thickness, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - size, y - thickness, 0);
 			Drawing.drawing.addVertex(x - size, y + thickness, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x + size, y - thickness, 0);
 			Drawing.drawing.addVertex(x + size, y + thickness, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - thickness, y - size, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x - thickness, y, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - thickness, y + size, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x - thickness, y, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x + thickness, y - size, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x + thickness, y, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x + thickness, y + size, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x + thickness, y, 0);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - thickness, y - size, 0);
 			Drawing.drawing.addVertex(x + thickness, y - size, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y, height);
 
 			Drawing.drawing.setColor(r2, g2, b2, a2, 1);
 			Drawing.drawing.addVertex(x - thickness, y + size, 0);
 			Drawing.drawing.addVertex(x + thickness, y + size, 0);
-			Drawing.drawing.setColor(r, g, b, a, 1);
+			Drawing.drawing.setColor(c, c, c, a, 1);
 			Drawing.drawing.addVertex(x, y, height);
 
 			double res = 40;
 			double height2 = height * 0.75;
 			for (int i = 0; i < res; i++)
 			{
-				Drawing.drawing.setColor(r, g, b, a, 1);
+				Drawing.drawing.setColor(c, c, c, a, 1);
 				double x1 = Math.cos(i / res * Math.PI * 2) * size;
 				double x2 = Math.cos((i + 1) / res * Math.PI * 2) * size;
 				double y1 = Math.sin(i / res * Math.PI * 2) * size;
@@ -1205,7 +1060,7 @@ public class Panel
 		long total = Runtime.getRuntime().totalMemory();
 		long used = total - free;
 
-		Game.game.window.fontRenderer.drawString(boundary + 150, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, Game.ModAPIVersion);
+		Game.game.window.fontRenderer.drawString(boundary + 150, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, ModAPI.version);
 		Game.game.window.fontRenderer.drawString(boundary + 150, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "Memory used: " + used / 1048576 + "/" + total / 1048576 + "MB");
 
 		double partyIpLen = 10;

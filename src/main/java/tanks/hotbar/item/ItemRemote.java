@@ -5,6 +5,7 @@ import tanks.tank.Tank;
 public class ItemRemote extends Item
 {
     public int bounces;
+    public double size = 10;
     public double range;
 
     @Override

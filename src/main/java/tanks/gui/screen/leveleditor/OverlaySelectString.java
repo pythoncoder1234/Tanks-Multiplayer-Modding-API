@@ -2,7 +2,7 @@ package tanks.gui.screen.leveleditor;
 
 import tanks.Drawing;
 import tanks.GameObject;
-import tanks.editorselector.StringSelector;
+import tanks.editor.selector.StringSelector;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
 import tanks.gui.screen.Screen;
@@ -31,7 +31,7 @@ public class OverlaySelectString extends ScreenLevelEditorOverlay
     {
         super.draw();
 
-        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.setColor(editor.fontBrightness, editor.fontBrightness, editor.fontBrightness);
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.drawInterfaceText(this.centerX, this.centerY - this.objYSpace * 2, "Choose text");
 

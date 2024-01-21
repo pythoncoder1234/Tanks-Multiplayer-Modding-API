@@ -1,8 +1,8 @@
 package tanks.obstacle;
 
 import tanks.*;
-import tanks.editorselector.GroupIdSelector;
-import tanks.editorselector.LevelEditorSelector;
+import tanks.editor.selector.GroupIdSelector;
+import tanks.editor.selector.LevelEditorSelector;
 import tanks.gui.screen.ScreenGame;
 import tanks.tank.Mine;
 import tanks.tank.Tank;

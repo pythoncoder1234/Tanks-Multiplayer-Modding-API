@@ -224,13 +224,15 @@ public class Selector implements IDrawable, ITrigger
     }
 
     @Override
-    public void updateKeybind()
+    public InputBindingGroup getKeybind()
     {
-        if (this.keybind != null && this.keybind.isValid())
-        {
-            this.keybind.invalidate();
-            this.setScreen();
-        }
+        return keybind;
+    }
+
+    @Override
+    public void onClick()
+    {
+        this.setScreen();
     }
 
     public void drawSelection()

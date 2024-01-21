@@ -29,6 +29,7 @@ import tanks.network.event.online.EventSetMusic;
 import tanks.network.event.online.*;
 import tanks.obstacle.*;
 import tanks.registry.*;
+import tanks.rendering.ShaderGroundIntro;
 import tanks.rendering.ShaderGroundOutOfBounds;
 import tanks.rendering.ShaderTracks;
 import tanks.tank.*;
@@ -72,7 +73,6 @@ public class Game
 	public static ArrayList<Cloud> clouds = new ArrayList<>();
 	public static SynchronizedList<Player> players = new SynchronizedList<>();
 
-	public static boolean redrawTiles = false;
 	/** Obstacles that need to change how they look next frame */
 	public static HashSet<Obstacle> redrawObstacles = new HashSet<>();
 	/** Ground tiles that need to be redrawn due to obstacles being added/removed over them */
@@ -107,8 +107,7 @@ public class Game
 
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
-    public static final String version = "Tanks v1.5.2d";
-    public static final String ModAPIVersion = "Mod API v1.2.e";
+    public static final String version = "Tanks v1.5.2g";
     public static final int network_protocol = 53;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;
@@ -161,6 +160,7 @@ public class Game
 
 	public static boolean followingCam = false;
 	public static boolean firstPerson = false;
+	public static boolean fancyLights = false;
 
 	public static boolean tankTextures = true;
 
@@ -232,6 +232,7 @@ public class Game
 	public static RegistryMinigame registryMinigame = new RegistryMinigame();
 
 	public final HashMap<Class<? extends ShaderGroup>, ShaderGroup> shaderInstances = new HashMap<>();
+	public ShaderGroundIntro shaderIntro;
 	public ShaderGroundOutOfBounds shaderOutOfBounds;
 	public ShaderTracks shaderTracks;
 
@@ -882,7 +883,7 @@ public class Game
 		int x = (int) (o.posX / Game.tile_size);
 		int y = (int) (o.posY / Game.tile_size);
 
-		if (x >= 0 && y >= 0 && x < Game.currentSizeX && y < Game.currentSizeY)
+		if (x >= 0 && y >= 0 && x < Game.currentSizeX && y < Game.currentSizeY && Game.enable3d)
 			Game.redrawGroundTiles.add(new int[]{x, y});
 	}
 
@@ -1082,7 +1083,10 @@ public class Game
 			e1.printStackTrace();
 		}
 
-		Drawing.drawing.playSound("leave.ogg");
+		if (Game.game.window != null)
+			Drawing.drawing.playSound("leave.ogg");
+		else
+			throw new RuntimeException("Failed to start game", e);
 	}
 
 	public static void resetTiles()
@@ -1107,14 +1111,16 @@ public class Game
         if (Game.fancyTerrain)
             var = 20;
 
-        for (int i = 0; i < 28; i++)
-        {
-            for (int j = 0; j < 18; j++)
-            {
-				Game.tilesR[i][j] = (235 + Math.random() * var);
-				Game.tilesG[i][j] = (207 + Math.random() * var);
-				Game.tilesB[i][j] = (166 + Math.random() * var);
-				Game.tilesDepth[i][j] = Math.random() * var / 2;
+		Random tilesRandom = new Random(0);
+		for (int i = 0; i < 28; i++)
+		{
+			for (int j = 0; j < 18; j++)
+			{
+				Game.tilesR[i][j] = (235 + tilesRandom.nextDouble() * var);
+				Game.tilesG[i][j] = (207 + tilesRandom.nextDouble() * var);
+				Game.tilesB[i][j] = (166 + tilesRandom.nextDouble() * var);
+				double rand = tilesRandom.nextDouble() * var / 2;
+				Game.tilesDepth[i][j] = Game.enable3dBg ? rand : 0;
 			}
 		}
 

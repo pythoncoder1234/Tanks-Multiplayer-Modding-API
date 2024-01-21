@@ -17,13 +17,13 @@ public class EmptySpace implements IDrawable, ITrigger
     }
 
     @Override
-    public void setPosition(double x, double y)
+    public void onClick()
     {
 
     }
 
     @Override
-    public void updateKeybind()
+    public void setPosition(double x, double y)
     {
 
     }

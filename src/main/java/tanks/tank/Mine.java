@@ -12,7 +12,7 @@ import tanks.obstacle.Obstacle;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Mine extends Movable implements IAvoidObject, ISolidObject
+public class Mine extends Movable implements IAvoidObject, IDrawableLightSource, ISolidObject
 {
     public static double mine_size = 30;
     public static double mine_radius = Game.tile_size * 2.5;
@@ -48,6 +48,8 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
     public static int currentID = 0;
     public static ArrayList<Integer> freeIDs = new ArrayList<>();
     public static HashMap<Integer, Mine> idMap = new HashMap<>();
+
+    public double[] lightInfo = new double[]{0, 0, 0, 0, 0, 0, 0};
 
     public Face[] horizontalFaces;
     public Face[] verticalFaces;
@@ -184,7 +186,7 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
         {
             if (withinExplosionRange(m))
             {
-                if (m instanceof Tank && !m.destroy && ((Tank) m).targetable)
+                if (m instanceof Tank && !m.destroy && ((Tank) m).targetable && !((Tank) m).hidden)
                 {
                     if (Team.isAllied(m, this.tank))
                         allyNear = true;
@@ -329,6 +331,23 @@ public class Mine extends Movable implements IAvoidObject, ISolidObject
             Drawing.drawing.addVertex(posX + Math.cos(angle) * size * inner, posY + Math.sin(angle) * size * inner, 0);
         }
         Game.game.window.shapeRenderer.setBatchMode(false, true, false);
+    }
+
+    @Override
+    public boolean lit()
+    {
+        return Game.fancyLights;
+    }
+
+    @Override
+    public double[] getLightInfo()
+    {
+        this.lightInfo[3] = 2;
+
+        this.lightInfo[4] = this.outlineColorR;
+        this.lightInfo[5] = this.outlineColorG;
+        this.lightInfo[6] = this.outlineColorB;
+        return this.lightInfo;
     }
 
     @Override

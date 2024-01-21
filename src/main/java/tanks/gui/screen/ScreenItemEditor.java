@@ -13,7 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
+public class ScreenItemEditor extends Screen implements IConditionalOverlayScreen
 {
     public Item item;
     public IItemScreen screen;
@@ -54,7 +54,53 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
     }
     );
 
-    public ScreenEditItem(Item item, IItemScreen s, boolean omitPrice, boolean omitUnlockLevel)
+
+
+    public Button save = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 250, this.objWidth, this.objHeight, "Save to template", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            item.exportProperties();
+            BaseFile f = Game.game.fileManager.getFile(Game.homedir + Game.itemDir + "/" + item.name.replace(" ", "_") + ".tanks");
+
+            if (!f.exists())
+            {
+                try
+                {
+                    f.create();
+                    f.startWriting();
+                    f.println(item.toString());
+                    f.stopWriting();
+
+                    save.setText("Done!");
+                }
+                catch (IOException e)
+                {
+                    Game.exitToCrash(e);
+                }
+            }
+            else
+            {
+                Game.screen = new ScreenConfirmOverwrite("Overwrite item template \"" + item.name + "\"?", () ->
+                {
+                    try
+                    {
+                        f.startWriting();
+                        f.println(item.toString());
+                        f.stopWriting();
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        }
+    }
+    );
+
+    public ScreenItemEditor(Item item, IItemScreen s, boolean omitPrice, boolean omitUnlockLevel)
     {
         super(350, 40, 380, 60);
 
@@ -100,6 +146,7 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
                 t.maxChars = 9;
                 t.allowLetters = false;
                 t.allowSpaces = false;
+                t.allowNegatives = true;
 
                 properties.add(t);
             }
@@ -125,6 +172,7 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
                 t.allowDoubles = true;
                 t.allowLetters = false;
                 t.allowSpaces = false;
+                t.allowNegatives = true;
 
                 properties.add(t);
             }
@@ -209,55 +257,41 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
         }
     }
 
-    public Button save = new Button(Drawing.drawing.interfaceSizeX / 2 + 190, Drawing.drawing.interfaceSizeY / 2 - 250, this.objWidth, this.objHeight, "Save to template", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            item.exportProperties();
-            BaseFile f = Game.game.fileManager.getFile(Game.homedir + Game.itemDir + "/" + item.name.replace(" ", "_") + ".tanks");
-
-            if (!f.exists())
-            {
-                try
-                {
-                    f.create();
-                    f.startWriting();
-                    f.println(item.toString());
-                    f.stopWriting();
-
-                    save.setText("Done!");
-                }
-                catch (IOException e)
-                {
-                    Game.exitToCrash(e);
-                }
-            }
-            else
-            {
-                Game.screen = new ScreenConfirmOverwrite("Overwrite item template \"" + item.name + "\"?", () ->
-                {
-                    try
-                    {
-                        f.startWriting();
-                        f.println(item.toString());
-                        f.stopWriting();
-                    }
-                    catch (FileNotFoundException e)
-                    {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        }
-    }
-    );
-
-    public ScreenEditItem(Item item, IItemScreen s)
+    public ScreenItemEditor(Item item, IItemScreen s)
     {
         this(item, s, false, false);
     }
 
+    @Override
+    public void update()
+    {
+            for (int i = page * rows * 3; i < Math.min(page * rows * 3 + rows * 3, properties.size()); i++)
+            {
+                if (properties.get(i) instanceof Selector)
+                    ((Selector) properties.get(i)).drawBehindScreen = this.drawBehindScreen;
+
+                properties.get(i).update();
+            }
+
+            back.update();
+            delete.update();
+            save.update();
+
+            previous.enabled = page > 0;
+            next.enabled = (properties.size() > (1 + page) * rows * 3);
+
+            if (rows * 3 < properties.size())
+            {
+                previous.update();
+                next.update();
+            }
+
+            if (Game.game.input.editorPause.isValid())
+            {
+                back.function.run();
+                Game.game.input.editorPause.invalidate();
+            }
+    }
     @Override
     public void draw()
     {
@@ -267,7 +301,10 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
             ((Screen) this.screen).draw();
         }
         else
+        {
+            Drawing.drawing.setLighting(Level.currentLightIntensity, Math.max(Level.currentLightIntensity * 0.75, Level.currentShadowIntensity));
             this.drawDefaultBackground();
+        }
 
         if (Game.screen instanceof ScreenSelector)
             return;
@@ -306,36 +343,7 @@ public class ScreenEditItem extends Screen implements IConditionalOverlayScreen
         Drawing.drawing.displayInterfaceText(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 - 300, "%s item properties", Translation.translate(item.getTypeName()));
     }
 
-    @Override
-    public void update()
-    {
-            for (int i = page * rows * 3; i < Math.min(page * rows * 3 + rows * 3, properties.size()); i++)
-            {
-                if (properties.get(i) instanceof Selector)
-                    ((Selector) properties.get(i)).drawBehindScreen = this.drawBehindScreen;
 
-                properties.get(i).update();
-            }
-
-            back.update();
-            delete.update();
-            save.update();
-
-            previous.enabled = page > 0;
-            next.enabled = (properties.size() > (1 + page) * rows * 3);
-
-            if (rows * 3 < properties.size())
-            {
-                previous.update();
-                next.update();
-            }
-
-            if (Game.game.input.editorPause.isValid())
-            {
-                back.function.run();
-                Game.game.input.editorPause.invalidate();
-            }
-    }
 
     @Override
     public double getOffsetX()

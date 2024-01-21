@@ -3,10 +3,10 @@ package tanks.obstacle;
 import basewindow.IBatchRenderableObject;
 import basewindow.ShaderGroup;
 import tanks.*;
-import tanks.editorselector.GroupIdSelector;
-import tanks.editorselector.LevelEditorSelector;
-import tanks.editorselector.RotationSelector;
-import tanks.editorselector.StackHeightSelector;
+import tanks.editor.selector.GroupIdSelector;
+import tanks.editor.selector.LevelEditorSelector;
+import tanks.editor.selector.RotationSelector;
+import tanks.editor.selector.StackHeightSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.rendering.ShaderGroundObstacle;
@@ -55,10 +55,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	 */
 	public boolean batchDraw = true;
 
-	/**
-	 * If set to true, the obstacle (if batch rendered) will be redrawn.
-	 */
-	public boolean colorChanged = false;
 	public Class<? extends ShaderGroup> renderer = ShaderObstacle.class;
 	public Class<? extends ShaderGroup> tileRenderer = ShaderGroundObstacle.class;
 
@@ -86,8 +82,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public boolean removed = false;
 	protected boolean redrawn = false;
-
-	public boolean requiresRedraw = false;
 
 	public String name;
 	public String description;
@@ -183,15 +177,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 				byte option = 0;
 
-				if (Obstacle.draw_size >= Game.tile_size)
-				{
-//					if (i > 0)
-//						option += 1;
-
-//					if (i < Math.min(this.stackHeight, default_max_height) - 1)
-//						option += 2;
-				}
-
 				double cutoff = -Math.min((i - 1 + stackHeight % 1.0) * Game.tile_size, 0);
 
 				if (stackHeight % 1 == 0)
@@ -224,6 +209,17 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		}
 	}
 
+	public void drawOutlineAt(double x, double y)
+	{
+		double x1 = this.posX;
+		double y1 = this.posY;
+		this.posX = x;
+		this.posY = y;
+		this.drawOutline();
+		this.posX = x1;
+		this.posY = y1;
+	}
+
 	public void drawOutline()
 	{
 		drawOutline(this.colorR, this.colorG, this.colorB, this.colorA);
@@ -234,7 +230,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		Drawing.drawing.setColor(r, g, b, a);
 		Drawing.drawing.drawRect(this.posX, this.posY, draw_size, draw_size, Game.tile_size * 0.2);
 	}
-
 
 	public void draw3dOutline()
 	{
@@ -364,11 +359,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	 */
 	public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
 	{
-		if (Obstacle.draw_size < Game.tile_size || extra != 0)
-		{
-			Drawing.drawing.setColor(r, g, b);
-			Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
-		}
+		Drawing.drawing.setColor(r, g, b);
+		Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d);
 	}
 
 	public void postOverride()
@@ -508,13 +500,10 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	 */
 	public int unfavorability(TankAIControlled t)
 	{
-		if (this.startHeight > 1)
-			return 0;
-
-		if (this.destructible)
+		if (this.destructible && this.tankCollision && this.startHeight < 1)
 			return 10;
-		else
-			return 0;
+
+		return 0;
 	}
 
 	/** Return true if objects must render before this obstacle to support transparency. */

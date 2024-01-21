@@ -11,6 +11,8 @@ public class ScreenDebug extends ScreenOptionsOverlay
     public String followingCamText = "Immersive camera: ";
     public String tankIDsText = "Show tank IDs: ";
     public String invulnerableText = "Invulnerable: ";
+    public String fancyLightsText = "Fancy lighting: ";
+
 
     Button back = new Button(this.centerX, this.centerY + 210, this.objWidth, this.objHeight, "Back", () ->
     {
@@ -120,6 +122,11 @@ public class ScreenDebug extends ScreenOptionsOverlay
         autocannon.setText("Autocannon: ", Game.autocannon ? ScreenOptions.onText : ScreenOptions.offText);
         pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
         allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
+
+        if (Game.fancyLights)
+            fancyLighting.setText(fancyLightsText, ScreenOptions.onText);
+        else
+            fancyLighting.setText(fancyLightsText, ScreenOptions.offText);
     }
 
     Button traceAllRays = new Button(this.centerX, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
@@ -188,10 +195,25 @@ public class ScreenDebug extends ScreenOptionsOverlay
         }
     });
 
+    Button fancyLighting = new Button(Drawing.drawing.interfaceSizeX / 2 - this.objXSpace, Drawing.drawing.interfaceSizeY / 2 + this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.fancyLights = !Game.fancyLights;
+
+            if (Game.fancyLights)
+                fancyLighting.setText(fancyLightsText, ScreenOptions.onText);
+            else
+                fancyLighting.setText(fancyLightsText, ScreenOptions.offText);
+        }
+    });
+
     @Override
     public void update()
     {
         test.update();
+        fancyLighting.update();
         traceAllRays.update();
         followingCam.update();
         firstPerson.update();
@@ -232,6 +254,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 210, "Debug menu");
 
         test.draw();
+        fancyLighting.draw();
         firstPerson.draw();
         followingCam.draw();
         traceAllRays.draw();

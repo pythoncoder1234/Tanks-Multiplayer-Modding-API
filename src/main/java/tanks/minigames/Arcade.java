@@ -76,7 +76,7 @@ public class Arcade extends Minigame
         this.enableRemote = true;
     }
 
-    public void start()
+    protected void start()
     {
         ModAPI.sendEvents = !remote;
 
@@ -294,7 +294,7 @@ public class Arcade extends Minigame
             chainOpacity = Math.max(0, chainOpacity - Panel.frameFrequency / 20);
 
         if (frenzy)
-            this.endCondition = EndCondition.defaultEndCondition;
+            this.endCondition = EndCondition.normal;
 
         if (!ScreenPartyLobby.isClient)
         {

@@ -1,10 +1,7 @@
 package tanks.gui;
 
 import basewindow.InputCodes;
-import tanks.BiConsumer;
-import tanks.Drawing;
-import tanks.Game;
-import tanks.Level;
+import tanks.*;
 import tanks.translation.Translation;
 
 import java.util.ArrayList;
@@ -25,6 +22,25 @@ public class ButtonList
     public int rows = 6;
     public int columns = 3;
 
+    public int dragIndex;
+    public BiConsumer<Integer, Integer> reorderBehavior;
+
+    public BiConsumer<Button, Boolean> finishDragging = (b, canceled) ->
+    {
+        if (!canceled)
+            reorderBehavior.accept(dragIndex, buttons.indexOf(b));
+    };
+
+    public Consumer<Button> whileDragging = b ->
+    {
+        if (dragIndex == Integer.MAX_VALUE)
+            return;
+
+        Button b1 = this.buttons.get(dragIndex);
+        Drawing.drawing.setColor(150, 150, 150);
+        Drawing.drawing.fillInterfaceRect(b1.posX, b1.posY - b1.sizeY / 2 - 10, b1.sizeX, 10);
+    };
+
     public double xOffset;
     public double yOffset;
 
@@ -44,8 +60,6 @@ public class ButtonList
     public boolean translate = false;
 
     public boolean hideText = false;
-
-    public BiConsumer<Integer, Integer> reorderBehavior;
 
     Button next = new Button(Drawing.drawing.interfaceSizeX / 2 + Drawing.drawing.objXSpace / 2, Drawing.drawing.interfaceSizeY / 2, Drawing.drawing.objWidth, Drawing.drawing.objHeight, "Next page", () -> page++);
 
@@ -140,6 +154,8 @@ public class ButtonList
                 b.posY = Drawing.drawing.interfaceSizeY / 2 + yOffset + this.objYSpace * ((i % (rows * columns)) / columns - rows / 2. + 0.5);
             }
 
+            b.whileDragging = whileDragging;
+            b.finishDrag = finishDragging;
             b.sizeX = this.objWidth;
             b.sizeY = this.objHeight;
             b.translated = this.translate;
@@ -217,18 +233,28 @@ public class ButtonList
             downButtons.get(downButtons.size() - 1).enabled = false;
         }
 
-        for (int i = page * rows * columns; i < Math.min(page * rows * columns + rows * columns, buttons.size()); i++)
+        dragIndex = Integer.MAX_VALUE;
+
+        for (int i = page * rows * columns; i < Math.min((page + 1) * rows * columns, buttons.size()); i++)
         {
+            Button b = buttons.get(i);
+
             if (this.arrowsEnabled)
-                buttons.get(i).enabled = !this.reorder;
+            {
+                b.enabled = !this.reorder;
+                b.draggable = this.reorder;
+            }
 
             if (this.reorder)
             {
                 upButtons.get(i).update();
                 downButtons.get(i).update();
+
+                if (Panel.draggedButton != null && Game.lessThan(b.posX - b.sizeX / 2, Panel.draggedButton.posX, b.posX + b.sizeX / 2) && Panel.draggedButton.posY < b.posY)
+                    dragIndex = Math.min(dragIndex, i);
             }
 
-            buttons.get(i).update();
+            b.update();
         }
 
         previous.enabled = page > 0;

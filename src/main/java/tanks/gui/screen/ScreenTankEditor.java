@@ -17,9 +17,7 @@ import tanks.translation.Translation;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 @SuppressWarnings({"unused", "SuspiciousNameCombination"})
 public class ScreenTankEditor extends Screen implements IItemScreen
@@ -33,7 +31,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
     public Item lastItem;
     public Field lastItemField;
-    public ScreenEditItem lastItemScreen;
+    public ScreenItemEditor lastItemScreen;
     public SelectorDrawable lastItemButton;
 
     public boolean drawBehindScreen;
@@ -243,7 +241,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     this.lastItem = i;
                     this.lastItemField = f;
                     this.resetLayout();
-                    ScreenEditItem editItem = new ScreenEditItem(i, this);
+                    ScreenItemEditor editItem = new ScreenItemEditor(i, this);
                     editItem.delete.setText("Load from template");
                     Game.screen = editItem;
                     this.lastItemScreen = editItem;
@@ -365,7 +363,10 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     }
                 }
 
-                musics.sort(String::compareTo);
+                musics.sort(Comparator.naturalOrder());
+
+                for (int i = 1; i <= 8; i++)
+                    musics.add("arcade/rampage" + i + ".ogg");
 
                 String[] musicsArray = new String[musics.size()];
                 boolean[] selectedMusicsArray = new boolean[musics.size()];
@@ -610,7 +611,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
             {
                 this.lastItem = i;
                 this.lastItemField = itemField;
-                ScreenEditItem editItem = new ScreenEditItem(i, this, true, true);
+                ScreenItemEditor editItem = new ScreenItemEditor(i, this, true, true);
                 editItem.delete.setText("Load from template");
                 Game.screen = editItem;
                 this.lastItemScreen = editItem;

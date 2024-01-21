@@ -91,7 +91,6 @@ public class ScreenOptionsMisc extends ScreenOptionsOverlay
 
     public ScreenOptionsMisc()
     {
-
         if (Game.autostart)
             autostart.setText(autostartText, ScreenOptions.onText);
         else
@@ -107,8 +106,4 @@ public class ScreenOptionsMisc extends ScreenOptionsOverlay
         else
             pauseOnDefocus.setText(pauseText, ScreenOptions.offText);
     }
-
-
-
-
 }

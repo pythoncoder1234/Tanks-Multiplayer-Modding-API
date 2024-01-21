@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ModAPI
 {
+    public static String version = "Mod API v1.2.f";
     public static boolean sendEvents = true;
 
     // Directions in radians in terms of tank (the model is rotated 90 degrees)
@@ -62,7 +63,6 @@ public class ModAPI
         NetworkEventMap.register(EventDisableMinimap.class);
         NetworkEventMap.register(EventDisplayText.class);
         NetworkEventMap.register(EventMinigameStart.class);
-        NetworkEventMap.register(EventLoadMapLevel.class);
         NetworkEventMap.register(EventOverrideNPCState.class);
         NetworkEventMap.register(EventPurchaseNPCItem.class);
         NetworkEventMap.register(EventSetHotbar.class);

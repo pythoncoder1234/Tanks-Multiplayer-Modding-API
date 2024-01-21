@@ -32,7 +32,7 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
 
             editor.level.colorVarR = Integer.parseInt(colorVarRed.inputText);
             editor.level.reloadTiles();
-            Game.redrawTiles = true;
+            Drawing.drawing.terrainRenderer.reset();
         }
                 , editor.level.colorR, 0, 255, 1);
 
@@ -54,7 +54,7 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
             colorVarGreen.performValueCheck();
 
             editor.level.colorVarG = Integer.parseInt(colorVarGreen.inputText);
-            Game.redrawTiles = true;
+            Drawing.drawing.terrainRenderer.reset();
             editor.level.reloadTiles();
         }
                 , editor.level.colorG, 0, 255, 1);
@@ -77,7 +77,7 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
             colorVarBlue.performValueCheck();
 
             editor.level.colorVarB = Integer.parseInt(colorVarBlue.inputText);
-            Game.redrawTiles = true;
+            Drawing.drawing.terrainRenderer.reset();
             editor.level.reloadTiles();
         }
                 , editor.level.colorB, 0, 255, 1);
@@ -96,7 +96,7 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
 
             editor.level.colorVarR = Integer.parseInt(colorVarRed.inputText);
 
-            Game.redrawTiles = true;
+            Drawing.drawing.terrainRenderer.reset();
             editor.level.reloadTiles();
         }
                 , editor.level.colorVarR + "");
@@ -113,7 +113,7 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
 
             editor.level.colorVarG = Integer.parseInt(colorVarGreen.inputText);
 
-            Game.redrawTiles = true;
+            Drawing.drawing.terrainRenderer.reset();
             editor.level.reloadTiles();
         }
                 , editor.level.colorVarG + "");
@@ -130,7 +130,7 @@ public class OverlayLevelOptionsColor extends ScreenLevelEditorOverlay
 
             editor.level.colorVarB = Integer.parseInt(colorVarBlue.inputText);
 
-            Game.redrawTiles = true;
+            Drawing.drawing.terrainRenderer.reset();
             editor.level.reloadTiles();
         }
                 , editor.level.colorVarB + "");

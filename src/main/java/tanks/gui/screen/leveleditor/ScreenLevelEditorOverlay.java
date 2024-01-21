@@ -1,7 +1,7 @@
 package tanks.gui.screen.leveleditor;
 
 import tanks.Game;
-import tanks.editorselector.LevelEditorSelector;
+import tanks.editor.selector.LevelEditorSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.Screen;
 import tanks.tank.TankSpawnMarker;

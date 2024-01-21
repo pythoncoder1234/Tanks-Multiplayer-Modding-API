@@ -5,6 +5,8 @@ import tanks.Panel;
 
 public class InputBinding
 {
+    /** In milliseconds because {@code System.currentTimeMillis()} is used. */
+    public static int doubleClickTime = 300;
     public enum InputType {keyboard, mouse}
 
     public int input;
@@ -12,6 +14,9 @@ public class InputBinding
 
     public int defaultInput;
     public InputType defaultInputType;
+
+    public int rapidClicks = 0;
+    public long lastClick;
 
     public InputBinding(InputType type, int value)
     {
@@ -53,12 +58,29 @@ public class InputBinding
         return false;
     }
 
+    public boolean doubleValid()
+    {
+        if (rapidClicks < 2)
+            return false;
+
+        rapidClicks = 0;
+        return System.currentTimeMillis() - this.lastClick < doubleClickTime;
+    }
+
     public void invalidate()
     {
         if (inputType == InputType.keyboard)
             Game.game.window.validPressedKeys.remove((Integer) input);
         else if (inputType == InputType.mouse)
             Game.game.window.validPressedButtons.remove((Integer) input);
+
+        long time = System.currentTimeMillis();
+        if (time - this.lastClick < doubleClickTime)
+            rapidClicks++;
+        else
+            rapidClicks = 1;
+
+        this.lastClick = time;
     }
 
     @Override

@@ -33,7 +33,7 @@ public class ItemBar
     public static double slotSelectedB = 0;
 
     public static double slotCooldownR = 255;
-    public static double slotCooldownG = 128;
+    public static double slotCooldownG = 75;
     public static double slotCooldownB = 0;
 
     public static double itemCountR = 255;

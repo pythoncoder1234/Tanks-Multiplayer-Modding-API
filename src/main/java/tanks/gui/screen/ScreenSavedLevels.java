@@ -28,7 +28,7 @@ public class ScreenSavedLevels extends Screen
 			savedLevelsList.filter(search.inputText);
 			savedLevelsList.sortButtons();
 
-			if (search.inputText.length() <= 0)
+			if (search.inputText.isEmpty())
 				savedLevelsList.page = page;
 		}
 	}, "");
@@ -107,7 +107,7 @@ public class ScreenSavedLevels extends Screen
 	{
 		savedLevelsList.update();
 
-		if (search.inputText.length() <= 0)
+		if (search.inputText.isEmpty())
 			page = savedLevelsList.page;
 
 		quit.update();
@@ -135,12 +135,12 @@ public class ScreenSavedLevels extends Screen
 
 		savedLevelsList.draw();
 
-		if (savedLevelsList.buttons.size() <= 0)
+		if (savedLevelsList.buttons.isEmpty())
 		{
 			Drawing.drawing.setColor(0, 0, 0);
 			Drawing.drawing.setInterfaceFontSize(24);
 
-			if (search.inputText.length() > 0)
+			if (!search.inputText.isEmpty())
 			{
 				Drawing.drawing.drawInterfaceText(this.centerX, this.centerY, "No levels found");
 			}

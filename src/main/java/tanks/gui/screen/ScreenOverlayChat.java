@@ -86,73 +86,74 @@ public class ScreenOverlayChat
                         else
                             Drawing.drawing.setColor(255, 255, 255, opacity / 2);
 
-                        Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.interfaceSizeY - i * 30 - 70 + radius / 2, width + xPad, radius);
-                        Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.interfaceSizeY - (i + (c.lines.size() - 1)) * 30 - 70 - radius / 2, width + xPad, radius);
-                        Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.interfaceSizeY - (i + (c.lines.size() - 1) / 2.0) * 30 - 70, width + xPad + radius * 2, height + yPad - radius * 2);
+                        Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + radius / 2, width + xPad, radius);
+                        Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.getInterfaceEdgeY(true) - (i + (c.lines.size() - 1)) * 30 - 70 - radius / 2, width + xPad, radius);
+                        Drawing.drawing.fillInterfaceRect(width / 2 + xStart, Drawing.drawing.getInterfaceEdgeY(true) - (i + (c.lines.size() - 1) / 2.0) * 30 - 70, width + xPad + radius * 2, height + yPad - radius * 2);
 
                         Game.game.window.shapeRenderer.setBatchMode(true, false, false);
 
                         for (int j = 0; j < 15; j++)
                         {
-                            Drawing.drawing.addInterfaceVertex(xStart - xPad / 2, Drawing.drawing.interfaceSizeY - i * 30 - 70, 0);
+                            Drawing.drawing.addInterfaceVertex(xStart - xPad / 2, Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70, 0);
                             Drawing.drawing.addInterfaceVertex(xStart - xPad / 2 + Math.cos((j + 15) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius, 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius, 0);
                             Drawing.drawing.addInterfaceVertex(xStart - xPad / 2 + Math.cos((j + 16) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius, 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius, 0);
                         }
 
                         for (int j = 15; j < 30; j++)
                         {
-                            Drawing.drawing.addInterfaceVertex(xStart - xPad / 2, Drawing.drawing.interfaceSizeY - i * 30 - 70 - 30 * (c.lines.size() - 1), 0);
+                            Drawing.drawing.addInterfaceVertex(xStart - xPad / 2, Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 - 30 * (c.lines.size() - 1), 0);
                             Drawing.drawing.addInterfaceVertex(xStart - xPad / 2 + Math.cos((j + 15) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
                             Drawing.drawing.addInterfaceVertex(xStart - xPad / 2 + Math.cos((j + 16) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
                         }
 
                         for (int j = 0; j < 15; j++)
                         {
-                            Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2, Drawing.drawing.interfaceSizeY - i * 30 - 70, 0);
+                            Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2, Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70, 0);
                             Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2 + Math.cos((j + 45) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius, 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius, 0);
                             Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2 + Math.cos((j + 46) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius, 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius, 0);
                         }
 
                         for (int j = 15; j < 30; j++)
                         {
-                            Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2, Drawing.drawing.interfaceSizeY - i * 30 - 70 - 30 * (c.lines.size() - 1), 0);
+                            Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2, Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 - 30 * (c.lines.size() - 1), 0);
                             Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2 + Math.cos((j + 45) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 15) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
                             Drawing.drawing.addInterfaceVertex(width + xStart + xPad / 2 + Math.cos((j + 46) / 30.0 * Math.PI) * radius,
-                                    Drawing.drawing.interfaceSizeY - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
+                                    Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70 + Math.sin((j + 16) / 30.0 * Math.PI) * radius - 30 * (c.lines.size() - 1), 0);
                         }
 
                         Game.game.window.shapeRenderer.setBatchMode(false, false, false);
 
                         double x = 34;
-                        double y = Drawing.drawing.interfaceSizeY - (i + (c.lines.size() - 1)) * 30 - 70;
+                        double y = Drawing.drawing.getInterfaceEdgeY(true) - (i + (c.lines.size() - 1)) * 30 - 70;
                         double size = Game.tile_size * 0.4;
 
                         if (c.enableTankIcon)
                         {
-                            Drawing.drawing.setColor(c.r2, c.g2, c.b2, opacity);
+                            Drawing.drawing.setColor(c.r2, c.g2, c.b2);
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.base, x, y, size, size, 0);
 
-                            Drawing.drawing.setColor(c.r1, c.g1, c.b1, opacity);
+                            Drawing.drawing.setColor(c.r1, c.g1, c.b1);
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.color, x, y, size, size, 0);
 
-                            Drawing.drawing.setColor(c.r2, c.g2, c.b2, opacity);
+                            Drawing.drawing.setColor(c.r2, c.g2, c.b2);
+
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.turret, x, y, size, size, 0);
 
-                            Drawing.drawing.setColor((c.r1 + c.r2) / 2, (c.g1 + c.g2) / 2, (c.b1 + c.b2) / 2, opacity);
+                            Drawing.drawing.setColor((c.r1 + c.r2) / 2, (c.g1 + c.g2) / 2, (c.b1 + c.b2) / 2);
                             Drawing.drawing.drawInterfaceModel(TankModels.tank.turretBase, x, y, size, size, 0);
                         }
 
                         for (int j = c.lines.size() - 1; j >= 0; j--)
                         {
                             double mx = 20;
-                            double my = Drawing.drawing.interfaceSizeY - i * 30 - 70;
+                            double my = Drawing.drawing.getInterfaceEdgeY(true) - i * 30 - 70;
 
                             if (isDark())
                                 Drawing.drawing.setColor(255, 255, 255, opacity);

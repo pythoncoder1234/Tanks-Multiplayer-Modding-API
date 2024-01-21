@@ -54,7 +54,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	public double mouseY;
 
 	public static Model sunglassesModel;
-	public static boolean me = false;
+	public static boolean hi = false;
 
 	public TankPlayer(double x, double y, double angle)
     {
@@ -74,7 +74,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         this.secondaryColorG = Game.player.turretColorG;
 		this.secondaryColorB = Game.player.turretColorB;
 
-		if (me)
+		if (hi)
 			this.baseModel = TankModels.arrow.base;
 
 		if (enableDestroyCheat)
@@ -123,7 +123,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
     {
         super.draw();
 
-		if (this.destroy || !me)
+		if (this.destroy || !hi || !Game.enable3d)
 			return;
 
         Drawing.drawing.setColor(0, 0, 0);
@@ -141,16 +141,16 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
         boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
 
-		if ((Game.game.window.validPressedKeys.contains(InputCodes.KEY_H) || age == 0) && Level.currentLightIntensity < 0.5)
+		if ((Game.game.window.validPressedKeys.contains(InputCodes.KEY_G) || age == 0) && Level.currentLightIntensity < 0.5)
 		{
 			if (age != 0)
 			{
-				Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_H);
+				Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_G);
 				nightVision = !nightVision;
 			}
 
 			Level.currentLightIntensity = Level.currentLightIntensity == 0.019 ? 0 : Math.max(Level.currentLightIntensity, 0.019);
-			double multiplier = nightVision ? -7 * Level.currentLightIntensity + 3 + 2./3 : 0;
+			double multiplier = nightVision ? -8 * Level.currentLightIntensity + 4 : 0;
 			this.glowSize = 0;
 			this.lightSize = 20 * multiplier;
 			this.lightIntensity = multiplier;
@@ -437,18 +437,20 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			if (h.enabledItemBar && h.itemBar.selected >= 0)
 			{
 				Item i = h.itemBar.slots[h.itemBar.selected];
-				if (i instanceof ItemBullet)
+				if (i instanceof ItemBullet b)
 				{
-					r.bounces = ((ItemBullet) i).bounces;
-					range = ((ItemBullet) i).getRange();
+					r.bounces = b.bounces;
+					r.size = b.size;
+					range = b.getRange();
 
-					if (((ItemBullet) i).bulletClass.equals(BulletElectric.class))
+					if (b.bulletClass.equals(BulletElectric.class))
 						r.bounces = 0;
 				}
-				else if (i instanceof ItemRemote)
+				else if (i instanceof ItemRemote ir)
 				{
-					if (((ItemRemote)i).bounces >= 0)
-						r.bounces = ((ItemRemote)i).bounces;
+					r.size = ir.size;
+					if (ir.bounces >= 0)
+						r.bounces = ir.bounces;
 
 					range = ((ItemRemote) i).range;
 				}
@@ -537,8 +539,15 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		b.speed = speed;
 		this.addPolarMotion(b.getPolarDirection() + Math.PI, 25.0 / 32.0 * b.recoil * this.getAttributeValue(AttributeModifier.recoil, 1) * b.frameDamageMultipler);
 
+		this.recoilSpeed = this.getSpeed();
+		if (this.recoilSpeed > this.maxSpeed * 1.01)
+		{
+			this.tookRecoil = true;
+			this.inControlOfMotion = false;
+		}
+
 		if (b.moveOut)
-			b.moveOut(50 / speed * this.size / Game.tile_size);
+			b.moveOut(50 * this.size / Game.tile_size);
 
 		b.setTargetLocation(this.mouseX, this.mouseY);
 

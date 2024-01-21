@@ -133,6 +133,9 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
             tankTextures.setText(tankTexturesText, ScreenOptions.onText);
         else
             tankTextures.setText(tankTexturesText, ScreenOptions.offText);
+
+        if (Game.framework == Game.Framework.libgdx)
+            previewCrusades.enabled = false;
     }
 
     protected void update3dGroundButton()
@@ -149,42 +152,23 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
         else
         {
             ground3d.enabled = false;
-
             ground3d.setText(ground3dText, ScreenOptions.offText);
         }
-    }
 
-    @Override
-    public void update()
-    {
-        terrain.update();
-        bulletTrails.update();
-        glow.update();
-        effects.update();
-        tankTextures.update();
-        xrayBullets.update();
-        previewCrusades.update();
-
-        graphics3d.update();
-        ground3d.update();
-        altPerspective.update();
-        shadows.update();
-        antialiasing.update();
-
-        back.update();
-
-        if (Game.antialiasing != Game.game.window.antialiasingEnabled)
+        if (Game.enable3d)
         {
-            antialiasing.bgColG = 238;
-            antialiasing.bgColB = 220;
+            if (Game.xrayBullets)
+                xrayBullets.setText("X-ray bullets: ", ScreenOptions.onText);
+            else
+                xrayBullets.setText("X-ray bullets: ", ScreenOptions.offText);
+
+            xrayBullets.enabled = true;
         }
         else
         {
-            antialiasing.bgColG = 255;
-            antialiasing.bgColB = 255;
+            xrayBullets.setText("X-ray bullets: ", ScreenOptions.offText);
+            xrayBullets.enabled = false;
         }
-
-        super.update();
     }
 
     Button terrain = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
@@ -201,39 +185,13 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
 
             update3dGroundButton();
 
-            if (Game.currentLevel == null)
-                Game.resetTiles();
-            else
-                Game.currentLevel.reloadTiles();
+            Drawing.drawing.terrainRenderer.reset();
+            Game.resetTiles();
         }
     },
             "Fancy terrain enables varied block and---ground colors------May impact performance on large levels");
 
-    @Override
-    public void draw()
-    {
-        this.drawDefaultBackground();
-
-        back.draw();
-
-        previewCrusades.draw();
-        antialiasing.draw();
-        shadows.draw();
-        altPerspective.draw();
-        ground3d.draw();
-        graphics3d.draw();
-
-        xrayBullets.draw();
-        tankTextures.draw();
-        effects.draw();
-        glow.draw();
-        bulletTrails.draw();
-        terrain.draw();
-
-        Drawing.drawing.setInterfaceFontSize(this.titleSize);
-        Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Graphics options");
-    }    Button bulletTrails = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
+    Button bulletTrails = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -289,10 +247,8 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
 
             update3dGroundButton();
 
-            if (Game.currentLevel == null)
-                Game.resetTiles();
-            else
-                Game.currentLevel.reloadTiles();
+            Drawing.drawing.terrainRenderer.reset();
+            Game.resetTiles();
         }
     },
             "3D graphics may impact performance");
@@ -309,10 +265,8 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
             else
                 ground3d.setText(ground3dText, ScreenOptions.offText);
 
-            if (Game.currentLevel == null)
-                Game.resetTiles();
-            else
-                Game.currentLevel.reloadTiles();
+            Drawing.drawing.terrainRenderer.reset();
+            Game.resetTiles();
         }
     },
             "Enabling 3D ground may impact---performance in large levels");
@@ -384,21 +338,6 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
     },
             "May fix flickering in thin edges---at the cost of performance------Requires restarting the game---to take effect");
 
-    Button xrayBullets = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.xrayBullets = !Game.xrayBullets;
-
-            if (Game.xrayBullets)
-                xrayBullets.setText("X-ray bullets: ", ScreenOptions.onText);
-            else
-                xrayBullets.setText("X-ray bullets: ", ScreenOptions.offText);
-        }
-    },
-            "Shows indicators for bullets---hidden behind terrain");
-
     Button previewCrusades = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
@@ -429,9 +368,84 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
     },
             "Adds designs to the built-in tanks---which can help differentiate them");
 
+    Button xrayBullets = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.xrayBullets = !Game.xrayBullets;
+
+            if (Game.xrayBullets)
+                xrayBullets.setText("X-ray bullets: ", ScreenOptions.onText);
+            else
+                xrayBullets.setText("X-ray bullets: ", ScreenOptions.offText);
+        }
+    },
+            "Shows indicators for bullets---hidden behind terrain");
+
     Button back = new Button(this.centerX, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Back", () -> Game.screen = new ScreenOptions());
 
     Button shadows = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsShadows(), "Shadows are quite graphically intense---and may significantly reduce framerate");
 
     Button effects = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", () -> Game.screen = new ScreenOptionsEffects(), "Particle effects may significantly---impact performance");
+
+
+    @Override
+    public void update()
+    {
+        terrain.update();
+        bulletTrails.update();
+        glow.update();
+        effects.update();
+        tankTextures.update();
+        xrayBullets.update();
+        previewCrusades.update();
+
+        graphics3d.update();
+        ground3d.update();
+        altPerspective.update();
+        shadows.update();
+        antialiasing.update();
+
+        back.update();
+
+        if (Game.antialiasing != Game.game.window.antialiasingEnabled)
+        {
+            antialiasing.bgColG = 238;
+            antialiasing.bgColB = 220;
+        }
+        else
+        {
+            antialiasing.bgColG = 255;
+            antialiasing.bgColB = 255;
+        }
+
+        super.update();
+    }
+
+    @Override
+    public void draw()
+    {
+        this.drawDefaultBackground();
+
+        back.draw();
+
+        previewCrusades.draw();
+        antialiasing.draw();
+        shadows.draw();
+        altPerspective.draw();
+        ground3d.draw();
+        graphics3d.draw();
+
+        xrayBullets.draw();
+        tankTextures.draw();
+        effects.draw();
+        glow.draw();
+        bulletTrails.draw();
+        terrain.draw();
+
+        Drawing.drawing.setInterfaceFontSize(this.titleSize);
+        Drawing.drawing.setColor(0, 0, 0);
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Graphics options");
+    }
 }

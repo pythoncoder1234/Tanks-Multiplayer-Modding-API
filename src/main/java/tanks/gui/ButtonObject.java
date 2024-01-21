@@ -9,8 +9,6 @@ import java.util.ArrayList;
 
 public class ButtonObject extends Button
 {
-	public double bgColA = 0;
-
 	public IDrawableForInterface object;
     public Runnable drawObjectForInterface = () -> object.drawForInterface(this.posX, this.posY);
     public boolean tempDisableHover = false;
@@ -61,6 +59,7 @@ public class ButtonObject extends Button
 		this.disabledColR = 0;
 		this.disabledColG = 0;
 		this.disabledColB = 0;
+		this.bgColA = 0;
 
 		if (Game.game.window.touchscreen)
 			this.enableHover = false;

@@ -14,7 +14,7 @@ public abstract class EndCondition
     public boolean teamWon(Team t) { return true; }
     public boolean playerWon(Player p) { return true; }
 
-    public static EndCondition defaultEndCondition = new EndCondition()
+    public static EndCondition normal = new EndCondition()
     {
         public boolean finishedQuick() { return aliveTeams != null && aliveTeams.size() <= 1; }
         public boolean finished() { return fullyAliveTeams != null && fullyAliveTeams.size() <= 1; }
@@ -35,17 +35,11 @@ public abstract class EndCondition
     {
         public boolean finishedQuick() { return aliveTeams != null && aliveTeams.size() <= 1; }
         public boolean finished() { return fullyAliveTeams != null && fullyAliveTeams.size() <= 1; }
-
-        public boolean teamWon(Team t) { return true; }
-        public boolean playerWon(Player p) { return true; }
     };
 
     public static EndCondition instantWin = new EndCondition()
     {
         public boolean finishedQuick() { return true; }
         public boolean finished() { return true; }
-
-        public boolean teamWon(Team t) { return true; }
-        public boolean playerWon(Player p) { return true;}
     };
 }

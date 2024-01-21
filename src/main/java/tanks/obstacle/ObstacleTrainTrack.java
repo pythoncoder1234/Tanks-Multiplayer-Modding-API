@@ -27,6 +27,8 @@ public class ObstacleTrainTrack extends Obstacle
     public int turn = 0;
     protected boolean firstFrame = true;
 
+    public boolean redraw = false;
+
     public ObstacleTrainTrack(String name, double posX, double posY)
     {
         super(name, posX, posY);
@@ -53,6 +55,13 @@ public class ObstacleTrainTrack extends Obstacle
             setOrientation();
 
         batchDraw = turn == 0;
+
+        if (redraw && batchDraw)
+        {
+            redraw = false;
+            Game.redrawObstacles.add(this);
+        }
+
         if (turn > 0)
         {
             Drawing.drawing.setColor(176, 111, 14);
@@ -135,9 +144,9 @@ public class ObstacleTrainTrack extends Obstacle
             if (o.connectedY() > 1)
                 return;
 
-            this.colorChanged = !this.horizontal;
+            this.redraw = !this.horizontal;
             this.horizontal = true;
-            o.colorChanged = o.colorChanged || !o.horizontal;
+            o.redraw = o.redraw || !o.horizontal;
             o.horizontal = true;
 
             this.connectedTo[2 - dxi] = o;
@@ -150,9 +159,9 @@ public class ObstacleTrainTrack extends Obstacle
             if (o.connectedX() > 1)
                 return;
 
-            this.colorChanged = this.horizontal;
+            this.redraw = this.horizontal;
             this.horizontal = false;
-            o.colorChanged = o.colorChanged || o.horizontal;
+            o.redraw = o.redraw || o.horizontal;
             o.horizontal = false;
 
             this.connectedTo[1 + dyi] = o;
@@ -202,7 +211,7 @@ public class ObstacleTrainTrack extends Obstacle
     public void setOrientation()
     {
         firstFrame = false;
-        this.colorChanged = turn > 0;
+        this.redraw = turn > 0;
 
         for (int i = 0; i < 4; i++)
         {

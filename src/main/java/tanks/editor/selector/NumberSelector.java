@@ -1,4 +1,4 @@
-package tanks.editorselector;
+package tanks.editor.selector;
 
 import tanks.Game;
 import tanks.GameObject;

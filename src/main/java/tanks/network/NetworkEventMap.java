@@ -12,6 +12,15 @@ public class NetworkEventMap
 	
 	public static void register(Class<? extends INetworkEvent> c)
 	{
+		try
+		{
+			c.getConstructor();
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException("The network event " + c + " does not have a no-parameter constructor. Please give it one.");
+		}
+
 		map1.put(id, c);
 		map2.put(c, id);
 		id++;

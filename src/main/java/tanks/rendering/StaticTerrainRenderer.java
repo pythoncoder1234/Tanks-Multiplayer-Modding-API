@@ -1,8 +1,6 @@
 package tanks.rendering;
 
-import basewindow.BaseStaticBatchRenderer;
-import basewindow.IBatchRenderableObject;
-import basewindow.ShaderGroup;
+import basewindow.*;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.screen.ILevelPreviewScreen;
@@ -16,6 +14,7 @@ public class StaticTerrainRenderer extends TerrainRenderer
     protected final HashMap<Class<? extends ShaderGroup>, RegionRenderer> renderers = new HashMap<>();
     public RegionRenderer outOfBoundsRenderer;
 
+    public boolean staged = false;
     public boolean freed = false;
 
     protected float[] currentColor = new float[3];
@@ -247,7 +246,9 @@ public class StaticTerrainRenderer extends TerrainRenderer
     public void reset()
     {
         for (RegionRenderer r : this.renderers.values())
+        {
             r.renderer.free();
+        }
 
         this.outOfBoundsRenderer.renderer.free();
 
@@ -314,9 +315,9 @@ public class StaticTerrainRenderer extends TerrainRenderer
 
         if (asPreview)
         {
-            xStart = -(100 / previewWidth - 1);
+            xStart = -(100 / previewWidth) - 1;
             yStart = 0;
-            xEnd = 100 / previewWidth - 1;
+            xEnd = 100 / previewWidth + 1;
             yEnd = 0;
         }
 
@@ -379,44 +380,28 @@ public class StaticTerrainRenderer extends TerrainRenderer
         Game.game.window.shaderDefault.set();
     }
 
-    public void drawTile(int i, int j)
+    public void stageObstacles()
     {
-        double r = Game.tilesR[i][j];
-        double g = Game.tilesG[i][j];
-        double b = Game.tilesB[i][j];
-        double depth = Game.tilesDepth[i][j];
-        this.currentDepth = depth;
-        currentColor[0] = (float) (r / 255.0);
-        currentColor[1] = (float) (g / 255.0);
-        currentColor[2] = (float) (b / 255.0);
+        if (!Game.enable3d)
+            return;
 
-        Obstacle o = Game.obstacleGrid[i][j];
-        if (o != null && o.replaceTiles && !o.removed)
+        double d = Obstacle.draw_size;
+        Obstacle.draw_size = Game.tile_size;
+        for (Obstacle o: Game.obstacles)
         {
-            this.tiles[i][j].obstacleAbove = o;
-            o.drawTile(this.tiles[i][j], r, g, b, depth, Game.tile_size);
-        }
-        else
-        {
-            this.tiles[i][j].obstacleAbove = null;
-            Drawing.drawing.setColor(r, g, b);
-            this.addBox(this.tiles[i][j],
-                    i * Game.tile_size,
-                    j * Game.tile_size,
-                    -Game.tile_size, Game.tile_size, Game.tile_size,
-                    Game.tile_size + depth, (byte) 1, false);
-        }
+            int i = Math.max(0, Math.min(Game.currentSizeX - 1, (int) (o.posX / Game.tile_size)));
+            int j = Math.max(0, Math.min(Game.currentSizeY - 1, (int) (o.posY / Game.tile_size)));
+            double r = Game.tilesR[i][j];
+            double g = Game.tilesG[i][j];
+            double b = Game.tilesB[i][j];
+            this.currentDepth = Game.tilesDepth[i][j];
+            currentColor[0] = (float) (r / 255.0);
+            currentColor[1] = (float) (g / 255.0);
+            currentColor[2] = (float) (b / 255.0);
 
-        if (!this.staged)
-            this.addBox(this.tiles[i][j],
-                    i * Game.tile_size,
-                    j * Game.tile_size,
-                    -Game.tile_size, Game.tile_size, Game.tile_size,
-                    Game.tile_size + depth, (byte) 1, true);
-    }
-
-    public static class Tile implements IBatchRenderableObject
-    {
-        public Obstacle obstacleAbove = null;
+            if (o.batchDraw)
+                o.draw();
+        }
+        Obstacle.draw_size = d;
     }
 }

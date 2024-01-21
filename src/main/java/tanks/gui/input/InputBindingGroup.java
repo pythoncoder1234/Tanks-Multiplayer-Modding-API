@@ -37,6 +37,11 @@ public class InputBindingGroup
         return input1.isValid() || input2.isValid();
     }
 
+    public boolean doubleValid()
+    {
+        return input1.doubleValid() || input2.doubleValid();
+    }
+
     public void invalidate()
     {
         input1.invalidate();

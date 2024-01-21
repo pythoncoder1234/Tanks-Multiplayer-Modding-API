@@ -47,7 +47,7 @@ public class Tutorial extends Minigame
     }
 
     @Override
-    public void start()
+    protected void start()
     {
         start(false, false);
     }
@@ -86,7 +86,7 @@ public class Tutorial extends Minigame
 
     public void update()
     {
-        ((ScreenGame) Game.screen).endCondition = step <= 8 && !Game.playerTank.destroy ? EndCondition.neverEnd : EndCondition.defaultEndCondition;
+        ((ScreenGame) Game.screen).endCondition = step <= 8 && !Game.playerTank.destroy ? EndCondition.neverEnd : EndCondition.normal;
 
         if (Game.playerTank.destroy)
             return;

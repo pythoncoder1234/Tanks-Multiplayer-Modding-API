@@ -16,8 +16,13 @@ import java.util.ArrayList;
 public class Button implements IDrawable, ITrigger
 {
     public Runnable function;
+	public Runnable doubleClickFunc = null;
     public InputBindingGroup keybind;
     public double posX, posY, sizeX, sizeY;
+
+	public double age = 0;
+	public double lastClick = 0;
+	public int rapidClicks;
 
 	public boolean draggable;
 	public String dragTooltip = null;
@@ -47,6 +52,8 @@ public class Button implements IDrawable, ITrigger
 	public boolean justPressed = false;
 
 	public boolean enabled = true;
+	/** Whether you can click the button while it's disabled */
+	public boolean disabledClick = false;
 
 	public double disabledColR = 200;
 	public double disabledColG = 200;
@@ -55,6 +62,7 @@ public class Button implements IDrawable, ITrigger
 	public double bgColR = 255;
 	public double bgColG = 255;
 	public double bgColB = 255;
+	public double bgColA = 255;
 
 	public double selectedColR = 240;
 	public double selectedColG = 240;
@@ -158,7 +166,12 @@ public class Button implements IDrawable, ITrigger
 		Drawing drawing = Drawing.drawing;
 
 		if (this.fontSize < 0)
-			drawing.setInterfaceFontSize(this.sizeY * 0.6);
+		{
+			if (this.enableHover)
+				drawing.setBoundedInterfaceFontSize(this.sizeY * 0.6, this.sizeX - 80, this.text);
+			else
+				drawing.setBoundedInterfaceFontSize(this.sizeY * 0.6, this.sizeX - 40, this.text);
+		}
 		else
 			drawing.setInterfaceFontSize(this.fontSize);
 
@@ -189,7 +202,7 @@ public class Button implements IDrawable, ITrigger
 		else if (selected && !Game.game.window.touchscreen)
 			drawing.setColor(this.selectedColR, this.selectedColG, this.selectedColB);
 		else
-			drawing.setColor(this.bgColR, this.bgColG, this.bgColB);
+			drawing.setColor(this.bgColR, this.bgColG, this.bgColB, this.bgColA);
 
 		drawing.fillInterfaceRect(posX, posY, sizeX - sizeY, sizeY);
 		drawing.fillInterfaceOval(posX - sizeX / 2 + sizeY / 2, posY, sizeY, sizeY);
@@ -226,6 +239,11 @@ public class Button implements IDrawable, ITrigger
 			Drawing.drawing.setColor(127, 180, 255);
 			drawing.drawInterfaceModel2D(model, this.posX + this.imageXOffset, this.posY + this.imageYOffset, 0,this.imageSizeX * 0.75, this.imageSizeY * 0.75, this.imageSizeY * 0.75);
 		}
+
+		if (this.fontSize < 0)
+			Drawing.drawing.setInterfaceFontSize(this.sizeY * 0.6);
+		else
+			Drawing.drawing.setInterfaceFontSize(this.fontSize);
 
 		if (!isDragging)
 		{
@@ -275,19 +293,29 @@ public class Button implements IDrawable, ITrigger
         this.posY = y;
     }
 
-    @Override
-    public void updateKeybind()
-    {
-        if (this.keybind != null && this.keybind.isValid())
-        {
-            this.keybind.invalidate();
-            this.function.run();
-        }
-    }
+	@Override
+	public InputBindingGroup getKeybind()
+	{
+		return keybind;
+	}
 
-    public void update()
+	@Override
+	public void onClick()
+	{
+		this.function.run();
+	}
+
+	@Override
+	public void doubleClick()
+	{
+		if (this.doubleClickFunc != null)
+			this.doubleClickFunc.run();
+	}
+
+	public void update()
     {
         this.justPressed = false;
+		this.age += Panel.frameFrequency;
 
         this.updateKeybind();
 
@@ -387,18 +415,31 @@ public class Button implements IDrawable, ITrigger
 				else
 					Game.screen = new ScreenInfo(Game.screen, this.translatedText, this.hoverText);
 			}
-			else if (enabled)
+			else
 			{
-				function.run();
-
-				if (!this.silent)
+				if (enabled || disabledClick)
 				{
-					Drawing.drawing.playSound("bullet_explode.ogg", 2f, 0.3f);
-					Drawing.drawing.playVibration("click");
+					onClick();
+
+					if (!this.silent)
+					{
+						Drawing.drawing.playSound("bullet_explode.ogg", 2f, 0.3f);
+						Drawing.drawing.playVibration("click");
+					}
+
+					this.justPressed = true;
+					handled = true;
 				}
 
-				this.justPressed = true;
-				handled = true;
+				if (age - lastClick < 30)
+					this.rapidClicks++;
+				else
+					this.rapidClicks = 1;
+
+				if (this.rapidClicks >= 2)
+					doubleClick();
+
+				this.lastClick = age;
 			}
 		}
 		else if (draggable && selected && pressed && !cancelDrag)

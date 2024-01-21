@@ -8,9 +8,9 @@ import tanks.gui.Button;
 import tanks.gui.Joystick;
 import tanks.gui.screen.ScreenGame;
 import tanks.network.event.EventPlaySound;
+import tanks.obstacle.Obstacle;
 import tanks.rendering.TerrainRenderer;
 import tanks.rendering.TrackRenderer;
-import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.translation.Translation;
 
@@ -910,12 +910,17 @@ public class Drawing
 
 	public void fillInterfaceRect(double x, double y, double sizeX, double sizeY)
 	{
+		fillInterfaceRect(x, y, sizeX, sizeY, 0);
+	}
+
+	public void fillInterfaceRect(double x, double y, double sizeX, double sizeY, double borderRadius)
+	{
 		double drawX = (interfaceScale * (x - sizeX / 2) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
 		double drawY = (interfaceScale * (y - sizeY / 2) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
 		double drawSizeX = (sizeX * interfaceScale);
 		double drawSizeY = (sizeY * interfaceScale);
 
-		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY);
+		Game.game.window.shapeRenderer.fillRect(drawX, drawY, drawSizeX, drawSizeY, borderRadius);
 	}
 
 	public void fillShadedInterfaceRect(double x, double y, double sizeX, double sizeY)
@@ -947,7 +952,13 @@ public class Drawing
 		double drawSizeX = (sizeX * interfaceScale);
 		double drawSizeY = (sizeY * interfaceScale);
 
-		Game.game.window.shapeRenderer.drawImage(drawX, drawY, drawSizeX, drawSizeY, "/images/" + img, false);
+		if (!img.startsWith("text:"))
+			Game.game.window.shapeRenderer.drawImage(drawX, drawY, drawSizeX, drawSizeY, "/images/" + img, false);
+		else
+		{
+			Drawing.drawing.setColor(0, 0, 0);
+			Game.game.window.fontRenderer.drawString(drawX, drawY, drawSizeX / 36, drawSizeY / 36, img.substring(5));
+		}
 	}
 
 	public void drawInterfaceImage(double rotation, String img, double x, double y, double sizeX, double sizeY)
@@ -1405,9 +1416,8 @@ public class Drawing
 			x = Panel.panel.pastPlayerX.get(0) * (1 - frac) + Panel.panel.pastPlayerX.get(1) * frac;
 		}
 
-		double result = (x - (Panel.windowWidth) / scale / 2);
-
-		double margin = Math.max(0, Math.min(Game.tile_size * 2, Game.currentSizeX * Game.tile_size * Drawing.drawing.scale - Panel.windowWidth)) / 2;
+		double result = (x - (Panel.windowWidth / scale / 2));
+		double margin = Obstacle.draw_size / Game.tile_size * Math.max(0, Math.min(Game.tile_size * 2, Game.currentSizeX * Game.tile_size * Drawing.drawing.scale - Panel.windowWidth)) / 2;
 
 		boolean less = result < -margin;
 		boolean greater = result + (Panel.windowWidth) / scale > sizeX + margin;
@@ -1421,7 +1431,7 @@ public class Drawing
 			else if (greater && !less)
 				return -margin - (sizeX - (Panel.windowWidth) / scale);
 			else
-				return 0 - result;
+				return -result;
 		}
 		else
 		{
@@ -1512,6 +1522,32 @@ public class Drawing
 		return (Game.game.window.absoluteHeight - statsHeight - sizeY / scale) / 2;
 	}
 
+	/**
+	 *	Gets interface coordinate position of left/right edge of screen
+	 */
+	public double getInterfaceEdgeX(boolean right)
+	{
+		if (right)
+			return (Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeX) / 2
+					+ Drawing.drawing.interfaceSizeX - Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale;
+		else
+			return (Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeX) / 2
+				+ Drawing.drawing.interfaceSizeX - Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale;
+	}
+
+	/**
+	 *	Gets interface coordinate position of top/bottom edge of screen
+	 */
+	public double getInterfaceEdgeY(boolean bottom)
+	{
+		if (bottom)
+			return ((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2
+					+ Drawing.drawing.interfaceSizeY;
+		else
+			return -((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2;
+	}
+
+
 	public double gameToAbsoluteX(double x, double sizeX)
 	{
 		if (Game.screen.enableMargins)
@@ -1574,10 +1610,8 @@ public class Drawing
 		if (Game.angledView)
 			dist = 300;
 
-		Tank t = ScreenGame.focusedTank();
-
-        if ((!Game.followingCam || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam) || !Drawing.drawing.movingCamera) || !(Game.screen instanceof ScreenGame))
-            return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
+		if (!Game.followingCam || !(Game.screen instanceof ScreenGame))
+			return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
 		else
 			return false;
 	}

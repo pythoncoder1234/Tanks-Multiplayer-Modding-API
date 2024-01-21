@@ -110,16 +110,14 @@ public class ScreenPartyHost extends Screen
         this.musicID = "menu";
         toggleIP.fullInfo = true;
 
-        chatbox = new ChatBox(this.centerX, Drawing.drawing.interfaceSizeY - 30, Drawing.drawing.interfaceSizeX - 20, 40, Game.game.input.chat, () ->
+        chatbox = new ChatBox(this.centerX, Drawing.drawing.getInterfaceEdgeY(true) - 30, Drawing.drawing.interfaceSizeX - 20, 40, Game.game.input.chat, () ->
         {
             ScreenPartyHost.chat.add(0, new ChatMessage(Game.player, ScreenPartyHost.chatbox.inputText));
             Game.eventsOut.add(new EventPlayerChat(Game.player, ScreenPartyHost.chatbox.inputText));
         });
 
         if (Game.game.window.touchscreen)
-        {
             chatbox.defaultText = "Click here to send a chat message";
-        }
 
         for (int i = 0; i < this.kickButtons.length; i++)
         {

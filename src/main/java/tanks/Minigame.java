@@ -34,7 +34,7 @@ public abstract class Minigame
     public String name = this.getClass().getSimpleName();
     public String description = "";
 
-    public EndCondition endCondition = EndCondition.defaultEndCondition;
+    public EndCondition endCondition = EndCondition.normal;
 
     /**
      * The amount of coins one gets from killing players.
@@ -71,7 +71,7 @@ public abstract class Minigame
     }
 
     /** Initialize the minigame here. */
-    public void start()
+    protected void start()
     {
 
     }

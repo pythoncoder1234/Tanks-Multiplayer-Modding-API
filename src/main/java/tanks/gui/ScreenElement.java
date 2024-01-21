@@ -19,6 +19,11 @@ public abstract class ScreenElement
     {
         public ArrayList<String> text;
 
+        public Notification(String text)
+        {
+            this(text, 1000);
+        }
+
         public Notification(String text, int duration)
         {
             this.text = Drawing.drawing.wrapText(text, 300, 16);
@@ -60,7 +65,7 @@ public abstract class ScreenElement
 
         public CenterMessage(String message, Object... objects)
         {
-            this(String.format(message, objects), 1000);
+            this(String.format(message, objects), 100);
         }
         public CenterMessage(String message, int duration)
         {

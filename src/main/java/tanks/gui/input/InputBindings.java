@@ -71,6 +71,12 @@ public class InputBindings
     public InputBindingGroup editorZoomOut = new InputBindingGroup("editor.zoomOut", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_MINUS));
     public InputBindingGroup editorRevertCamera = new InputBindingGroup("editor.revertCamera", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_0));
 
+    public InputBindingGroup editorResetTool = new InputBindingGroup("editor.resetTool", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_0));
+    public InputBindingGroup editorSquare = new InputBindingGroup("editor.square", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_Q));
+    public InputBindingGroup editorCircle = new InputBindingGroup("editor.circle", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_N));
+    public InputBindingGroup editorLine = new InputBindingGroup("editor.line", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_P));
+    public InputBindingGroup editorWand = new InputBindingGroup("editor.wand", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_W));
+
     public InputBindingGroup editorNextObj = new InputBindingGroup("editor.nextObject", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_RIGHT), new InputBinding(InputBinding.InputType.mouse, InputCodes.MOUSE_BUTTON_5));
     public InputBindingGroup editorPrevObj = new InputBindingGroup("editor.prevObject", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_LEFT), new InputBinding(InputBinding.InputType.mouse, InputCodes.MOUSE_BUTTON_4));
     public InputBindingGroup editorNextType = new InputBindingGroup("editor.nextType", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_DOWN));
@@ -120,9 +126,7 @@ public class InputBindings
         try
         {
             if (!file.exists())
-            {
                 this.save();
-            }
 
             file.startReading();
 

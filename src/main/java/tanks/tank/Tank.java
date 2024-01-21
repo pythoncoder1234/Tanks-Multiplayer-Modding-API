@@ -4,9 +4,9 @@ import basewindow.Model;
 import basewindow.ModelPart;
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.editorselector.LevelEditorSelector;
-import tanks.editorselector.RotationSelector;
-import tanks.editorselector.TeamSelector;
+import tanks.editor.selector.LevelEditorSelector;
+import tanks.editor.selector.RotationSelector;
+import tanks.editor.selector.TeamSelector;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
@@ -497,10 +497,10 @@ public abstract class Tank extends Movable implements ISolidObject
     @Override
     public void preUpdate()
     {
-		if (Math.abs(this.posZ) < disabledZ && Math.abs(this.lastPosZ) >= disabledZ)
+		if (Math.abs(this.posZ) < disabledZ && Math.abs(this.lastPosZ) >= disabledZ && !positionLock)
             this.disabled = this.hidden = false;
 
-		if (Math.abs(this.posZ) >= disabledZ && Math.abs(this.lastPosZ) < disabledZ)
+		if (Math.abs(this.posZ) >= disabledZ && Math.abs(this.lastPosZ) < disabledZ && !positionLock)
             this.disabled = this.hidden = true;
 
         super.preUpdate();
@@ -1207,10 +1207,10 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	}
 
-	public double getAutoZoomRaw()
+	public AutoZoom getAutoZoomRaw()
 	{
 		double nearest = Double.MAX_VALUE;
-
+		Tank nearestTank = null;
 		double farthestInSight = -1;
 
 		for (Movable m: Game.movables)
@@ -1228,7 +1228,10 @@ public abstract class Tank extends Movable implements ISolidObject
 						yDist / (Drawing.drawing.interfaceSizeY)) * 3;
 
 				if (dist < nearest)
-                    nearest = dist;
+				{
+					nearest = dist;
+					nearestTank = (Tank) m;
+				}
 
 				if (dist <= 3.5 && dist > farthestInSight)
 				{
@@ -1247,7 +1250,11 @@ public abstract class Tank extends Movable implements ISolidObject
 			}
 		}
 
-		return Math.max(nearest, farthestInSight);
+		Tank focus = nearest > farthestInSight ? nearestTank : this.lastFarthestInSight;
+		if (focus == null)
+			return new AutoZoom(0, 0, 0);
+
+		return new AutoZoom(Math.max(nearest, farthestInSight), this.posX - focus.posX, this.posY - focus.posY);
 	}
 
 	public void setMetadata(String s)
@@ -1286,10 +1293,17 @@ public abstract class Tank extends Movable implements ISolidObject
 		Game.eventsOut.add(new EventTankUpdate(this));
 	}
 
-	public double getAutoZoom()
+	public AutoZoom getAutoZoom()
 	{
-		double dist = Math.min(3, Math.max(1, getAutoZoomRaw()));
-		return 1 / dist;
+		AutoZoom raw = getAutoZoomRaw();
+		double dist = Math.min(3, Math.max(1, raw.zoom));
+		return new AutoZoom(1 / dist, Math.min(AutoZoom.maxPanDist, raw.panX), Math.min(AutoZoom.maxPanDist, raw.panY));
+	}
+
+	// java 16 :D
+	public record AutoZoom(double zoom, double panX, double panY)
+	{
+		public static double maxPanDist = Game.tile_size * 8;
 	}
 
 	public void setBufferCooldown(double value)

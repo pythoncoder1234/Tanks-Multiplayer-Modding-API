@@ -69,9 +69,7 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         this.shader = s;
 
         for (ShaderGroup.Attribute a: s.attributes)
-        {
             this.addAttribute(a);
-        }
     }
 
     public void settings(boolean depth)
@@ -256,9 +254,7 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         }
 
         if (this.modifyingSize >= 0 && this.modifyingWritten >= this.modifyingSize)
-        {
             this.migrate(o);
-        }
 
         if (this.bufferStartPoints.get(o) == null)
         {
@@ -292,13 +288,10 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
 
     public void endModification()
     {
-        if (this.modifying == null || this.modifyingSize < 0)
+        if (this.modifying == null || this.modifyingSize < 0 || this.bufferStartPoints.get(this.modifying) == null)
             return;
 
-        Integer start = this.bufferStartPoints.get(this.modifying);
-        if (start == null)
-            return;
-
+        int start = this.bufferStartPoints.get(this.modifying);
         for (int i = this.modifyingWritten + start; i < start + this.modifyingSize; i++)
         {
             this.vertBuffer.put(i * 3, 0f);
@@ -462,6 +455,9 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         if (!this.bufferStartPoints.containsKey(o))
             return;
 
+        if (this.modifying == o)
+            this.modifying = null;
+
         if (this.adding != null)
             this.endAdd();
 
@@ -501,10 +497,7 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * 4, new float[4 * size]);
         for (ShaderGroup.Attribute a: attributeBuffers.keySet())
         {
-            Integer s = this.attributeVBOs.get(a);
-            if (s == null) continue;
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, s);
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.attributeVBOs.get(a));
             GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * a.count, new float[a.count * size]);
         }
     }

@@ -1,7 +1,7 @@
 package tanks.gui.screen.leveleditor;
 
 import tanks.Drawing;
-import tanks.editorselector.ChoiceSelector;
+import tanks.editor.selector.ChoiceSelector;
 import tanks.gui.Button;
 import tanks.gui.ButtonList;
 import tanks.gui.screen.Screen;

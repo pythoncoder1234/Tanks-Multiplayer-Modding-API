@@ -7,12 +7,6 @@ import tanks.gui.screen.ScreenGame;
 
 public class EventCustomLevelEndCondition extends PersonalEvent
 {
-    public EventCustomLevelEndCondition()
-    {
-        int i = 0;
-        i = i;
-    }
-
     @Override
     public void execute()
     {

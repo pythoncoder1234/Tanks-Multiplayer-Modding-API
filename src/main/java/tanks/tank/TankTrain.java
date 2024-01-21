@@ -185,7 +185,10 @@ public class TankTrain extends Tank implements IAvoidObject
                     continue;
 
                 if (!f.getName().equals("name") && propertiesToCopy.contains(p.category()))
+                {
                     f.set(this, f.get(t));
+                    System.out.println(p.id());
+                }
             }
         }
         catch (Exception e)

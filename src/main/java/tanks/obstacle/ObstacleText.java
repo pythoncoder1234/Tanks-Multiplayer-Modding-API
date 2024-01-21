@@ -3,7 +3,7 @@ package tanks.obstacle;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
-import tanks.editorselector.StringSelector;
+import tanks.editor.selector.StringSelector;
 
 public class ObstacleText extends Obstacle
 {

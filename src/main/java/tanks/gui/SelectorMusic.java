@@ -18,7 +18,6 @@ public class SelectorMusic extends Selector
         this.screen = screen;
     }
 
-
     @Override
     public void drawSelection()
     {
@@ -37,7 +36,10 @@ public class SelectorMusic extends Selector
 
         if (numSelected == 1)
         {
-            s = lastSelected.substring(lastSelected.indexOf("tank/") + "tank/".length(), lastSelected.indexOf(".ogg"));
+            if (lastSelected.contains("tank/"))
+                s = lastSelected.substring(lastSelected.indexOf("tank/") + "tank/".length(), lastSelected.indexOf(".ogg"));
+            else if (lastSelected.contains("arcade/"))
+                s = lastSelected.substring(lastSelected.indexOf("arcade/") + "arcade/".length(), lastSelected.indexOf(".ogg"));
             s = Game.formatString(s);
         }
         else if (numSelected > 1)

@@ -1,8 +1,10 @@
-package tanks.editorselector;
+package tanks.editor.selector;
 
 import tanks.Consumer;
 import tanks.Game;
 import tanks.GameObject;
+import tanks.editor.EditorButtons;
+import tanks.editor.EditorButtons.*;
 import tanks.gui.Button;
 import tanks.gui.input.InputBindingGroup;
 import tanks.gui.screen.leveleditor.OverlayObjectMenu;
@@ -15,6 +17,11 @@ import java.util.Objects;
 
 /**
  * A selector that is added to <code>GameObject</code>s.
+ * <p>
+ * It controls what is displayed in the left and right next to the "Ok" button in the object menu,
+ * as well as the bottom right buttons in the editor.
+ * <p>
+ * These selectors must be registered, via {@link GameObject#registerSelector(LevelEditorSelector[]) GameObject.registerSelector}.
  *
  * @param <T> the type of <code>GameObject</code> (<code>Tank</code>, <code>Obstacle</code>, etc.)
  *            that the selector is applied to.
@@ -48,7 +55,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
     protected boolean updated = false;
 
     /** The result of {@link #addShortcutButton()} is stored in this variable.*/
-    public ScreenLevelEditor.EditorButton shortcutButton;
+    public EditorButtons.EditorButton shortcutButton;
     public InputBindingGroup keybind = null;
 
     /**
@@ -61,7 +68,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
         addSelFuncRegistry.add(func);
     }
 
-    public void init()
+    protected void init()
     {
 
     }
@@ -86,12 +93,12 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
     public void addShortcutButton()
     {
         shortcutButton = editor.addedShortcutButtons.get(id);
-        ArrayList<ScreenLevelEditor.EditorButton> pos = getLocation(shortcutPos);
+        ArrayList<EditorButton> pos = getLocation(shortcutPos);
 
         if (shortcutButton != null)
             pos.remove(shortcutButton);
 
-        shortcutButton = new ScreenLevelEditor.EditorButton(pos, image.replace("icons/", ""),
+        shortcutButton = new EditorButton(pos, image.replace("icons/", ""),
                 50, 50, this::onShortcut, () -> false, this::gameObjectSelected, description, keybind);
         editor.addedShortcutButtons.put(id, shortcutButton);
 
@@ -166,7 +173,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
      * -1: If the editor's prev. meta keybind was pressed or if Shift+RMB was pressed.<br>
      * 1: If the editor's next meta keybind was pressed or if RMB was pressed.
      */
-    public abstract void changeMetadata(int add);
+    protected abstract void changeMetadata(int add);
 
     public void changeMeta(int add)
     {
@@ -297,7 +304,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
             return ScreenLevelEditor.currentPlaceable != ScreenLevelEditor.Placeable.obstacle && editor.mouseTank.getSelector(this.id) != null;
     }
 
-    public ArrayList<ScreenLevelEditor.EditorButton> getLocation(Position p)
+    public ArrayList<EditorButton> getLocation(Position p)
     {
         if (p == Position.editor_top_left)
             return editor.buttons.topLeft;

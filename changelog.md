@@ -1,13 +1,25 @@
 Older Changelogs
 ---
 
+**Mod API 1.2.e**
+- **Reference spawns**
+  - Hold shift on the exit buttons for level and crusade editor to save without tank references (info icon should appear while doing so)
+- Getting closer and closer to full 1.5.2d multiplayer compatibility!
+- Crusade Import overhaul
+- Minimap overhaul
+- Fixed multiplayer chat
+- F3+D = clear chat (like in minecraft)
+- Improved Tank AI
+- Did some merging
+- Fixed bugs
+
 **Mod API v1.2.d**
 - New Tank AI (black tanks are really op now)
 - Smartness parameter in custom tanks
 - Stole the respawn player function from arcade mode
 - Bug fixes and other minor improvements
 
-- **Mod API v1.2.c**
+**Mod API v1.2.c**
 - Hotbar swap item and drop item
 - Added images for horizontal flip and vertical flip
 - Bug fixes
@@ -29,7 +41,7 @@ Older Changelogs
 - Press shift + your copy keybind while in level options to copy the level's level string
 - Fixed event listeners
 - Scoreboards use event listeners now
-- 
+
 **Mod API v1.2.a**:
 - `LevelEditorSelector`: Customizable and modular editor properties
 - `ScreenLevelEditor.buttons`: Made adding buttons to the editor much simpler.

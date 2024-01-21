@@ -265,7 +265,8 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 	public void moveOut(double amount)
 	{
-		this.moveInDirection(vX, vY, amount);
+		double a = this.getPolarDirection();
+		this.moveInDirection(Math.cos(a), Math.sin(a), amount);
 	}
 
 	public void setTargetLocation(double x, double y)
@@ -1222,7 +1223,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 	@Override
 	public boolean lit()
 	{
-		return false;
+		return Game.fancyLights;
 	}
 
 	@Override

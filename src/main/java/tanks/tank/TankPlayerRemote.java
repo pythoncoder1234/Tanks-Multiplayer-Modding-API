@@ -186,7 +186,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             this.prevKnownVXFinal = this.lastFinalVX;
             this.prevKnownVYFinal = this.lastFinalVY;
             this.lastAngle = this.angle;
-            this.interpolationTime -= this.timeSinceRefresh;
+            //this.interpolationTime -= this.timeSinceRefresh;
             this.timeSinceRefresh = 0;
         }
 
@@ -222,7 +222,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         }
 
         if (lastLiveBullets != ib.liveBullets || ib.maxLiveBullets != lastMaxLiveBullets || im.liveMines != lastLiveMines || im.maxLiveMines != lastMaxLiveMines)
-            Game.eventsOut.add(new EventTankControllerUpdateAmmunition(this.player.clientID, ib.liveBullets, ib.maxLiveBullets, im.liveMines, im.maxLiveMines));
+            Game.eventsOut.add(new EventTankControllerUpdateAmmunition(this.player.clientID, ib.liveBullets, ib.maxLiveBullets, im.liveMines, im.maxLiveMines, ib.cooldown, ib.cooldownBase));
 
         lastLiveBullets = ib.liveBullets;
         lastLiveMines = im.liveMines;
@@ -309,9 +309,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
 
                 double distSq2 = dX2 * dX2 + dY2 * dY2;
                 if (distSq2 > maxDist * maxDist)
-                {
                     forceMotion = true;
-                }
 
                 x = ourPosX;
                 y = ourPosY;
@@ -449,9 +447,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             speed = Double.MIN_NORMAL;
 
         if (b.itemSound != null)
-        {
             Drawing.drawing.playGlobalSound(b.itemSound, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
-        }
 
         b.addPolarMotion(this.angle + offset, speed);
         b.speed = speed;
@@ -461,7 +457,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         this.addPolarMotion(b.getPolarDirection() + Math.PI, 25.0 / 32.0 * b.recoil * this.getAttributeValue(AttributeModifier.recoil, 1) * b.frameDamageMultipler);
 
         if (b.moveOut)
-            b.moveOut(50 / speed * this.size / Game.tile_size);
+            b.moveOut(50 * this.size / Game.tile_size);
 
         b.setTargetLocation(this.mouseX, this.mouseY);
 

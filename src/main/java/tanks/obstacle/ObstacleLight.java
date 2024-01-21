@@ -85,13 +85,13 @@ public class ObstacleLight extends Obstacle implements IDrawableLightSource
 	@Override
 	public boolean lit()
 	{
-		return false;
+		return Game.fancyLights;
 	}
 
 	@Override
 	public double[] getLightInfo()
 	{
-		this.lightInfo[3] = Math.pow(this.stackHeight, 3) / 4 * Obstacle.draw_size / Game.tile_size;
+		this.lightInfo[3] = Math.pow(this.stackHeight, 2) * Obstacle.draw_size / Game.tile_size;
 		return this.lightInfo;
 	}
 }
