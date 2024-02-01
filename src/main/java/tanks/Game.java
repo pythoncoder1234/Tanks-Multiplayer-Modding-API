@@ -231,7 +231,7 @@ public class Game
 	public static RegistryModelTank registryModelTank = new RegistryModelTank();
 	public static RegistryMinigame registryMinigame = new RegistryMinigame();
 
-	public final HashMap<Class<? extends ShaderGroup>, ShaderGroup> shaderInstances = new HashMap<>();
+	public HashMap<Class<? extends ShaderGroup>, ShaderGroup> shaderInstances = new HashMap<>();
 	public ShaderGroundIntro shaderIntro;
 	public ShaderGroundOutOfBounds shaderOutOfBounds;
 	public ShaderTracks shaderTracks;
@@ -617,9 +617,9 @@ public class Game
 		if (!extensionRegistryFile.exists())
             extensionRegistry.saveRegistry();
 
-		BaseFile levelsFile = game.fileManager.getFile(homedir + levelDir);
-		if (!levelsFile.exists())
-			levelsFile.mkdirs();
+		BaseFile scriptsDir = game.fileManager.getFile(homedir + levelDir);
+		if (!scriptsDir.exists())
+			scriptsDir.mkdirs();
 
 		BaseFile crusadesFile = game.fileManager.getFile(homedir + crusadeDir);
 		if (!crusadesFile.exists())
@@ -1134,6 +1134,26 @@ public class Game
 
 		Level.currentLightIntensity = 1.0;
 		Level.currentShadowIntensity = 0.75;
+	}
+
+	public static Obstacle getObstacle(double posX, double posY)
+	{
+		int x = (int) (posX / Game.tile_size);
+		int y = (int) (posY / Game.tile_size);
+        if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
+			return null;
+
+		return Game.obstacleGrid[x][y];
+	}
+
+	public static Obstacle getSurfaceObstacle(double posX, double posY)
+	{
+		int x = (int) (posX / Game.tile_size);
+		int y = (int) (posY / Game.tile_size);
+		if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
+			return null;
+
+		return Game.surfaceTileGrid[x][y];
 	}
 
 	public static double sampleGroundHeight(double px, double py)

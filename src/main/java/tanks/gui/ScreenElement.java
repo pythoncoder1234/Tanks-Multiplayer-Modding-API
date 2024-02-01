@@ -11,49 +11,59 @@ import java.util.ArrayList;
 public abstract class ScreenElement
 {
     public int duration;
-    protected double age = 0;
-
-    public abstract void draw();
+    public double age = 0;
 
     public static class Notification extends ScreenElement
     {
         public ArrayList<String> text;
+        public double sY;
+        public boolean fadeStart = false;
 
         public Notification(String text)
         {
-            this(text, 1000);
+            this(text, 500);
         }
 
         public Notification(String text, int duration)
         {
             this.text = Drawing.drawing.wrapText(text, 300, 16);
             this.duration = duration;
+            this.sY = Math.max(4, this.text.size()) * 20;
         }
 
-        public void draw()
+        public void draw(double prevSY)
         {
             this.age += Panel.frameFrequency;
 
-            if (this.age > this.duration)
-                Panel.currentNotification = null;
-
-            double linesHeight = Math.max(4, this.text.size()) * 20;
+            double fadeDuration = Math.min(75, duration * 0.2);
+            double mult = Math.sin(Math.min(Math.min(1, age / fadeDuration), 1 - Math.max(0, age - duration + fadeDuration) / fadeDuration) * Math.PI / 2);
+            double addX = (1 - mult) * 400, addY = (1 - mult) * 50, colA = mult * 255;
             double x = Drawing.drawing.interfaceSizeX - 320;
-            double y = Drawing.drawing.interfaceSizeY - Drawing.drawing.statsHeight - linesHeight - 80;
+            double y = Drawing.drawing.interfaceSizeY - Drawing.drawing.statsHeight - sY - 80 - prevSY;
 
-            Drawing.drawing.setColor(0, 0, 0, 128);
-            Drawing.drawing.drawPopup(x + 158, y + linesHeight / 2, 315, linesHeight + 10, 10, 5);
-            Drawing.drawing.setInterfaceFontSize(14);
+            if (!fadeStart && duration - age < fadeDuration)
+            {
+                fadeStart = true;
+                Panel.lastNotifTime = System.currentTimeMillis();
+            }
 
-            for (int i = 0; i < this.text.size(); i++)
-                Drawing.drawing.drawUncenteredInterfaceText(x + 50, y + i * 20 + 12, this.text.get(i));
-
-            Drawing.drawing.setColor(0, 150, 255);
-            Drawing.drawing.fillOval(x + 27, y + 25, 25, 25);
-
-            Drawing.drawing.setColor(255, 255, 255);
+            Drawing.drawing.setColor(0, 0, 0, colA / 2);
+            Drawing.drawing.drawPopup(x + 158 + addX, y + addY + sY / 2, 315, sY + 10, 5, 5);
             Drawing.drawing.setInterfaceFontSize(16);
-            Drawing.drawing.drawInterfaceText(x + 27, y + 25, "!");
+
+            Drawing.drawing.setColor(50, 200, 50, 64);
+            Drawing.drawing.fillInterfaceProgressRect(x + 157.5 + addX, y + addY + sY - 2.5, 303, 5, 1 - Math.min(duration, age + fadeDuration - 10) / duration);
+
+            Drawing.drawing.setColor(255, 255, 255, colA);
+            for (int i = 0; i < this.text.size(); i++)
+                Drawing.drawing.drawUncenteredInterfaceText(x + 50 + addX, y + addY + i * 20 + 12, this.text.get(i));
+
+            Drawing.drawing.setColor(0, 150, 255, colA);
+            Drawing.drawing.fillInterfaceOval(x + 27 + addX, y + addY + 20, 25, 25);
+
+            Drawing.drawing.setColor(255, 255, 255, colA);
+            Drawing.drawing.setInterfaceFontSize(16);
+            Drawing.drawing.drawInterfaceText(x + 27 + addX, y + addY + 20, "!");
         }
     }
 
@@ -65,19 +75,17 @@ public abstract class ScreenElement
 
         public CenterMessage(String message, Object... objects)
         {
-            this(String.format(message, objects), 100);
+            this(String.format(message, objects), 300);
         }
         public CenterMessage(String message, int duration)
         {
             int brightness = (Game.screen instanceof ScreenGame && Level.isDark()) ? 255 : 0;
-            this.styling = new TextWithStyling("A very very cool message", brightness, brightness, brightness, 80 - Math.max(8, message.length() * 2));
-            this.styling.colorA = Game.screen instanceof ScreenGame ? 128 : 255;
-            this.styling.text = message;
+            this.styling = new TextWithStyling(message, brightness, brightness, brightness, 80 - Math.max(8, message.length() * 2));
+            this.styling.colorA = Game.screen instanceof ScreenGame ? 200 : 255;
             this.duration = duration;
             this.previous = Panel.currentMessage != null;
         }
 
-        @Override
         public void draw()
         {
             this.age += Panel.frameFrequency;

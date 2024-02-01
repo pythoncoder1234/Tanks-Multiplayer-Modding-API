@@ -362,7 +362,7 @@ public class StaticTerrainRenderer extends TerrainRenderer
                             ((IObstacleSizeShader) so).setSize((float) (Obstacle.draw_size / Game.tile_size));
 
                         if (so instanceof IObstacleTimeShader)
-                            ((IObstacleTimeShader) so).setTime(((int) System.currentTimeMillis()) % 30000);
+                            ((IObstacleTimeShader) so).setTime((int) (age * 10));
 
                         if (so instanceof IShrubHeightShader)
                             ((IShrubHeightShader) so).setShrubHeight(getShrubHeight());

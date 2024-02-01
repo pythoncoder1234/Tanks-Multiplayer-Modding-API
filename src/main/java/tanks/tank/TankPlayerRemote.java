@@ -126,7 +126,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
 
         double angDiff = Movable.angleBetween(this.lastAngle, this.currentAngle);
         this.angle = this.lastAngle - frac * angDiff;
-        this.pitch = (1 - frac) * this.lastPitch + frac * this.currentPitch;
+        this.basePitch = (1 - frac) * this.lastPitch + frac * this.currentPitch;
 
         this.checkCollision();
 
@@ -359,9 +359,9 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         this.prevKnownVYFinal = this.lastFinalVY;
 
         this.lastAngle = this.angle;
-        this.lastPitch = this.pitch;
+        this.lastPitch = this.basePitch;
         this.currentAngle = angle;
-        this.currentPitch = this.pitch;
+        this.currentPitch = this.basePitch;
 
         this.posX = x;
         this.posY = y;

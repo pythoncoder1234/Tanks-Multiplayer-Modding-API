@@ -1,6 +1,6 @@
 #version 120
 
-uniform float obstacleSizeFrac;
+uniform int time;
 attribute float groundHeight;
 
 mat4 getTransform()
@@ -10,7 +10,8 @@ mat4 getTransform()
 
 vec4 getPos(mat4 transform)
 {
-    return gl_Vertex;
+    vec4 p = gl_Vertex;
+    return vec4(p.xy, p.z + sin(5.0 * (p.x + p.y) + (0.1f * p.x * p.y) + time / 1000.0f) * 3.0f - 3.0f, p.w);
 }
 
 vec3 getNormal(mat4 transform)
@@ -21,13 +22,14 @@ vec3 getNormal(mat4 transform)
 void getVertVecs(out vec4 pos, out vec3 normal)
 {
     pos = getPos(getTransform());
-    normal = vec3(0, 0, 0);
+//    pos.z += sin(5.0 * (pos.x + pos.y) + (0.1f * pos.x * pos.y) + time / 1000.0f) * 3.0f - 6.0f;
+    normal = gl_Normal;
 }
 
 vec4 getColor(vec4 colorIn)
 {
-    float pos = max(0.0, obstacleSizeFrac * 15.0 - groundHeight);
-    float maxPos = 15.0 - groundHeight;
+    vec4 pos = getPos(getTransform());
+    float offset = sin(5.0 * (pos.x + pos.y) + (0.1 * pos.x * pos.y) + time / 1000.0f) * 0.08f;
 
-    return vec4(colorIn.xyz, colorIn.a * pos / maxPos);
+    return vec4(colorIn.xyz + vec3(offset, offset, offset), colorIn.a);
 }

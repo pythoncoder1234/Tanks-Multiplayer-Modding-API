@@ -29,17 +29,8 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-- Double-click the editor tool's button or keybind to open its submenu, if it has one.
-- Using +/- on a selection changes it for all objects in the selection
-- Magic wand select
-- Undo/Redo 10x or 50x
-- Circle tool, square tool, line tool
-- Alt/Opt + scroll = zoom, Alt/Opt + drag = pan
-- Added double-click functionality to input bindings and buttons
-- Changed `LevelEditorSelector.init` access to protected, use `initBase` instead
-- Changed `Minigame.start` access to protected, use `startBase` instead
-- Changed `LevelEditorSelector.changeMetadata` access to protected, use `changeMeta` instead
-- Renamed `EndCondition.defaultEndCondition` to `EndCondition.normal`
-- Moved `Game.ModAPIVersion` to `ModAPI.version`
+**Mod API v1.2.g**
+- *w*a*v*y bushes and water
+- `Game.getObstacle` and `Game.getSurfaceObstacle` (surface tile)
 
 [Older Changelogs](changelog.md)

@@ -1118,7 +1118,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			Obstacle.draw_size = Math.min(Game.tile_size, Obstacle.draw_size + Panel.frameFrequency);
 		}
 
-		if (freecam)
+		if (freecam && !(paused && !screenshotMode))
 			updateFreecam();
 
 		if (npcShopScreen)
@@ -1935,7 +1935,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 					Game.game.unbreakableGrid[x][y] = false;
 				}
 
-                Game.obstacleGrid[x][y] = null;
+				if (o == Game.obstacleGrid[x][y])
+					Game.obstacleGrid[x][y] = null;
+
+				if (o == Game.surfaceTileGrid[x][y])
+					Game.surfaceTileGrid[x][y] = null;
 			}
 
 			Game.obstacles.remove(o);

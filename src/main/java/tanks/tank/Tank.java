@@ -12,12 +12,16 @@ import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemMine;
-import tanks.network.event.*;
-import tanks.obstacle.Face;
-import tanks.obstacle.ISolidObject;
-import tanks.obstacle.Obstacle;
+import tanks.network.event.EventTankAddAttributeModifier;
+import tanks.network.event.EventTankCreate;
+import tanks.network.event.EventTankUpdate;
+import tanks.network.event.EventTankUpdateHealth;
+import tanks.obstacle.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import static tanks.tank.TankProperty.Category.*;
 
@@ -192,6 +196,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	public double emblemAngle = 0;
 	public double orientation = 0;
+	public double basePitch, baseRoll;
 
 	public double hitboxSize = 0.95;
 
@@ -229,6 +234,9 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	public long lastFarthestInSightUpdate = 0;
 	public Tank lastFarthestInSight = null;
+
+	public boolean tiltFirstFrame = true;
+	public int tiltDirection;
 
 	public Tank(String name, double x, double y, double size, double r, double g, double b)
 	{
@@ -295,14 +303,14 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	public void checkCollision()
 	{
-		if (this.size <= 0)
+		if (this.size <= 0 || this.destroy)
 			return;
 
 		for (int i = 0; i < Game.movables.size(); i++)
 		{
 			Movable m = Game.movables.get(i);
 
-			if (m.skipNextUpdate)
+			if (m.skipNextUpdate || m.destroy)
 				continue;
 
 			if (this != m && m instanceof Tank t && t.enableCollision && m.size > 0)
@@ -432,6 +440,17 @@ public abstract class Tank extends Movable implements ISolidObject
         if ((o.isSurfaceTile || !o.enableStacking) && m.posZ > 25)
             return false;
 
+		double horizontalDist = Math.abs(m.posX - o.posX);
+		double verticalDist = Math.abs(m.posY - o.posY);
+
+		double distX = m.posX - o.posX;
+		double distY = m.posY - o.posY;
+
+		double bound = m.size / 2 + Game.tile_size / 2;
+
+		if (horizontalDist < bound && verticalDist < bound && o.checkForObjects)
+            o.onObjectEntry(m);
+
         if (!o.isSurfaceTile && !Game.lessThan(true, o.startHeight * Game.tile_size, m.posZ, o.startHeight * Game.tile_size + o.getTileHeight()))
             return false;
 
@@ -439,14 +458,6 @@ public abstract class Tank extends Movable implements ISolidObject
 
         if ((!(m instanceof Tank ? o.tankCollision : o.bulletCollision) && !o.checkForObjects) || o.startHeight >= 1)
             return false;
-
-        double horizontalDist = Math.abs(m.posX - o.posX);
-        double verticalDist = Math.abs(m.posY - o.posY);
-
-        double distX = m.posX - o.posX;
-        double distY = m.posY - o.posY;
-
-        double bound = m.size / 2 + Game.tile_size / 2;
 
         if (horizontalDist < bound && verticalDist < bound)
         {
@@ -527,21 +538,6 @@ public abstract class Tank extends Movable implements ISolidObject
 			IAvoidObject.avoidances.add(a);
 
         this.age += Panel.frameFrequency;
-
-        if ((this.posZ < 0 || buoyancy != 0) && this.getSpeed() > 0.1)
-        {
-            double groundHeight = -9999;
-
-            double s = this.size * this.hitboxSize / 2 + 10;
-
-            for (double x = this.posX - s; x <= this.posX + s; x += Game.tile_size)
-            {
-                for (double y = this.posY - s; y <= this.posY + s; y += Game.tile_size)
-                    groundHeight = Math.max(groundHeight, Game.sampleTerrainGroundHeight(x, y));
-            }
-
-            this.posZ = Math.min(0, Math.max(groundHeight, this.posZ + buoyancy * Panel.frameFrequency));
-        }
 
         this.treadAnimation += Math.sqrt(this.lastFinalVX * this.lastFinalVX + this.lastFinalVY * this.lastFinalVY) * Panel.frameFrequency;
 
@@ -655,6 +651,91 @@ public abstract class Tank extends Movable implements ISolidObject
 				e.setPolarMotion(Math.random() * 2 * Math.PI, Math.random());
 
 			Game.effects.add(e);
+		}
+
+		if (basePitch != 0)
+			basePitch /= Math.pow(1.04, Panel.frameFrequency);
+
+		if (baseRoll != 0)
+			baseRoll /= Math.pow(1.04, Panel.frameFrequency);
+
+		if (Game.effectsEnabled && prevInWater != inWater && inWater)
+		{
+			double mult = Game.getObstacle(posX, posY) instanceof ObstacleLiquid w ? w.getTileHeight() / 50 : 0;
+
+			for (double a = 0; a < 2 * Math.PI; a += Math.PI / Game.effectMultiplier * 0.05)
+			{
+				Effect e = Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.snow);
+				e.size = 5;
+				e.colR = 40;
+				e.colG = 120;
+				e.colB = 255;
+				e.vX = Math.cos(a) * Math.random() * mult;
+				e.vY = Math.sin(a) * Math.random() * mult;
+				e.vZ = Math.random() * mult;
+				Game.effects.add(e);
+			}
+
+			Game.effects.add(Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.splash));
+			addStatusEffect(StatusEffect.water_speed, 0, 0, 0, 25);
+		}
+
+		prevInWater = inWater;
+		inWater = false;
+
+		double s = this.size * this.hitboxSize / 2 + 10;
+		double maxTouchingZ = -9999;
+		boolean allow = true;
+
+		for (double x = this.posX - s; x <= this.posX + s; x += Game.tile_size)
+		{
+			for (double y = this.posY - s; y <= this.posY + s; y += Game.tile_size)
+			{
+				Obstacle o = Game.getObstacle(x, y);
+				if (!(o instanceof ObstacleLiquid))
+				{
+					maxTouchingZ = Math.max(0, maxTouchingZ);
+					continue;
+				}
+
+				double horizontalDist = Math.abs(posX - o.posX);
+				double verticalDist = Math.abs(posY - o.posY);
+				double bound = size / 2 + Game.tile_size / 2;
+
+				if ((horizontalDist <= bound || verticalDist <= bound) && maxTouchingZ < o.getTileHeight())
+				{
+					maxTouchingZ = o.getTileHeight();
+					allow = Math.abs(posZ - maxTouchingZ) < Game.tile_size / 2 || !(horizontalDist <= bound * 0.9 || verticalDist <= bound * 0.9);
+				}
+			}
+		}
+
+		double mult = 2;
+
+		if (posZ < maxTouchingZ)
+		{
+			if (tiltFirstFrame)
+				tiltDirection = (int) -Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
+
+			tiltFirstFrame = false;
+			maxSpeedModifier *= 1 / mult * (allow ? 1 : 0);
+			posZ += 0.3 * mult * Panel.frameFrequency;
+			basePitch = Math.min(allow ? 0.3 : Math.PI, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
+		}
+		else if (Math.abs(posZ - maxTouchingZ) < 1)
+		{
+			posZ = maxTouchingZ;
+			tiltFirstFrame = true;
+		}
+		else if (posZ > maxTouchingZ)
+		{
+			posZ -= size / 70;
+
+			if (tiltFirstFrame)
+				tiltDirection = (int) Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
+
+			tiltFirstFrame = false;
+			basePitch = Math.min(0.2, Math.abs(basePitch) + 0.04 / mult * Panel.frameFrequency) * tiltDirection;
 		}
 
 		super.update();
@@ -842,7 +923,7 @@ public abstract class Tank extends Movable implements ISolidObject
 						else
 						{
 							Drawing.drawing.setColor(0, 255, 0, 127, 1);
-							drawing.drawModel(this.baseModel, this.posX, this.posY, this.posZ, s * mod, s * mod, s - 2, this.orientation);
+							drawing.drawModel(this.baseModel, this.posX, this.posY, this.posZ, s * mod, s * mod, s - 2, this.orientation, basePitch, baseRoll);
 						}
 					}
 				}
@@ -861,11 +942,10 @@ public abstract class Tank extends Movable implements ISolidObject
 		else
 		{
 			if (Game.enable3d)
-				drawing.drawModel(this.baseModel, this.posX, this.posY, this.posZ, s, s, s, this.orientation);
+				drawing.drawModel(this.baseModel, this.posX, this.posY, this.posZ, s, s, s, this.orientation, basePitch, baseRoll);
 			else
 				drawing.drawModel(this.baseModel, this.posX, this.posY, s, s, this.orientation);
 		}
-
 
 		double flash = Math.min(1, this.flashAnimation);
 
@@ -881,7 +961,7 @@ public abstract class Tank extends Movable implements ISolidObject
 		else
 		{
 			if (Game.enable3d)
-				drawing.drawModel(this.colorModel, this.posX, this.posY, this.posZ, s, s, s, this.orientation);
+				drawing.drawModel(this.colorModel, this.posX, this.posY, this.posZ, s, s, s, this.orientation, basePitch, baseRoll);
 			else
 				drawing.drawModel(this.colorModel, this.posX, this.posY, s, s, this.orientation);
 		}
@@ -895,7 +975,7 @@ public abstract class Tank extends Movable implements ISolidObject
 					drawing.drawModel(health_model,
 							this.posX, this.posY, this.posZ + s / 4,
 							size, size, s,
-							this.orientation, 0, 0);
+							this.orientation, basePitch, baseRoll);
 				else
 					drawing.drawModel(health_model,
 							this.posX, this.posY,

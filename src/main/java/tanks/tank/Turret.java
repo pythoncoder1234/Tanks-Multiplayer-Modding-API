@@ -127,5 +127,4 @@ public class Turret extends Movable
 	{
 		return (input + 64) / 2;
 	}
-
 }

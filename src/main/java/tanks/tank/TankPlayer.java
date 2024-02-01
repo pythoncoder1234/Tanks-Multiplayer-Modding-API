@@ -54,7 +54,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	public double mouseY;
 
 	public static Model sunglassesModel;
-	public static boolean hi = false;
+	public static boolean hi = true;
 
 	public TankPlayer(double x, double y, double angle)
     {
@@ -230,14 +230,14 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 				a = 3 * Math.PI / 4;
 			else if (x == -1 && y == 0)
 				a = Math.PI;
-			else if (x == -1 && y == -1)
+			else if (x == -1)
 				a = 5 * Math.PI / 4;
 			else if (x == 0 && y == -1)
 				a = 3 * Math.PI / 2;
-			else if (x == 1 && y == -1)
+			else if (x == 1)
 				a = 7 * Math.PI / 4;
 
-			double intensity = 1;
+			double intensity;
 
 			if (a < 0 && Game.game.window.touchscreen)
 			{
@@ -247,7 +247,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 					a = controlStick.inputAngle;
 			}
 
-			if (a >= 0 && intensity >= 0.2)
+			if (a >= 0)
 			{
 				if (Game.followingCam)
 					a += this.angle + Math.PI / 2;
@@ -296,9 +296,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			for (Item i: h.itemBar.slots)
 			{
 				if (i != null && !(i instanceof ItemEmpty))
-				{
-					i.updateCooldown(reload);
-				}
+                    i.updateCooldown(reload);
 			}
 		}
 

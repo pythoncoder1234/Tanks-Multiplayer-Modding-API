@@ -10,7 +10,8 @@ mat4 getTransform()
 
 vec4 getPos(mat4 transform)
 {
-    return vec4(gl_Vertex.x, gl_Vertex.y, gl_Vertex.z * (obstacleSizeFrac * 0.75 + 0.25), gl_Vertex.w);
+    float frac = obstacleSizeFrac * 0.95 + 0.05;
+    return vec4(gl_Vertex.xy, gl_Vertex.z * frac, gl_Vertex.w);
 }
 
 vec3 getNormal(mat4 transform)

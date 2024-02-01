@@ -38,7 +38,7 @@ public class EventMinigameStart extends PersonalEvent
             Class<? extends Minigame> cls = Game.registryMinigame.getEntry(this.name);
             if (cls == null)
             {
-                Panel.currentNotification = new Notification("Warning: minigame '" + this.name + "' was not found in the registry.\nMinigame loading will be skipped.", 500);
+                Panel.notifs.add(new Notification("Warning: minigame '" + this.name + "' was not found in the registry.\nMinigame loading will be skipped.", 500));
                 return;
             }
 

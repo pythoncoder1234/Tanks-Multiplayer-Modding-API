@@ -3,6 +3,7 @@ package tanks.rendering;
 import basewindow.*;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.Panel;
 import tanks.gui.screen.*;
 import tanks.obstacle.Obstacle;
 
@@ -11,6 +12,8 @@ import java.util.HashMap;
 public class TerrainRenderer
 {
     public static final int section_size = 2000;
+
+    public double age = 0;
 
     protected final HashMap<Class<? extends ShaderGroup>, HashMap<Integer, RegionRenderer>> renderers = new HashMap<>();
     protected final HashMap<IBatchRenderableObject, RegionRenderer> renderersByObj = new HashMap<>();
@@ -58,7 +61,9 @@ public class TerrainRenderer
     {
         ShaderGroup s = Game.game.shaderInstances.get(shaderClass);
         if (s != null)
+        {
             return s;
+        }
         else
         {
             try
@@ -311,10 +316,8 @@ public class TerrainRenderer
     public void reset()
     {
         for (HashMap<Integer, RegionRenderer> h : this.renderers.values())
-        {
             for (RegionRenderer r : h.values())
                 r.renderer.free();
-        }
 
         for (RegionRenderer r : this.outOfBoundsRenderers.values())
             r.renderer.free();
@@ -389,6 +392,8 @@ public class TerrainRenderer
             Game.redrawGroundTiles.clear();
         }
 
+        age += Panel.frameFrequency;
+
         double width = (Game.game.window.absoluteWidth / Drawing.drawing.unzoomedScale / Game.tile_size);
         double height = ((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.unzoomedScale / Game.tile_size);
 
@@ -461,7 +466,7 @@ public class TerrainRenderer
                                 ((IObstacleSizeShader) so).setSize((float) (Obstacle.draw_size / Game.tile_size));
 
                             if (so instanceof IObstacleTimeShader)
-                                ((IObstacleTimeShader) so).setTime(((int) System.currentTimeMillis()) % 30000);
+                                ((IObstacleTimeShader) so).setTime((int) (age * 10));
 
                             if (so instanceof IShrubHeightShader)
                                 ((IShrubHeightShader) so).setShrubHeight(getShrubHeight());
@@ -502,8 +507,21 @@ public class TerrainRenderer
             Obstacle o = Game.obstacleGrid[i][j];
             if (o != null && o.replaceTiles && !o.removed)
             {
-                this.tiles[i][j].obstacleAbove = o;
-                o.drawTile(this.tiles[i][j], r, g, b, depth, Game.tile_size);
+                double extra = Game.tile_size;
+
+                if (i > 0)
+                    extra = Math.max(extra, -Game.game.heightGrid[i - 1][j]);
+
+                if (j > 0)
+                    extra = Math.max(extra, -Game.game.heightGrid[i][j - 1]);
+
+                if (i < Game.currentSizeX - 1)
+                    extra = Math.max(extra, -Game.game.heightGrid[i + 1][j]);
+
+                if (j < Game.currentSizeY - 1)
+                    extra = Math.max(extra, -Game.game.heightGrid[i][j + 1]);
+
+                o.drawTile(this.tiles[i][j], r, g, b, depth, extra);
             }
             else
             {

@@ -21,6 +21,7 @@ public class ObstacleSand extends Obstacle
         this.destructible = true;
         this.tankCollision = false;
         this.bulletCollision = false;
+        this.isSurfaceTile = true;
         this.checkForObjects = true;
         this.destroyEffect = Effect.EffectType.snow;
         this.destroyEffectAmount = 1.5;
@@ -51,16 +52,41 @@ public class ObstacleSand extends Obstacle
     @Override
     public void draw()
     {
-        if (firstFrame && this.stackHeight < 1)
+        if (Game.getObstacle(posX, posY) instanceof ObstacleWater)
+            return;
+
+        double maxHeight = Game.sampleGroundHeight(posX, posY);
+
+        for (int i = 0; i < 4; i++)
         {
-            firstFrame = false;
-            if (Math.random() > 0.1)
-                this.stackHeight = 0.3;
-            else
-                this.stackHeight = 0.45;
+            double x = posX + Game.dirX[i] * Game.tile_size;
+            double y = posY + Game.dirY[i] * Game.tile_size;
+
+            maxHeight = Math.max(maxHeight, Game.sampleGroundHeight(x, y) - 2);
         }
 
-        super.draw();
+        Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
+        Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Game.tile_size, Game.tile_size, maxHeight);
+    }
+
+    @Override
+    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
+    {
+        ObstacleSand s = null;
+        for (int i = 0; i < 4; i++)
+        {
+            double x = posX + Game.dirX[i] * Game.tile_size;
+            double y = posY + Game.dirY[i] * Game.tile_size;
+            if (Game.getObstacle(x, y) instanceof ObstacleWater && Game.getSurfaceObstacle(x, y) instanceof ObstacleSand s1)
+                s = s1;
+        }
+
+        if (s == null)
+            Drawing.drawing.setColor(r, g, b);
+        else
+            Drawing.drawing.setColor(s.colorR, s.colorG, s.colorB);
+
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra);
     }
 
     @Override
@@ -81,32 +107,62 @@ public class ObstacleSand extends Obstacle
     @Override
     public void onObjectEntryLocal(Movable m)
     {
-        if (Game.effectsEnabled && !ScreenGame.finished && m instanceof Tank)
+        if (Game.effectsEnabled && m instanceof Tank t && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.3 * Game.effectMultiplier)
         {
-            double speed = Math.sqrt((Math.pow(m.vX, 2) + Math.pow(m.vY, 2)));
+            double a = m.getPolarDirection();
+            Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
+            Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
+            e1.posZ = m.posZ;
+            e2.posZ = m.posZ;
+            e1.enableGlow = false;
+            e2.enableGlow = false;
+            e1.drawLayer = 1;
+            e2.drawLayer = 1;
+            e1.setPolarMotion(a - Math.PI / 2, t.size * 0.25);
+            e2.setPolarMotion(a + Math.PI / 2, t.size * 0.25);
+            e1.size = t.size / 8;
+            e2.size = t.size / 8;
+            e1.posX += e1.vX;
+            e1.posY += e1.vY;
+            e2.posX += e2.vX;
+            e2.posY += e2.vY;
+            e1.angle = a;
+            e2.angle = a;
+            e1.setPolarMotion(0, 0);
+            e2.setPolarMotion(0, 0);
 
-            double mul = 0.0625 / 4;
+            double var = 20;
+            e1.colR = Math.min(255, Math.max(0, this.colorR - 20 + Math.random() * var - var / 2));
+            e1.colG = Math.min(255, Math.max(0, this.colorG - 20 + Math.random() * var - var / 2));
+            e1.colB = Math.min(255, Math.max(0, this.colorB + Math.random() * var - var / 2));
 
-            double amt = speed * mul * Panel.frameFrequency * Game.effectMultiplier;
+            e2.colR = Math.min(255, Math.max(0, this.colorR - 20 + Math.random() * var - var / 2));
+            e2.colG = Math.min(255, Math.max(0, this.colorG - 20 + Math.random() * var - var / 2));
+            e2.colB = Math.min(255, Math.max(0, this.colorB + Math.random() * var - var / 2));
 
-            if (amt < 1 && Math.random() < amt % 1)
-                amt += 1;
+            double angle = t.getPolarDirection() + Math.PI / 2;
 
-            for (int i = 0; i < amt; i++)
-            {
-                Effect e = Effect.createNewEffect(m.posX, m.posY, m.posZ, Effect.EffectType.snow);
-                e.colR = this.colorR;
-                e.colG = this.colorG;
-                e.colB = this.colorB;
-                e.glowR = e.colR;
-                e.glowG = e.colG;
-                e.glowB = e.colB;
-                e.set3dPolarMotion(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * speed);
-                e.vX += m.vX;
-                e.vY += m.vY;
-                e.enableGlow = false;
-                Game.effects.add(e);
-            }
+            e1.vX = -t.vX / 2 * (Math.random() * 0.6 + 0.7);
+            e1.vY = -t.vY / 2 * (Math.random() * 0.6 + 0.7);
+            e1.vZ = Math.sqrt(t.vX * t.vX + t.vY * t.vY) / 2;
+            e1.addPolarMotion(angle, (Math.random() - 0.5) * 2 * e1.vZ);
+
+            e2.vX = -t.vX / 2 * (Math.random() * 0.6 + 0.7);
+            e2.vY = -t.vY / 2 * (Math.random() * 0.6 + 0.7);
+            e2.vZ = e1.vZ;
+            e2.addPolarMotion(angle, (Math.random() - 0.5) * 2 * e2.vZ);
+
+            e1.vZ *= (Math.random() * 0.6 + 0.4);
+            e2.vZ *= (Math.random() * 0.6 + 0.4);
+
+            e1.maxAge = 50 + Math.random() * 20;
+            e2.maxAge = 50 + Math.random() * 20;
+
+            e1.size /= 2;
+            e2.size /= 2;
+
+            Game.effects.add(e1);
+            Game.effects.add(e2);
         }
     }
 

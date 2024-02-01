@@ -23,6 +23,8 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
     public double posY;
     public double posZ = 0;
 
+	public boolean inWater, prevInWater;
+
     @TankProperty(category = appearanceGeneral, id = "size", name = "Tank size")
     public double size;
 

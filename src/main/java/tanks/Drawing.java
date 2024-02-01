@@ -1207,8 +1207,8 @@ public class Drawing
 
 	public void drawPopup(double x, double y, double sX, double sY, double borderWidth, double borderRadius)
 	{
-		fillRect(x, y, sX, sY, borderRadius);
-        drawRect(x, y, sX, sY, borderWidth, borderRadius);
+		fillInterfaceRect(x, y, sX, sY, borderRadius);
+        drawInterfaceRect(x + borderWidth, y + borderWidth, sX, sY, borderWidth, borderRadius);
         Drawing.drawing.setColor(255, 255, 255);
 	}
 

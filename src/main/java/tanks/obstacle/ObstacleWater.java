@@ -5,13 +5,12 @@ import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.rendering.ShaderGroundWater;
 import tanks.rendering.ShaderWater;
-import tanks.tank.Mine;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
 
 public class ObstacleWater extends ObstacleLiquid
 {
-    public static final int drownTime = 4000;
+    public static final int drownTime = 10000;
 
     public ObstacleWater(String name, double posX, double posY)
     {
@@ -23,27 +22,16 @@ public class ObstacleWater extends ObstacleLiquid
         this.checkForObjects = true;
 
         this.isSurfaceTile = false;
-        this.batchDraw = true;
 
         if (Game.enable3d)
             this.drawLevel = 6;
         else
             this.drawLevel = 1;
 
-        if (Game.fancyTerrain)
-        {
-            this.colorR = 50;
-            this.colorG = 100;
-            this.colorB = 255 - Math.random() * 45;
-        }
-        else
-        {
-            this.colorR = 50;
-            this.colorG = 100;
-            this.colorB = 255;
-        }
-
-        this.colorA = 125;
+        this.colorR = 50;
+        this.colorG = 120;
+        this.colorB = 255;
+        this.colorA = 64;
 
         for (int i = 0; i < default_max_height; i++)
         {
@@ -62,17 +50,12 @@ public class ObstacleWater extends ObstacleLiquid
     @Override
     public void onObjectEntry(Movable m)
     {
-        super.onObjectEntry(m);
-
-        if (m instanceof Mine)
-            ((Mine) m).destroysObstacles = false;
-
         if (m instanceof Tank)
         {
             Tank t = (Tank) m;
 
-            t.addStatusEffect(StatusEffect.snow_velocity, 0, 20, 30);
-            t.addStatusEffect(StatusEffect.snow_friction, 0, 5, 10);
+            if (t.posZ < -1)
+                t.inWater = true;
 
             CustomPropertiesMap p = t.customProperties;
 
@@ -94,18 +77,19 @@ public class ObstacleWater extends ObstacleLiquid
                     p.put("drown", 0D);
             }
         }
+
+        super.onObjectEntry(m);
     }
 
     @Override
     public void onObjectEntryLocal(Movable m)
     {
-        if (Game.effectsEnabled && m instanceof Tank && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.1 * Game.effectMultiplier)
+        if (Game.effectsEnabled && m instanceof Tank t && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.1 * Game.effectMultiplier)
         {
-            Tank t = (Tank) m;
-
             double a = m.getPolarDirection();
             Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
             Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
+            e1.enableGlow = false;
             e1.posZ = m.posZ;
             e2.posZ = m.posZ;
             e1.drawLayer = 1;
@@ -158,23 +142,22 @@ public class ObstacleWater extends ObstacleLiquid
         }
     }
 
-
     @Override
     public void draw()
     {
         Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, this.colorA);
-
-        if (Game.enable3d)
-            Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Game.tile_size, Game.tile_size, 0, (byte) 61);
-        else
-            Drawing.drawing.fillRect(this, this.posX, this.posY, Obstacle.draw_size, Obstacle.draw_size);
+        Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Game.tile_size, Game.tile_size, 0, (byte) 61);
     }
 
     @Override
     public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
-        Drawing.drawing.setColor(r, g, b);
-        Drawing.drawing.fillBox(tile, this.posX, this.posY, -Game.tile_size * this.stackHeight + d, Game.tile_size, Game.tile_size, -d-extra);
+        if (Game.getSurfaceObstacle(posX, posY) instanceof ObstacleSand s)
+            Drawing.drawing.setColor(s.colorR, s.colorG, s.colorB);
+        else
+            Drawing.drawing.setColor(r, g, b);
+
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -Game.tile_size * stackHeight + d - extra, Game.tile_size, Game.tile_size, extra);
     }
 
     @Override

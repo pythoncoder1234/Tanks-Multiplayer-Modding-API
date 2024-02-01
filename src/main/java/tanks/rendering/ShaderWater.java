@@ -3,10 +3,9 @@ package tanks.rendering;
 import basewindow.BaseWindow;
 
 @RendererDrawLayer(7)
-public class ShaderWater extends RendererShader implements IObstacleSizeShader, IGroundHeightShader
+public class ShaderWater extends RendererShader implements IObstacleTimeShader
 {
-    public Uniform1f obstacleSizeFrac;
-    public Attribute1f groundHeight;
+    public Uniform1i time;
 
     public ShaderWater(BaseWindow w)
     {
@@ -18,18 +17,11 @@ public class ShaderWater extends RendererShader implements IObstacleSizeShader, 
     public void initialize() throws Exception
     {
         this.shaderBase.setUp("/shaders/main.vert", new String[]{"/shaders/main_water.vert"}, "/shaders/main.frag", null);
-        this.shaderShadowMap.setUp("/shaders/shadow_map.vert", new String[]{"/shaders/main_ice.vert"}, "/shaders/shadow_map.frag", null);
+        this.shaderShadowMap.setUp("/shaders/shadow_map.vert", new String[]{"/shaders/main_water.vert"}, "/shaders/shadow_map.frag", null);
     }
-
     @Override
-    public Attribute1f getGroundHeight()
+    public void setTime(int time)
     {
-        return groundHeight;
-    }
-
-    @Override
-    public void setSize(float size)
-    {
-        this.obstacleSizeFrac.set(size);
+        this.time.set(time);
     }
 }

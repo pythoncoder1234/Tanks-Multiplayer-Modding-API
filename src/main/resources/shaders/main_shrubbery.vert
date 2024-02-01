@@ -3,6 +3,7 @@
 #define HALF_SIZE 25.0
 #extension GL_EXT_gpu_shader4 : enable
 
+uniform int time;
 uniform float obstacleSizeFrac;
 uniform float shrubHeight;
 attribute float vertexCoord;
@@ -15,10 +16,12 @@ mat4 getTransform()
 vec4 getPos(mat4 transform)
 {
     int coord = int(vertexCoord);
+    vec4 pos = gl_Vertex;
+    float mult = pos.z * 0.05f;
     float invFrac = 1.0 - obstacleSizeFrac;
     float size = HALF_SIZE * invFrac;
-    float coordX = float((coord & 1) * -2 + 1) * size;
-    float coordY = float(((coord >> 1) & 1) * -2 + 1) * size;
+    float coordX = float((coord & 1) * -2 + 1) * size + cos(pos.x * pos.y * 0.0001 + time * 0.001) * mult;
+    float coordY = float(((coord >> 1) & 1) * -2 + 1) * size + sin(pos.x * pos.y * 0.0001 + 20.0 + time * 0.001) * mult;
     float coordZ = float(((coord >> 2) & 1) * -2 + 1) * size;
     float h = (coord >> 3) * SIZE;
     float zDiff = gl_Vertex.z - h;

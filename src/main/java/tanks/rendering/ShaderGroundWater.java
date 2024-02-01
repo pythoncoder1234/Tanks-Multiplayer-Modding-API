@@ -2,6 +2,7 @@ package tanks.rendering;
 
 import basewindow.BaseWindow;
 
+@RendererDrawLayer(1)
 public class ShaderGroundWater extends RendererShader implements IObstacleSizeShader
 {
     public Uniform1f obstacleSizeFrac;

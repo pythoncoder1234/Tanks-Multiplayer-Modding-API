@@ -11,7 +11,7 @@ import tanks.tank.Turret;
 
 public class Effect extends Movable implements IDrawableWithGlow, IDrawableLightSource, IBatchRenderableObject
 {
-    public enum EffectType {fire, smokeTrail, trail, ray, explosion, laser, piece, obstaclePiece, obstaclePiece3d, charge, tread, darkFire, electric, healing, stun, bushBurn, glow, teleporterLight, teleporterPiece, interfacePiece, interfacePieceSparkle, snow, shield, boostLight, exclamation, chain, tutorialProgress}
+    public enum EffectType {fire, smokeTrail, trail, ray, explosion, laser, piece, obstaclePiece, obstaclePiece3d, charge, tread, darkFire, electric, healing, stun, bushBurn, glow, teleporterLight, teleporterPiece, interfacePiece, interfacePieceSparkle, snow, splash, shield, boostLight, exclamation, chain, tutorialProgress}
 
     public enum State {live, removed, recycle}
 
@@ -175,6 +175,11 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
             this.maxAge = Math.random() * 100 + 50;
             this.size = (Math.random() * 4 + 2) * Bullet.bullet_size;
         }
+        else if (type == EffectType.splash)
+        {
+            this.maxAge = 75;
+            this.size = 75;
+        }
         else if (type == EffectType.shield)
             this.maxAge = 50;
         else if (type == EffectType.chain || type == EffectType.tutorialProgress)
@@ -336,6 +341,12 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
                 drawing.fillOval(this.posX, this.posY, this.posZ, size2, size2);
             else
                 drawing.fillOval(this.posX, this.posY, size2, size2);
+        }
+        else if (this.type == EffectType.splash)
+        {
+            double s = age / maxAge * size;
+            Drawing.drawing.setColor(240, 240, 240, (1 - age / maxAge) * 128);
+            Drawing.drawing.fillOval(this.posX, this.posY, s, s);
         }
         else if (this.type == EffectType.interfacePiece || this.type == EffectType.interfacePieceSparkle)
         {

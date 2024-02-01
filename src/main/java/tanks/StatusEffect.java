@@ -31,8 +31,7 @@ public class StatusEffect
     public static final StatusEffect boost_bullet = new StatusEffect("boost_bullet", new AttributeModifier("boost_speed", AttributeModifier.velocity, AttributeModifier.Operation.multiply, 1),
             new AttributeModifier("boost_glow", AttributeModifier.glow, AttributeModifier.Operation.multiply, 1));
 
-    public static final StatusEffect water_float = new StatusEffect("water_float", new AttributeModifier("water_float", AttributeModifier.buoyancy, AttributeModifier.Operation.set, 1));
-    public static final StatusEffect water_sink = new StatusEffect("water_sink", new AttributeModifier("water_sink", AttributeModifier.buoyancy, AttributeModifier.Operation.set, -1));
+    public static final StatusEffect water_speed = new StatusEffect("water", new AttributeModifier("water_speed", AttributeModifier.max_speed, AttributeModifier.Operation.multiply, -0.25));
     public static final StatusEffect damage = new StatusEffect("damage", new AttributeModifier("damage", AttributeModifier.damage, AttributeModifier.Operation.add, 0.1));
 
     public static final StatusEffect[] arcade_rampage = createArcadeRampage();

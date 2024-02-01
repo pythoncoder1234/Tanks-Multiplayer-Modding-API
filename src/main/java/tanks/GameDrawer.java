@@ -21,16 +21,6 @@ public class GameDrawer implements IDrawer
 			}
 
 			Panel.panel.draw();
-
-			if (Game.enableExtensions)
-			{
-				for (int i = 0; i < Game.extensionRegistry.extensions.size(); i++)
-				{
-					Extension e = Game.extensionRegistry.extensions.get(i);
-
-					e.draw();
-				}
-			}
 		}
 		catch (Throwable e)
 		{

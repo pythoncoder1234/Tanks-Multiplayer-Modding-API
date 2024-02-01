@@ -1,6 +1,20 @@
 Older Changelogs
 ---
 
+**Mod API 1.2.f**
+- Double-click the editor tool's button or keybind to open its submenu, if it has one.
+- Using +/- on a selection changes it for all objects in the selection
+- Magic wand select
+- Undo/Redo 10x or 50x
+- Circle tool, square tool, line tool
+- Alt/Opt + scroll = zoom, Alt/Opt + drag = pan
+- Added double-click functionality to input bindings and buttons
+- Changed `LevelEditorSelector.init` access to protected, use `initBase` instead
+- Changed `Minigame.start` access to protected, use `startBase` instead
+- Changed `LevelEditorSelector.changeMetadata` access to protected, use `changeMeta` instead
+- Renamed `EndCondition.defaultEndCondition` to `EndCondition.normal`
+- Moved `Game.ModAPIVersion` to `ModAPI.version`
+
 **Mod API 1.2.e**
 - **Reference spawns**
   - Hold shift on the exit buttons for level and crusade editor to save without tank references (info icon should appear while doing so)

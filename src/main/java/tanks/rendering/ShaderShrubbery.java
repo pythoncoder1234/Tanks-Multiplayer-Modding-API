@@ -2,8 +2,9 @@ package tanks.rendering;
 
 import basewindow.BaseWindow;
 
-public class ShaderShrubbery extends RendererShader implements IObstacleSizeShader, IObstacleVertexCoordShader, IShrubHeightShader
+public class ShaderShrubbery extends RendererShader implements IObstacleSizeShader, IObstacleVertexCoordShader, IShrubHeightShader, IObstacleTimeShader
 {
+    public Uniform1i time;
     public Uniform1f shrubHeight;
     public Uniform1f obstacleSizeFrac;
     public Attribute1f vertexCoord;
@@ -36,5 +37,11 @@ public class ShaderShrubbery extends RendererShader implements IObstacleSizeShad
     public void setShrubHeight(float size)
     {
         this.shrubHeight.set(size);
+    }
+
+    @Override
+    public void setTime(int time)
+    {
+        this.time.set(time);
     }
 }

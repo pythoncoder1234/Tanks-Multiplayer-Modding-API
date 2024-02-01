@@ -32,7 +32,7 @@ public class EventTankUpdate extends PersonalEvent implements IStackableEvent
 		this.vY = t.vY;
 		this.damageRate = t.damageRate;
 		this.angle = t.angle;
-		this.pitch = t.pitch;
+		this.pitch = t.basePitch;
 	}
 
 	@Override

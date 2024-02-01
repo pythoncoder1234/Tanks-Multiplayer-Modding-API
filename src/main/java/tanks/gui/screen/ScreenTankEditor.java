@@ -1132,9 +1132,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
             }
 
             for (Tab t: this.subMenus)
-            {
                 t.sortUIElements();
-            }
         }
 
         @Override

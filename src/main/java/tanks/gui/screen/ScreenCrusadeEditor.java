@@ -309,7 +309,7 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
                 }
 
                 if (levelsMissing)
-                    Panel.currentNotification = new ScreenElement.Notification(m.toString(), 800);
+                    Panel.notifs.add(new ScreenElement.Notification(m.toString(), 800));
                 else
                     syncLevels.setText("Done!");
             }).start();
@@ -396,7 +396,7 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
                     }
 
                     if (itemsMissing)
-                        Panel.currentNotification = new ScreenElement.Notification(s.toString(), 800);
+                        Panel.notifs.add(new ScreenElement.Notification(s.toString(), 800));
                     else
                         syncItems.setText("Done!");
 

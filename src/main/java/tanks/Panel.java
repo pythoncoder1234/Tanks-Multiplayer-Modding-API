@@ -1,7 +1,8 @@
 package tanks;
 
+import basewindow.BaseWindow;
 import basewindow.InputCodes;
-import basewindow.transformation.Translation;
+import basewindow.ShaderGroup;
 import tanks.eventlistener.EventListener;
 import tanks.extension.Extension;
 import tanks.gui.Button;
@@ -25,14 +26,13 @@ import tanks.obstacle.Obstacle;
 import tanks.rendering.*;
 import tanks.tank.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 public class Panel
 {
     public static boolean onlinePaused;
-    public static Notification currentNotification;
+    public static LinkedList<Notification> notifs = new LinkedList<>();
+	public static long lastNotifTime = 0;
 	public static CenterMessage currentMessage;
 	public static String lastWindowTitle = "";
 
@@ -59,8 +59,6 @@ public class Panel
 
 	public static TextBox selectedTextBox;
 	public static Button draggedButton;
-
-	public Translation zoomTranslation = new Translation(Game.game.window, 0, 0, 0);
 
 	/** Important value used in calculating game speed. Larger values are set when the frames are lower, and game speed is increased to compensate.*/
 	public static double frameFrequency = 1;
@@ -772,8 +770,31 @@ public class Panel
         else
             Game.screen.draw();
 
-        if (currentNotification != null)
-            currentNotification.draw();
+		if (Game.enableExtensions)
+		{
+			for (int i = 0; i < Game.extensionRegistry.extensions.size(); i++)
+			{
+				Extension e = Game.extensionRegistry.extensions.get(i);
+				e.draw();
+			}
+		}
+
+        if (!notifs.isEmpty())
+		{
+			double sy = 0;
+			for (int i = 0; i < notifs.size(); i++)
+			{
+				if (i == 1 && notifs.get(0).fadeStart)
+					sy -= Math.min(750, System.currentTimeMillis() - lastNotifTime) * (notifs.get(0).sY + 100) / 750;
+
+				Notification n = notifs.get(i);
+				n.draw(sy);
+				sy += n.sY + 15;
+			}
+
+			if (notifs.get(0).age > notifs.get(0).duration)
+                notifs.pop();
+		}
 
 		if (currentMessage != null)
 			currentMessage.draw();
@@ -832,8 +853,44 @@ public class Panel
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_A))
 			{
-				Drawing.drawing.terrainRenderer.reset();
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_A);
+				Drawing.drawing.terrainRenderer.reset();
+				Panel.notifs.add(new Notification("Terrain reloaded!"));
+			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_T))
+			{
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_T);
+
+				HashMap<Class<? extends ShaderGroup>, ShaderGroup> newShaders = new HashMap<>();
+				for (Map.Entry<Class<? extends ShaderGroup>, ShaderGroup> entry : Game.game.shaderInstances.entrySet())
+				{
+					try
+					{
+						ShaderGroup s;
+						try
+						{
+							s = entry.getKey().getConstructor(BaseWindow.class)
+									.newInstance(Game.game.window);
+						}
+						catch (NoSuchMethodException e)
+						{
+							s = entry.getKey().getConstructor(BaseWindow.class, String.class)
+									.newInstance(Game.game.window, entry.getValue().name);
+						}
+
+						s.initialize();
+						newShaders.put(entry.getKey(), s);
+					}
+					catch (Exception e)
+					{
+						throw new RuntimeException(e);
+					}
+				}
+
+				Game.game.shaderInstances = newShaders;
+				Drawing.drawing.terrainRenderer.reset();
+				Panel.notifs.add(new Notification("Shaders reloaded!"));
 			}
 
 			int brightness = 0;

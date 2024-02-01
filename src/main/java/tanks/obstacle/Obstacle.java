@@ -368,15 +368,18 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		int x = (int) (this.posX / Game.tile_size);
 		int y = (int) (this.posY / Game.tile_size);
 
-		boolean collision = this.startHeight < 1 && (this.tankCollision || this.bulletCollision);
-
 		if (this.isSurfaceTile)
 			this.startHeight = -1;
 
 		if (x >= 0 && x < Game.obstacleGrid.length && y >= 0 && y < Game.obstacleGrid[0].length)
 		{
-			if (collision || Game.obstacleGrid[x][y] == null)
+			if (!isSurfaceTile || Game.obstacleGrid[x][y] == null)
+			{
+				if (Game.obstacleGrid[x][y] != null && Game.obstacleGrid[x][y].isSurfaceTile)
+					Game.surfaceTileGrid[x][y] = Game.obstacleGrid[x][y];
+
 				Game.obstacleGrid[x][y] = this;
+			}
 
 			if (this.isSurfaceTile)
 				Game.surfaceTileGrid[x][y] = this;

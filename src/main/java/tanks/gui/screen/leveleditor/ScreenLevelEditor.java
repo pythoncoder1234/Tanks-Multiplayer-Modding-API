@@ -1334,7 +1334,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 							if (o != null || s != null)
 							{
-								if (o == null)
+								if (o != null && s != null)
+									return new boolean[] {true, true};
+
+                                if (o == null)
 									o = s;
 
 								if (!validRight)
@@ -1859,9 +1862,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		windowTitle = (allowClose ? "" : "*");
 
-		for (Obstacle o : Game.obstacles)
-			o.baseGroundHeight = Game.sampleGroundHeight(o.posX, o.posY);
-
 		if (Game.enable3d)
 		{
 			for (Obstacle o : Game.obstacles)
@@ -1878,6 +1878,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
 			}
 		}
+
+		for (Obstacle o : Game.obstacles)
+			o.baseGroundHeight = Game.sampleGroundHeight(o.posX, o.posY);
 
 		Drawing.drawing.setColor(174, 92, 16);
 
