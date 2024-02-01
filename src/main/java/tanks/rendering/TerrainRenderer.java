@@ -490,7 +490,7 @@ public class TerrainRenderer
         double r = Game.tilesR[i][j];
         double g = Game.tilesG[i][j];
         double b = Game.tilesB[i][j];
-        double depth = Game.tilesDepth[i][j];
+        double depth = Game.enable3dBg ? Game.tilesDepth[i][j] : 0;
 
         this.currentDepth = depth;
         currentColor[0] = (float) (r / 255.0);

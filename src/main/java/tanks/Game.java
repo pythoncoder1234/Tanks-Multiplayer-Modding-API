@@ -1104,7 +1104,7 @@ public class Game
         Game.game.heightGrid = new double[28][18];
         Game.game.groundHeightGrid = new double[28][18];
         Game.obstacleGrid = new Obstacle[28][18];
-        Game.surfaceTileGrid = null;
+        Game.surfaceTileGrid = new Obstacle[28][18];
 
         double var = 0;
 

@@ -91,7 +91,6 @@ public class ScreenInputColor extends Screen
         add.update();
         back.update();
 
-        Game.game.window.pressedButtons.clear();
         textBox.update();
     }
 
