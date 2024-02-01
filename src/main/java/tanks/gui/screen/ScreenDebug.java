@@ -237,6 +237,8 @@ public class ScreenDebug extends ScreenOptionsOverlay
         public void run()
         {
             Game.invulnerable = !Game.invulnerable;
+            if (Game.playerTank != null)
+                Game.playerTank.invulnerable = Game.invulnerable;
 
             if (Game.invulnerable)
                 invulnerable.setText(invulnerableText, ScreenOptions.onText);

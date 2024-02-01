@@ -5,7 +5,7 @@ import tanks.Game;
 import tanks.Panel;
 import tanks.gui.Button;
 
-public class ScreenOverlayControls
+public class ScreenOverlayControls extends ScreenOptionsOverlay
 {
     public static Screen lastControlsScreen = new ScreenControlsGame();
 

@@ -1118,7 +1118,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			Obstacle.draw_size = Math.min(Game.tile_size, Obstacle.draw_size + Panel.frameFrequency);
 		}
 
-		if (freecam && !(paused && !screenshotMode))
+		if (freecam && !(paused && !screenshotMode) && Game.screen == this)
 			updateFreecam();
 
 		if (npcShopScreen)
