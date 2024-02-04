@@ -881,9 +881,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				selectHeld = false;
 
 				double lowX = Math.min(selectX1, selectX2);
-				double highX = Math.min((Game.currentSizeX - 1) * Game.tile_size, Math.max(selectX1, selectX2));
+				double highX = Math.min((Game.currentSizeX - 0.5) * Game.tile_size, Math.max(selectX1, selectX2));
 				double lowY = Math.min(selectY1, selectY2);
-				double highY = Math.min((Game.currentSizeY - 1) * Game.tile_size, Math.max(selectY1, selectY2));
+				double highY = Math.min((Game.currentSizeY - 0.5) * Game.tile_size, Math.max(selectY1, selectY2));
 
 				if (selectMode && selectTool == SelectTool.normal)
 					newSelection(lowX, highX, lowY, highY);

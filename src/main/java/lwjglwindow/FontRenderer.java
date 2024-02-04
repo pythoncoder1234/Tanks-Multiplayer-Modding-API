@@ -114,7 +114,8 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-			else if (c[i] == '\u00A7' && color.matcher(s.substring(i, i+13)).matches())
+
+			if (c[i] == '\u00A7' && s.length() >= i + 13 && color.matcher(s.substring(i, i+13)).matches())
 			{
 				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + c[i + 3]);
 				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + c[i + 6]);

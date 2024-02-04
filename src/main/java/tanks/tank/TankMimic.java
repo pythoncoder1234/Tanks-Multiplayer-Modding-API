@@ -1,7 +1,6 @@
 package tanks.tank;
 
-import basewindow.Model;
-import tanks.*;
+import tanks.Game;
 
 /**
  * A tank which mimics the closest tank it sees
@@ -23,6 +22,9 @@ public class TankMimic extends TankAIControlled
         this.colorModel = TankModels.checkerboard.color;
         this.turretModel = TankModels.checkerboard.turret;
         this.turretBaseModel = TankModels.checkerboard.turretBase;
+
+        this.avoidanceSeekOpenSpaces = true;
+        this.bulletAvoidBehvavior = BulletAvoidBehavior.dodge;
 
         this.transformMimic = true;
 

@@ -21,7 +21,9 @@ public class TankBlack extends TankAIControlled
 		this.bullet.name = "Dark fire bullet";
 		this.turretAimSpeed = 0.06;
 		this.enablePathfinding = true;
-		this.targetEnemySightBehavior = TargetEnemySightBehavior.strafe;
+		this.targetEnemySightBehavior = TargetEnemySightBehavior.sidewind;
+		this.avoidanceSeekOpenSpaces = true;
+		this.bulletAvoidBehvavior = BulletAvoidBehavior.back_off;
 
 		this.coinValue = 10;
 

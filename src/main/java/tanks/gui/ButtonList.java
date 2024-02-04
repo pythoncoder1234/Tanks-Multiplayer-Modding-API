@@ -25,22 +25,6 @@ public class ButtonList
     public int dragIndex;
     public BiConsumer<Integer, Integer> reorderBehavior;
 
-    public BiConsumer<Button, Boolean> finishDragging = (b, canceled) ->
-    {
-        if (!canceled)
-            reorderBehavior.accept(dragIndex, buttons.indexOf(b));
-    };
-
-    public Consumer<Button> whileDragging = b ->
-    {
-        if (dragIndex == Integer.MAX_VALUE)
-            return;
-
-        Button b1 = this.buttons.get(dragIndex);
-        Drawing.drawing.setColor(150, 150, 150);
-        Drawing.drawing.fillInterfaceRect(b1.posX, b1.posY - b1.sizeY / 2 - 10, b1.sizeX, 10);
-    };
-
     public double xOffset;
     public double yOffset;
 
@@ -154,8 +138,6 @@ public class ButtonList
                 b.posY = Drawing.drawing.interfaceSizeY / 2 + yOffset + this.objYSpace * ((i % (rows * columns)) / columns - rows / 2. + 0.5);
             }
 
-            b.whileDragging = whileDragging;
-            b.finishDrag = finishDragging;
             b.sizeX = this.objWidth;
             b.sizeY = this.objHeight;
             b.translated = this.translate;
@@ -240,10 +222,7 @@ public class ButtonList
             Button b = buttons.get(i);
 
             if (this.arrowsEnabled)
-            {
                 b.enabled = !this.reorder;
-                b.draggable = this.reorder;
-            }
 
             if (this.reorder)
             {

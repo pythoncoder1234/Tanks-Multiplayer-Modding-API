@@ -20,7 +20,7 @@ public class OverlaySelectString extends ScreenLevelEditorOverlay
 
         screenLevelEditor.paused = true;
         this.selector = selector;
-        this.textBox.inputText = selector.string.replaceAll("§", "\\\\u00a7");
+        this.textBox.inputText = selector.string;
         this.textBox.maxChars = 50;
         this.textBox.enableCaps = true;
         this.textBox.enablePunctuation = true;
@@ -54,11 +54,9 @@ public class OverlaySelectString extends ScreenLevelEditorOverlay
             return;
         }
 
-        String text = textBox.inputText;
-        if (text.matches(".*\\\\u00a7[\\d{12}].*"))
-            text = text.replaceAll("\\\\u00a7", "§");
-
         this.selector.modified = true;
-        this.selector.setMetadata(text);
+        this.selector.encoded = false;
+        this.selector.setMetadata(textBox.inputText);
+        this.selector.encoded = true;
     }
 }

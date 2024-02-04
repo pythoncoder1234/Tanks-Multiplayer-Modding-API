@@ -802,6 +802,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 	public Ray getRay()
 	{
 		Ray r = new Ray(posX, posY, this.getAngleInDirection(this.posX + this.vX, this.posY + this.vY), this.bounces, tank);
+		r.ignoreTanks = true;
 		r.size = this.size;
 		return r;
 	}

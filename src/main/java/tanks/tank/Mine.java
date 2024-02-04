@@ -74,7 +74,7 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
         this.outlineColorG = outlineCol[1];
         this.outlineColorB = outlineCol[2];
 
-        this.posZ = Game.sampleTerrainGroundHeight(this.posX, this.posY);
+        this.posZ = tank.posZ;
         this.team = t.team;
 
         if (!ScreenPartyLobby.isClient)

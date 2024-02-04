@@ -239,7 +239,11 @@ public class TextBox implements IDrawable, ITrigger
 					Button.drawGlow(this.posX - this.sizeX / 2 + this.sizeY / 2, this.posY + 2.5, this.sizeY * 3 / 4, this.sizeY * 3 / 4, 0.6, 0, 0, 0, 100, false);
 			}
 
-			drawing.setColor(255, 0, 0);
+			if (!clearSelected || Game.game.window.touchscreen)
+				drawing.setColor(160, 160, 160);
+			else
+				drawing.setColor(255, 0, 0);
+
 			drawing.fillInterfaceOval(this.posX - this.sizeX / 2 + this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
 
 			drawing.setColor(255, 255, 255);
@@ -316,7 +320,7 @@ public class TextBox implements IDrawable, ITrigger
 		if (Game.glowEnabled && !Game.game.window.drawingShadow)
 		{
 			if (this.lastFrame < Panel.panel.ageFrames - 1)
-				this.glowEffects.remove((Integer) InputCodes.KEY_V);
+				this.glowEffects.clear();
 
 			this.lastFrame = Panel.panel.ageFrames;
 
@@ -360,12 +364,6 @@ public class TextBox implements IDrawable, ITrigger
 		return this.hover && !this.selected && this.enabled && !Game.game.window.touchscreen;
 	}
 
-	@Override
-	public void onClick()
-	{
-
-	}
-
 	public boolean checkMouse(double mx, double my, boolean down, boolean valid, InputPoint p)
 	{
 		boolean handled = false;
@@ -398,14 +396,16 @@ public class TextBox implements IDrawable, ITrigger
 				selected = true;
 				this.previousInputText = this.inputText;
 
-				if (Panel.selectedTextBox != null)
-					Panel.selectedTextBox.submit();
+				TextBox prev = Panel.selectedTextBox;
 
 				Panel.selectedTextBox = this;
 
+				if (prev != null)
+					prev.submit();
+
 				Drawing.drawing.playVibration("click");
 				Drawing.drawing.playSound("bounce.ogg", 0.5f, 0.7f);
-				Game.game.window.getRawTextKeys().remove((Integer) InputCodes.KEY_V);
+				Game.game.window.getRawTextKeys().clear();
 			}
 		}
 
@@ -523,8 +523,8 @@ public class TextBox implements IDrawable, ITrigger
 
 		ArrayList<Character> texts = Game.game.window.getRawTextKeys();
 
-		Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_V);
-		Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_V);
+		Game.game.window.pressedKeys.clear();
+		Game.game.window.validPressedKeys.clear();
 
 		if (Game.game.window.textPressedKeys.contains(InputCodes.KEY_LEFT_CONTROL) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_RIGHT_CONTROL) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_LEFT_SUPER) || Game.game.window.textPressedKeys.contains(InputCodes.KEY_RIGHT_SUPER))
 		{

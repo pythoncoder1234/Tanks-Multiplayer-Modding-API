@@ -118,7 +118,7 @@ public class TankAIControlled extends Tank
 	public boolean enableTargetEnemyReaction = true;
 	/** Type of behavior tank should have if its target enemy is in line of sight*/
 	@TankProperty(category = movementOnSight, id = "target_enemy_sight_behavior", name = "Reaction",
-			desc = "How the tank should react upon line of sight \n" + "Keep distance - move to or away from the target until at a specific distance to it \n",
+			desc = "How the tank should react upon line of sight",
 			choiceDesc = {
 			"Approach - move directly toward the target",
 			"Flee - move directly away from the target",
@@ -231,6 +231,9 @@ public class TankAIControlled extends Tank
 	/** When set to true, will calculate target enemy velocity when shooting. Only effective when shootAIType is straight!*/
 	@TankProperty(category = firingBehavior, id = "enable_predictive_firing", name = "Predictive", desc = "When enabled, will use the current velocity of the target to predict and fire towards its future position \n Only works with straight aiming behavior!")
 	public boolean enablePredictiveFiring = true;
+	/** The chance out of 1 that the tank will use predictive firing every shot */
+	@TankProperty(category = firingBehavior, id = "predictive_firing_chance", name = "Predictive chance", desc = "The chance out of 1 that the tank will use predictive firing every shot")
+	public double predictiveChance = 1;
 	/** When set to true, will shoot at bullets aiming towards the tank*/
 	@TankProperty(category = firingBehavior, id = "enable_defensive_firing", name = "Deflect bullets", desc = "When enabled, will shoot at incoming bullet threats to deflect them \n Does not work with wander or sprinkler aiming behavior!")
 	public boolean enableDefensiveFiring = false;
@@ -309,6 +312,9 @@ public class TankAIControlled extends Tank
 	protected boolean laidMine = false;
 
 	protected boolean shotMine = false;
+
+	/** Whether the tank is using predictive firing */
+	protected boolean predictiveFiring = true;
 
 	/** Alternates for tanks with the alternate AI. Tells tanks to shoot with reflection and then to shoot straight.*/
 	protected boolean straightShoot = false;
@@ -582,6 +588,7 @@ public class TankAIControlled extends Tank
 			this.baseColorG = this.colorG;
 			this.baseColorB = this.colorB;
 			this.idleTimer = (this.random.nextDouble() * turretIdleTimerRandom) + turretIdleTimerBase;
+			this.predictiveFiring = this.enablePredictiveFiring;
 		}
 
 		this.angle = (this.angle + Math.PI * 2) % (Math.PI * 2);
@@ -677,7 +684,7 @@ public class TankAIControlled extends Tank
 
 		boolean arc = BulletArc.class.isAssignableFrom(this.bullet.bulletClass);
 
-		if ((this.bullet.liveBullets < this.bullet.maxLiveBullets || this.bullet.maxLiveBullets <= 0) && !this.disabled)
+		if (!this.disabled && this.bullet.maxLiveBullets <= 0 || this.bullet.liveBullets < this.bullet.maxLiveBullets)
 		{
 			if (this.cooldown <= 0)
 			{
@@ -705,7 +712,7 @@ public class TankAIControlled extends Tank
 
 					double an = this.angle;
 
-					if (this.targetEnemy != null && this.enablePredictiveFiring && this.shootAIType == ShootAI.straight)
+					if (this.targetEnemy != null && this.predictiveFiring && this.shootAIType == ShootAI.straight)
 						an = this.getAngleInDirection(this.targetEnemy.posX, this.targetEnemy.posY);
 
 					Ray a2 = new Ray(this.posX, this.posY, an, this.bullet.bounces, this);
@@ -892,6 +899,9 @@ public class TankAIControlled extends Tank
 
 		if (this.shootAIType.equals(ShootAI.alternate))
 			this.straightShoot = !this.straightShoot;
+
+		if (this.enablePredictiveFiring && this.predictiveChance < 1)
+			this.predictiveFiring = this.random.nextDouble() < this.predictiveChance;
 	}
 
 	public void updateTarget()
@@ -1117,7 +1127,7 @@ public class TankAIControlled extends Tank
 		t.vX = this.vX;
 		t.vY = this.vY;
 		t.angle = this.angle;
-		t.basePitch = this.basePitch;
+		t.pitch = this.pitch;
 		t.team = this.team;
 		t.health = this.health;
 		t.orientation = this.orientation;
@@ -1128,7 +1138,7 @@ public class TankAIControlled extends Tank
 		t.statusEffects = this.statusEffects;
 		t.coinValue = this.coinValue;
 		t.currentlyVisible = true;
-		t.cooldown = Math.min(t.cooldownBase, this.cooldown);
+		t.cooldown = Math.max(100, this.cooldown);
 		t.age = this.age;
 
 		Tank p = this;
@@ -1587,6 +1597,7 @@ public class TankAIControlled extends Tank
 					for (int dir = 0; dir < count; dir++)
 					{
 						Ray r = new Ray(this.posX, this.posY, direction + fleeDirections[dir], 0, this, Game.tile_size);
+						r.ignoreTanks = true;
 						r.size = Game.tile_size * this.hitboxSize - 1;
 
 						boolean b = this.targetEnemy != null && this.bulletAvoidBehvavior == BulletAvoidBehavior.aggressive_dodge && Movable.absoluteAngleBetween(fleeDirections[dir] + direction, this.getAngleInDirection(this.targetEnemy.posX, this.targetEnemy.posY)) > Math.PI * 0.5;
@@ -1639,7 +1650,9 @@ public class TankAIControlled extends Tank
 						this.avoidDirection = direction + Math.PI * 0.5 * (1 - (1 - frac) * invert / 2) * Math.signum(diff);
 					}
 					else if (this.bulletAvoidBehvavior == BulletAvoidBehavior.back_off)
+					{
 						this.avoidDirection = nearest.getAngleInDirection(this.posX, this.posY);
+					}
 					else if (this.bulletAvoidBehvavior == BulletAvoidBehavior.intersect)
 					{
 						double targetX = nearestTarget.targetX;
@@ -1689,13 +1702,13 @@ public class TankAIControlled extends Tank
 			this.angle = this.orientation;
 		else if (this.shootAIType.equals(ShootAI.wander) || this.shootAIType.equals(ShootAI.sprinkler))
 			this.updateTurretWander();
-		else if (this.shootAIType.equals(ShootAI.straight))
+		else if (this.shootAIType.equals(ShootAI.straight) || (this.shootAIType == ShootAI.alternate && straightShoot))
 			this.updateTurretStraight();
 		else
 			this.updateTurretReflect();
 
 		if (!BulletArc.class.isAssignableFrom(this.bullet.bulletClass))
-			this.basePitch -= Movable.angleBetween(this.basePitch, 0) / 10 * Panel.frameFrequency;
+			this.pitch -= Movable.angleBetween(this.pitch, 0) / 10 * Panel.frameFrequency;
 
 		if (!this.chargeUp)
 		{
@@ -1852,7 +1865,7 @@ public class TankAIControlled extends Tank
 		if (BulletArc.class.isAssignableFrom(this.bullet.bulletClass))
 		{
 			double pitch = Math.atan(this.distance / this.bullet.speed * 0.5 * BulletArc.gravity / this.bullet.speed);
-			this.basePitch -= Movable.angleBetween(this.basePitch, pitch) / 10 * Panel.frameFrequency;
+			this.pitch -= Movable.angleBetween(this.pitch, pitch) / 10 * Panel.frameFrequency;
 		}
 
 		this.checkAndShoot();
@@ -1886,7 +1899,7 @@ public class TankAIControlled extends Tank
 
 	public void setAimAngleStraight()
 	{
-		if (this.enablePredictiveFiring && this.targetEnemy instanceof Tank && (this.targetEnemy.vX != 0 || this.targetEnemy.vY != 0))
+		if (this.predictiveFiring && this.targetEnemy instanceof Tank && (this.targetEnemy.vX != 0 || this.targetEnemy.vY != 0))
 		{
 			Ray r = new Ray(targetEnemy.posX, targetEnemy.posY, targetEnemy.getLastPolarDirection(), 0, (Tank) targetEnemy);
 			r.ignoreDestructible = this.aimIgnoreDestructible;
@@ -1922,7 +1935,7 @@ public class TankAIControlled extends Tank
 		if (this.targetEnemy == null)
 			return;
 
-		if (this.enablePredictiveFiring && this.targetEnemy instanceof Tank && (this.targetEnemy.vX != 0 || this.targetEnemy.vY != 0))
+		if (this.predictiveFiring && this.targetEnemy instanceof Tank && (this.targetEnemy.vX != 0 || this.targetEnemy.vY != 0))
 		{
 			Ray r = new Ray(targetEnemy.posX, targetEnemy.posY, targetEnemy.getLastPolarDirection(), 0, (Tank) targetEnemy);
 			r.size = Game.tile_size * this.hitboxSize - 1;
@@ -2603,7 +2616,7 @@ public class TankAIControlled extends Tank
 			Tank.idMap.put(this.networkID, this);
 			this.health = this.sightTransformTank.health;
 			this.orientation = this.sightTransformTank.orientation;
-			this.basePitch = this.sightTransformTank.basePitch;
+			this.pitch = this.sightTransformTank.pitch;
 			this.drawAge = this.sightTransformTank.drawAge;
 			this.attributes = this.sightTransformTank.attributes;
 			this.statusEffects = this.sightTransformTank.statusEffects;
@@ -2936,6 +2949,12 @@ public class TankAIControlled extends Tank
 					Drawing.drawing.fillGlow(this.posX, this.posY, this.size * 4 - this.age * 2, this.size * 4 - this.age * 2);
 			}
 		}
+
+		/*if (this.mandatoryKill)
+		{
+			Drawing.drawing.setColor(255, 0, 0, 64);
+			Drawing.drawing.fillBox(posX, posY, 50, 50, 50, 100);
+		}*/
 	}
 
 	public static void solveReferences(ArrayList<TankAIControlled> customTanks)

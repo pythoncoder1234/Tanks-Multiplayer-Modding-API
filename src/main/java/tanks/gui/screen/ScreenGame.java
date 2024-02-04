@@ -4,7 +4,6 @@ import basewindow.InputCodes;
 import basewindow.InputPoint;
 import basewindow.transformation.RotationAboutPoint;
 import basewindow.transformation.ScaleAboutPoint;
-import basewindow.transformation.Transformation;
 import basewindow.transformation.Translation;
 import tanks.*;
 import tanks.bullet.Bullet;
@@ -947,11 +946,17 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		if (Game.game.input.zoomAuto.isValid() && playing)
 		{
-			if (Panel.autoZoom)
-				Panel.zoomTarget = Panel.panel.zoomTimer;
-
 			Game.game.input.zoomAuto.invalidate();
-			Panel.autoZoom = !Panel.autoZoom;
+
+			if (!Game.game.window.shift)
+			{
+				if (Panel.autoZoom)
+					Panel.zoomTarget = Panel.panel.zoomTimer;
+
+				Panel.autoZoom = !Panel.autoZoom;
+			}
+			else
+				Panel.forceCenter = !Panel.forceCenter;
 		}
 
 		Game.player.hotbar.update();
@@ -2056,6 +2061,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
         {
             double frac = Panel.panel.zoomTimer;
 
+			Game.game.window.clipMultiplier = 1;
+			Game.game.window.clipDistMultiplier = 100;
+
             if (freecam)
                 Game.game.window.transformations.add(new Translation(Game.game.window, x, y, z));
 
@@ -2082,9 +2090,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
             if (freecam)
                 Game.game.window.transformations.add(new RotationAboutPoint(Game.game.window, yaw, pitch, roll, 0, 0, 0));
-
-            for (Transformation t : Game.game.window.transformations)
-                t.applyAsShadow = true;
 
             Game.game.window.loadPerspective();
         }
@@ -2155,6 +2160,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
         Drawing.drawing.fillShadedInterfaceRect(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2,
 				mul * Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale, mul * Game.game.window.absoluteHeight / Drawing.drawing.interfaceScale);
 
+		this.drawDefaultBackground();
+
 		Drawing drawing = Drawing.drawing;
 
 //		drawables[0].addAll(Game.tracks);
@@ -2199,8 +2206,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 			arr.clear();
 		}
-
-		this.drawDefaultBackground();
 
 		for (int i = 0; i < this.drawables.length; i++)
 		{

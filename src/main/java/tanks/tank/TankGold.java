@@ -1,6 +1,6 @@
 package tanks.tank;
 
-import tanks.*;
+import tanks.Game;
 import tanks.bullet.Bullet;
 import tanks.bullet.BulletBoost;
 
@@ -33,7 +33,9 @@ public class TankGold extends TankAIControlled
 		this.mine.radius *= 1.5;
 
 		if (Game.tankTextures)
+		{
 			this.colorModel = TankModels.arrow.color;
+		}
 
 		this.coinValue = 4;
 

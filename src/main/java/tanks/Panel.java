@@ -38,6 +38,7 @@ public class Panel
 
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
+	public static boolean forceCenter = false;
 	public static boolean autoZoom = true;
 	public static double lastAutoZoomSpeed = 0;
 
@@ -497,7 +498,7 @@ public class Panel
 			double accel = 0.0003 * Drawing.drawing.unzoomedScale;
 			double distDampen = 2;
 
-			if (Panel.autoZoom)
+			if (Panel.autoZoom && !Panel.forceCenter)
 			{
 				double dispX = Panel.panTargetX - panX;
 				double dispY = Panel.panTargetY - panY;

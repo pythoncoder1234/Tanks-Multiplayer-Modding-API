@@ -12,6 +12,7 @@ public class TankDarkGreen extends TankAIControlled
 	{
 		super(name, x, y, Game.tile_size, 85, 107, 47, angle, ShootAI.straight);
 		this.cooldownBase = 5;
+		this.bullet.cooldownBase = 5;
 		this.cooldownRandom = 0;
 		this.maxSpeed = 1.5;
 		this.bullet.speed = 25.0 / 4;
@@ -23,6 +24,7 @@ public class TankDarkGreen extends TankAIControlled
 		this.bullet.effect = Bullet.BulletEffect.trail;
 		this.bullet.name = "Mini bullet";
 		this.targetEnemySightBehavior = TargetEnemySightBehavior.flee;
+		this.bulletAvoidBehvavior = BulletAvoidBehavior.dodge;
 
 		if (Game.tankTextures)
 		{

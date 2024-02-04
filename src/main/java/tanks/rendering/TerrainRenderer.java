@@ -521,6 +521,7 @@ public class TerrainRenderer
                 if (j < Game.currentSizeY - 1)
                     extra = Math.max(extra, -Game.game.heightGrid[i][j + 1]);
 
+                this.tiles[i][j].obstacleAbove = Game.obstacleGrid[i][j];
                 o.drawTile(this.tiles[i][j], r, g, b, depth, extra);
             }
             else

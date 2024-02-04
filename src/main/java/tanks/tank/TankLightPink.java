@@ -1,6 +1,6 @@
 package tanks.tank;
 
-import tanks.*;
+import tanks.Game;
 import tanks.bullet.Bullet;
 
 /**
@@ -27,6 +27,8 @@ public class TankLightPink extends TankAIControlled
         this.bullet.bounces = 1;
         this.bullet.effect = Bullet.BulletEffect.trail;
         this.shootAIType = ShootAI.reflect;
+        this.avoidanceSeekOpenSpaces = true;
+        this.bulletAvoidBehvavior = BulletAvoidBehavior.dodge;
 
         if (Game.tankTextures)
         {

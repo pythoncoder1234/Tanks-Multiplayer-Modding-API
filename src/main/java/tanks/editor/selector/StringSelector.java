@@ -4,12 +4,19 @@ import tanks.Game;
 import tanks.GameObject;
 import tanks.gui.screen.leveleditor.OverlaySelectString;
 
+import java.util.Base64;
+import java.util.regex.Pattern;
+
 public class StringSelector<T extends GameObject> extends LevelEditorSelector<T>
 {
     // Easiest selector to write so far, nice.
     // Mod API 1.2.0a
 
+    // nvm i forgot certain characters break stuff
+    // 1.2.g
+
     public String string;
+    public boolean encoded;
 
     @Override
     public void baseInit()
@@ -30,18 +37,38 @@ public class StringSelector<T extends GameObject> extends LevelEditorSelector<T>
     @Override
     public String getMetadata()
     {
-        return string;
+        return Base64.getEncoder().encodeToString(encodeString(string).getBytes()) + ";" + true;
     }
 
     @Override
     public void setMetadata(String data)
     {
-        this.string = data;
+        String[] stuff = data.split(";");
+        this.string = stuff[0];
+        if (stuff.length > 1)
+            encoded = Boolean.parseBoolean(stuff[1]);
+
+        if (encoded)
+            this.string = new String(Base64.getDecoder().decode(this.string.getBytes())).replaceAll("-o\\$8", "§");
+        else
+            this.string = decodeString(string);
     }
 
     @Override
     public void changeMetadata(int add)
     {
 
+    }
+
+    public static final Pattern allowedReg = Pattern.compile("[^a-zA-Z0-9 !\"@#$%&'()*+\\[\\]<=>:;,\\-./{|}~^âăîşţàçæèéêëïôœùúûüÿáíóñ¡¿äöå]");
+
+    public static String encodeString(String s)
+    {
+        return allowedReg.matcher(s).replaceAll("-o\\$8");
+    }
+
+    public static String decodeString(String s)
+    {
+        return s.replaceAll("-o\\$8", "§");
     }
 }

@@ -1417,6 +1417,10 @@ public class Drawing
 		}
 
 		double result = (x - (Panel.windowWidth / scale / 2));
+
+		if (Panel.forceCenter)
+			return -result;
+
 		double margin = Obstacle.draw_size / Game.tile_size * Math.max(0, Math.min(Game.tile_size * 2, Game.currentSizeX * Game.tile_size * Drawing.drawing.scale - Panel.windowWidth)) / 2;
 
 		boolean less = result < -margin;
@@ -1464,6 +1468,9 @@ public class Drawing
 		}
 
 		double result = (y - (Panel.windowHeight - statsHeight) / scale / 2);
+
+		if (Panel.forceCenter)
+			return -result;
 
 		double margin = Math.max(0, Math.min(Game.tile_size * 2, Game.currentSizeY * Game.tile_size * Drawing.drawing.scale - (Panel.windowHeight - Drawing.drawing.statsHeight))) / 2;
 

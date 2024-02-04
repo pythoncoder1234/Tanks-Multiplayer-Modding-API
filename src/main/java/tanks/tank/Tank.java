@@ -710,7 +710,7 @@ public abstract class Tank extends Movable implements ISolidObject
 			}
 		}
 
-		double mult = 2;
+		double mult = 1;
 
 		if (posZ < maxTouchingZ)
 		{
@@ -719,7 +719,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 			tiltFirstFrame = false;
 			maxSpeedModifier *= 1 / mult * (allow ? 1 : 0);
-			posZ += 0.3 * mult * Panel.frameFrequency;
+			posZ += (allow ? 2 : 0.3) * mult * Panel.frameFrequency;
 			basePitch = Math.min(allow ? 0.3 : Math.PI, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
 		}
 		else if (Math.abs(posZ - maxTouchingZ) < 1)

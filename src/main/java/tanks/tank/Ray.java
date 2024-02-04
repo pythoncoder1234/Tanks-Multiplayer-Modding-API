@@ -22,6 +22,7 @@ public class Ray
 	public double vY;
 
 	public boolean enableBounciness = true;
+	public boolean ignoreTanks = false;
 	public boolean ignoreDestructible = false;
 	public boolean ignoreShootThrough = false;
 
@@ -204,6 +205,9 @@ public class Ray
 					boolean passThrough = false;
 					if (f.owner instanceof Obstacle o && !o.bouncy)
 						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+
+					if (ignoreTanks && f.owner instanceof Tank)
+						passThrough = true;
 
 					if (f.startX < this.posX + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;

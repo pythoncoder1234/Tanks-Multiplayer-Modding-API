@@ -24,15 +24,17 @@ public class TankOrange extends TankAIControlled
 
 		this.turnChance = 0.001;
 		this.mineAvoidSensitivity = 1;
+		this.bulletAvoidBehvavior = BulletAvoidBehavior.aggressive_dodge;
+		this.avoidanceSeekOpenSpaces = true;
 
 		this.bullet.maxLiveBullets = 0;
-		this.bullet.accuracy = 5;
 		this.bullet.bulletClass = BulletFlame.class;
 		this.bullet.cooldownBase = 0;
 		this.cooldownBase = 0;
 		this.cooldownRandom = 0;
 		this.bullet.effect = Bullet.BulletEffect.none;
 		this.bullet.bounces = 0;
+		this.bullet.damage = 0.1;
 		this.bullet.name = "Flamethrower";
 
 		this.coinValue = 4;

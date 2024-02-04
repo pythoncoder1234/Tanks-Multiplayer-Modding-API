@@ -12,11 +12,16 @@ public class TankPurple extends TankAIControlled
 		super(name, x, y, Game.tile_size, 150, 0, 200, angle, ShootAI.alternate);
 		this.enableDefensiveFiring = true;
 		this.enablePredictiveFiring = true;
+		this.predictiveChance = 0.4;
 		this.cooldownBase = 20;
 		this.cooldownRandom = 40;
 		this.enablePathfinding = true;
 
-		this.turretAimSpeed = 0.05;
+		this.turretAimSpeed = 0.045;
+		this.turretIdleSpeed = 0.001;
+		this.avoidanceSeekOpenSpaces = true;
+		this.bulletAvoidBehvavior = BulletAvoidBehavior.aggressive_dodge;
+
 		this.coinValue = 10;
 
 		this.description = "A smart, fast tank which can lay mines";
