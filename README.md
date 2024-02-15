@@ -29,9 +29,4 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-**Mod API v1.2.g**
-- *w*a*v*y bushes and water (shaders are cool)
-- `Game.getObstacle(x, y)` and `Game.getSurfaceObstacle(x, y)` fetches the tile or surface tile at the specified grid location
-- Lots of bug fixes (thanks furret)
-
 [Older Changelogs](changelog.md)

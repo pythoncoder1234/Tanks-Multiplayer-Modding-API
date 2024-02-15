@@ -38,6 +38,11 @@ Older Changelogs
 - Added images for horizontal flip and vertical flip
 - Bug fixes
 
+**Mod API v1.2.0**
+- *w*a*v*y bushes and water (shaders are cool)
+- `Game.getObstacle(x, y)` and `Game.getSurfaceObstacle(x, y)` fetches the tile or surface tile at the specified grid location
+- Lots of bug fixes (thanks furret)
+- 
 **Mod API v1.2.b**:
 - Implemented new renderer
 - A bit of multiplayer testing
