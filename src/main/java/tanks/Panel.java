@@ -491,6 +491,7 @@ public class Panel
 		}
 
 		this.zoomTimer = Math.min(Math.max(this.zoomTimer, 0), 1);
+		double d = Math.pow(1.01, Panel.frameFrequency);
 
 		if (Game.screen instanceof ScreenGame && Drawing.drawing.enableMovingCamera && Panel.zoomTarget >= 0 && (((ScreenGame) Game.screen).spectatingTank != null || (Game.playerTank != null && !Game.playerTank.destroy)) && ((ScreenGame) Game.screen).playing)
 		{
@@ -505,13 +506,13 @@ public class Panel
 				double dist = Math.sqrt(dispX*dispX + dispY*dispY);
 
 				panSpeedTarget = Math.min(0.01, dist * 0.5);
-				panSpeed += 0.02 * Panel.frameFrequency * Math.signum(panSpeedTarget - panSpeed);
+				panSpeed += 0.05 * Panel.frameFrequency * Math.signum(panSpeedTarget - panSpeed);
 
 				Tank t = ScreenGame.focusedTank();
-				if (t != null && Drawing.drawing.isOutOfBounds(t.posX, t.posY))
+				if (t == null || Drawing.drawing.scale >= 0.9)
 				{
-					this.panX /= Math.pow(1.01, Panel.frameFrequency);
-					this.panY /= Math.pow(1.01, Panel.frameFrequency);
+					this.panX /= d;
+					this.panY /= d;
 				}
 				else if (Math.abs(dispX) + Math.abs(dispY) < Math.abs(panSpeed) * 2)
 				{
@@ -557,9 +558,14 @@ public class Panel
 				else
 					this.zoomTimer = Math.min(nzt, Panel.zoomTarget);
 
-				this.panX /= 1.01 * Panel.frameFrequency;
-				this.panY /= 1.01 * Panel.frameFrequency;
+				this.panX /= d;
+				this.panY /= d;
 			}
+		}
+		else
+		{
+			this.panX /= d;
+			this.panY /= d;
 		}
 
 		Drawing.drawing.scale = Game.screen.getScale();

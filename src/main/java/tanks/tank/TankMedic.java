@@ -30,6 +30,7 @@ public class TankMedic extends TankAIControlled
 		this.bullet.cooldownBase = 0;
 		this.bullet.name = "Healing ray";
 		this.turnChance = 0.001;
+		this.bulletAvoidBehvavior = BulletAvoidBehavior.dodge;
 		this.enablePathfinding = true;
 		this.seekChance = 0.01;
 		this.aimAccuracyOffset = 0;

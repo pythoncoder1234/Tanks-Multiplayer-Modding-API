@@ -22,7 +22,7 @@ To create a custom game or level, the source code is needed.
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21260&authkey=!AJp3wMJcfvURVhw).
+You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21282&authkey=!ALe48JLV4FN-s9o).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
@@ -30,7 +30,8 @@ New Features:
 ---
 
 **Mod API v1.2.g**
-- *w*a*v*y bushes and water
-- `Game.getObstacle` and `Game.getSurfaceObstacle` (surface tile)
+- *w*a*v*y bushes and water (shaders are cool)
+- `Game.getObstacle(x, y)` and `Game.getSurfaceObstacle(x, y)` fetches the tile or surface tile at the specified grid location
+- Lots of bug fixes (thanks furret)
 
 [Older Changelogs](changelog.md)

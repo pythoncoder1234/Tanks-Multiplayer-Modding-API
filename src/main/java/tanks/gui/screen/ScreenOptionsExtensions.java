@@ -1,7 +1,6 @@
 package tanks.gui.screen;
 
 import basewindow.BaseFile;
-import basewindow.InputCodes;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
@@ -46,8 +45,6 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
         }
     });
 
-    private boolean click = false;
-
     public ScreenOptionsExtensions()
     {
         try
@@ -72,7 +69,7 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
                 {
                     String line = in.nextLine();
 
-                    if (line == null || line.length() == 0 || line.startsWith("#"))
+                    if (line == null || line.isEmpty() || line.startsWith("#"))
                         continue;
 
                     String[] extensionLine = line.split(",");
@@ -108,8 +105,6 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
     @Override
     public void update()
     {
-        click = Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1);
-
         description.update();
         enabled.update();
         autoLoad.update();
@@ -148,8 +143,9 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
             {
                 Drawing.drawing.setColor(100, Math.min(230, Drawing.drawing.currentColorG + 100), 100);
 
-                if (click)
+                if (Game.game.input.shoot.isValid())
                 {
+                    Game.game.input.shoot.invalidate();
                     selectedExtensions[i] = !selectedExtensions[i];
                     modified = true;
                 }

@@ -33,6 +33,7 @@ public class TextBox implements IDrawable, ITrigger
 	public boolean hover = false;
 
 	public boolean selected = false;
+	public boolean onlyRunFuncIfChanged = true;
 	public boolean infoSelected = false;
 	public boolean clearSelected = false;
 
@@ -239,10 +240,7 @@ public class TextBox implements IDrawable, ITrigger
 					Button.drawGlow(this.posX - this.sizeX / 2 + this.sizeY / 2, this.posY + 2.5, this.sizeY * 3 / 4, this.sizeY * 3 / 4, 0.6, 0, 0, 0, 100, false);
 			}
 
-			if (!clearSelected || Game.game.window.touchscreen)
-				drawing.setColor(160, 160, 160);
-			else
-				drawing.setColor(255, 0, 0);
+			drawing.setColor(255, 0, 0);
 
 			drawing.fillInterfaceOval(this.posX - this.sizeX / 2 + this.sizeY / 2, this.posY, this.sizeY * 3 / 4, this.sizeY * 3 / 4);
 
@@ -478,7 +476,8 @@ public class TextBox implements IDrawable, ITrigger
 		Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_ESCAPE);
 
 		this.performValueCheck();
-		function.run();
+		if (!onlyRunFuncIfChanged || !this.inputText.equals(this.previousInputText))
+			function.run();
 		this.previousInputText = this.inputText;
 		Drawing.drawing.playSound("destroy.ogg", 2f);
 		Drawing.drawing.playVibration("click");
@@ -487,9 +486,7 @@ public class TextBox implements IDrawable, ITrigger
 		Panel.selectedTextBox = null;
 
 		if (Game.glowEnabled)
-		{
-			this.submitEffect();
-		}
+            this.submitEffect();
 	}
 
 	public void submitEffect()

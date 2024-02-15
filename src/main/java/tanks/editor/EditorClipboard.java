@@ -1,6 +1,5 @@
 package tanks.editor;
 
-import tanks.Game;
 import tanks.obstacle.Obstacle;
 import tanks.tank.Tank;
 
@@ -29,7 +28,7 @@ public class EditorClipboard
     {
         if (o instanceof Obstacle)
             obstacles.remove(o);
-        else
+        else if (o instanceof Tank)
             tanks.remove(o);
     }
 
@@ -100,8 +99,6 @@ public class EditorClipboard
 
     public void rotate()
     {
-        double ts = Game.tile_size;
-
         for (Obstacle o : obstacles)
         {
             double x = o.posX - centerX, y = o.posY - centerY;

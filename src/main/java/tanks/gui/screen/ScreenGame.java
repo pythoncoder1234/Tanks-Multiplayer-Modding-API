@@ -2892,13 +2892,13 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	@Override
 	public double getOffsetX()
 	{
-		return Drawing.drawing.getPlayerOffsetX() + Panel.panel.panX / 10;
+		return Drawing.drawing.getPlayerOffsetX() + Panel.panel.panX;
 	}
 
 	@Override
 	public double getOffsetY()
 	{
-		return Drawing.drawing.getPlayerOffsetY() + Panel.panel.panY / 10;
+		return Drawing.drawing.getPlayerOffsetY() + Panel.panel.panY;
 	}
 
 	@Override

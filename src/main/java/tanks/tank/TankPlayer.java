@@ -126,8 +126,10 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (this.destroy || !hi || !Game.enable3d)
 			return;
 
+		double s = (this.size * (Game.tile_size - destroyTimer) / Game.tile_size) * Math.min(this.drawAge / Game.tile_size, 1);
+
         Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, size, size, size, this.angle);
+        Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, this.posZ, s, s, s, this.angle);
     }
 
     @Override

@@ -1722,13 +1722,15 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		double mx = prevMouseObstacle.posX;
 		double my = prevMouseObstacle.posY;
 
+		int prevSize = Game.movables.size() + Game.obstacles.size();
+
 		for (Obstacle o : clipboard.obstacles)
 		{
 			currentPlaceable = Placeable.obstacle;
 
 			try
 			{
-				Obstacle n = o.getClass().getConstructor(String.class, double.class, double.class).newInstance(o.name, (o.posX + prevMouseObstacle.posX) / 50 - 0.5, (o.posY + prevMouseObstacle.posY) / 50 - 0.5);
+				Obstacle n = o.getClass().getConstructor(String.class, double.class, double.class).newInstance(o.name, (o.posX + mx) / 50 - 0.5, (o.posY + my) / 50 - 0.5);
 				n.selectors = o.selectors;
 				n.stackHeight = o.stackHeight;
 				n.startHeight = o.startHeight;
@@ -1756,11 +1758,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 				if (o.getClass().equals(TankAIControlled.class))
 				{
-					n = new TankAIControlled(o.name, o.posX + prevMouseObstacle.posX, o.posY + prevMouseObstacle.posY, o.size, o.colorR, o.colorG, o.colorB, o.angle, ((TankAIControlled) o).shootAIType);
+					n = new TankAIControlled(o.name, o.posX + mx, o.posY + my, o.size, o.colorR, o.colorG, o.colorB, o.angle, ((TankAIControlled) o).shootAIType);
 					((TankAIControlled) o).cloneProperties((TankAIControlled) n);
 				}
 				else
-					n = o.getClass().getConstructor(String.class, double.class, double.class, double.class).newInstance(o.name, o.posX + prevMouseObstacle.posX, o.posY + prevMouseObstacle.posY, o.angle);
+					n = o.getClass().getConstructor(String.class, double.class, double.class, double.class).newInstance(o.name, o.posX + mx, o.posY + my, o.angle);
 
 				n.team = o.team;
 				n.destroy = o.destroy;
@@ -1792,7 +1794,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		ArrayList<EditorAction> tempActions = this.undoActions;
 		this.undoActions = actions;
 
-		this.undoActions.add(new EditorAction.ActionPaste(this, tempActions));
+		if (Game.movables.size() + Game.obstacles.size() > prevSize)
+			this.undoActions.add(new EditorAction.ActionPaste(this, tempActions));
 	}
 
 	int endX, endY;

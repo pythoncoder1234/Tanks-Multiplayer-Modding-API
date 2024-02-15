@@ -28,7 +28,6 @@ public abstract class BulletInstant extends Bullet
 	public BulletInstant(double x, double y, int bounces, Tank t, boolean affectsMaxLiveBullets, ItemBullet ib)
 	{
 		super(x, y, bounces, t, affectsMaxLiveBullets, ib);
-		this.enableExternalCollisions = false;
 		this.playPopSound = false;
 		this.playBounceSound = false;
 	}
