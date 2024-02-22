@@ -275,7 +275,7 @@ public class Level
             }
         }
 
-        currentCloudCount = (int) (Math.random() * this.sizeX / 10.2 + Math.random() * this.sizeY / 10.2);
+		currentCloudCount = (int) (Math.random() * this.sizeX / 10.2 + Math.random() * this.sizeY / 10.2);
 
         for (int i = 0; i < Level.currentCloudCount; i++)
             Game.clouds.add(new Cloud());
