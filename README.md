@@ -22,7 +22,7 @@ To create a custom game or level, the source code is needed.
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21282&authkey=!ALe48JLV4FN-s9o).
+You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21290&authkey=!ACA1mtl2bBNhftk).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
