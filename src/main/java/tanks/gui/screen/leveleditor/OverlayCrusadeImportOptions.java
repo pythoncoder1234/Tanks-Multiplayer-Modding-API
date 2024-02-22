@@ -390,7 +390,7 @@ public class OverlayCrusadeImportOptions extends ScreenLevelEditorOverlay
             }
         }
         else
-            al = Game.game.fileManager.getInternalFileContents(path);
+            al = Game.game.fileManager.getInternalFileContents(path.toLowerCase());
 
         return new Crusade(al, selected.text, localPath);
     }
