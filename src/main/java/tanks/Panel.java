@@ -777,6 +777,9 @@ public class Panel
         else
             Game.screen.draw();
 
+		if (!(Game.screen instanceof ScreenExit || Game.screen instanceof ScreenIntro))
+			this.drawBar();
+
 		if (Game.enableExtensions)
 		{
 			for (int i = 0; i < Game.extensionRegistry.extensions.size(); i++)
@@ -807,9 +810,6 @@ public class Panel
 			currentMessage.draw();
 
         ScreenOverlayChat.draw(!(Game.screen instanceof IHiddenChatboxScreen));
-
-		if (!(Game.screen instanceof ScreenExit || Game.screen instanceof ScreenIntro))
-			this.drawBar();
 
 		if (Game.screen.showDefaultMouse)
 			this.drawMouseTarget();

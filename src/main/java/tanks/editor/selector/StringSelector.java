@@ -9,12 +9,6 @@ import java.util.regex.Pattern;
 
 public class StringSelector<T extends GameObject> extends LevelEditorSelector<T>
 {
-    // Easiest selector to write so far, nice.
-    // Mod API 1.2.0a
-
-    // nvm i forgot certain characters break stuff
-    // 1.2.g
-
     public String string;
     public boolean encoded;
 
@@ -37,6 +31,7 @@ public class StringSelector<T extends GameObject> extends LevelEditorSelector<T>
     @Override
     public String getMetadata()
     {
+        // WARNING: DO NOT TRY THIS AT HOME!!!
         return Base64.getEncoder().encodeToString(encodeString(string).getBytes()) + ";" + true;
     }
 
@@ -48,7 +43,7 @@ public class StringSelector<T extends GameObject> extends LevelEditorSelector<T>
         if (stuff.length > 1)
             encoded = Boolean.parseBoolean(stuff[1]);
 
-        if (encoded)
+        if (encoded)     // WARNING: DO NOT TRY THIS AT HOME!!!
             this.string = new String(Base64.getDecoder().decode(this.string.getBytes())).replaceAll("-o\\$8", "§");
         else
             this.string = decodeString(string);

@@ -1610,9 +1610,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		for (int i = 0; i < Game.movables.size(); i++)
 		{
-			if (Game.movables.get(i) instanceof Tank t)
+			if (Game.movables.get(i) instanceof Tank)
 			{
-				int x = (int) (t.posX / Game.tile_size);
+                Tank t = (Tank) Game.movables.get(i);
+                int x = (int) (t.posX / Game.tile_size);
 				int y = (int) (t.posY / Game.tile_size);
 
 				level.append(x).append("-").append(y).append("-").append(t.name).append("-");

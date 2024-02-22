@@ -110,9 +110,10 @@ public class ObstacleShrubbery extends Obstacle
 	@Override
 	public void onObjectEntry(Movable m)
 	{
-		if (m instanceof Tank t)
+		if (m instanceof Tank)
 		{
-			t.hiddenStatusChanged = true;
+            Tank t = (Tank) m;
+            t.hiddenStatusChanged = true;
 
 			for (int x = -1; x <= 1; x++)
 			{
@@ -197,10 +198,16 @@ public class ObstacleShrubbery extends Obstacle
 			return 0;
 
 		double shrubScale = 0.25;
-		if (Game.screen instanceof ScreenGame g)
-			shrubScale = g.shrubberyScale;
-		else if (Game.screen instanceof ScreenOptionsOverlay o && o.game != null)
-			shrubScale = o.game.shrubberyScale;
+		if (Game.screen instanceof ScreenGame)
+        {
+            ScreenGame g = (ScreenGame) Game.screen;
+            shrubScale = g.shrubberyScale;
+        }
+        else if (Game.screen instanceof ScreenOptionsOverlay && ((ScreenOptionsOverlay) Game.screen).game != null)
+        {
+            ScreenOptionsOverlay o = (ScreenOptionsOverlay) Game.screen;
+            shrubScale = o.game.shrubberyScale;
+        }
 
 		return this.finalHeight * shrubScale;
 	}

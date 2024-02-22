@@ -112,14 +112,25 @@ public class Level
 		{
             switch (s.toLowerCase())
             {
-                case "level" -> parsing = 0;
-                case "items" -> parsing = 1;
-                case "shop" -> parsing = 2;
-                case "coins" -> parsing = 3;
-                case "tanks" -> parsing = 4;
-                case "properties" -> parsing = 5;
-                default ->
-                {
+                case "level":
+                    parsing = 0;
+                    break;
+                case "items":
+                    parsing = 1;
+                    break;
+                case "shop":
+                    parsing = 2;
+                    break;
+                case "coins":
+                    parsing = 3;
+                    break;
+                case "tanks":
+                    parsing = 4;
+                    break;
+                case "properties":
+                    parsing = 5;
+                    break;
+                default:
                     if (parsing == 0)
                     {
                         preset = s.substring(s.indexOf('{') + 1, s.indexOf('}')).split("\\|");
@@ -157,7 +168,7 @@ public class Level
                         else
                             this.startingCoins = Integer.parseInt(s);
                     }
-                }
+                    break;
             }
 		}
 
@@ -275,7 +286,7 @@ public class Level
             }
         }
 
-        currentCloudCount = (int) (Math.random() * this.sizeX / 10.2 + Math.random() * this.sizeY / 10.2);
+		currentCloudCount = (int) (Math.random() * this.sizeX / 10.2 + Math.random() * this.sizeY / 10.2);
 
         for (int i = 0; i < Level.currentCloudCount; i++)
             Game.clouds.add(new Cloud());
@@ -494,7 +505,7 @@ public class Level
 
 					if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks && Crusade.currentCrusade.retry && !Crusade.currentCrusade.livingTankIDs.contains(t.crusadeID))
 						tanksToRemove.add(t);
-					else if (!metadata.isEmpty())
+					else if (metadata.length() == 0)
 						t.setMetadata(metadata.toString());
 				}
 

@@ -154,16 +154,22 @@ public class Crusade
 			String s = levelArray.get(i);
             switch (s.toLowerCase())
             {
-                case "levels" -> parsing = 0;
-                case "items" -> parsing = 1;
-                case "properties" -> parsing = 2;
-                case "tanks" -> parsing = 3;
-                default ->
-                {
+                case "levels":
+                    parsing = 0;
+                    break;
+                case "items":
+                    parsing = 1;
+                    break;
+                case "properties":
+                    parsing = 2;
+                    break;
+                case "tanks":
+                    parsing = 3;
+                    break;
+                default:
                     switch (parsing)
                     {
-                        case 0 ->
-                        {
+                        case 0:
                             String lvl = levelArray.get(i);
                             String lvlName;
                             if (levelArray.get(i).contains("name="))
@@ -171,38 +177,38 @@ public class Crusade
                             else
                                 lvlName = ("Battle " + (levels.size() + 1));
                             this.levels.add(new CrusadeLevel(lvlName, lvl));
-                        }
-                        case 1 -> this.crusadeItems.add(Item.parseItem(null, s));
-                        case 2 ->
-                        {
-							if (propertiesLine == 1)
-							{
-								String[] z = s.split(",");
-								this.startingLives = Integer.parseInt(z[0]);
-								this.bonusLifeFrequency = Integer.parseInt(z[1]);
-								if (z.length > 2)
-									this.showNames = Boolean.parseBoolean(z[2]);
-								if (z.length > 3)
-									this.respawnTanks = Boolean.parseBoolean(z[3]);
-								if (z.length > 4 && (z[4].equals("true") || z[4].equals("false")))
-									this.disableFriendlyFire = Boolean.parseBoolean(z[4]);
-								else if (z.length > 4)
-									this.description = z[z.length - 1].replace(commaChar, ",");
-							}
+                            break;
+                        case 1:
+                            this.crusadeItems.add(Item.parseItem(null, s));
+                            break;
+                        case 2:
+                            if (propertiesLine == 1)
+                            {
+                                String[] z = s.split(",");
+                                this.startingLives = Integer.parseInt(z[0]);
+                                this.bonusLifeFrequency = Integer.parseInt(z[1]);
+                                if (z.length > 2)
+                                    this.showNames = Boolean.parseBoolean(z[2]);
+                                if (z.length > 3)
+                                    this.respawnTanks = Boolean.parseBoolean(z[3]);
+                                if (z.length > 4 && (z[4].equals("true") || z[4].equals("false")))
+                                    this.disableFriendlyFire = Boolean.parseBoolean(z[4]);
+                                else if (z.length > 4)
+                                    this.description = z[z.length - 1].replace(commaChar, ",");
+                            }
 
-							propertiesLine++;
-                        }
-                        case 3 ->
-                        {
+                            propertiesLine++;
+                            break;
+                        case 3:
                             int divider = s.indexOf("]") + 1;
                             String first = s.substring(0, divider);
                             String second = s.substring(divider);
                             TankAIControlled t = TankAIControlled.fromString(second);
                             tankOccurrences.put(t, first);
                             this.customTanks.add(t);
-                        }
+                            break;
                     }
-                }
+                    break;
             }
 
 			i++;

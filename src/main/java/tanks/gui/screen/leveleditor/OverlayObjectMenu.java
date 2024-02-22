@@ -457,8 +457,9 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
                     if (b.isDragging)
                         continue;
 
-                    if (editor.tankNum >= Game.registryTank.tankEntries.size() && !tankButtons.get(i).enabled && tankButtons.get(i) instanceof ButtonObject b1)
+                    if (editor.tankNum >= Game.registryTank.tankEntries.size() && !tankButtons.get(i).enabled && tankButtons.get(i) instanceof ButtonObject)
                     {
+                        ButtonObject b1 = (ButtonObject) tankButtons.get(i);
                         if (this.editTank.selected)
                             b1.tempDisableHover = true;
 

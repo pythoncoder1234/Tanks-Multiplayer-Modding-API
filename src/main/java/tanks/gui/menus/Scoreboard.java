@@ -7,6 +7,7 @@ import tanks.network.event.EventScoreboardUpdateScore;
 import tanks.tank.Tank;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A scoreboard that displays a list of players and their scores, as well as the name of the objective.<br>
@@ -194,7 +195,7 @@ public class Scoreboard extends FixedMenu
         if (!teamPoints.isEmpty())
         {
             List<Map.Entry<Team, Double>> sorted = teamPoints.entrySet().stream().limit(8)
-                    .sorted(teamComparator).toList();
+                    .sorted(teamComparator).collect(Collectors.toList());
 
             for (int i = 0; i < sorted.size(); i++)
             {
@@ -212,7 +213,7 @@ public class Scoreboard extends FixedMenu
         else
         {
             List<Map.Entry<Tank, Double>> sorted = tankPoints.entrySet().stream().limit(8)
-                    .sorted(tankComparator).toList();
+                    .sorted(tankComparator).collect(Collectors.toList());
 
             for (int i = 0; i < sorted.size(); i++)
             {

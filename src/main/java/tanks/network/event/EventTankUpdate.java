@@ -74,9 +74,10 @@ public class EventTankUpdate extends PersonalEvent implements IStackableEvent
 		{
 			t.damageRate = this.damageRate;
 
-			if (t instanceof TankRemote r)
+			if (t instanceof TankRemote)
 			{
-				double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
+                TankRemote r = (TankRemote) t;
+                double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
 
 				r.prevKnownPosX = r.posX;
 				r.prevKnownPosY = r.posY;

@@ -43,7 +43,8 @@ public class Team
 			return true;
 		if (a.team == null || b.team == null)
 			return false;
-		else return a.team == b.team;
+		else
+			return a.team.equals(b.team);
 	}
 	
 	public static double[] getObjectColor(double r, double g, double b, Movable m)
@@ -80,5 +81,17 @@ public class Team
 		col[1] = g;
 		col[2] = b;
 		return col;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof Team)
+        {
+            Team t = (Team) obj;
+            return this.name.equals(t.name);
+        }
+
+		return super.equals(obj);
 	}
 }

@@ -18,10 +18,7 @@ import tanks.network.event.EventTankUpdate;
 import tanks.network.event.EventTankUpdateHealth;
 import tanks.obstacle.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static tanks.tank.TankProperty.Category.*;
 
@@ -313,9 +310,10 @@ public abstract class Tank extends Movable implements ISolidObject
 			if (m.skipNextUpdate || m.destroy)
 				continue;
 
-			if (this != m && m instanceof Tank t && t.enableCollision && m.size > 0)
+			if (this != m && m instanceof Tank && ((Tank) m).enableCollision && m.size > 0)
 			{
-				double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
+                Tank t = (Tank) m;
+                double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
 
                 if (distSq <= Math.pow((this.size + t.size) / 2, 2) && Math.abs(this.posZ - t.posZ) < this.size + t.size)
                 {
@@ -434,8 +432,11 @@ public abstract class Tank extends Movable implements ISolidObject
         if (o == null)
             return false;
 
-		if (o instanceof IAvoidObject a)
+		if (o instanceof IAvoidObject)
+        {
+            IAvoidObject a = (IAvoidObject) o;
             IAvoidObject.avoidances.add(a);
+        }
 
         if ((o.isSurfaceTile || !o.enableStacking) && m.posZ > 25)
             return false;
@@ -534,8 +535,11 @@ public abstract class Tank extends Movable implements ISolidObject
 			this.emblemAngle = this.angle;
         }
 
-		if (this instanceof IAvoidObject a)
-			IAvoidObject.avoidances.add(a);
+		if (this instanceof IAvoidObject)
+        {
+            IAvoidObject a = (IAvoidObject) this;
+            IAvoidObject.avoidances.add(a);
+        }
 
         this.age += Panel.frameFrequency;
 
@@ -661,7 +665,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 		if (Game.effectsEnabled && prevInWater != inWater && inWater)
 		{
-			double mult = Game.getObstacle(posX, posY) instanceof ObstacleLiquid w ? w.getTileHeight() / 50 : 0;
+			double mult = Game.getObstacle(posX, posY) instanceof ObstacleLiquid ? ((ObstacleLiquid) Game.getObstacle(posX, posY)).getTileHeight() / 50 : 0;
 
 			for (double a = 0; a < 2 * Math.PI; a += Math.PI / Game.effectMultiplier * 0.05)
 			{
@@ -1107,8 +1111,11 @@ public abstract class Tank extends Movable implements ISolidObject
 
 	public void onDestroy()
 	{
-		if (this instanceof IAvoidObject a)
-			IAvoidObject.avoidances.remove(a);
+		if (this instanceof IAvoidObject)
+        {
+            IAvoidObject a = (IAvoidObject) this;
+            IAvoidObject.avoidances.remove(a);
+        }
 
 		if (this.explodeOnDestroy && this.age >= 250)
             new Explosion(this.posX, this.posY, Mine.mine_radius, 2, true, this).explode();
@@ -1380,11 +1387,63 @@ public abstract class Tank extends Movable implements ISolidObject
 		return new AutoZoom(1 / dist, Math.min(AutoZoom.maxPanDist, raw.panX), Math.min(AutoZoom.maxPanDist, raw.panY));
 	}
 
-	// java 16 :D
-	public record AutoZoom(double zoom, double panX, double panY)
-	{
-		public static double maxPanDist = Game.tile_size * 8;
-	}
+    // java 16 :D
+    public static final class AutoZoom
+    {
+        public static double maxPanDist = Game.tile_size * 8;
+        private final double zoom;
+        private final double panX;
+        private final double panY;
+
+        public AutoZoom(double zoom, double panX, double panY)
+        {
+            this.zoom = zoom;
+            this.panX = panX;
+            this.panY = panY;
+        }
+
+        public double zoom()
+        {
+            return zoom;
+        }
+
+        public double panX()
+        {
+            return panX;
+        }
+
+        public double panY()
+        {
+            return panY;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            AutoZoom that = (AutoZoom) obj;
+            return Double.doubleToLongBits(this.zoom) == Double.doubleToLongBits(that.zoom) &&
+                   Double.doubleToLongBits(this.panX) == Double.doubleToLongBits(that.panX) &&
+                   Double.doubleToLongBits(this.panY) == Double.doubleToLongBits(that.panY);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return Objects.hash(zoom, panX, panY);
+        }
+
+        @Override
+        public String toString()
+        {
+            return "AutoZoom[" +
+                   "zoom=" + zoom + ", " +
+                   "panX=" + panX + ", " +
+                   "panY=" + panY + ']';
+        }
+
+    }
 
 	public void setBufferCooldown(double value)
 	{

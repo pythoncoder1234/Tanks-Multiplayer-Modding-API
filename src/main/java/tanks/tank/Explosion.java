@@ -87,16 +87,18 @@ public class Explosion extends Movable
                 if (distSq < knockbackRadius * knockbackRadius)
                 {
                     double power = (1 - distSq / Math.pow(knockbackRadius, 2));
-                    if (m instanceof Bullet b)
+                    if (m instanceof Bullet)
                     {
+                        Bullet b = (Bullet) m;
                         double angle = this.getAngleInDirection(m.posX, m.posY);
                         m.addPolarMotion(angle, power * this.bulletKnockback * Math.pow(Bullet.bullet_size, 2) / Math.max(1, Math.pow(b.size, 2)));
                         b.collisionX = m.posX;
                         b.collisionY = m.posY;
                         b.addTrail();
                     }
-                    else if (m instanceof Tank t)
+                    else if (m instanceof Tank)
                     {
+                        Tank t = (Tank) m;
                         double angle = this.getAngleInDirection(m.posX, m.posY);
                         m.addPolarMotion(angle, power * this.tankKnockback * Math.pow(Game.tile_size, 2) / Math.max(1, Math.pow(m.size, 2)));
                         t.recoilSpeed = m.getSpeed();
@@ -188,7 +190,7 @@ public class Explosion extends Movable
 
     public static boolean withinExplosionRange(Movable m, double mineX, double mineY, double radius)
     {
-        double adjustedRadius = m instanceof Tank t ? radius - Game.tile_size * 0.95 + m.size * t.hitboxSize : radius;
+        double adjustedRadius = m instanceof Tank ? radius - Game.tile_size * 0.95 + m.size * ((Tank) m).hitboxSize : radius;
         if (Game.vanillaMode && ScreenPartyLobby.isClient)
             adjustedRadius = radius + m.size;
 

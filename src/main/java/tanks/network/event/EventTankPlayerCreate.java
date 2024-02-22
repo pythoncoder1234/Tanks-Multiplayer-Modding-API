@@ -117,10 +117,18 @@ public class EventTankPlayerCreate extends PersonalEvent
 
         switch (team)
         {
-            case "**" -> t.team = Game.playerTeam;
-            case "***" -> t.team = Game.playerTeamNoFF;
-            case "*" -> t.team = null;
-            default -> t.team = Game.currentLevel.teamsMap.get(team);
+            case "**":
+                t.team = Game.playerTeam;
+                break;
+            case "***":
+                t.team = Game.playerTeamNoFF;
+                break;
+            case "*":
+                t.team = null;
+                break;
+            default:
+                t.team = Game.currentLevel.teamsMap.get(team);
+                break;
         }
 
 		t.colorR = this.colorR;

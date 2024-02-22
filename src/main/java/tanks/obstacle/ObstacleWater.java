@@ -84,8 +84,9 @@ public class ObstacleWater extends ObstacleLiquid
     @Override
     public void onObjectEntryLocal(Movable m)
     {
-        if (Game.effectsEnabled && m instanceof Tank t && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.1 * Game.effectMultiplier)
+        if (Game.effectsEnabled && m instanceof Tank && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.1 * Game.effectMultiplier)
         {
+            Tank t = (Tank) m;
             double a = m.getPolarDirection();
             Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
             Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
@@ -152,8 +153,11 @@ public class ObstacleWater extends ObstacleLiquid
     @Override
     public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
-        if (Game.getSurfaceObstacle(posX, posY) instanceof ObstacleSand s)
+        if (Game.getSurfaceObstacle(posX, posY) instanceof ObstacleSand)
+        {
+            ObstacleSand s = (ObstacleSand) Game.getSurfaceObstacle(posX, posY);
             Drawing.drawing.setColor(s.colorR, s.colorG, s.colorB);
+        }
         else
             Drawing.drawing.setColor(r, g, b);
 

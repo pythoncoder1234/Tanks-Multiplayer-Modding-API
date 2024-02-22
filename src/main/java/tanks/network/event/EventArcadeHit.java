@@ -51,8 +51,9 @@ public class EventArcadeHit extends PersonalEvent
     @Override
     public void execute()
     {
-        if (clientID == null && Game.currentGame instanceof Arcade a)
+        if (clientID == null && Game.currentGame instanceof Arcade)
         {
+            Arcade a = (Arcade) Game.currentGame;
             a.chain = power;
             a.lastHit = a.age;
 

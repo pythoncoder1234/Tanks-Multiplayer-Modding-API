@@ -377,8 +377,11 @@ public class Bullet extends Movable implements IDrawableLightSource
 			m.vY += this.vY * Math.pow(this.size, 2) / Math.max(1, Math.pow(m.size, 2)) * frameDamageMultipler * frameDamageMultipler * kb * Panel.frameFrequency;
 		}
 
-		if (m instanceof Bullet b)
-			b.addTrail();
+		if (m instanceof Bullet)
+        {
+            Bullet b = (Bullet) m;
+            b.addTrail();
+        }
 	}
 
 	protected void pop()
@@ -639,9 +642,10 @@ public class Bullet extends Movable implements IDrawableLightSource
 		{
 			Movable o = Game.movables.get(i);
 
-			if (o instanceof Tank t && !o.destroy)
+			if (o instanceof Tank && !o.destroy)
 			{
-				double horizontalDist = Math.abs(this.posX - o.posX);
+                Tank t = (Tank) o;
+                double horizontalDist = Math.abs(this.posX - o.posX);
 				double verticalDist = Math.abs(this.posY - o.posY);
 
 				double bound = this.size / 2 + t.size * t.hitboxSize / 2;

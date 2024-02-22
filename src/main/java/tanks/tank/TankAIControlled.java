@@ -859,11 +859,17 @@ public class TankAIControlled extends Tank
 		{
 			for (Movable m2 : Game.movables)
 			{
-				if (mine && m2 instanceof TankAIControlled t && m2 != this && Team.isAllied(this, t) && t.targetEnemy == m && this.random.nextDouble() < 0.2)
-					return false;
+				if (mine && m2 instanceof TankAIControlled && m2 != this && Team.isAllied(this, (TankAIControlled) m2) && ((TankAIControlled) m2).targetEnemy == m && this.random.nextDouble() < 0.2)
+                {
+                    TankAIControlled t = (TankAIControlled) m2;
+                    return false;
+                }
 
-				if (Team.isAllied(m2, this) && m2 instanceof Tank t && !t.resistExplosions && this.team != null && this.team.friendlyFire && Math.pow(m2.posX - x, 2) + Math.pow(m2.posY - y, 2) <= size * size)
-					return false;
+				if (Team.isAllied(m2, this) && m2 instanceof Tank && !((Tank) m2).resistExplosions && this.team != null && this.team.friendlyFire && Math.pow(m2.posX - x, 2) + Math.pow(m2.posY - y, 2) <= size * size)
+                {
+                    Tank t = (Tank) m2;
+                    return false;
+                }
 			}
 		}
 
@@ -923,8 +929,8 @@ public class TankAIControlled extends Tank
 				continue;
 
 			boolean correctTeam = (this.isSupportTank() && Team.isAllied(this, m)) || (!this.isSupportTank() && !Team.isAllied(this, m));
-			if ((m instanceof Tank t && correctTeam && !t.hidden && t.targetable && m != this &&
-					!(BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) && t.health - t.baseHealth >= 1)) ||
+			if ((m instanceof Tank && correctTeam && !((Tank) m).hidden && ((Tank) m).targetable && m != this &&
+					!(BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) && ((Tank) m).health - ((Tank) m).baseHealth >= 1)) ||
 					(m instanceof Mine && !BulletAir.class.isAssignableFrom(this.bullet.bulletClass) && !this.isSupportTank() && isTargetSafe(m.posX, m.posY, m)))
 			{
 				boolean reachable = new Ray(this.posX, this.posY, this.getAngleInDirection(m.posX, m.posY), this.bullet.bounces, this).getTarget() == m;
@@ -1493,9 +1499,10 @@ public class TankAIControlled extends Tank
 
 		for (int i = 0; i < Game.movables.size(); i++)
 		{
-			if (Game.movables.get(i) instanceof Bullet b && !b.destroy)
+			if (Game.movables.get(i) instanceof Bullet && !((Bullet) Game.movables.get(i)).destroy)
 			{
-				double dist = Movable.distanceBetween(this, b);
+                Bullet b = (Bullet) Game.movables.get(i);
+                double dist = Movable.distanceBetween(this, b);
 
 				double distBox = this.enableMovement ? 10 : 20;
 				if (!(b.tank == this && b.age < 20) && !(this.team != null && Team.isAllied(b, this) && !this.team.friendlyFire)
@@ -2226,11 +2233,11 @@ public class TankAIControlled extends Tank
         if (this.transformMimic)
             return m instanceof Tank && !(m.getClass().equals(this.getClass())) && m.size == this.size;
         else if (this.isSupportTank())
-            return m instanceof Tank t && Team.isAllied(m, this) && m != this
-                    && (t.health - t.baseHealth < 1 || !BulletHealing.class.isAssignableFrom(this.bullet.bulletClass))
+            return m instanceof Tank && Team.isAllied(m, this) && m != this
+                    && (((Tank) m).health - ((Tank) m).baseHealth < 1 || !BulletHealing.class.isAssignableFrom(this.bullet.bulletClass))
                     && !(m.getClass().equals(this.getClass()));
         else
-            return m instanceof Tank t && !Team.isAllied(m, this) && !t.hidden && t.targetable
+            return m instanceof Tank && !Team.isAllied(m, this) && !((Tank) m).hidden && ((Tank) m).targetable
                     && m.posX >= 0 && m.posX / Game.tile_size < Game.currentSizeX
                     && m.posY >= 0 && m.posY / Game.tile_size < Game.currentSizeY;
     }
@@ -2317,9 +2324,10 @@ public class TankAIControlled extends Tank
 				while (i < Game.movables.size())
 				{
 					Movable m = Game.movables.get(i);
-					if (m instanceof Tank t && Team.isAllied(this, m) && m != this)
+					if (m instanceof Tank && Team.isAllied(this, m) && m != this)
 					{
-						if (Math.pow(t.posX - this.posX, 2) + Math.pow(t.posY - this.posY, 2) <= Math.pow(200, 2))
+                        Tank t = (Tank) m;
+                        if (Math.pow(t.posX - this.posX, 2) + Math.pow(t.posY - this.posY, 2) <= Math.pow(200, 2))
 						{
 							layMine = false;
 							break;
@@ -2987,9 +2995,10 @@ public class TankAIControlled extends Tank
 
 			for (Field f : solved.referenceFields)
 			{
-				if (f.get(solved) instanceof TankAIControlled t1 && t1.isUnsolvedReference)
+				if (f.get(solved) instanceof TankAIControlled && ((TankAIControlled) f.get(solved)).isUnsolvedReference)
 				{
-					unsolved = true;
+                    TankAIControlled t1 = (TankAIControlled) f.get(solved);
+                    unsolved = true;
 					solved.isUnsolvedReference = true;
 					putAdd(newRefs, t1.name, t1);
 				}
@@ -3019,7 +3028,6 @@ public class TankAIControlled extends Tank
 
 	public static TankAIControlled fromString(String s, String[] remainder, boolean saveReferences)
 	{
-		s = s.strip();
 		String original = s;
 		String[] r = new String[1];
 		TankAIControlled t = new TankAIControlled();

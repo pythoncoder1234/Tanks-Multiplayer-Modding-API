@@ -14,10 +14,16 @@ public abstract class ScreenOptionsOverlay extends Screen implements IHiddenChat
 
     public ScreenOptionsOverlay()
     {
-        if (Game.screen instanceof ScreenGame g)
+        if (Game.screen instanceof ScreenGame)
+        {
+            ScreenGame g = (ScreenGame) Game.screen;
             game = g;
-        else if (Game.screen instanceof ScreenOptionsOverlay o)
+        }
+        else if (Game.screen instanceof ScreenOptionsOverlay)
+        {
+            ScreenOptionsOverlay o = (ScreenOptionsOverlay) Game.screen;
             game = o.game;
+        }
 
         if (game != null)
         {

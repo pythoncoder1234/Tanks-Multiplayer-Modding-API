@@ -55,7 +55,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
         if (this.trigger != Game.dummyTank)
             return;
 
-        if ((m instanceof Bullet b && b.explodeMines) || m instanceof Tank)
+        if ((m instanceof Bullet && ((Bullet) m).explodeMines) || m instanceof Tank)
         {
             if (m instanceof Bullet)
             {

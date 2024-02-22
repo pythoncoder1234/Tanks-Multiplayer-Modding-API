@@ -2944,10 +2944,16 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 	public static ScreenGame getInstance()
 	{
-		if (Game.screen instanceof ScreenGame g)
-			return g;
-		else if (Game.screen instanceof ScreenOptionsOverlay o)
-			return o.game;
+		if (Game.screen instanceof ScreenGame)
+        {
+            ScreenGame g = (ScreenGame) Game.screen;
+            return g;
+        }
+        else if (Game.screen instanceof ScreenOptionsOverlay)
+        {
+            ScreenOptionsOverlay o = (ScreenOptionsOverlay) Game.screen;
+            return o.game;
+        }
 		return null;
 	}
 }

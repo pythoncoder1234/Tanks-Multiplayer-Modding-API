@@ -1134,7 +1134,7 @@ public class Game
 
 		Level.currentLightIntensity = 1.0;
 		Level.currentShadowIntensity = 0.75;
-	}
+    }
 
 	public static Obstacle getObstacle(double posX, double posY)
 	{

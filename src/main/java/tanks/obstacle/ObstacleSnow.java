@@ -65,7 +65,7 @@ public class ObstacleSnow extends Obstacle
 
             int amt = 5;
             int lastDepth = (int) Math.ceil(this.depth * amt);
-            this.depth -= Panel.frameFrequency * 0.005 * (m instanceof Bullet b && b.burnsBushes ? 5 : 1);
+            this.depth -= Panel.frameFrequency * 0.005 * (m instanceof Bullet && ((Bullet) m).burnsBushes ? 5 : 1);
             Game.redrawObstacles.add(this);
 
             if (this.depth <= 0)

@@ -31,8 +31,9 @@ public class EventTankTransformPreset extends PersonalEvent
     {
         Tank t = Tank.idMap.get(tank);
 
-        if (this.clientID == null && t instanceof TankRemote t1 && t1.tank instanceof TankAIControlled && (!revert || t1.parentTransformations.size() > 0))
+        if (this.clientID == null && t instanceof TankRemote && ((TankRemote) t).tank instanceof TankAIControlled && (!revert || ((TankRemote) t).parentTransformations.size() > 0))
         {
+            TankRemote t1 = (TankRemote) t;
             TankAIControlled target;
 
             if (revert)

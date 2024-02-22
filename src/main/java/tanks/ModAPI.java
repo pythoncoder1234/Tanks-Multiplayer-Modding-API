@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ModAPI
 {
-    public static String version = "Mod API v1.2.g";
+    public static String version = "Mod API v1.2.1";
     public static boolean sendEvents = true;
 
     // Directions in radians in terms of tank (the model is rotated 90 degrees)

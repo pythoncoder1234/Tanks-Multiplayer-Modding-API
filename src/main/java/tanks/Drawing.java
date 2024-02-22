@@ -1702,7 +1702,7 @@ public class Drawing
 			first = false;
 		}
 
-		if (!l.isEmpty())
+		if (l.length() == 0)
 			lines.add(l.toString());
 
 		return lines;

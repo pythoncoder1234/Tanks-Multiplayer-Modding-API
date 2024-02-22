@@ -283,20 +283,35 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
                             String s = f.nextLine();
                             switch (s)
                             {
-                                case "level" -> parsing = 0;
-                                case "items" -> parsing = 1;
-                                case "shop" -> parsing = 2;
-                                case "coins" -> parsing = 3;
-                                case "tanks" -> parsing = 4;
-                                case "properties" -> parsing = 5;
-                                default ->
-                                {
+                                case "level":
+                                    parsing = 0;
+                                    break;
+                                case "items":
+                                    parsing = 1;
+                                    break;
+                                case "shop":
+                                    parsing = 2;
+                                    break;
+                                case "coins":
+                                    parsing = 3;
+                                    break;
+                                case "tanks":
+                                    parsing = 4;
+                                    break;
+                                case "properties":
+                                    parsing = 5;
+                                    break;
+                                default:
                                     switch (parsing)
                                     {
-                                        case 0 -> l.levelString = s;
-                                        case 4 -> l.tanks.add(TankAIControlled.fromString(s));
+                                        case 0:
+                                            l.levelString = s;
+                                            break;
+                                        case 4:
+                                            l.tanks.add(TankAIControlled.fromString(s));
+                                            break;
                                     }
-                                }
+                                    break;
                             }
                         }
 

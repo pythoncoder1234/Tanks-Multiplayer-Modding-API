@@ -173,9 +173,10 @@ public class Ray
 
 		for (Movable m: Game.movables)
 		{
-			if (m instanceof Tank t && m != this.tank)
+			if (m instanceof Tank && m != this.tank)
 			{
-				if (this.posX + this.size / 2 >= t.posX - t.size / 2 &&
+                Tank t = (Tank) m;
+                if (this.posX + this.size / 2 >= t.posX - t.size / 2 &&
 						this.posX - this.size / 2 <= t.posX + t.size / 2 &&
 						this.posY + this.size / 2 >= t.posY - t.size / 2 &&
 						this.posY - this.size / 2 <= t.posY + t.size / 2)
@@ -203,8 +204,11 @@ public class Ray
 						size *= tankHitSizeMul;
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+					if (f.owner instanceof Obstacle && !((Obstacle) f.owner).bouncy)
+                    {
+                        Obstacle o = (Obstacle) f.owner;
+                        passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+                    }
 
 					if (ignoreTanks && f.owner instanceof Tank)
 						passThrough = true;
@@ -236,8 +240,11 @@ public class Ray
 
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+					if (f.owner instanceof Obstacle && !((Obstacle) f.owner).bouncy)
+                    {
+                        Obstacle o = (Obstacle) f.owner;
+                        passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+                    }
 
 					if (f.startX > this.posX - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;
@@ -267,8 +274,11 @@ public class Ray
 						size *= tankHitSizeMul;
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+					if (f.owner instanceof Obstacle && !((Obstacle) f.owner).bouncy)
+                    {
+                        Obstacle o = (Obstacle) f.owner;
+                        passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+                    }
 
 					if (f.startY < this.posY + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;
@@ -304,8 +314,11 @@ public class Ray
 						size *= tankHitSizeMul;
 
 					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+					if (f.owner instanceof Obstacle && !((Obstacle) f.owner).bouncy)
+                    {
+                        Obstacle o = (Obstacle) f.owner;
+                        passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+                    }
 
 					if (f.startY > this.posY - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
 						continue;

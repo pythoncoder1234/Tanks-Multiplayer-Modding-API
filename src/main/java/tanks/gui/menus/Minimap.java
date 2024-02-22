@@ -133,8 +133,9 @@ public class Minimap extends FixedMenu
 
             if ((posX < x && x < posX + size) && (posY + 30 < y && y < posY + (size - 30)))
             {
-                if (m instanceof Tank t && !m.destroy)
+                if (m instanceof Tank && !m.destroy)
                 {
+                    Tank t = (Tank) m;
                     if (m.team != null && m.team.enableColor)
                         Drawing.drawing.setColor(m.team.teamColorR, m.team.teamColorG, m.team.teamColorB, colA);
                     else

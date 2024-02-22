@@ -54,7 +54,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	public double mouseY;
 
 	public static Model sunglassesModel;
-	public static boolean hi = true;
+	public static boolean hi = false;
 
 	public TankPlayer(double x, double y, double angle)
     {
@@ -437,18 +437,20 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			if (h.enabledItemBar && h.itemBar.selected >= 0)
 			{
 				Item i = h.itemBar.slots[h.itemBar.selected];
-				if (i instanceof ItemBullet b)
+				if (i instanceof ItemBullet)
 				{
-					r.bounces = b.bounces;
+                    ItemBullet b = (ItemBullet) i;
+                    r.bounces = b.bounces;
 					r.size = b.size;
 					range = b.getRange();
 
 					if (b.bulletClass.equals(BulletElectric.class))
 						r.bounces = 0;
 				}
-				else if (i instanceof ItemRemote ir)
+				else if (i instanceof ItemRemote)
 				{
-					r.size = ir.size;
+                    ItemRemote ir = (ItemRemote) i;
+                    r.size = ir.size;
 					if (ir.bounces >= 0)
 						r.bounces = ir.bounces;
 

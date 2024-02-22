@@ -31,8 +31,9 @@ public class EventBulletDestroyed extends PersonalEvent
         if (bullet == null)
             return;
 
-        if (bullet instanceof BulletInstant i)
+        if (bullet instanceof BulletInstant)
         {
+            BulletInstant i = (BulletInstant) bullet;
             i.remoteShoot();
         }
         else

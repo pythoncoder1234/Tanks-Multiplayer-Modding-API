@@ -92,8 +92,9 @@ public abstract class Minigame
                     {
                         for (FixedMenu m : ModAPI.fixedMenus)
                         {
-                            if (m instanceof Scoreboard s)
+                            if (m instanceof Scoreboard)
                             {
+                                Scoreboard s = (Scoreboard) m;
                                 if (s.objectiveType.equals(Scoreboard.objectiveTypes.kills))
                                     s.addTankScore(dt.attacker, 1);
                                 else if (s.objectiveType.equals(Scoreboard.objectiveTypes.deaths))

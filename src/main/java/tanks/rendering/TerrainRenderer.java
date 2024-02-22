@@ -563,10 +563,16 @@ public class TerrainRenderer
     public float getShrubHeight()
     {
         float shrubMod = 0.25f;
-        if (Game.screen instanceof ScreenGame g)
+        if (Game.screen instanceof ScreenGame)
+        {
+            ScreenGame g = (ScreenGame) Game.screen;
             shrubMod = (float) g.shrubberyScale;
-        else if (Game.screen instanceof ScreenOptionsOverlay o && o.game != null)
+        }
+        else if (Game.screen instanceof ScreenOptionsOverlay && ((ScreenOptionsOverlay) Game.screen).game != null)
+        {
+            ScreenOptionsOverlay o = (ScreenOptionsOverlay) Game.screen;
             shrubMod = (float) o.game.shrubberyScale;
+        }
 
         return shrubMod;
     }

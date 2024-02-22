@@ -200,9 +200,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 			INetworkEvent prev = null;
 			for (INetworkEvent e : Game.eventsOut)
 			{
-				if (e instanceof IStackableEvent s && s.isStackable())
+				if (e instanceof IStackableEvent && ((IStackableEvent) e).isStackable())
 				{
-					this.stackedEvents.put(IStackableEvent.f(NetworkEventMap.get(e.getClass()) + IStackableEvent.f(s.getIdentifier())), s);
+                    IStackableEvent s = (IStackableEvent) e;
+                    this.stackedEvents.put(IStackableEvent.f(NetworkEventMap.get(e.getClass()) + IStackableEvent.f(s.getIdentifier())), s);
 				}
 				else
 				{

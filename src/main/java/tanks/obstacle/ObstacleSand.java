@@ -77,8 +77,11 @@ public class ObstacleSand extends Obstacle
         {
             double x = posX + Game.dirX[i] * Game.tile_size;
             double y = posY + Game.dirY[i] * Game.tile_size;
-            if (Game.getObstacle(x, y) instanceof ObstacleWater && Game.getSurfaceObstacle(x, y) instanceof ObstacleSand s1)
+            if (Game.getObstacle(x, y) instanceof ObstacleWater && Game.getSurfaceObstacle(x, y) instanceof ObstacleSand)
+            {
+                ObstacleSand s1 = (ObstacleSand) Game.getSurfaceObstacle(x, y);
                 s = s1;
+            }
         }
 
         if (s == null)
@@ -107,8 +110,9 @@ public class ObstacleSand extends Obstacle
     @Override
     public void onObjectEntryLocal(Movable m)
     {
-        if (Game.effectsEnabled && m instanceof Tank t && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.3 * Game.effectMultiplier)
+        if (Game.effectsEnabled && m instanceof Tank && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.3 * Game.effectMultiplier)
         {
+            Tank t = (Tank) m;
             double a = m.getPolarDirection();
             Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
             Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
