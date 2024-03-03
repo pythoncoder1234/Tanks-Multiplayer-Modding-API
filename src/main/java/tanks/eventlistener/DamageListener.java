@@ -67,16 +67,21 @@ public class DamageListener extends EventListener
         add(e, false);
     }
 
-    public static class DamagedTank
+    public record DamagedTank(Tank target, Tank attacker, Movable source)
     {
-        public Tank target, attacker;
-        public Movable source;
-
-        DamagedTank(Tank target, Tank attacker, Movable source)
+        public Tank target()
         {
-            this.target = target;
-            this.attacker = attacker;
-            this.source = source;
+            return target;
+        }
+
+        public Tank attacker()
+        {
+            return attacker;
+        }
+
+        public Movable source()
+        {
+            return source;
         }
 
         @Override

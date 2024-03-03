@@ -356,14 +356,14 @@ public class Level
 				if (obs.length >= 3)
 					name = obs[2];
 
-				String meta = null;
+				StringBuilder meta = null;
 
 				if (obs.length >= 4)
                 {
-                    meta = obs[3];
+                    meta = new StringBuilder(obs[3]);
 
                     for (int j = 4; j < obs.length; j++)
-                        meta += "-" + obs[j];
+                        meta.append("-").append(obs[j]);
                 }
 
 				for (double x = startX; x <= endX; x++)
@@ -374,7 +374,7 @@ public class Level
 						o.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 
 						if (meta != null)
-							o.setMetadata(meta);
+							o.setMetadata(meta.toString());
 
 						Game.obstacles.add(o);
 					}

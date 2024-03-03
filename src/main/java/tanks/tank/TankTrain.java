@@ -215,9 +215,7 @@ public class TankTrain extends Tank implements IAvoidObject
         if (collided == 0)
         {
             double relative = Math.sqrt(Math.pow((t.vX-this.vX), 2) + Math.pow((t.vY-this.vY), 2));
-
-            if (!t.damage(relative / this.getSpeed() * damageOnCollide, this))
-                Drawing.drawing.playGlobalSound("damage.ogg", 1f);
+            t.damage(relative / this.getSpeed() * damageOnCollide, this);
         }
 
         collided = 5;

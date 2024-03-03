@@ -1,11 +1,14 @@
 package tanks;
 
+import tanks.bullet.Bullet;
 import tanks.eventlistener.DamageListener;
 import tanks.gui.menus.FixedMenu;
 import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenInterlevel;
+import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.network.EventMinigameStart;
+import tanks.obstacle.ObstacleWater;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.tank.TankPlayerRemote;
@@ -95,11 +98,14 @@ public abstract class Minigame
                             if (m instanceof Scoreboard s)
                             {
                                 if (s.objectiveType.equals(Scoreboard.objectiveTypes.kills))
-                                    s.addTankScore(dt.attacker, 1);
+                                    s.addTankScore(dt.attacker(), 1);
                                 else if (s.objectiveType.equals(Scoreboard.objectiveTypes.deaths))
-                                    s.addTankScore(dt.target, 1);
+                                    s.addTankScore(dt.target(), 1);
                             }
                         }
+
+                        if (enableKillMessages && ScreenPartyHost.isServer)
+                            ModAPI.sendChatMessage(generateKillMessage(dt.target(), dt.attacker(), dt.source()));
                     }
 
                     this.onKill(tanks);
@@ -146,14 +152,17 @@ public abstract class Minigame
     public void onKill(HashSet<DamageListener.DamagedTank> tanks)
     {
         for (DamageListener.DamagedTank t : tanks)
-            onKill(t.attacker, t.target);
+            onKill(t.attacker(), t.target());
     }
 
-    public String generateKillMessage(Tank target, Tank attacker, boolean isBullet)
+    public String generateKillMessage(Tank target, Tank attacker, GameObject source)
     {
+        if (source instanceof ObstacleWater)
+            return generateDrownMessage(target);
+
         StringBuilder message = new StringBuilder(getName(target));
 
-        message.append("\u00a7000000000255 was ").append(isBullet ? "shot" : "blown up").append(" by ");
+        message.append("\u00a7000000000255 was ").append(source instanceof Bullet ? "shot" : "blown up").append(" by ");
 
         if (attacker == target)
             message.append("themselves :/");
@@ -170,6 +179,9 @@ public abstract class Minigame
 
     public static String getName(Tank t)
     {
+        if (t == null)
+            return "an unknown tank";
+
         StringBuilder message = new StringBuilder();
 
         String killedR;
@@ -192,11 +204,13 @@ public abstract class Minigame
         message.append("\u00a7").append(killedR).append(killedG).append(killedB).append("255");
 
         if (t instanceof TankPlayer)
+        {
             message.append(((TankPlayer) t).player.username);
-
+        }
         else if (t instanceof TankPlayerRemote)
+        {
             message.append(((TankPlayerRemote) t).player.username);
-
+        }
         else
         {
             String name = t.getClass().getSimpleName();

@@ -11,6 +11,7 @@ import tanks.network.event.EventPlaySound;
 import tanks.obstacle.Obstacle;
 import tanks.rendering.TerrainRenderer;
 import tanks.rendering.TrackRenderer;
+import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 import tanks.translation.Translation;
 
@@ -1274,6 +1275,44 @@ public class Drawing
 		}
 	}
 
+	public void playGameSound(String sound, Movable m, double radius, float pitch)
+	{
+		playGameSound(sound, m.posX, m.posY, radius, pitch);
+	}
+
+	public void playGameSound(String sound, Movable m, double radius, float pitch, float volume)
+	{
+		playGameSound(sound, m.posX, m.posY, radius, pitch, volume);
+	}
+
+	public void playGameSound(String sound, double x, double y, double radius, float pitch)
+	{
+		playGameSound(sound, x, y, radius, pitch, 1f);
+	}
+
+	public void playGameSound(String sound, double x, double y, double radius, float pitch, float volume)
+	{
+		float newVolume = volume;
+		Tank t = ScreenGame.focusedTank();
+		if (t != null)
+		{
+			double dist = Movable.distanceBetween(t.posX, t.posY, x, y);
+			double fade = 0.55;
+
+			if (dist > radius * fade)
+			{
+				double relativeDist = dist - radius * fade;
+				double relativeRadius = radius * (1-fade);
+				newVolume *= (float) ((-(relativeDist * relativeDist) / (relativeRadius * relativeRadius) + 1) * volume);
+			}
+
+			if (newVolume <= 0)
+				return;
+		}
+
+		playSound(sound, pitch, newVolume);
+	}
+
 	public void playGlobalSound(String sound, float pitch)
 	{
 		this.playSound(sound, pitch);
@@ -1669,7 +1708,13 @@ public class Drawing
 				continue;
 			}
 
-			if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, l + " " + s) / Drawing.drawing.interfaceScale <= max)
+			if (s.endsWith("\n"))
+			{
+				l.append(s.substring(0, s.length() - 1));
+				lines.add(l.toString());
+				l = new StringBuilder();
+			}
+			else if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, l + " " + s) / Drawing.drawing.interfaceScale <= max)
 			{
 				if (!first)
 					l.append(" ");

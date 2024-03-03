@@ -1,7 +1,7 @@
 Older Changelogs
 ---
 
-**Mod API 1.2.f**
+**Mod API 1.2.0**
 - Double-click the editor tool's button or keybind to open its submenu, if it has one.
 - Using +/- on a selection changes it for all objects in the selection
 - Magic wand select

@@ -48,7 +48,7 @@ public class BulletHealing extends BulletInstant
 				freq = 1;
 
 			if (!hitTank)
-				Drawing.drawing.playGlobalSound("heal1.ogg", 1f, freq / 2);
+				Drawing.drawing.playGameSound("heal1.ogg", this, soundRange, 1f, freq / 2);
 		}
 
 		super.update();
@@ -74,7 +74,7 @@ public class BulletHealing extends BulletInstant
 
 		t.checkHit(this.tank, this);
 
-		Drawing.drawing.playGlobalSound("heal2.ogg", (float) ((Math.min(t.health, t.baseHealth + 1) / (t.baseHealth + 1) / 2) + 1f) / 2, freq / 2);
+		Drawing.drawing.playGameSound("heal2.ogg", this, soundRange, (float) ((Math.min(t.health, t.baseHealth + 1) / (t.baseHealth + 1) / 2) + 1f) / 2, freq / 2);
 
 		Game.eventsOut.add(new EventTankUpdateHealth(t, this));
 

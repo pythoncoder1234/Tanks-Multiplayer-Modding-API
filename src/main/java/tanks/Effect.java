@@ -305,7 +305,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
             double size = radius * 2;
             double opacity = 100 - this.age * 5;
 
-            if (Game.vanillaMode && ScreenPartyLobby.isClient)
+            if (Game.vanillaMode)
                 size += Game.tile_size;
 
             drawing.setColor(255, 0, 0, opacity, 1);

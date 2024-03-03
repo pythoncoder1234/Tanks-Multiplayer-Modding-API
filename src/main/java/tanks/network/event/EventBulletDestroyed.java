@@ -7,6 +7,7 @@ import tanks.bullet.BulletInstant;
 public class EventBulletDestroyed extends PersonalEvent
 {
     public Bullet bullet;
+    public int bulletID;
     public double posX;
     public double posY;
 
@@ -27,6 +28,8 @@ public class EventBulletDestroyed extends PersonalEvent
     {
         if (this.clientID != null)
             return;
+
+        this.bullet = Bullet.idMap.get(bulletID);
 
         if (bullet == null)
             return;
@@ -61,7 +64,7 @@ public class EventBulletDestroyed extends PersonalEvent
     @Override
     public void read(ByteBuf b)
     {
-        this.bullet = Bullet.idMap.get(b.readInt());
+        this.bulletID = b.readInt();
         this.posX = b.readDouble();
         this.posY = b.readDouble();
     }

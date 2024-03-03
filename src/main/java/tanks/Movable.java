@@ -6,6 +6,8 @@ import tanks.gui.screen.ScreenPartyHost;
 import tanks.network.event.EventStatusEffectBegin;
 import tanks.network.event.EventStatusEffectDeteriorate;
 import tanks.network.event.EventStatusEffectEnd;
+import tanks.obstacle.Face;
+import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 import tanks.tank.NameTag;
 import tanks.tank.Tank;
@@ -17,7 +19,7 @@ import java.util.HashSet;
 
 import static tanks.tank.TankProperty.Category.appearanceGeneral;
 
-public abstract class Movable extends GameObject implements IDrawableForInterface
+public abstract class Movable extends GameObject implements IDrawableForInterface, ISolidObject
 {
     public double posX;
     public double posY;
@@ -73,6 +75,9 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 
 	protected ArrayList<StatusEffect> removeStatusEffects = new ArrayList<>();
 	public boolean drawTransparent = false;
+
+	public Face[] horizontalFaces;
+	public Face[] verticalFaces;
 
 	public Movable(double x, double y)
 	{
@@ -507,6 +512,46 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		return best;
 	}
 
+	@Override
+	public Face[] getHorizontalFaces()
+	{
+		double s = this.size / 2;
+
+		if (this.horizontalFaces == null)
+		{
+			this.horizontalFaces = new Face[2];
+			this.horizontalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX + s, this.posY - s, true, true, true, true);
+			this.horizontalFaces[1] = new Face(this, this.posX - s, this.posY + s, this.posX + s, this.posY + s, true, false,true, true);
+		}
+		else
+		{
+			this.horizontalFaces[0].update(this.posX - s, this.posY - s, this.posX + s, this.posY - s);
+			this.horizontalFaces[1].update(this.posX - s, this.posY + s, this.posX + s, this.posY + s);
+		}
+
+		return this.horizontalFaces;
+	}
+
+	@Override
+	public Face[] getVerticalFaces()
+	{
+		double s = this.size / 2;
+
+		if (this.verticalFaces == null)
+		{
+			this.verticalFaces = new Face[2];
+			this.verticalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX - s, this.posY + s, false, true, true, true);
+			this.verticalFaces[1] = new Face(this, this.posX + s, this.posY - s, this.posX + s, this.posY + s, false, false, true, true);
+		}
+		else
+		{
+			this.verticalFaces[0].update(this.posX - s, this.posY - s, this.posX - s, this.posY + s);
+			this.verticalFaces[1].update(this.posX + s, this.posY - s, this.posX + s, this.posY + s);
+		}
+
+		return this.verticalFaces;
+	}
+
 
 	public static double[] getLocationInDirection(double angle, double distance)
 	{
@@ -531,14 +576,34 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		this.drawAt(x, y);
 	}
 
+	public static double distanceBetween(double x1, double y1, double x2, double y2)
+	{
+		return Math.sqrt(squaredDistanceBetween(x1, y1, x2, y2));
+	}
+
+	public static double squaredDistanceBetween(double x1, double y1, double x2, double y2)
+	{
+		return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
+	}
+
+	public static double squaredDistanceBetween(final Movable a, final Movable b)
+	{
+		return squaredDistanceBetween(a.posX, a.posY, b.posX, b.posY);
+	}
+
 	public static double distanceBetween(final Movable a, final Movable b)
 	{
-		return Math.sqrt((a.posX-b.posX)*(a.posX-b.posX) + (a.posY-b.posY)*(a.posY-b.posY));
+		return distanceBetween(a.posX, a.posY, b.posX, b.posY);
 	}
 	
 	public static double distanceBetween(final Obstacle a, final Movable b)
 	{
-		return Math.sqrt((a.posX-b.posX)*(a.posX-b.posX) + (a.posY-b.posY)*(a.posY-b.posY));
+		return distanceBetween(a.posX, a.posY, b.posX, b.posY);
+	}
+
+	public static double distanceBetween(Obstacle a, Obstacle b)
+	{
+		return distanceBetween(a.posX, a.posY, b.posX, b.posY);
 	}
 
 	public static double angleBetween(double a, double b)

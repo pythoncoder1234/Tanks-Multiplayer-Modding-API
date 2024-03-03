@@ -165,9 +165,9 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
     }
 
     @Override
-    public boolean damage(double amount, GameObject source)
+    public boolean damage(double amount, GameObject source, boolean playDamageSound)
     {
-        return super.damage(amount * 0.25, source);
+        return super.damage(amount * 0.25, source, playDamageSound);
     }
 
     @Override

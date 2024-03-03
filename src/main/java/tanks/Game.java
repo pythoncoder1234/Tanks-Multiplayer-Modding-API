@@ -125,6 +125,7 @@ public class Game
     public static boolean showTankIDs = false;
 	public static boolean showTankHitboxes = false;
 	public static boolean showObstacleHitboxes = false;
+	public static boolean showUPFMeter = false;
 	public static boolean showPathfinding = false;
 	public static boolean allowAllNumbers = false;
 	public static final boolean cinematic = false;
@@ -1073,9 +1074,7 @@ public class Game
 		try
 		{
 			if (Crusade.currentCrusade != null && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient)
-			{
-				Crusade.currentCrusade.crusadePlayers.get(Game.player).saveCrusade();
-			}
+                Crusade.currentCrusade.crusadePlayers.get(Game.player).saveCrusade();
 		}
 		catch (Exception e1)
 		{

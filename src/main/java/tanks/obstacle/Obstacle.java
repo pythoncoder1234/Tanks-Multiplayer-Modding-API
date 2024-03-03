@@ -9,11 +9,13 @@ import tanks.editor.selector.RotationSelector;
 import tanks.editor.selector.StackHeightSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
+import tanks.network.event.EventObstacleDestroy;
 import tanks.rendering.ShaderGroundObstacle;
 import tanks.rendering.ShaderObstacle;
+import tanks.tank.Explosion;
 import tanks.tank.TankAIControlled;
 
-public class Obstacle extends GameObject implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IBatchRenderableObject
+public class Obstacle extends GameObject implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IBatchRenderableObject, IExplodable
 {
 	public static final int default_max_height = 8;
 
@@ -265,6 +267,16 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	}
 
 	@Override
+	public void onExploded(Explosion explosion)
+	{
+		if (!this.destructible || removed) return;
+
+		this.onDestroy(explosion);
+		this.playDestroyAnimation(explosion.posX, explosion.posY, explosion.radius);
+		Game.eventsOut.add(new EventObstacleDestroy(this.posX, this.posY, this.name, explosion.posX, explosion.posY, explosion.radius + Game.tile_size / 2));
+	}
+
+    @Override
 	public boolean isGlowEnabled()
 	{
 		return false;
@@ -365,6 +377,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public void postOverride()
 	{
+		if (this.startHeight > 0)
+			return;
+
 		int x = (int) (this.posX / Game.tile_size);
 		int y = (int) (this.posY / Game.tile_size);
 
@@ -413,8 +428,12 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			sel.setMetadata(metadata[i]);
 		}
 
-		if (metadata.length - this.selectorCount() == 1)
-			this.startHeight = Double.parseDouble(metadata[metadata.length - 1]);
+		try
+		{
+			if (metadata.length - this.selectorCount() == 1)
+				this.startHeight = Double.parseDouble(metadata[metadata.length - 1]);
+		}
+		catch (Exception ignored) {}
 
 		this.updateSelectors();
 	}

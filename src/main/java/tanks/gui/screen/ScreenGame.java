@@ -26,12 +26,10 @@ import tanks.network.Client;
 import tanks.network.ConnectedPlayer;
 import tanks.network.event.*;
 import tanks.obstacle.Face;
-import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -789,6 +787,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             }
         }
 
+		if (finishedQuick)
+			fcPitch = Math.max(0, fcPitch - Panel.frameFrequency * 0.004);
+
         showDefaultMouse = finishedQuick || paused || !playing || shopScreen || npcShopScreen ||
 				(!Game.followingCam && !Game.angledView) || focusedTank() == null || focusedTank().destroy;
         Game.game.window.moveMouseToOtherSide = !showDefaultMouse;
@@ -1123,7 +1124,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			Obstacle.draw_size = Math.min(Game.tile_size, Obstacle.draw_size + Panel.frameFrequency);
 		}
 
-		if (freecam && !(paused && !screenshotMode) && Game.screen == this)
+		if (freecam && !(paused && !screenshotMode) && !Game.game.window.pressedKeys.contains(InputCodes.KEY_F) && Game.screen == this)
 			updateFreecam();
 
 		if (npcShopScreen)
@@ -1464,11 +1465,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
             playing = true;
 
-			if (!freecam && Game.followingCam)
-                updateFollowingCam();
-
             ItemBar b = Game.player.hotbar.itemBar;
             this.selectedArcBullet = b.selected > -1 && b.slots[b.selected] instanceof ItemBullet && BulletArc.class.isAssignableFrom(((ItemBullet) b.slots[b.selected]).bulletClass);
+
+			if (!freecam && Game.followingCam)
+				updateFollowingCam();
 
             Obstacle.draw_size = Math.min(Game.tile_size, Obstacle.draw_size);
             HashSet<Team> aliveTeams = new HashSet<>();
@@ -1498,10 +1499,10 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				if (Double.isNaN(m.posX) || Double.isNaN(m.posY))
 					throw new RuntimeException("Movable with NaN position: " + m.getClass() + " " + m.lastPosX + " " + m.lastPosY);
 
-				if (m instanceof ISolidObject)
+				if (m.rayCollision())
 				{
-					Game.horizontalFaces.addAll(Arrays.asList(((ISolidObject) m).getHorizontalFaces()));
-					Game.verticalFaces.addAll(Arrays.asList(((ISolidObject) m).getVerticalFaces()));
+					Collections.addAll(Game.horizontalFaces, m.getHorizontalFaces());
+					Collections.addAll(Game.verticalFaces, m.getVerticalFaces());
 				}
 			}
 
@@ -1554,8 +1555,12 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				Game.movables.get(i).preUpdate();
 
 			Tank.shouldUpdate = Game.vanillaMode || System.currentTimeMillis() - Tank.lastUpdateTime > 1000 / Tank.updatesPerSecond;
+			Tank.updatesPerFrame = 0;
 			if (Tank.shouldUpdate)
 				Tank.lastUpdateTime = System.currentTimeMillis();
+
+			Tank.lastTankCount = Tank.tankCount;
+			Tank.tankCount = 0;
 
 			for (int i = 0; i < Game.movables.size(); i++)
 			{
@@ -1874,7 +1879,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				Game.bulletLocked = false;
 		}
 
-		if (spectatingTank != null && spectatingTank.destroy)
+		if (spectatingTank != null && spectatingTank.destroy && spectatingTank.destroyTimer <= 0)
 			spectatingTank = null;
 
 		if (!Game.game.window.touchscreen)
@@ -2067,9 +2072,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             if (freecam)
                 Game.game.window.transformations.add(new Translation(Game.game.window, x, y, z));
 
+			Tank t = Game.playerTank != null ? Game.playerTank : focusedTank();
+
             if (!Game.firstPerson)
             {
-                Game.game.window.transformations.add(new RotationAboutPoint(Game.game.window, 0, 0, freecam ? 0 : (frac * ((focusedTank().angle + Math.PI * 3 / 2) % (Math.PI * 2) - Math.PI)), 0, -Drawing.drawing.statsHeight / Game.game.window.absoluteHeight / 2, 0));
+                Game.game.window.transformations.add(new RotationAboutPoint(Game.game.window, 0, 0, freecam ? 0 : (frac * ((t.angle + Math.PI * 3 / 2) % (Math.PI * 2) - Math.PI)), 0, -Drawing.drawing.statsHeight / Game.game.window.absoluteHeight / 2, 0));
                 Game.game.window.transformations.add(new Translation(Game.game.window, 0, 0.1 * frac, 0));
                 Game.game.window.transformations.add(new RotationAboutPoint(Game.game.window, 0, -Math.PI * 0.35 * frac + fcPitch, 0, fcPitch * 3, fcPitch * 3, -1));
                 Game.game.window.transformations.add(new Translation(Game.game.window, 0, 0, 0.5 * frac));
@@ -2079,7 +2086,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             }
             else
             {
-                Game.game.window.transformations.add(new RotationAboutPoint(Game.game.window, 0, 0, frac * ((Game.playerTank.angle + Math.PI * 3 / 2) % (Math.PI * 2) - Math.PI), 0, -Drawing.drawing.statsHeight / Game.game.window.absoluteHeight / 2, 0));
+                Game.game.window.transformations.add(new RotationAboutPoint(Game.game.window, 0, 0, frac * ((t.angle + Math.PI * 3 / 2) % (Math.PI * 2) - Math.PI), 0, -Drawing.drawing.statsHeight / Game.game.window.absoluteHeight / 2, 0));
                 Game.game.window.transformations.add(new Translation(Game.game.window, 0, 0.1 * frac, 0));
                 Game.game.window.transformations.add(new RotationAboutPoint(Game.game.window, 0, -Math.PI * 0.5 * frac, 0, 0, 0, -1));
                 Game.game.window.transformations.add(new Translation(Game.game.window, 0, 0.0575 * frac, 0.9 * frac));
@@ -2290,11 +2297,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
                 this.drawSpinny(Game.playerTank.posX, Game.playerTank.posY, Game.playerTank.size / 2, 198, 3, 0.5, 60 * fade, 0.375 * fade, false);
             }
 
-            if (i == 9 && Game.followingCam && selectedArcBullet)
+            if (i == 9 && Game.followingCam && Panel.panel.zoomTimer > 0.2 && selectedArcBullet)
             {
                 Tank t = focusedTank();
-                Drawing.drawing.setColor(255, 255, 255);
-                Drawing.drawing.drawImage(t.angle, "cursor.png", t.posX + Math.cos(t.angle) * fcArcAim, t.posY + Math.sin(t.angle) * fcArcAim, 100, 100);
+                Drawing.drawing.setColor(t.colorR, t.colorG, t.colorB);
+                Drawing.drawing.drawImage(t.angle + Math.PI / 4, "cursor.png", t.posX + Math.cos(t.angle) * fcArcAim, t.posY + Math.sin(t.angle) * fcArcAim, 50, 100, 100);
             }
 
             drawables[i].clear();
@@ -2302,7 +2309,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		for (Face f : Game.horizontalFaces)
 		{
-			if ((f.owner instanceof Tank || f.owner instanceof Mine) && Game.showTankHitboxes)
+			if ((f.owner instanceof Tank && !(f.owner instanceof TankAIControlled t && t.invisible) || f.owner instanceof Mine) && Game.showTankHitboxes)
 			{
 				drawing.setColor(100, 50, 50);
 				drawing.fillRect(0.5 * (f.endX + f.startX), f.startY, f.endX - f.startX, 5);
@@ -2766,7 +2773,32 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
         if (this.overlay != null)
             this.overlay.draw();
 
-        Drawing.drawing.setInterfaceFontSize(this.textSize);
+		if (Game.showUPFMeter)
+		{
+			if (!paused)
+			{
+				Tank.prevUPF.add(Tank.updatesPerFrame);
+				if (Tank.prevUPF.size() > 100)
+					Tank.prevUPF.pop();
+			}
+
+			Drawing.drawing.setColor(255, 0, 0);
+			int i = 0;
+			for (int num : Tank.prevUPF)
+			{
+				Drawing.drawing.fillInterfaceOval(i * 2 + 20, (100 - num) * 2 + 150, 5, 5);
+				i++;
+			}
+
+			Drawing.drawing.setColor(0, 0, 0);
+			Drawing.drawing.setInterfaceFontSize(14);
+			for (i = 0; i <= 150; i += 10)
+				Drawing.drawing.drawInterfaceText(10, (100 - i) * 2 + 150, i + "");
+
+			Drawing.drawing.drawInterfaceText(120, 360, "Tank count: " + Tank.lastTankCount);
+		}
+
+		Drawing.drawing.setInterfaceFontSize(this.textSize);
     }
 
     public void updateFreecam()
@@ -2828,12 +2860,17 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
         if (Game.game.input.tilt.isPressed())
             fcPitch += (Drawing.drawing.getInterfaceMouseY() - this.prevCursorY) / (sensitivity * 500);
-        else
+        else if (selectedArcBullet)
             fcArcAim += (this.prevCursorY - Drawing.drawing.getInterfaceMouseY()) * (sensitivity * 3);
 
         fcPitch = Math.max(0, Math.min(0.5, fcPitch));
+		if (selectedArcBullet)
+		{
+			ItemBar b = Game.player.hotbar.itemBar;
+			fcArcAim = Math.max(0, Math.min(((ItemBullet) b.slots[b.selected]).getRange(), fcArcAim));
+		}
 
-        this.prevCursorX = Drawing.drawing.getInterfaceMouseX();
+		this.prevCursorX = Drawing.drawing.getInterfaceMouseX();
         this.prevCursorY = Drawing.drawing.getInterfaceMouseY();
 
         fcZoomPressed = Game.game.input.fcZoom.isPressed();
@@ -2937,7 +2974,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			return Game.playerTank;
 
 		if (Game.playerTank.destroy && g.spectatingTank != null)
-			return ((ScreenGame) Game.screen).spectatingTank;
+			return g.spectatingTank;
 
 		return Game.playerTank;
 	}

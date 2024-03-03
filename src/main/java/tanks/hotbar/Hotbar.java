@@ -241,7 +241,7 @@ public class Hotbar
                 if (uses > 0 || rcMax == 0)
                     Drawing.drawing.setColor(0, 150, 255, a);
                 else
-                    Drawing.drawing.setColor(255, 128, 0);
+                    Drawing.drawing.setColor(255, 255, 0);
 
                 Drawing.drawing.fillInterfaceOval(x + 175, y, 18, 18);
 

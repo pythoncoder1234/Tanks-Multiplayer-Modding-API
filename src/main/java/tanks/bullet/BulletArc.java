@@ -32,6 +32,7 @@ public class BulletArc extends Bullet
         //this.effect = BulletEffect.trail;
         this.itemSound = "arc.ogg";
 
+        this.soundRange = speed > 2 ? Game.tile_size * 45 : Game.tile_size * 20;
         this.enableExternalCollisions = false;
         this.playPopSound = false;
         this.playBounceSound = false;
@@ -63,11 +64,7 @@ public class BulletArc extends Bullet
             if (this.bounces > 0 && (this.posX >= 0 && this.posX <= Game.currentSizeX * Game.tile_size && this.posY >= 0 && this.posY <= Game.currentSizeY * Game.tile_size))
             {
                 this.bounces--;
-
-                if (!this.tank.isRemote)
-                    this.checkCollision();
-
-                this.checkCollisionLocal();
+                this.checkCollision();
 
                 this.posZ += 2 * ((Game.tile_size / 2) - this.posZ);
                 this.vZ = Math.abs(this.vZ) * 0.75;
@@ -82,15 +79,11 @@ public class BulletArc extends Bullet
                 this.vY = 0;
                 this.vZ = 0;
 
-                if (!this.tank.isRemote)
-                    this.checkCollision();
-
-                this.checkCollisionLocal();
-
+                this.checkCollision();
                 this.destroy = true;
             }
 
-            Drawing.drawing.playSound("bullet_explode.ogg", (float) (Bullet.bullet_size / this.size));
+            Drawing.drawing.playGameSound("bullet_explode.ogg", this, soundRange, (float) (Bullet.bullet_size / this.size));
         }
 
         if (!this.destroy)

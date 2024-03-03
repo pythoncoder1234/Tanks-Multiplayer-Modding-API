@@ -152,9 +152,7 @@ public class BulletElectric extends BulletInstant
 		this.destroy = true;
 
 		if (movable instanceof BulletElectric)
-		{
-			return;
-		}
+            return;
 
 		this.targets.add(movable);
 

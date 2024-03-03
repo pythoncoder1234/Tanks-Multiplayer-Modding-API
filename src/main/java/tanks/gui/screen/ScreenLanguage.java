@@ -19,6 +19,8 @@ public class ScreenLanguage extends Screen
     {
         super(350, 40, 380, 60);
 
+        this.music = "menu_1.ogg";
+        this.musicID = "menu";
 
         languages = new SavedFilesList(Game.homedir + Game.languagesPath, page, 0, -30,
                 (name, file) -> changeLanguage(new Translation(file)), (file) -> null, (file, button) ->

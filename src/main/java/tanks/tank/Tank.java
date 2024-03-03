@@ -12,22 +12,19 @@ import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemMine;
-import tanks.network.event.EventTankAddAttributeModifier;
-import tanks.network.event.EventTankCreate;
-import tanks.network.event.EventTankUpdate;
-import tanks.network.event.EventTankUpdateHealth;
+import tanks.network.event.*;
 import tanks.obstacle.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static tanks.tank.TankProperty.Category.*;
 
-public abstract class Tank extends Movable implements ISolidObject
+public abstract class Tank extends Movable implements ISolidObject, IExplodable
 {
     public static int disabledZ = (int) (1.25 * Game.tile_size);
+	public static int updatesPerFrame = 0;
+	public static ArrayDeque<Integer> prevUPF = new ArrayDeque<>();
+	public static int tankCount, lastTankCount;
 
     public static int updatesPerSecond = 30;
     public static long lastUpdateTime = 0;
@@ -176,7 +173,7 @@ public abstract class Tank extends Movable implements ISolidObject
 	public ItemMine mine = (ItemMine) TankPlayer.default_mine.clone();
 
 	/** Age in frames*/
-	protected double age = 0;
+	protected double age = 0, trueAge = 0;
 
 	public double drawAge = 0;
 	public double destroyTimer = 0;
@@ -534,6 +531,8 @@ public abstract class Tank extends Movable implements ISolidObject
 			this.emblemAngle = this.angle;
         }
 
+		tankCount++;
+
 		if (this instanceof IAvoidObject a)
 			IAvoidObject.avoidances.add(a);
 
@@ -561,7 +560,7 @@ public abstract class Tank extends Movable implements ISolidObject
 
 			if (this.destroyTimer <= 0 && this.health <= 1e-7)
 			{
-				Drawing.drawing.playSound("destroy.ogg", (float) (Game.tile_size / this.size));
+				Drawing.drawing.playGameSound("destroy.ogg", this, Game.tile_size * 80, (float) (Game.tile_size / this.size));
 
 				this.onDestroy();
 
@@ -1114,47 +1113,12 @@ public abstract class Tank extends Movable implements ISolidObject
             new Explosion(this.posX, this.posY, Mine.mine_radius, 2, true, this).explode();
 	}
 
-	@Override
-	public Face[] getHorizontalFaces()
-	{
-		double s = this.size * this.hitboxSize / 2;
-
-		if (this.horizontalFaces == null)
-		{
-			this.horizontalFaces = new Face[2];
-			this.horizontalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX + s, this.posY - s, true, true, true, true);
-			this.horizontalFaces[1] = new Face(this, this.posX - s, this.posY + s, this.posX + s, this.posY + s, true, false,true, true);
-		}
-		else
-		{
-			this.horizontalFaces[0].update(this.posX - s, this.posY - s, this.posX + s, this.posY - s);
-			this.horizontalFaces[1].update(this.posX - s, this.posY + s, this.posX + s, this.posY + s);
-		}
-
-		return this.horizontalFaces;
-	}
-
-	@Override
-	public Face[] getVerticalFaces()
-	{
-		double s = this.size * this.hitboxSize / 2;
-
-		if (this.verticalFaces == null)
-		{
-			this.verticalFaces = new Face[2];
-			this.verticalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX - s, this.posY + s, false, true, true, true);
-			this.verticalFaces[1] = new Face(this, this.posX + s, this.posY - s, this.posX + s, this.posY + s, false, false, true, true);
-		}
-		else
-		{
-			this.verticalFaces[0].update(this.posX - s, this.posY - s, this.posX - s, this.posY + s);
-			this.verticalFaces[1].update(this.posX + s, this.posY - s, this.posX + s, this.posY + s);
-		}
-
-		return this.verticalFaces;
-	}
-
 	public boolean damage(double amount, GameObject source)
+	{
+		return damage(amount, source, true);
+	}
+
+	public boolean damage(double amount, GameObject source, boolean playDamageSound)
 	{
 		double finalAmount = amount * this.getDamageMultiplier(source);
 		this.health -= finalAmount;
@@ -1170,6 +1134,12 @@ public abstract class Tank extends Movable implements ISolidObject
 				}
 			}
 		}
+
+		boolean kill = this.health <= 1e-7;
+		float pitch = source instanceof Bullet b ? (float) (Bullet.bullet_size / b.size) : 1;
+
+		if (finalAmount > 0 && !kill && playDamageSound)
+			Drawing.drawing.playGameSound("damage.ogg", this, Game.tile_size * 25, pitch);
 
 		Game.eventsOut.add(new EventTankUpdateHealth(this, source));
 
@@ -1200,11 +1170,30 @@ public abstract class Tank extends Movable implements ISolidObject
 			Game.effects.add(e);
 		}
 
-		return this.health <= 1e-7;
+		return kill;
 	}
 
     public void checkHit(Tank owner, GameObject source)
     {
+		if (this.health <= 1e-7)
+		{
+			int coins = Game.currentGame != null ? Game.currentGame.playerKillCoins : this.coinValue;
+
+			if (coins > 0)
+			{
+				if (owner instanceof TankPlayer t)
+				{
+					t.player.hotbar.coins += coins;
+					Game.eventsOut.add(new EventUpdateCoins(t.player));
+				}
+				else if (owner instanceof TankPlayerRemote t)
+				{
+					t.player.hotbar.coins += coins;
+					Game.eventsOut.add(new EventUpdateCoins(t.player));
+				}
+			}
+		}
+
         if (Crusade.crusadeMode && Crusade.currentCrusade != null && !ScreenPartyLobby.isClient)
         {
             if (owner instanceof IServerPlayerTank)
@@ -1238,13 +1227,46 @@ public abstract class Tank extends Movable implements ISolidObject
 		}
 	}
 
-    public double getDamageMultiplier(GameObject source)
+	@Override
+	public boolean rayCollision()
+	{
+		return enableCollision;
+	}
+
+	public double getDamageMultiplier(GameObject source)
     {
         if (this.invulnerable || (source instanceof Bullet && this.resistBullets) || (source instanceof Explosion && this.resistExplosions))
             return 0;
 
+		if (source instanceof Movable m && this.team != null && !this.team.friendlyFire && Team.isAllied(m, this))
+			return 0;
+
         return 1;
     }
+
+	@Override
+	public void onExploded(Explosion explosion)
+	{
+		this.damage(explosion.damage, explosion);
+	}
+
+	@Override
+	public void applyExplosionKnockback(double angle, double power, Explosion explosion)
+	{
+		this.addPolarMotion(angle, power * explosion.tankKnockback * Math.pow(Game.tile_size, 2) / Math.max(1, Math.pow(this.size, 2)));
+		this.recoilSpeed = this.getSpeed();
+		if (this.recoilSpeed > this.maxSpeed)
+		{
+			this.inControlOfMotion = false;
+			this.tookRecoil = true;
+		}
+	}
+
+	@Override
+	public double getSize()
+	{
+		return this.size;
+	}
 
 	public void setEffectHeight(Effect e)
 	{
@@ -1371,6 +1393,11 @@ public abstract class Tank extends Movable implements ISolidObject
 	public void sendUpdateEvent()
 	{
 		Game.eventsOut.add(new EventTankUpdate(this));
+	}
+
+	public boolean canShoot()
+	{
+		return !this.disabled && !Game.bulletLocked;
 	}
 
 	public AutoZoom getAutoZoom()

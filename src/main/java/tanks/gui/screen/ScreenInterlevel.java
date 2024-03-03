@@ -154,6 +154,7 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 		{
 			Game.reset();
 			Game.cleanUp();
+			Crusade.crusadeMode = false;
 			Game.screen = ScreenPartyHost.activeScreen;
 		}
 		else

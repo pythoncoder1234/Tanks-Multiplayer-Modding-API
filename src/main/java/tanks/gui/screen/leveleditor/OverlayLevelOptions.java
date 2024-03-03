@@ -3,7 +3,9 @@ package tanks.gui.screen.leveleditor;
 import basewindow.BaseFile;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.Panel;
 import tanks.gui.Button;
+import tanks.gui.ScreenElement;
 import tanks.gui.TextBox;
 import tanks.gui.screen.Screen;
 
@@ -81,7 +83,7 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
         {
             Game.game.input.editorCopy.invalidate();
             Game.game.window.setClipboard(this.editor.level.levelString);
-            Drawing.drawing.playSound("bullet_explode.ogg", 2f, 0.3f);
+            Panel.notifs.add(new ScreenElement.Notification("Level string copied to clipboard!"));
         }
 
         super.update();

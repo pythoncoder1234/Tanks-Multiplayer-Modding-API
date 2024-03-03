@@ -1,6 +1,7 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Drawing;
 import tanks.Game;
 import tanks.bullet.*;
 import tanks.hotbar.item.ItemBullet;
@@ -80,6 +81,9 @@ public class EventShootBullet extends PersonalEvent
 		bullet.vZ = this.vZ;
 		bullet.name = this.name;
 		bullet.effect = Bullet.BulletEffect.valueOf(this.type);
+
+		if (!Game.vanillaMode && bullet.itemSound != null)
+			Drawing.drawing.playGameSound(bullet.itemSound, bullet, bullet.soundRange, (float) ((Bullet.bullet_size / bullet.size) * (1 - (Math.random() * 0.5) * bullet.pitchVariation)));
 
 		bullet.bounces = this.bounces;
 		bullet.damage = this.damage;

@@ -79,6 +79,8 @@ public class Panel
 	public long lastFrameNano = 0;
 
 	public int lastFPS = 0;
+	public int lastWorstFPS = 0;
+	public double worstFPS = 0;
 
 	public ScreenOverlayOnline onlineOverlay;
 
@@ -305,6 +307,8 @@ public class Panel
 			Panel.frameFrequency = Game.game.window.frameFrequency;
 
 		Game.game.window.showKeyboard = false;
+
+//		Panel.frameFrequency *= 5;
 
 		synchronized (Game.eventsIn)
 		{
@@ -763,12 +767,15 @@ public class Panel
 			if (lastFrameSec < time && lastFrameSec != firstFrameSec)
 			{
 				lastFPS = (int) (frames * 1.0 * frameSampling);
+				lastWorstFPS = (int) worstFPS;
+				worstFPS = lastFPS;
 				frames = 0;
 			}
 
 			lastFrameSec = time;
 			frames++;
 			ageFrames++;
+			worstFPS = Math.min(worstFPS, 100 / Panel.frameFrequency);
 			Game.screen.screenAge += Panel.frameFrequency;
 		}
 
@@ -862,7 +869,7 @@ public class Panel
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_A);
 				Drawing.drawing.terrainRenderer.reset();
-				Panel.notifs.add(new Notification("Terrain reloaded!"));
+				Panel.notifs.add(new Notification("Terrain reloaded!").setColor(255, 255, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_T))
@@ -897,7 +904,7 @@ public class Panel
 
 				Game.game.shaderInstances = newShaders;
 				Drawing.drawing.terrainRenderer.reset();
-				Panel.notifs.add(new Notification("Shaders reloaded!"));
+				Panel.notifs.add(new Notification("Shaders reloaded!").setColor(255, 255, 128));
 			}
 
 			int brightness = 0;
@@ -1116,7 +1123,7 @@ public class Panel
 			boundary += 40;
 
 		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, Game.version);
-		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS);
+		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS + "§255227186032/" + lastWorstFPS + "§255227186255");
 
 		Game.game.window.fontRenderer.drawString(boundary + 600, offset + (int) (Panel.windowHeight - 40 + 10), 0.6, 0.6, Game.screen.screenHint);
 

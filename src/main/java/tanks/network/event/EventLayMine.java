@@ -1,6 +1,7 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Drawing;
 import tanks.Game;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
@@ -47,6 +48,9 @@ public class EventLayMine extends PersonalEvent
 			m.networkID = id;
 			m.size = size;
 			Game.movables.add(m);
+
+			if (!Game.vanillaMode)
+				Drawing.drawing.playGameSound("lay_mine.ogg", m, Game.tile_size * 20, (float) (Mine.mine_size / m.size));
 
 			Mine.idMap.put(id, m);
 		}

@@ -48,9 +48,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         this.tankScreen.removeTank(this.tank);
         this.tankScreen.refreshTanks(this.tank);
         for (String m : this.tankMusics)
-        {
             Drawing.drawing.removeSyncedMusic(m, 500);
-        }
     }
     );
 

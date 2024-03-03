@@ -1,9 +1,11 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Drawing;
 import tanks.Effect;
 import tanks.Game;
 import tanks.GameObject;
+import tanks.hotbar.item.ItemShield;
 import tanks.tank.Tank;
 
 public class EventTankUpdateHealth extends PersonalEvent
@@ -11,6 +13,7 @@ public class EventTankUpdateHealth extends PersonalEvent
 	public Tank tank;
 	public double health;
 	public GameObject source;
+	public boolean shieldSound;
 	
 	public EventTankUpdateHealth()
 	{
@@ -22,6 +25,7 @@ public class EventTankUpdateHealth extends PersonalEvent
 		tank = t;
 		health = t.health;
 		this.source = source;
+		shieldSound = source instanceof ItemShield;
 	}
 	
 	@Override
@@ -35,6 +39,9 @@ public class EventTankUpdateHealth extends PersonalEvent
 
 		double before = tank.health;
 		tank.health = health;
+
+		if (shieldSound)
+			Drawing.drawing.playGameSound("shield.ogg", tank, Game.tile_size * 20, 1f);
 
 		if (tank.health > 6 && (int) before != (int) tank.health)
 		{
@@ -50,6 +57,9 @@ public class EventTankUpdateHealth extends PersonalEvent
 	{
 		b.writeInt(this.tank.networkID);
 		b.writeDouble(this.health);
+
+		if (!Game.vanillaMode)
+			b.writeBoolean(shieldSound);
 	}
 
 	@Override
@@ -57,5 +67,8 @@ public class EventTankUpdateHealth extends PersonalEvent
 	{
 		this.tank = Tank.idMap.get(b.readInt());
 		this.health = b.readDouble();
+
+		if (!Game.vanillaMode)
+			shieldSound = b.readBoolean();
 	}
 }

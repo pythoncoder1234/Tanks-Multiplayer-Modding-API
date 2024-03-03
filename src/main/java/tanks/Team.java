@@ -91,4 +91,10 @@ public class Team
 
 		return super.equals(obj);
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return this.name.hashCode();
+	}
 }

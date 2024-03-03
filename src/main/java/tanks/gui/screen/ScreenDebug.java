@@ -67,7 +67,17 @@ public class ScreenDebug extends ScreenOptionsOverlay
         }
     });
 
-    Button allNums = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    Button upfMeter = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.showUPFMeter = !Game.showUPFMeter;
+            upfMeter.setText("UPF Meter: ", Game.showUPFMeter ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    });
+
+            Button allNums = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -122,6 +132,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         autocannon.setText("Autocannon: ", Game.autocannon ? ScreenOptions.onText : ScreenOptions.offText);
         pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
         allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
+        upfMeter.setText("UPF Meter: ", Game.showUPFMeter ? ScreenOptions.onText : ScreenOptions.offText);
 
         if (Game.fancyLights)
             fancyLighting.setText(fancyLightsText, ScreenOptions.onText);
@@ -225,6 +236,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         tankHitboxes.update();
         obstacleHitboxes.update();
         pathfinding.update();
+        upfMeter.update();
         allNums.update();
         back.update();
 
@@ -267,6 +279,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         pathfinding.draw();
         tankIDs.draw();
         glipping.draw();
+        upfMeter.draw();
         autocannon.draw();
         invulnerable.draw();
         back.draw();

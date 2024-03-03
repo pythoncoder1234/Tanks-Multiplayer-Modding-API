@@ -1,6 +1,7 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Crusade;
 import tanks.Game;
 import tanks.gui.screen.ScreenPartyLobby;
 
@@ -18,6 +19,7 @@ public class EventReturnToLobby extends PersonalEvent
 		{
 			Game.reset();
 			Game.cleanUp();
+			Crusade.crusadeMode = false;
 			Game.screen = new ScreenPartyLobby();
 			ScreenPartyLobby.readyPlayers.clear();
 			ScreenPartyLobby.includedPlayers.clear();
