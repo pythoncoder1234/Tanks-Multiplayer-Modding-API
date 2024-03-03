@@ -38,6 +38,7 @@ New Features:
 - Implemented `IExplodable` using some of F6's code
 - Added `Movable.squaredDistanceBetween`
 - Added `updateFrequency`, use when modifying or overriding `TankAIControlled`'s update function
+- Lowest instantaneous FPS counter
 - Fixed many, many bugs
 
 [Older Changelogs](changelog.md)
