@@ -156,7 +156,7 @@ public class TankTrain extends Tank implements IAvoidObject
                     if (parts.length > 1 && !parts[1].equals("all") && (team == null || !parts[1].equals(team.name)))
                         continue;
 
-                    if (parts.length > 2 && parts[2].length() > 0)
+                    if (parts.length > 2 && !parts[2].isEmpty())
                     {
                         this.showName = true;
                         this.nameTag.name = parts[2].replaceAll("\\+\\+", "-");

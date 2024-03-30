@@ -134,7 +134,7 @@ public class TankAIControlled extends Tank
 	public double strafeDirectionChangeChance = 0.01;
 	/** If set to keep a distance, the tank will maintain that distance from its target upon sight*/
 	@TankProperty(category = movementOnSight, id = "target_sight_distance", name = "Target distance", desc = "If set to keep distance on line of sight, how far away the tank will try to sit from its target \n \n 1 tile = 50 units")
-	public double targetSightDistance = Game.tile_size * 20;
+	public double targetSightDistance = Game.tile_size * 6;
 
 	/** Tank to transform into*/
 	@TankProperty(category = transformationOnSight, id = "sight_transform_tank", name = "Transformation tank", desc = "When set, the tank will transform into this tank upon entering line of sight with its target")
@@ -158,7 +158,7 @@ public class TankAIControlled extends Tank
 	public double mimicRevertTime = 200;
 	/** Range tanks must be in to be mimicked */
 	@TankProperty(category = transformationMimic, id = "mimic_range", name = "Mimic range", desc = "Maximum distance between this tank and a tank it mimics")
-	public double mimicRange = Game.tile_size * 20;
+	public double mimicRange = Game.tile_size * 12;
 
 	@TankProperty(category = mines, id = "enable_mine_laying", name = "Can lay mines")
 	public boolean enableMineLaying = true;
@@ -2831,7 +2831,7 @@ public class TankAIControlled extends Tank
 			{
 				this.possessingTank.colorR = ((Tank) this.targetEnemy).colorR;
 				this.possessingTank.colorG = ((Tank) this.targetEnemy).colorG;
-				this.possessingTank.colorB = ((Tank) this.targetEnemy).colorB;
+				this.possessingTank.colorB = ((Tank) twhis.targetEnemy).colorB;
 
 				this.possessingTank.secondaryColorR = ((Tank) this.targetEnemy).secondaryColorR;
 				this.possessingTank.secondaryColorG = ((Tank) this.targetEnemy).secondaryColorG;

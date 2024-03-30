@@ -56,7 +56,7 @@ public class OverlayGenerateTeams extends ScreenLevelEditorOverlay
         @Override
         public void run()
         {
-            if (name.inputText.length() > 0)
+            if (!name.inputText.isEmpty())
                 generator.name = name.inputText;
             else
                 generator.name = name.previousInputText;
@@ -70,7 +70,7 @@ public class OverlayGenerateTeams extends ScreenLevelEditorOverlay
         @Override
         public void run()
         {
-            if (amount.inputText.length() > 0)
+            if (!amount.inputText.isEmpty())
                 copies = Integer.parseInt(amount.inputText);
             else
                 amount.inputText = amount.previousInputText;

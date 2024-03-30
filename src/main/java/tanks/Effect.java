@@ -3,7 +3,6 @@ package tanks;
 import basewindow.IBatchRenderableObject;
 import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.ScreenPartyLobby;
 import tanks.minigames.Arcade;
 import tanks.obstacle.Obstacle;
 import tanks.rendering.TrackRenderer;
@@ -50,7 +49,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
 
     public static Effect createNewEffect(double x, double y, double z, EffectType type)
     {
-        while (Game.recycleEffects.size() > 0)
+        while (!Game.recycleEffects.isEmpty())
         {
             Effect e = Game.recycleEffects.remove();
 

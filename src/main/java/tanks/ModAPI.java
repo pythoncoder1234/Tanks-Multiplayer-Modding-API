@@ -391,7 +391,7 @@ public class ModAPI
 
     public static String capitalize(String s)
     {
-        if (s.length() == 0)
+        if (s.isEmpty())
             throw new RuntimeException("Capitalizing string without letters in it or of size 0");
 
         if (!(Game.lessThan('A', s.charAt(1), 'Z') || Game.lessThan('a', s.charAt(1), 'z')))

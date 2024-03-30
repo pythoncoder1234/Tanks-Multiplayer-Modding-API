@@ -268,7 +268,7 @@ public class ScreenArcadeBonuses extends Screen implements IDarkScreen
                 fireworksToSpawn = (int) fireworks;
         }
 
-        if (age >= firstBonusTime + interBonusTime * 5 && this.getFireworkArray().size() == 0)
+        if (age >= firstBonusTime + interBonusTime * 5 && this.getFireworkArray().isEmpty())
         {
             ScreenInterlevel.title = Translation.translate("You scored %d points!", score);
             Panel.win = true;
