@@ -45,9 +45,6 @@ public class Hotbar
 		if (this.persistent)
 			this.hidden = false;
 
-		if (ScreenGame.finished)
-			this.hidden = true;
-
 		this.hideTimer = Math.max(0, this.hideTimer - Panel.frameFrequency);
 
 		if (this.hideTimer <= 0 && !this.persistent)

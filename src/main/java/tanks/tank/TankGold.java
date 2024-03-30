@@ -29,6 +29,7 @@ public class TankGold extends TankAIControlled
 		this.bullet.bulletClass = BulletBoost.class;
 		this.bullet.name = "Booster bullet";
 		this.enableSuicide = true;
+		this.targetType = TargetType.allies;
 		this.targetEnemySightBehavior = TargetEnemySightBehavior.keep_distance;
 		this.mine.radius *= 1.5;
 

@@ -33,8 +33,6 @@ public class BulletFlame extends BulletGas
         this.maxLiveBullets = 0;
         this.cooldown = 0;
         this.effect = BulletEffect.none;
-        this.bounces = 0;
-        this.damage = 0.1;
         this.lowersBushes = false;
         this.burnsBushes = true;
         this.bulletCollision = false;

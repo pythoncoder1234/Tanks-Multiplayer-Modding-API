@@ -100,8 +100,8 @@ public abstract class Screen implements IBatchRenderableObject
 		{
 			for (int j = 0; j < Game.currentSizeY; j++)
 			{
-				if (Game.game.heightGrid[i][j] <= -1000)
-					Game.game.heightGrid[i][j] = 0;
+				if (Chunk.getTile(i, j).height <= -1000)
+					Chunk.getTile(i, j).height = 0;
 			}
 		}
 
@@ -145,11 +145,6 @@ public abstract class Screen implements IBatchRenderableObject
 		}
 
 		this.lastObsSize = Obstacle.draw_size;
-	}
-
-	public double getFlashCol(double col, int i, int j)
-	{
-		return col * (1 - Game.tilesFlash[i][j]) + Game.tilesFlash[i][j] * 255;
 	}
 
 	public double getOffsetX()

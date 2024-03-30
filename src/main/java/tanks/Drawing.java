@@ -1263,17 +1263,17 @@ public class Drawing
 
 	public void playSound(String sound, float volume, boolean asMusic)
 	{
-		if (Game.game.window.soundsEnabled)
-		{
-			if (asMusic)
-			{
-				if (Game.musicEnabled)
-					Game.game.window.soundPlayer.playSound("/music/" + sound, 1.0f, volume * Game.musicVolume);
-			}
-			else if (Game.soundsEnabled)
-				Game.game.window.soundPlayer.playSound("/sound/" + sound, 1.0f, volume * Game.soundVolume);
-		}
-	}
+        if (!Game.game.window.soundsEnabled || volume <= 0)
+            return;
+
+        if (asMusic)
+        {
+            if (Game.musicEnabled)
+                Game.game.window.soundPlayer.playSound("/music/" + sound, 1.0f, volume * Game.musicVolume);
+        }
+        else if (Game.soundsEnabled)
+            Game.game.window.soundPlayer.playSound("/sound/" + sound, 1.0f, volume * Game.soundVolume);
+    }
 
 	public void playGameSound(String sound, Movable m, double radius, float pitch)
 	{
@@ -1321,12 +1321,18 @@ public class Drawing
 
 	public void playSound(String sound, float pitch, float volume)
 	{
+		if (volume <= 0)
+			return;
+
 		if (Game.game.window.soundsEnabled && Game.soundsEnabled)
 			Game.game.window.soundPlayer.playSound("/sounds/" + sound, pitch, volume * Game.soundVolume);
 	}
 
 	public void playGlobalSound(String sound, float pitch, float volume)
 	{
+		if (volume <= 0)
+			return;
+
 		this.playSound(sound, pitch, volume);
 		Game.eventsOut.add(new EventPlaySound(sound, pitch, volume));
 	}

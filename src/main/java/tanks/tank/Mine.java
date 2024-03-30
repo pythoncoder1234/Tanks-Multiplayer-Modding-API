@@ -5,7 +5,6 @@ import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemMine;
 import tanks.network.event.EventMineChangeTimer;
 import tanks.network.event.EventMineRemove;
-import tanks.obstacle.Face;
 import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 
@@ -51,8 +50,7 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
 
     public double[] lightInfo = new double[]{0, 0, 0, 0, 0, 0, 0};
 
-    public Face[] horizontalFaces;
-    public Face[] verticalFaces;
+    private boolean firstFrame = true;
 
     public Mine(double x, double y, double timer, Tank t, ItemMine item)
     {
@@ -103,8 +101,9 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
     {
         Drawing.drawing.setColor(this.outlineColorR, this.outlineColorG, this.outlineColorB, 255, 0.5);
 
-        if (Game.enable3d && Game.enable3dBg && Game.fancyTerrain)
+        if (Game.enable3d && Game.enable3dBg && Game.fancyTerrain && firstFrame)
         {
+            firstFrame = false;
             this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX - this.size / 2, this.posY - this.size / 2));
             this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX + this.size / 2, this.posY - this.size / 2));
             this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX - this.size / 2, this.posY + this.size / 2));

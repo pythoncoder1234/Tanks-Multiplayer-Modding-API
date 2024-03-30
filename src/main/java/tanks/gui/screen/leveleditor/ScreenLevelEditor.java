@@ -239,7 +239,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			.addSubButtons(
 					new EditorButton("10x.png", 40, 40, () -> redoCount = 10, () -> redoCount == 10, "Redo 10x", null),
 					new EditorButton("50x.png", 40, 40, () -> redoCount = 50, () -> redoCount == 50, "Redo 50x", null)
-			).onReset(() -> redoCount = 1);;
+			).onReset(() -> redoCount = 1);
 
 	EditorButton copy = new EditorButton(buttons.topRight, "copy.png", 50, 50, () -> this.copy(false),
 			() -> false, () -> selection, "Copy (%s)", Game.game.input.editorCopy);
@@ -680,9 +680,12 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 				if (o.bulletCollision)
 				{
-					Game.game.solidGrid[x][y] = false;
-					Game.game.unbreakableGrid[x][y] = false;
+					Chunk.getTile(x, y).solid = false;
+					Chunk.getTile(x, y).unbreakable = false;
 				}
+
+				Game.removeObstacle(o);
+				Game.removeSurfaceObstacle(o);
 			}
 		}
 
@@ -1878,7 +1881,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				int y = (int) (o.posY / Game.tile_size);
 
 				if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-					Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
+					Chunk.getTile(x, y).height = Math.max(o.getTileHeight(), Chunk.getTile(x, y).height);
 			}
 		}
 
@@ -2081,6 +2084,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		buttons.draw();
 
+		Chunk.drawDebugStuff();
+
 		if (Game.screen instanceof IOverlayScreen || this.paused)
 		{
 			Drawing.drawing.setColor(127, 178, 228, 64);
@@ -2278,9 +2283,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		this.save();
 		this.replaceSpawns();
 
-		Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-		Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-
 		for (Obstacle o : Game.obstacles)
 		{
 			int x = (int) (o.posX / Game.tile_size);
@@ -2293,10 +2295,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 			{
-				Game.game.solidGrid[x][y] = true;
+				Chunk.getTile(x, y).solid = true;
 
 				if (!o.shouldShootThrough)
-					Game.game.unbreakableGrid[x][y] = true;
+					Chunk.getTile(x, y).unbreakable = true;
 			}
 		}
 

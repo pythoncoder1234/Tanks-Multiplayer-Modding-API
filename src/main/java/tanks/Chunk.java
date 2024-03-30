@@ -1,0 +1,236 @@
+package tanks;
+
+import basewindow.IBatchRenderableObject;
+import tanks.obstacle.Obstacle;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Random;
+
+@SuppressWarnings("UnusedReturnValue")
+public class Chunk
+{
+    public static final Level defaultLevel = new Level("{28,18|,|,}");
+    public static final Tile emptyTile = new Tile();
+    public static boolean debug = false;
+
+    public static HashMap<Integer, Chunk> chunks = new HashMap<>();
+    public static int chunkSize = 16;
+
+    public final int chunkX, chunkY;
+    public final HashSet<Obstacle> obstacles = new HashSet<>();
+    public final HashSet<Movable> movables = new HashSet<>();
+    public final Tile[][] tileGrid = new Tile[chunkSize][chunkSize];
+
+    public Chunk(Level l, Random r, int x, int y)
+    {
+        this.chunkX = x;
+        this.chunkY = y;
+
+        for (int i = 0; i < chunkSize; i++)
+        {
+            for (int j = 0; j < chunkSize; j++)
+            {
+                if (tileGrid[i][j] == null)
+                    tileGrid[i][j] = setTileColor(l, r, new Tile());
+            }
+        }
+    }
+
+    public static Tile setTileColor(Level l, Random r, Tile t)
+    {
+        t.colR = l.colorR + (Game.fancyTerrain ? r.nextDouble() * l.colorVarR : 0);
+        t.colG = l.colorG + (Game.fancyTerrain ? r.nextDouble() * l.colorVarG : 0);
+        t.colB = l.colorB + (Game.fancyTerrain ? r.nextDouble() * l.colorVarB : 0);
+        t.depth = Game.fancyTerrain ? r.nextDouble() * 10 : 0;
+        return t;
+    }
+
+    public static void reset()
+    {
+        Random r = new Random(0);
+        for (Chunk c : chunks.values())
+            for (int x = 0; x < chunkSize; x++)
+                for (int y = 0; y < chunkSize; y++)
+                    c.tileGrid[x][y] = setTileColor(defaultLevel, r, new Tile());
+    }
+
+    public static void fillHeightGrid()
+    {
+        for (Chunk c : chunks.values())
+            for (int x = 0; x < chunkSize; x++)
+                for (int y = 0; y < chunkSize; y++)
+                    c.tileGrid[x][y].height = c.tileGrid[x][y].groundHeight = -1000;
+    }
+
+    public void removeSurfaceIfEquals(Obstacle o)
+    {
+        int x = toChunkTileCoords(o.posX);
+        int y = toChunkTileCoords(o.posY);
+
+        if (Objects.equals(tileGrid[x][y].surfaceObstacle, o))
+            tileGrid[x][y].surfaceObstacle = null;
+    }
+
+    public void removeObstacleIfEquals(Obstacle o)
+    {
+        int x = toChunkTileCoords(o.posX);
+        int y = toChunkTileCoords(o.posY);
+
+        if (Objects.equals(tileGrid[x][y].obstacle, o))
+            tileGrid[x][y].obstacle = null;
+    }
+
+    /** Automatically converts to chunk coordinates. */
+    public Tile getChunkTile(int posX, int posY)
+    {
+        if (posX < 0 || posY < 0)
+            return null;
+
+        return tileGrid[posX % chunkSize][posY % chunkSize];
+    }
+
+    /** Automatically converts to tile coordinates and then chunk coordinates. */
+    public Tile getChunkTile(double posX, double posY)
+    {
+        if (posX < 0 || posX >= Game.currentSizeX * Game.tile_size || posY < 0 || posY >= Game.currentSizeY * Game.tile_size)
+            return null;
+
+        return tileGrid[toChunkTileCoords(posX)][toChunkTileCoords(posY)];
+    }
+
+    public void setObstacle(int x, int y, Obstacle o)
+    {
+        if (!o.isSurfaceTile || tileGrid[x][y] == null)
+        {
+            if (tileGrid[x][y].obstacle != null && tileGrid[x][y].obstacle.isSurfaceTile)
+                tileGrid[x][y].surfaceObstacle = tileGrid[x][y].obstacle;
+
+            tileGrid[x][y].obstacle = o;
+        }
+        else
+        {
+            tileGrid[x][y].surfaceObstacle = o;
+        }
+    }
+
+    public static Tile getTile(int tileX, int tileY)
+    {
+        return getChunk(tileX / chunkSize, tileY / chunkSize).getChunkTile(tileX, tileY);
+    }
+
+    /** Equivalent to <code>Chunk.getChunk(posX, posY).getChunkTile(posX, posY)</code> */
+    public static Tile getTile(double posX, double posY)
+    {
+        return getChunk(posX, posY).getChunkTile(posX, posY);
+    }
+
+    public static Tile tileCoordsGet(double posX, double posY)
+    {
+        posX = (posX + 0.5) * Game.tile_size;
+        posY = (posY + 0.5) * Game.tile_size;
+        return getTile(posX, posY);
+    }
+
+    public static int toChunkTileCoords(double a)
+    {
+        return  (int) (a / Game.tile_size) % chunkSize;
+    }
+
+    public static double addCoords(double chunk, double tile)
+    {
+        return chunk * chunkSize + tile;
+    }
+
+    public static void drawDebugStuff()
+    {
+        if (!debug)
+            return;
+
+        Drawing.drawing.setColor(255, 0, 0, 128);
+
+        for (Chunk c : chunks.values())
+            Drawing.drawing.drawRect(addCoords(c.chunkX, chunkSize / 2.) * Game.tile_size, addCoords(c.chunkY, chunkSize / 2.) * Game.tile_size,
+                    chunkSize * Game.tile_size, chunkSize * Game.tile_size, 5, 20);
+    }
+
+    public static class Tile implements IBatchRenderableObject
+    {
+        public Obstacle obstacle, surfaceObstacle;
+        public double colR, colG, colB, depth, height, groundHeight, lastHeight;
+        public boolean solid, unbreakable;
+    }
+
+    public static void initialize()
+    {
+        populateChunks(defaultLevel);
+    }
+
+    public static void populateChunks(Level l)
+    {
+        chunks.clear();
+
+        int sX = l.sizeX / chunkSize + 1, sY = l.sizeY / chunkSize + 1;
+        Random r = new Random(0);
+
+        for (int x = 0; x < sX; x++)
+            for (int y = 0; y < sY; y++)
+                addChunk(x, y, new Chunk(l, r, x, y));
+    }
+
+    public static Obstacle getObstacle(double posX, double posY)
+    {
+        return getObstacle(posX, posY, false);
+    }
+
+    public static Obstacle getObstacle(double posX, double posY, boolean isTileCoords)
+    {
+        int x = (int) posX;
+        int y = (int) posY;
+
+        if (!isTileCoords)
+        {
+            posX /= Game.tile_size;
+            posY /= Game.tile_size;
+        }
+
+        return getChunk(posX, posY).tileGrid[x % chunkSize][y % chunkSize].obstacle;
+    }
+
+    public static Chunk getChunk(double posX, double posY)
+    {
+        return getChunk(posX, posY, false);
+    }
+
+    public static Chunk getChunk(double posX, double posY, boolean isTileCoords)
+    {
+        if (!isTileCoords)
+        {
+            posX = posX / Game.tile_size - 0.5;
+            posY = posY / Game.tile_size - 0.5;
+        }
+
+        return getChunk((int) (posX / chunkSize), (int) (posY / chunkSize));
+    }
+
+    public static Chunk getChunk(int chunkX, int chunkY)
+    {
+        return chunks.get(encodeChunkCoords(chunkX, chunkY));
+    }
+
+    public static Chunk addChunk(int chunkX, int chunkY, Chunk c)
+    {
+        return chunks.put(encodeChunkCoords(chunkX, chunkY), c);
+    }
+
+    public static int f(int i)
+    {
+        return 1664525 * i + 1013904223;
+    }
+
+    public static int encodeChunkCoords(int chunkX, int chunkY)
+    {
+        return f(f(chunkX) + chunkY);
+    }
+}

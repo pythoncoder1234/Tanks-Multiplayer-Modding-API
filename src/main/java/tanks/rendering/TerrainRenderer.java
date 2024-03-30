@@ -1,6 +1,7 @@
 package tanks.rendering;
 
 import basewindow.*;
+import tanks.Chunk;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
@@ -371,15 +372,11 @@ public class TerrainRenderer
         {
             for (Obstacle o : Game.redrawObstacles)
             {
-                int i = Math.max(0, Math.min(Game.currentSizeX - 1, (int) (o.posX / Game.tile_size)));
-                int j = Math.max(0, Math.min(Game.currentSizeY - 1, (int) (o.posY / Game.tile_size)));
-                double r = Game.tilesR[i][j];
-                double g = Game.tilesG[i][j];
-                double b = Game.tilesB[i][j];
-                this.currentDepth = Game.tilesDepth[i][j];
-                currentColor[0] = (float) (r / 255.0);
-                currentColor[1] = (float) (g / 255.0);
-                currentColor[2] = (float) (b / 255.0);
+                Chunk.Tile t = Chunk.getTile(o.posX, o.posY);
+                this.currentDepth = t.depth;
+                currentColor[0] = (float) (t.colR / 255.0);
+                currentColor[1] = (float) (t.colG / 255.0);
+                currentColor[2] = (float) (t.colB / 255.0);
 
                 if (o.batchDraw && !o.removed)
                     o.draw();
@@ -485,17 +482,28 @@ public class TerrainRenderer
         Game.game.window.shaderDefault.set();
     }
 
+    public void redrawGround()
+    {
+        for (Chunk c : Chunk.chunks.values())
+            for (int i = 0; i < Chunk.chunkSize; i++)
+                for (int j = 0; j < Chunk.chunkSize; j++)
+                    drawTile(i + c.chunkX * Chunk.chunkSize, j + c.chunkY * Chunk.chunkSize, c);
+    }
+
     public void drawTile(int i, int j)
     {
-        double r = Game.tilesR[i][j];
-        double g = Game.tilesG[i][j];
-        double b = Game.tilesB[i][j];
-        double depth = Game.enable3dBg ? Game.tilesDepth[i][j] : 0;
+        drawTile(i, j, Chunk.getChunk(i, j));
+    }
 
-        this.currentDepth = depth;
+    public void drawTile(int i, int j, Chunk c)
+    {
+        Chunk.Tile t = c.getChunkTile(i, j);
+        double r = t.colR, g = t.colG, b = t.colB, depth = t.depth;
+
         currentColor[0] = (float) (r / 255.0);
         currentColor[1] = (float) (g / 255.0);
         currentColor[2] = (float) (b / 255.0);
+        currentDepth = depth;
 
         if (!(this instanceof StaticTerrainRenderer))
             this.remove(this.tiles[i][j]);
@@ -510,16 +518,16 @@ public class TerrainRenderer
                 double extra = Game.tile_size;
 
                 if (i > 0)
-                    extra = Math.max(extra, -Game.game.heightGrid[i - 1][j]);
+                    extra = Math.max(extra, -Game.getTileHeight(i-1, j));
 
                 if (j > 0)
-                    extra = Math.max(extra, -Game.game.heightGrid[i][j - 1]);
+                    extra = Math.max(extra, -Game.getTileHeight(i, j - 1));
 
                 if (i < Game.currentSizeX - 1)
-                    extra = Math.max(extra, -Game.game.heightGrid[i + 1][j]);
+                    extra = Math.max(extra, -Game.getTileHeight(i + 1, j));
 
                 if (j < Game.currentSizeY - 1)
-                    extra = Math.max(extra, -Game.game.heightGrid[i][j + 1]);
+                    extra = Math.max(extra, -Game.getTileHeight(i, j + 1));
 
                 this.tiles[i][j].obstacleAbove = Game.obstacleGrid[i][j];
                 o.drawTile(this.tiles[i][j], r, g, b, depth, extra);
@@ -585,12 +593,10 @@ public class TerrainRenderer
             int y = (int) (o.posY / Game.tile_size);
 
             if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-                Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
+                Chunk.getTile(x, y).height = Math.max(o.getTileHeight(), Chunk.getTile(x, y).height);
         }
 
-        for (int i = 0; i < this.tiles.length; i++)
-            for (int j = 0; j < this.tiles[i].length; j++)
-                this.drawTile(i, j);
+        redrawGround();
 
         Obstacle.draw_size = s;
     }
@@ -601,15 +607,11 @@ public class TerrainRenderer
         Obstacle.draw_size = Game.tile_size;
         for (Obstacle o: Game.obstacles)
         {
-            int i = Math.max(0, Math.min(Game.currentSizeX - 1, (int) (o.posX / Game.tile_size)));
-            int j = Math.max(0, Math.min(Game.currentSizeY - 1, (int) (o.posY / Game.tile_size)));
-            double r = Game.tilesR[i][j];
-            double g = Game.tilesG[i][j];
-            double b = Game.tilesB[i][j];
-            this.currentDepth = Game.tilesDepth[i][j];
-            currentColor[0] = (float) (r / 255.0);
-            currentColor[1] = (float) (g / 255.0);
-            currentColor[2] = (float) (b / 255.0);
+            Chunk.Tile t = Chunk.getTile(o.posX, o.posY);
+            currentColor[0] = (float) (t.colR / 255.0);
+            currentColor[1] = (float) (t.colG / 255.0);
+            currentColor[2] = (float) (t.colB / 255.0);
+            currentDepth = t.depth;
 
             if (o.batchDraw)
                 o.draw();

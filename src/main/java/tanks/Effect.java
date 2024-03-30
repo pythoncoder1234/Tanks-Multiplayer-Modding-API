@@ -822,9 +822,9 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
 
             if (!(collidedX || collidedY))
             {
-                collided = this.posZ <= Game.game.lastHeightGrid[x][y];
+                collided = this.posZ <= Chunk.getTile(x, y).lastHeight;
 
-                if (collided && prevGridX >= 0 && prevGridX < Game.currentSizeX && prevGridY >= 0 && prevGridY < Game.currentSizeY && Game.game.lastHeightGrid[x][y] != Game.game.lastHeightGrid[prevGridX][prevGridY])
+                if (collided && prevGridX >= 0 && prevGridX < Game.currentSizeX && prevGridY >= 0 && prevGridY < Game.currentSizeY && Chunk.getTile(x, y).lastHeight != Chunk.getTile(prevGridX, prevGridY).lastHeight)
                 {
                     collidedX = this.prevGridX != x;
                     collidedY = this.prevGridY != y;
@@ -866,10 +866,10 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
                     this.posY = this.posY - dist;
                 }
 
-                if (!collidedX && !collidedY && (x != this.initialGridX || y != initialGridY) && Math.abs(this.posZ - Game.game.lastHeightGrid[x][y]) < Game.tile_size / 2)
+                if (!collidedX && !collidedY && (x != this.initialGridX || y != initialGridY) && Math.abs(this.posZ - Chunk.getTile(x, y).lastHeight) < Game.tile_size / 2)
                 {
                     this.vZ = -0.6 * this.vZ;
-                    this.posZ = 2 * Game.game.lastHeightGrid[x][y] - this.posZ;
+                    this.posZ = 2 * Chunk.getTile(x, y).lastHeight - this.posZ;
                 }
             }
 

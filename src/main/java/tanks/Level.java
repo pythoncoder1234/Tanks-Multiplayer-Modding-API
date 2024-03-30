@@ -303,11 +303,9 @@ public class Level
 		for (Item i: this.startingItems)
 			i.importProperties();
 
-		if (sc instanceof ScreenLevelEditor)
+		if (sc instanceof ScreenLevelEditor s)
 		{
-			ScreenLevelEditor s = (ScreenLevelEditor) sc;
-
-			s.level = this;
+            s.level = this;
 
 			s.selectedTiles = new boolean[sizeX][sizeY];
 			Game.movables.remove(Game.playerTank);
@@ -321,9 +319,10 @@ public class Level
 			s.teams = this.teamsList;
 		}
 
+		Chunk.populateChunks(this);
 		this.reloadTiles();
 
-		if (!((obstaclesPos.length == 1 && obstaclesPos[0].equals("")) || obstaclesPos.length == 0))
+		if (!((obstaclesPos.length == 1 && obstaclesPos[0].isEmpty()) || obstaclesPos.length == 0))
 		{
             for (String pos : obstaclesPos)
             {
@@ -382,8 +381,6 @@ public class Level
 			}
 		}
 
-		Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-		Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
 		boolean[][] solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
 
 		for (Obstacle o: Game.obstacles)
@@ -398,10 +395,10 @@ public class Level
 
             if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
             {
-                Game.game.solidGrid[x][y] = true;
+                Chunk.getTile(x, y).solid = true;
 
                 if (!o.shouldShootThrough)
-                    Game.game.unbreakableGrid[x][y] = true;
+                    Chunk.getTile(x, y).unbreakable = true;
             }
 
             if (o.tankCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
@@ -424,7 +421,7 @@ public class Level
 
 		ArrayList<Tank> tanksToRemove = new ArrayList<>();
 
-		if (!preset[2].equals(""))
+		if (!preset[2].isEmpty())
 		{
             for (String s : tanks)
             {
@@ -731,42 +728,10 @@ public class Level
 
         currentLightIntensity = light;
         currentShadowIntensity = shadow;
-
-        Game.tilesR = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesG = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesB = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesDepth = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesFlash = new double[Game.currentSizeX][Game.currentSizeY];
         Game.obstacleGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
         Game.surfaceTileGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
-        for (int i = 0; i < Game.currentSizeX; i++)
-        {
-            for (int j = 0; j < Game.currentSizeY; j++)
-            {
-                if (Game.fancyTerrain)
-                {
-                    Game.tilesR[i][j] = (colorR + Math.random() * colorVarR);
-                    Game.tilesG[i][j] = (colorG + Math.random() * colorVarG);
-                    Game.tilesB[i][j] = (colorB + Math.random() * colorVarB);
-					Game.tilesDepth[i][j] = Math.random() * 10;
-				}
-				else
-				{
-					Game.tilesR[i][j] = colorR;
-					Game.tilesG[i][j] = colorG;
-					Game.tilesB[i][j] = colorB;
-					Game.tilesDepth[i][j] = 0;
-				}
-			}
-		}
-
-		Game.game.heightGrid = new double[Game.currentSizeX][Game.currentSizeY];
-		Game.game.groundHeightGrid = new double[Game.currentSizeX][Game.currentSizeY];
 		Drawing.drawing.setScreenBounds(Game.tile_size * sizeX, Game.tile_size * sizeY);
-
-		Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-		Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
 
 		for (Obstacle o: Game.obstacles)
         {
@@ -780,10 +745,10 @@ public class Level
 
             if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
             {
-                Game.game.solidGrid[x][y] = true;
+                Chunk.getTile(x, y).solid = true;
 
                 if (!o.shouldShootThrough)
-                    Game.game.unbreakableGrid[x][y] = true;
+                    Chunk.getTile(x, y).unbreakable = true;
             }
         }
 

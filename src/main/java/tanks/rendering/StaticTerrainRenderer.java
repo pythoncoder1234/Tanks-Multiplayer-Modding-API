@@ -382,26 +382,7 @@ public class StaticTerrainRenderer extends TerrainRenderer
 
     public void stageObstacles()
     {
-        if (!Game.enable3d)
-            return;
-
-        double d = Obstacle.draw_size;
-        Obstacle.draw_size = Game.tile_size;
-        for (Obstacle o: Game.obstacles)
-        {
-            int i = Math.max(0, Math.min(Game.currentSizeX - 1, (int) (o.posX / Game.tile_size)));
-            int j = Math.max(0, Math.min(Game.currentSizeY - 1, (int) (o.posY / Game.tile_size)));
-            double r = Game.tilesR[i][j];
-            double g = Game.tilesG[i][j];
-            double b = Game.tilesB[i][j];
-            this.currentDepth = Game.tilesDepth[i][j];
-            currentColor[0] = (float) (r / 255.0);
-            currentColor[1] = (float) (g / 255.0);
-            currentColor[2] = (float) (b / 255.0);
-
-            if (o.batchDraw)
-                o.draw();
-        }
-        Obstacle.draw_size = d;
+        if (Game.enable3d)
+            super.stageObstacles();
     }
 }

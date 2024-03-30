@@ -1,5 +1,6 @@
 package tanks.obstacle;
 
+import tanks.Chunk;
 import tanks.Game;
 
 public class ObstacleHill extends Obstacle
@@ -20,9 +21,10 @@ public class ObstacleHill extends Obstacle
 
         for (int i = 0; i < default_max_height; i++)
         {
-            this.stackColorR[i] = Game.tilesR[x][y];
-            this.stackColorG[i] = Game.tilesG[x][y];
-            this.stackColorB[i] = Game.tilesB[x][y];
+            Chunk.Tile t = Chunk.getTile(x, y);
+            this.stackColorR[i] = t.colR;
+            this.stackColorG[i] = t.colG;
+            this.stackColorB[i] = t.colB;
         }
 
         super.draw();

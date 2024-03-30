@@ -252,6 +252,11 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		this.mine.unlimitedStack = true;
 	}
 
+	public boolean canBeHealed()
+	{
+		return health - baseHealth < 1;
+	}
+
 	public void unregisterNetworkID()
 	{
 		if (idMap.get(this.networkID) == this)
@@ -341,17 +346,17 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		double t = Game.tile_size;
 		drawTransparent = false;
 
-		int x1 = (int) Math.min(Math.max(0, (this.posX - this.size / 2) / t - 1), Game.currentSizeX - 1);
-		int y1 = (int) Math.min(Math.max(0, (this.posY - this.size / 2) / t - 1), Game.currentSizeY - 1);
-		int x2 = (int) Math.min(Math.max(0, (this.posX + this.size / 2) / t + 1), Game.currentSizeX - 1);
-		int y2 = (int) Math.min(Math.max(0, (this.posY + this.size / 2) / t + 1), Game.currentSizeY - 1);
+		int x1 = (int) ((this.posX - this.size / 2) / t - 1);
+		int y1 = (int) ((this.posY - this.size / 2) / t - 1);
+		int x2 = (int) ((this.posX + this.size / 2) / t + 1);
+		int y2 = (int) ((this.posY + this.size / 2) / t + 1);
 
 		for (int x = x1; x <= x2; x++)
 		{
 			for (int y = y1; y <= y2; y++)
 			{
-				checkCollisionWith(Game.obstacleGrid[x][y]);
-				checkCollisionWith(Game.surfaceTileGrid[x][y]);
+				checkCollisionWith(Game.getObstacle(x, y));
+				checkCollisionWith(Game.getSurfaceObstacle(x, y));
 			}
 		}
 	}
@@ -1235,7 +1240,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 	public double getDamageMultiplier(GameObject source)
     {
-        if (this.invulnerable || (source instanceof Bullet && this.resistBullets) || (source instanceof Explosion && this.resistExplosions))
+        if (this.invulnerable || (source instanceof Bullet && this.resistBullets) || (source instanceof Explosion && this.resistExplosions) || ScreenGame.finishedQuick)
             return 0;
 
 		if (source instanceof Movable m && this.team != null && !this.team.friendlyFire && Team.isAllied(m, this))

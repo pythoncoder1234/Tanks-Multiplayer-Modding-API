@@ -332,9 +332,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 		{
 			if (unbreakable)
-				return Game.game.unbreakableGrid[x][y];
+				return Game.isUnbreakable(x, y);
 			else
-				return Game.game.solidGrid[x][y];
+				return Game.isUnbreakable(x, y);
 		}
 
 		return false;
@@ -398,6 +398,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 			if (this.isSurfaceTile)
 				Game.surfaceTileGrid[x][y] = this;
+
+			Game.setObstacle(posX, posY, this);
 		}
 	}
 

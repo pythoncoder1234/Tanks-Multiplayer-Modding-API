@@ -630,9 +630,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 			this.justBounced = true;
 
 			if (this.bounces < 0 || this.bouncyBounces < 0 || !allowBounce)
-			{
-				this.pop();
-			}
+                this.pop();
 			else if (this.playBounceSound)
 				Drawing.drawing.playGameSound("bounce.ogg", this, Game.tile_size * 35, (float) (bullet_size / size));
 
@@ -910,26 +908,18 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 				}
 
 				while (this.quarterAgeFrac >= 0.25)
-				{
-					this.quarterAgeFrac -= 0.25;
-				}
+                    this.quarterAgeFrac -= 0.25;
 
 				while (this.halfAgeFrac >= 0.5)
-				{
-					this.halfAgeFrac -= 0.5;
-				}
+                    this.halfAgeFrac -= 0.5;
 			}
 		}
 
 		if (this.destroyTimer >= maxDestroyTimer && noTrails)
-		{
-			Game.removeMovables.add(this);
-		}
+            Game.removeMovables.add(this);
 
 		if (this.effect != BulletEffect.none && !this.addedTrail && !this.destroy && Movable.absoluteAngleBetween(this.getPolarDirection(), this.lastTrailAngle) >= 0.001)
-		{
-			this.addTrail(true);
-		}
+            this.addTrail(true);
 
 		this.addedTrail = false;
 

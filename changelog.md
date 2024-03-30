@@ -1,5 +1,21 @@
-Older Changelogs
+Changelog
 ---
+
+**Mod API 1.2.2**
+- New way to aim arc bullets when in third person
+- All movables implement `ISolidObject` now, you can override `rayCollision` to turn on ray collision
+- Tank optimization begins - Tank updates alternate between frames now, and update ≥ 30 times per second
+- Pressing left alt/option makes your trace ray ignore tanks
+- Added `Drawing.drawing.playGameSound` - adjusts sound volume based on how far away it is to the player tank
+- `Movable.distanceBetween` now supports using two xy-coordinate pairs and two obstacles
+- Implemented `IExplodable` using some of F6's code
+- Added `Movable.squaredDistanceBetween`
+- Added `updateFrequency`, use when modifying or overriding `TankAIControlled`'s update function
+- Lowest instantaneous FPS counter
+- Fixed many, many bugs
+
+**Mod API 1.2.1**
+- Ported to Java 8
 
 **Mod API 1.2.0**
 - Double-click the editor tool's button or keybind to open its submenu, if it has one.

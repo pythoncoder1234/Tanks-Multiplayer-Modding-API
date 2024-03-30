@@ -32,7 +32,7 @@ public class BulletArc extends Bullet
         //this.effect = BulletEffect.trail;
         this.itemSound = "arc.ogg";
 
-        this.soundRange = speed > 2 ? Game.tile_size * 45 : Game.tile_size * 20;
+        this.soundRange = Game.tile_size * 45;
         this.enableExternalCollisions = false;
         this.playPopSound = false;
         this.playBounceSound = false;

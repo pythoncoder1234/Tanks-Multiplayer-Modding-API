@@ -90,7 +90,10 @@ public class Minimap extends FixedMenu
                         if (obstaclesMode)
                         {
                             if (inside)
-                                Drawing.drawing.setColor(Game.tilesR[gridX][gridY], Game.tilesG[gridX][gridY], Game.tilesB[gridX][gridY], colA);
+                            {
+                                Chunk.Tile t = Chunk.getTile(gridX, gridY);
+                                Drawing.drawing.setColor(t.colR, t.colG, t.colB, colA);
+                            }
                             else
                                 Drawing.drawing.setColor(174, 92, 16, colA);
 

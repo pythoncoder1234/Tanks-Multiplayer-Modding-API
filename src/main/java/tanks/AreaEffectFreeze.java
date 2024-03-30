@@ -19,8 +19,8 @@ public class AreaEffectFreeze extends AreaEffect
 
 		if (!this.isRemote)
 			Game.eventsOut.add(new EventCreateFreezeEffect(this));
-		else
-			Drawing.drawing.playGameSound("freeze.ogg", this, Game.tile_size * 25, 1);
+
+		Drawing.drawing.playGameSound("freeze.ogg", this, Game.tile_size * 25, 1);
 	}
 
 	@Override

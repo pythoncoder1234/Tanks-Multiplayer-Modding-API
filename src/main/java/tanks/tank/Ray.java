@@ -469,7 +469,7 @@ public class Ray
 		int ox = (int) (x / Game.tile_size);
 		int oy = (int) (y / Game.tile_size);
 
-		return !(ox >= 0 && ox < Game.currentSizeX && oy >= 0 && oy < Game.currentSizeY) || Game.game.solidGrid[ox][oy];
+		return !(ox >= 0 && ox < Game.currentSizeX && oy >= 0 && oy < Game.currentSizeY) || Game.isSolid(ox, oy);
 	}
 
 	public void moveOut(double amount)

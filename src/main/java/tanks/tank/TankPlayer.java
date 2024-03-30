@@ -54,7 +54,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	public double mouseY;
 
 	public static Model sunglassesModel;
-	public static boolean hi = false;
+	public static boolean hi = true;
 
 	public TankPlayer(double x, double y, double angle)
     {

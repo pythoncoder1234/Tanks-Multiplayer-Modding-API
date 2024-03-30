@@ -141,6 +141,7 @@ public class Panel
 
 		ModAPI.setUp();
 		Game.resetTiles();
+		Chunk.initialize();
 
 		if (Game.game.fullscreen)
 			Game.game.window.setFullscreen(Game.game.fullscreen);
@@ -353,11 +354,7 @@ public class Panel
 			}
 		}
 
-		for (int i = 0; i < Game.game.heightGrid.length; i++)
-		{
-			Arrays.fill(Game.game.heightGrid[i], -1000);
-			Arrays.fill(Game.game.groundHeightGrid[i], -1000);
-		}
+		Chunk.fillHeightGrid();
 
 		if (ScreenPartyHost.isServer)
 		{

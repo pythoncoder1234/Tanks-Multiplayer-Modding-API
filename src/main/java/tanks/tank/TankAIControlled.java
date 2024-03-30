@@ -187,6 +187,11 @@ public class TankAIControlled extends Tank
 	@TankProperty(category = firingGeneral, id = "charge_up", name = "Charge up", desc = "If enabled, the tank will only wait its cooldown while aiming at an enemy tank, playing a charge up animation")
 	public boolean chargeUp = false;
 
+	public enum TargetType {allies, enemies}
+
+	@TankProperty(category = firingGeneral, id = "target", name = "Target", desc = "The tank will either target allies or enemies")
+	public TargetType targetType = TargetType.enemies;
+
 	/** Determines which type of AI the tank will use when shooting.
 	 *  None means that the tank will not shoot
 	 *  Sprinkler means the tank will just randomly shoot when it is able to
@@ -953,12 +958,11 @@ public class TankAIControlled extends Tank
 		for (int i = 0; i < Game.movables.size(); i++)
 		{
 			Movable m = Game.movables.get(i);
-			if (smartness >= 0.6 && m.destroy)
+			if (m.destroy)
 				continue;
 
-			boolean correctTeam = (this.isSupportTank() && Team.isAllied(this, m)) || (!this.isSupportTank() && !Team.isAllied(this, m));
-			if ((m instanceof Tank t && correctTeam && !t.hidden && t.targetable && m != this &&
-					!(BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) && t.health - t.baseHealth >= 1)) ||
+			boolean correctTeam = (this.isSupportTank() && Team.isAllied(this, m) && m instanceof Tank t && t.canBeHealed()) || (!this.isSupportTank() && !Team.isAllied(this, m));
+			if ((m instanceof Tank t && correctTeam && !t.hidden && t.targetable && m != this) ||
 					(m instanceof Mine && !BulletAir.class.isAssignableFrom(this.bullet.bulletClass) && !this.isSupportTank() && isTargetSafe(m.posX, m.posY, m)))
 			{
 				boolean reachable = new Ray(this.posX, this.posY, this.getAngleInDirection(m.posX, m.posY), this.bullet.bounces, this).getTarget() == m;
@@ -2258,16 +2262,19 @@ public class TankAIControlled extends Tank
 
     public boolean isInterestingPathTarget(Movable m)
     {
+		if (!(m instanceof Tank t))
+			return false;
+		if (m.posX < 0 || m.posX >= Game.currentSizeX * Game.tile_size ||
+				m.posY < 0 || m.posY >= Game.currentSizeY * Game.tile_size)
+			return false;
+
         if (this.transformMimic)
-            return m instanceof Tank && !(m.getClass().equals(this.getClass())) && m.size == this.size;
+            return !(m.getClass().equals(this.getClass())) && m.size == this.size;
         else if (this.isSupportTank())
-            return m instanceof Tank t && Team.isAllied(m, this) && m != this
-                    && (t.health - t.baseHealth < 1 || !BulletHealing.class.isAssignableFrom(this.bullet.bulletClass))
-                    && !(m.getClass().equals(this.getClass()));
+            return Team.isAllied(m, this) && m != this && t.canBeHealed()
+					&& !(m.getClass().equals(this.getClass()));
         else
-            return m instanceof Tank t && !Team.isAllied(m, this) && !t.hidden && t.targetable
-                    && m.posX >= 0 && m.posX / Game.tile_size < Game.currentSizeX
-                    && m.posY >= 0 && m.posY / Game.tile_size < Game.currentSizeY;
+            return !Team.isAllied(m, this) && !t.hidden && t.targetable;
     }
 
     public void setPathfindingTileProperties(Tile t, Obstacle o)
@@ -2348,25 +2355,21 @@ public class TankAIControlled extends Tank
 			if (this.mineTimer <= 0 && this.enableMineLaying && !this.disabled)
 			{
 				boolean layMine = true;
-				int i = 0;
-				while (i < Game.movables.size())
+				for (int i = 0; i < Game.movables.size(); i++)
 				{
 					Movable m = Game.movables.get(i);
-					if (m instanceof Tank t && Team.isAllied(this, m) && m != this)
+					if (!(m instanceof Tank t) || !Team.isAllied(this, m) || m == this)
+						continue;
+
+					if (Math.pow(t.posX - this.posX, 2) + Math.pow(t.posY - this.posY, 2) <= Math.pow(200, 2))
 					{
-						if (Math.pow(t.posX - this.posX, 2) + Math.pow(t.posY - this.posY, 2) <= Math.pow(200, 2))
-						{
-							layMine = false;
-							break;
-						}
+						layMine = false;
+						break;
 					}
-					i++;
 				}
 
 				if (layMine)
-				{
-					this.mine.attemptUse(this);
-				}
+                    this.mine.attemptUse(this);
 			}
 
 			if (!this.currentlySeeking)
@@ -2654,7 +2657,6 @@ public class TankAIControlled extends Tank
 			Drawing.drawing.playGlobalSound("slowdown.ogg", 0.75f);
 			Game.eventsOut.add(new EventTankTransformPreset(this, false, true));
 			Game.movables.add(this);
-			Game.removeMovables.add(this.sightTransformTank);
 			this.skipNextUpdate = true;
 			this.justTransformed = true;
 			this.seesTargetEnemy = false;
@@ -2812,7 +2814,7 @@ public class TankAIControlled extends Tank
 			t.turretBaseModel = this.turretBaseModel;
 
 			if (t instanceof TankAIControlled)
-				((TankAIControlled) t).cooldown = Math.min(((TankAIControlled) t).cooldownBase, this.cooldown);
+				((TankAIControlled) t).cooldown = this.cooldown;
 
 			t.age = 0;
 
@@ -2888,7 +2890,7 @@ public class TankAIControlled extends Tank
 
 	public boolean isSupportTank()
 	{
-		return !this.suicidal && (BulletHealing.class.isAssignableFrom(this.bullet.bulletClass) || BulletBoost.class.isAssignableFrom(this.bullet.bulletClass));
+		return !this.suicidal && targetType == TargetType.allies;
 	}
 
 	public void setPolarAcceleration(double angle, double acceleration)
@@ -3372,7 +3374,7 @@ public class TankAIControlled extends Tank
 
 				if (x1 < 0 || x1 >= Game.currentSizeX || y1 < 0 || y1 >= Game.currentSizeY)
 					surrounded++;
-				else if (Game.game.solidGrid[x1][y1])
+				else if (Game.isSolid(x1, y1))
                     surrounded++;
 			}
 
@@ -3415,7 +3417,7 @@ public class TankAIControlled extends Tank
             if (x1 < 0 || x1 >= Game.currentSizeX || y1 < 0 || y1 >= Game.currentSizeY)
 				return false;
 
-			return Game.game.solidGrid[x1][y1];
+			return Game.isSolid(x1, y1);
 		}
 	}
 

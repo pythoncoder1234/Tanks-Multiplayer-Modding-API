@@ -601,7 +601,7 @@ public class Arcade extends Minigame
             else if (other)
                 y += Game.currentSizeY - 4;
 
-            if (!Game.game.solidGrid[x][y])
+            if (!Chunk.getTile(x, y).solid)
             {
                 found = true;
 

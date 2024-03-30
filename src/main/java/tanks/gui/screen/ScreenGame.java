@@ -969,15 +969,15 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			int y = (int) (o.posY / Game.tile_size);
 
 			if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-				Game.game.groundHeightGrid[x][y] = Math.max(o.getGroundHeight(), Game.game.groundHeightGrid[x][y]);
+				Chunk.getTile(x, y).groundHeight = Math.max(o.getGroundHeight(), Chunk.getTile(x, y).groundHeight);
 		}
 
 		for (int i = 0; i < Game.currentSizeX; i++)
 		{
 			for (int j = 0; j < Game.currentSizeY; j++)
 			{
-				if (Game.game.groundHeightGrid[i][j] <= -1000)
-					Game.game.groundHeightGrid[i][j] = Game.tilesDepth[i][j];
+				if (Chunk.getTile(i, j).groundHeight <= -1000)
+					Chunk.getTile(i, j).groundHeight = 0;
 			}
 		}
 
@@ -1941,8 +1941,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 				if (o.bulletCollision)
 				{
-					Game.game.solidGrid[x][y] = false;
-					Game.game.unbreakableGrid[x][y] = false;
+					Chunk.getTile(x, y).solid = false;
+					Chunk.getTile(x, y).unbreakable = false;
 				}
 
 				if (o == Game.obstacleGrid[x][y])
@@ -1950,6 +1950,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 				if (o == Game.surfaceTileGrid[x][y])
 					Game.surfaceTileGrid[x][y] = null;
+
+				Game.removeObstacle(o);
+				Game.removeSurfaceObstacle(o);
 			}
 
 			Game.obstacles.remove(o);
@@ -2137,8 +2140,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
                 if (Game.fancyTerrain && Game.enable3d && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
                 {
-                    Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
-                    Game.game.groundHeightGrid[x][y] = Math.max(o.getGroundHeight(), Game.game.groundHeightGrid[x][y]);
+                    Chunk.getTile(x, y).height = Math.max(o.getTileHeight(), Chunk.getTile(x, y).height);
+                    Chunk.getTile(x, y).groundHeight = Math.max(o.getGroundHeight(), Chunk.getTile(x, y).groundHeight);
                 }
 
 				if (!Game.game.window.drawingShadow)
@@ -2149,12 +2152,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				}
             }
         }
-
-		if (Game.game.lastHeightGrid == null || Game.game.heightGrid.length != Game.game.lastHeightGrid.length || Game.game.heightGrid[0].length != Game.game.lastHeightGrid[0].length)
-			Game.game.lastHeightGrid = new double[Game.game.heightGrid.length][Game.game.heightGrid[0].length];
-
-		for (int i = 0; i < Game.game.heightGrid.length; i++)
-			System.arraycopy(Game.game.heightGrid[i], 0, Game.game.lastHeightGrid[i], 0, Game.game.heightGrid[i].length);
 
         this.setPerspective();
 
@@ -2369,6 +2366,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
         for (FixedMenu menu : ModAPI.fixedMenus)
             menu.draw();
+
+		Chunk.drawDebugStuff();
 
         if (npcShopScreen)
         {
