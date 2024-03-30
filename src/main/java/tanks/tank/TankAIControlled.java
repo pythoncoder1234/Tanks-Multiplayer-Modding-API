@@ -2831,7 +2831,7 @@ public class TankAIControlled extends Tank
 			{
 				this.possessingTank.colorR = ((Tank) this.targetEnemy).colorR;
 				this.possessingTank.colorG = ((Tank) this.targetEnemy).colorG;
-				this.possessingTank.colorB = ((Tank) twhis.targetEnemy).colorB;
+				this.possessingTank.colorB = ((Tank) this.targetEnemy).colorB;
 
 				this.possessingTank.secondaryColorR = ((Tank) this.targetEnemy).secondaryColorR;
 				this.possessingTank.secondaryColorG = ((Tank) this.targetEnemy).secondaryColorG;
