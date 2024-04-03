@@ -32,6 +32,7 @@ import tanks.tank.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGameScreen
 {
@@ -367,7 +368,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	Button back = new Button(Drawing.drawing.interfaceSizeX / 2, Drawing.drawing.interfaceSizeY / 2 + this.objYSpace, this.objWidth, this.objHeight, "Back to my levels", () ->
 	{
 		Game.cleanUp();
-		System.gc();
 		Panel.panel.zoomTimer = 0;
 
 		if (ScreenInterlevel.tutorial)
@@ -404,7 +404,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	{
 		Game.reset();
 		Game.cleanUp();
-		System.gc();
 		Panel.panel.zoomTimer = 0;
 		Game.screen = ScreenPartyHost.activeScreen;
 		ScreenPartyHost.readyPlayers.clear();
@@ -418,7 +417,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	{
 		Game.reset();
 		Game.cleanUp();
-		System.gc();
 		Panel.panel.zoomTimer = 0;
 		Drawing.drawing.playSound("leave.ogg");
 		ScreenPartyLobby.isClient = false;
@@ -526,7 +524,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		Panel.panel.zoomTimer = 0;
 		Game.silentCleanUp();
-		System.gc();
 		ScreenPartyHost.readyPlayers.clear();
 		ScreenPartyHost.includedPlayers.clear();
 
@@ -546,7 +543,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		Panel.panel.zoomTimer = 0;
 		Game.cleanUp();
-		System.gc();
 		Game.screen = ScreenPartyHost.activeScreen;
 		ScreenPartyHost.readyPlayers.clear();
 		ScreenPartyHost.includedPlayers.clear();
@@ -969,7 +965,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			int y = (int) (o.posY / Game.tile_size);
 
 			if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-				Chunk.getTile(x, y).groundHeight = Math.max(o.getGroundHeight(), Chunk.getTile(x, y).groundHeight);
+				Chunk.getTile(x, y).updateGroundHeight(o.getGroundHeight());
 		}
 
 		for (int i = 0; i < Game.currentSizeX; i++)
@@ -1860,7 +1856,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 									Game.exitToInterlevel();
 
 								Game.eventsOut.add(new EventLevelEnd(s, endText));
-								System.gc();
 							}
 							else if (Game.currentLevel != null && !Game.currentLevel.remote)
 							{
@@ -1918,6 +1913,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			this.shrubberyScale = Math.max(this.shrubberyScale - Panel.frameFrequency / 200, 0.25);
 
 		this.updateMusic(prevMusic);
+
+		for (Movable m : Game.removeMovables)
+			m.getTouchingChunks().forEach(chunk -> chunk.removeMovable(m));
 
 		Game.movables.removeAll(Game.removeMovables);
 		Game.clouds.removeAll(Game.removeClouds);
@@ -2139,10 +2137,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
                 int y = (int) (o.posY / Game.tile_size);
 
                 if (Game.fancyTerrain && Game.enable3d && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-                {
-                    Chunk.getTile(x, y).height = Math.max(o.getTileHeight(), Chunk.getTile(x, y).height);
-                    Chunk.getTile(x, y).groundHeight = Math.max(o.getGroundHeight(), Chunk.getTile(x, y).groundHeight);
-                }
+                    Chunk.getTile(x, y).updateHeight(o.getTileHeight()).updateGroundHeight(o.getGroundHeight());
 
 				if (!Game.game.window.drawingShadow)
 				{
@@ -2304,31 +2299,52 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             drawables[i].clear();
         }
 
-		for (Face f : Game.horizontalFaces)
+		for (Chunk c : Chunk.chunkList)
+			c.faces.clear();
+
+		for (Movable m : Game.movables)    // todo: fix sometime
 		{
-			if ((f.owner instanceof Tank && !(f.owner instanceof TankAIControlled t && t.invisible) || f.owner instanceof Mine) && Game.showTankHitboxes)
+			AtomicInteger count = new AtomicInteger();
+			m.getTouchingChunks().forEach(c ->
+            {
+                c.addMovable(m);
+				count.getAndIncrement();
+            });
+
+			if (Chunk.debug)
 			{
-				drawing.setColor(100, 50, 50);
-				drawing.fillRect(0.5 * (f.endX + f.startX), f.startY, f.endX - f.startX, 5);
-			}
-			else if (f.owner instanceof Obstacle && Game.showObstacleHitboxes)
-			{
-				drawing.setColor(50, 50, 100);
-				drawing.fillRect(0.5 * (f.endX + f.startX), f.startY, f.endX - f.startX, 5);
+				Drawing.drawing.setColor(255, 255, 255);
+				Drawing.drawing.drawText(m.posX, m.posY, Game.tile_size, count + "");
 			}
 		}
 
-		for (Face f : Game.verticalFaces)
+		if (Game.showHitboxes)
 		{
-			if ((f.owner instanceof Tank || f.owner instanceof Mine) && Game.showTankHitboxes)
+			for (Chunk c : Chunk.chunkList)
 			{
-				drawing.setColor(255, 50, 50);
-				drawing.fillRect(f.startX, 0.5 * (f.endY + f.startY), 5, f.endY - f.startY);
-			}
-			else if (f.owner instanceof Obstacle && Game.showObstacleHitboxes)
-			{
-				drawing.setColor(50, 50, 255);
-				drawing.fillRect(f.startX, 0.5 * (f.endY + f.startY), 5, f.endY - f.startY);
+				for (Face f : c.faces.topFaces)
+				{
+					drawing.setColor(150, 50, 50);
+					drawing.fillRect(0.5 * (f.endX + f.startX), f.startY, f.endX - f.startX, 5);
+				}
+
+				for (Face f : c.faces.bottomFaces)
+				{
+					drawing.setColor(255, 50, 50);
+					drawing.fillRect(0.5 * (f.endX + f.startX), f.startY, f.endX - f.startX, 5);
+				}
+
+				for (Face f : c.faces.leftFaces)
+				{
+					drawing.setColor(50, 50, 150);
+					drawing.fillRect(f.startX, 0.5 * (f.endY + f.startY), 5, f.endY - f.startY);
+				}
+
+				for (Face f : c.faces.rightFaces)
+				{
+					drawing.setColor(50, 50, 255);
+					drawing.fillRect(f.startX, 0.5 * (f.endY + f.startY), 5, f.endY - f.startY);
+				}
 			}
 		}
 
@@ -2366,8 +2382,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
         for (FixedMenu menu : ModAPI.fixedMenus)
             menu.draw();
-
-		Chunk.drawDebugStuff();
 
         if (npcShopScreen)
         {

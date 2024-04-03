@@ -48,8 +48,8 @@ public class Face implements Comparable<Face>
     public String toString()
     {
         if (this.horizontal)
-            return this.startX + "-" + this.endX + " " + this.startY;
+            return Math.round(this.startX) + "-" + Math.round(this.endX) + " " + Math.round(this.startY);
         else
-            return this.startX + " " + this.startY + "-" + this.endY;
+            return Math.round(this.startX) + " " + Math.round(this.startY) + "-" + Math.round(this.endY);
     }
 }

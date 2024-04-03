@@ -16,6 +16,8 @@ import tanks.tank.TankProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static tanks.tank.TankProperty.Category.appearanceGeneral;
 
@@ -24,6 +26,8 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
     public double posX;
     public double posY;
     public double posZ = 0;
+
+	public HashSet<Chunk> prevChunks = new HashSet<>();
 
 	public boolean inWater, prevInWater;
 
@@ -103,6 +107,50 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		this.lastPosZ = this.posZ;
 	}
 
+	public void updateChunks()
+	{
+		HashSet<Chunk> chunks = getTouchingChunks().collect(Collectors.toCollection(HashSet::new));
+		for (Chunk c : prevChunks)
+		{
+			if (!chunks.contains(c))
+                onLeaveChunk(c);
+		}
+
+		for (Chunk c : chunks)
+		{
+			c.faces.addFaces(this);
+			if (!prevChunks.contains(c))
+				onEnterChunk(c);
+		}
+
+		prevChunks = chunks;
+	}
+
+	public void onEnterChunk(Chunk c)
+	{
+		c.addMovable(this);
+	}
+
+	public void onLeaveChunk(Chunk c)
+	{
+		c.removeMovable(this);
+	}
+
+	public void addFaces()
+	{
+		getTouchingChunks().forEach(chunk -> chunk.faces.addFaces(this));
+	}
+
+	public void removeFaces()
+	{
+	getTouchingChunks().forEach(chunk -> chunk.faces.removeFaces(this));
+	}
+
+	public Stream<Chunk> getTouchingChunks()
+	{
+		return Chunk.getChunksInRange(posX - size / 2, posY - size / 2, posX + size / 2, posY + size / 2);
+	}
+
 	public void update()
 	{
 		if (!destroy)
@@ -131,15 +179,17 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 				vY2 = this.getAttributeValue(AttributeModifier.velocity, vY2);
 				vZ2 = this.getAttributeValue(AttributeModifier.velocity, vZ2);
 
-			this.lastFinalVX = vX2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
-			this.lastFinalVY = vY2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
-			this.lastFinalVZ = vZ2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
+				this.lastFinalVX = vX2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
+				this.lastFinalVY = vY2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
+				this.lastFinalVZ = vZ2 * ScreenGame.finishTimer / ScreenGame.finishTimerMax;
 
 				this.posX += this.lastFinalVX * Panel.frameFrequency;
 				this.posY += this.lastFinalVY * Panel.frameFrequency;
 				this.posZ += this.lastFinalVZ * Panel.frameFrequency;
 			}
 		}
+
+		updateChunks();
 	}
 
 	public void setMotionInDirection(double x, double y, double velocity)

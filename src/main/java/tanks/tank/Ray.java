@@ -1,5 +1,6 @@
 package tanks.tank;
 
+import tanks.Chunk;
 import tanks.Effect;
 import tanks.Game;
 import tanks.Movable;
@@ -8,6 +9,7 @@ import tanks.obstacle.Face;
 import tanks.obstacle.Obstacle;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 public class Ray
 {
@@ -20,6 +22,7 @@ public class Ray
 	public double posY;
 	public double vX;
 	public double vY;
+	public double angle;
 
 	public boolean enableBounciness = true;
 	public boolean ignoreTanks = false;
@@ -48,6 +51,7 @@ public class Ray
 	{
 		this.vX = speed * Math.cos(angle);
 		this.vY = speed * Math.sin(angle);
+		this.angle = angle;
 
 		this.posX = x;
 		this.posY = y;
@@ -60,6 +64,7 @@ public class Ray
 	{
 		this.vX = speed * Math.cos(angle);
 		this.vY = speed * Math.sin(angle);
+		this.angle = angle;
 
 		this.posX = x;
 		this.posY = y;
@@ -71,93 +76,17 @@ public class Ray
 	public Movable getTarget(double mul, Tank targetTank)
 	{
 		this.targetTank = targetTank;
+		this.targetTank.removeFaces();
 		this.targetTank.size *= mul;
-
-		for (Face f: this.targetTank.getHorizontalFaces())
-			Game.horizontalFaces.remove(f);
-
-		for (Face f: this.targetTank.getVerticalFaces())
-			Game.verticalFaces.remove(f);
-
-		for (Face f: this.targetTank.getHorizontalFaces())
-			addFace(f);
-
-		for (Face f: this.targetTank.getVerticalFaces())
-			addFace(f);
+		this.targetTank.addFaces();
 
 		Movable m = this.getTarget();
 
-		for (Face f: this.targetTank.getHorizontalFaces())
-			Game.horizontalFaces.remove(f);
-
-		for (Face f: this.targetTank.getVerticalFaces())
-			Game.verticalFaces.remove(f);
-
+		this.targetTank.removeFaces();
 		this.targetTank.size /= mul;
-
-		for (Face f: this.targetTank.getHorizontalFaces())
-			addFace(f);
-
-		for (Face f: this.targetTank.getVerticalFaces())
-			addFace(f);
+		this.targetTank.addFaces();
 
 		return m;
-	}
-
-	public void addFace(Face f)
-	{
-		if (f.horizontal)
-		{
-			int a = 0;
-			int b = Game.horizontalFaces.size() - 1;
-
-			boolean added = false;
-			int m = 0;
-			while (a <= b)
-			{
-				m = (a + b) / 2;
-
-				if (Game.horizontalFaces.get(m).startY < f.startY)
-					a = m + 1;
-				else if (Game.horizontalFaces.get(m).startY > f.startY)
-					b = m - 1;
-				else
-				{
-					added = true;
-					Game.horizontalFaces.add(m, f);
-					break;
-				}
-			}
-
-			if (!added)
-				Game.horizontalFaces.add(m, f);
-		}
-		else
-		{
-			int a = 0;
-			int b = Game.verticalFaces.size() - 1;
-
-			boolean added = false;
-			int m = 0;
-			while (a <= b)
-			{
-				m = (a + b) / 2;
-
-				if (Game.verticalFaces.get(m).startX < f.startX)
-					a = m + 1;
-				else if (Game.verticalFaces.get(m).startX > f.startX)
-					b = m - 1;
-				else
-				{
-					added = true;
-					Game.verticalFaces.add(m, f);
-					break;
-				}
-			}
-
-			if (!added)
-				Game.verticalFaces.add(m, f);
-		}
 	}
 
 	public Movable getTarget()
@@ -190,163 +119,30 @@ public class Ray
 			double t = Double.MAX_VALUE;
 			double collisionX = -1;
 			double collisionY = -1;
-			Face collisionFace = null;
+			Result result = null;
 
-			if (vX > 0)
+			for (int chunksChecked = 1; chunksChecked <= 12; chunksChecked++)
 			{
-				for (int i = 0; i < Game.verticalFaces.size(); i++)
-				{
-					double size = this.size;
+				double moveX = Chunk.chunkSize * Game.tile_size * Math.cos(angle);
+				double moveY = Chunk.chunkSize * Game.tile_size * Math.signum(angle);
+				Chunk chunk = Chunk.getChunk(posX + moveX * chunksChecked, posY + moveY * chunksChecked);
 
-					Face f = Game.verticalFaces.get(i);
-					if (f.owner instanceof Movable)
-						size *= tankHitSizeMul;
-
-					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-
-					if (ignoreTanks && f.owner instanceof Tank)
-						passThrough = true;
-
-					if (f.startX < this.posX + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
-						continue;
-
-					double y = (f.startX - size / 2 - this.posX) * vY / vX + this.posY;
-					if (y >= f.startY - size / 2 && y <= f.endY + size / 2)
-					{
-						t = (f.startX - size / 2 - this.posX) / vX;
-						collisionX = f.startX - size / 2;
-						collisionY = y;
-						collisionFace = f;
-						break;
-					}
-				}
-			}
-			else if (vX < 0)
-			{
-				for (int i = Game.verticalFaces.size() - 1; i >= 0; i--)
-				{
-					Face f = Game.verticalFaces.get(i);
-
-					double size = this.size;
-
-					if (f.owner instanceof Movable)
-						size *= tankHitSizeMul;
-
-					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-
-					if (ignoreTanks && f.owner instanceof Tank)
-						passThrough = true;
-
-					if (f.startX > this.posX - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
-						continue;
-
-					double y = (f.startX + size / 2 - this.posX) * vY / vX + this.posY;
-					if (y >= f.startY - size / 2 && y <= f.endY + size / 2)
-					{
-						t = (f.startX + size / 2 - this.posX) / vX;
-						collisionX = f.startX + size / 2;
-						collisionY = y;
-						collisionFace = f;
-						break;
-					}
-				}
+				result = checkCollisionIn(chunk, firstBounce, t, collisionX, collisionY);
+				if (result.collisionFace != null)
+					break;
 			}
 
-			boolean corner = false;
-			if (vY > 0)
-			{
-				for (int i = 0; i < Game.horizontalFaces.size(); i++)
-				{
-					Face f = Game.horizontalFaces.get(i);
 
-					double size = this.size;
-
-					if (f.owner instanceof Movable)
-						size *= tankHitSizeMul;
-
-					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-
-					if (ignoreTanks && f.owner instanceof Tank)
-						passThrough = true;
-
-					if (f.startY < this.posY + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
-						continue;
-
-					double x = (f.startY - size / 2 - this.posY) * vX / vY + this.posX;
-					if (x >= f.startX - size / 2 && x <= f.endX + size / 2)
-					{
-						double t1 = (f.startY - size / 2 - this.posY) / vY;
-
-						if (t1 == t)
-							corner = true;
-						else if (t1 < t)
-						{
-							collisionX = x;
-							collisionY = f.startY - size / 2;
-							collisionFace = f;
-							t = t1;
-						}
-
-						break;
-					}
-				}
-			}
-			else if (vY < 0)
-			{
-				for (int i = Game.horizontalFaces.size() - 1; i >= 0; i--)
-				{
-					Face f = Game.horizontalFaces.get(i);
-
-					double size = this.size;
-
-					if (f.owner instanceof Movable)
-						size *= tankHitSizeMul;
-
-					boolean passThrough = false;
-					if (f.owner instanceof Obstacle o && !o.bouncy)
-						passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
-
-					if (ignoreTanks && f.owner instanceof Tank)
-						passThrough = true;
-
-					if (f.startY > this.posY - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
-						continue;
-
-					double x = (f.startY + size / 2 - this.posY) * vX / vY + this.posX;
-					if (x >= f.startX - size / 2 && x <= f.endX + size / 2)
-					{
-						double t1 = (f.startY + size / 2 - this.posY) / vY;
-
-						if (t1 == t)
-							corner = true;
-						else if (t1 < t)
-						{
-							collisionX = x;
-							collisionY = f.startY + size / 2;
-							collisionFace = f;
-							t = t1;
-						}
-						break;
-					}
-				}
-			}
-
-			this.age += t;
+			this.age += result.t();
 
 			firstBounce = false;
 
-			if (collisionFace != null)
+			if (result.collisionFace() != null)
 			{
 				if (trace)
 				{
-					double dx = collisionX - posX;
-					double dy = collisionY - posY;
+					double dx = result.collisionX() - posX;
+					double dy = result.collisionY() - posY;
 
 					double steps = (Math.sqrt((Math.pow(dx, 2) + Math.pow(dy, 2)) / (1 + Math.pow(this.vX, 2) + Math.pow(this.vY, 2))) + 1);
 
@@ -370,36 +166,36 @@ public class Ray
 					remainder = s - steps;
 				}
 
-				this.posX = collisionX;
-				this.posY = collisionY;
+				this.posX = result.collisionX();
+				this.posY = result.collisionY();
 
-				if (collisionFace.owner instanceof Movable)
+				if (result.collisionFace().owner instanceof Movable)
 				{
-					this.targetX = collisionX;
-					this.targetY = collisionY;
-					bounceX.add(collisionX);
-					bounceY.add(collisionY);
+					this.targetX = result.collisionX();
+					this.targetY = result.collisionY();
+					bounceX.add(result.collisionX());
+					bounceY.add(result.collisionY());
 
-					return (Movable) collisionFace.owner;
+					return (Movable) result.collisionFace().owner;
 				}
-				else if (collisionFace.owner instanceof Obstacle && ((Obstacle) collisionFace.owner).bouncy)
+				else if (result.collisionFace().owner instanceof Obstacle && ((Obstacle) result.collisionFace().owner).bouncy)
 					this.bouncyBounces--;
-				else if (collisionFace.owner instanceof Obstacle && !((Obstacle) collisionFace.owner).allowBounce)
+				else if (result.collisionFace().owner instanceof Obstacle && !((Obstacle) result.collisionFace().owner).allowBounce)
 					this.bounces = -1;
 				else
 					this.bounces--;
 
-				bounceX.add(collisionX);
-				bounceY.add(collisionY);
+				bounceX.add(result.collisionX());
+				bounceY.add(result.collisionY());
 
 				if (this.bounces >= 0)
 				{
-					if (corner)
+					if (result.corner())
 					{
 						this.vX = -this.vX;
 						this.vY = -this.vY;
 					}
-					else if (collisionFace.horizontal)
+					else if (result.collisionFace().horizontal)
 						this.vY = -this.vY;
 					else
 						this.vX = -this.vX;
@@ -411,6 +207,205 @@ public class Ray
 
 		return null;
 	}
+
+	public Result checkCollisionIn(Chunk c, boolean firstBounce, double t, double collisionX, double collisionY)
+	{
+		Face collisionFace = null;
+		if (vX > 0)
+		{
+			for (int i = 0; i < Game.verticalFaces.size(); i++)
+			{
+				double size = this.size;
+
+				Face f = Game.verticalFaces.get(i);
+				if (f.owner instanceof Movable)
+					size *= tankHitSizeMul;
+
+				boolean passThrough = false;
+				if (f.owner instanceof Obstacle o && !o.bouncy)
+					passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+
+				if (ignoreTanks && f.owner instanceof Tank)
+					passThrough = true;
+
+				if (f.startX < this.posX + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
+					continue;
+
+				double y = (f.startX - size / 2 - this.posX) * vY / vX + this.posY;
+				if (y >= f.startY - size / 2 && y <= f.endY + size / 2)
+				{
+					t = (f.startX - size / 2 - this.posX) / vX;
+					collisionX = f.startX - size / 2;
+					collisionY = y;
+					collisionFace = f;
+					break;
+				}
+			}
+		}
+		else if (vX < 0)
+		{
+			for (int i = Game.verticalFaces.size() - 1; i >= 0; i--)
+			{
+				Face f = Game.verticalFaces.get(i);
+
+				double size = this.size;
+
+				if (f.owner instanceof Movable)
+					size *= tankHitSizeMul;
+
+				boolean passThrough = false;
+				if (f.owner instanceof Obstacle o && !o.bouncy)
+					passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+
+				if (ignoreTanks && f.owner instanceof Tank)
+					passThrough = true;
+
+				if (f.startX > this.posX - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
+					continue;
+
+				double y = (f.startX + size / 2 - this.posX) * vY / vX + this.posY;
+				if (y >= f.startY - size / 2 && y <= f.endY + size / 2)
+				{
+					t = (f.startX + size / 2 - this.posX) / vX;
+					collisionX = f.startX + size / 2;
+					collisionY = y;
+					collisionFace = f;
+					break;
+				}
+			}
+		}
+
+		boolean corner = false;
+		if (vY > 0)
+		{
+			for (int i = 0; i < Game.horizontalFaces.size(); i++)
+			{
+				Face f = Game.horizontalFaces.get(i);
+
+				double size = this.size;
+
+				if (f.owner instanceof Movable)
+					size *= tankHitSizeMul;
+
+				boolean passThrough = false;
+				if (f.owner instanceof Obstacle o && !o.bouncy)
+					passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+
+				if (ignoreTanks && f.owner instanceof Tank)
+					passThrough = true;
+
+				if (f.startY < this.posY + size / 2 || !f.solidBullet || !f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
+					continue;
+
+				double x = (f.startY - size / 2 - this.posY) * vX / vY + this.posX;
+				if (x >= f.startX - size / 2 && x <= f.endX + size / 2)
+				{
+					double t1 = (f.startY - size / 2 - this.posY) / vY;
+
+					if (t1 == t)
+						corner = true;
+					else if (t1 < t)
+					{
+						collisionX = x;
+						collisionY = f.startY - size / 2;
+						collisionFace = f;
+						t = t1;
+					}
+
+					break;
+				}
+			}
+		}
+		else if (vY < 0)
+		{
+			for (int i = Game.horizontalFaces.size() - 1; i >= 0; i--)
+			{
+				Face f = Game.horizontalFaces.get(i);
+
+				double size = this.size;
+
+				if (f.owner instanceof Movable)
+					size *= tankHitSizeMul;
+
+				boolean passThrough = false;
+				if (f.owner instanceof Obstacle o && !o.bouncy)
+					passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+
+				if (ignoreTanks && f.owner instanceof Tank)
+					passThrough = true;
+
+				if (f.startY > this.posY - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
+					continue;
+
+				double x = (f.startY + size / 2 - this.posY) * vX / vY + this.posX;
+				if (x >= f.startX - size / 2 && x <= f.endX + size / 2)
+				{
+					double t1 = (f.startY + size / 2 - this.posY) / vY;
+
+					if (t1 == t)
+						corner = true;
+					else if (t1 < t)
+					{
+						collisionX = x;
+						collisionY = f.startY + size / 2;
+						collisionFace = f;
+						t = t1;
+					}
+					break;
+				}
+			}
+		}
+
+		int i = 0;
+		for (TreeSet<Face> faces : c.faces)
+		{
+			for (Face f : (positive ? faces.descendingSet() : faces))
+			{
+				double size = this.size;
+
+				if (f.owner instanceof Movable)
+					size *= tankHitSizeMul;
+
+				boolean passThrough = false;
+				if (f.owner instanceof Obstacle o && !o.bouncy)
+					passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
+
+				if (ignoreTanks && f.owner instanceof Tank)
+					passThrough = true;
+
+				double a1 = x ? f.startX : f.startY;
+				double b1 = x ? f.startY : f.startX;
+				double a2 = x ? this.posX : this.posY;
+				double b2 = x ? this.posY : this.posX;
+				double v1 = x ? this.vX : this.vY;
+				double v2 = x ? this.vY : this.vX;
+
+				if (f.startY > this.posY - size / 2 || !f.solidBullet || f.positiveCollision || (f.owner == this.tank && firstBounce) || passThrough)
+					continue;
+
+				double x = (f.startY + size / 2 - this.posY) * vX / vY + this.posX;
+				if (x >= f.startX - size / 2 && x <= f.endX + size / 2)
+				{
+					double t1 = (f.startY + size / 2 - this.posY) / vY;
+
+					if (t1 == t)
+						corner = true;
+					else if (t1 < t)
+					{
+						collisionX = x;
+						collisionY = f.startY + size / 2;
+						collisionFace = f;
+						t = t1;
+					}
+					break;
+				}
+			}
+		}
+
+		return new Result(t, collisionX, collisionY, collisionFace, corner);
+	}
+
+	public record Result(double t, double collisionX, double collisionY, Face collisionFace, boolean corner) {}
 
 	public double getDist()
 	{

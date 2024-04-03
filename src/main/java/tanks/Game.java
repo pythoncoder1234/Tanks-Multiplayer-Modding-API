@@ -56,9 +56,6 @@ public class Game
 
 	public static final int absoluteDepthBase = 1000;
 
-	public static ArrayList<Face> horizontalFaces = new ArrayList<>();
-	public static ArrayList<Face> verticalFaces = new ArrayList<>();
-
 	public static ArrayList<Movable> movables = new ArrayList<>();
 	public static ArrayList<Obstacle> obstacles = new ArrayList<>();
 	public static ArrayList<Effect> effects = new ArrayList<>();
@@ -111,7 +108,7 @@ public class Game
     public static boolean debug = false;
     public static boolean traceAllRays = false;
     public static boolean showTankIDs = false;
-	public static boolean showTankHitboxes = false;
+	public static boolean showHitboxes = false;
 	public static boolean showObstacleHitboxes = false;
 	public static boolean showUPFMeter = false;
 	public static boolean showPathfinding = false;
@@ -868,6 +865,9 @@ public class Game
 		o.removed = false;
 		Game.obstacles.add(o);
 		Game.redrawObstacles.add(o);
+		Chunk c = Chunk.getChunk(o.posX, o.posY);
+		if (c != null)
+			c.addObstacle(o);
 
 		int x = (int) (o.posX / Game.tile_size);
 		int y = (int) (o.posY / Game.tile_size);
@@ -959,6 +959,7 @@ public class Game
         ObstacleTeleporter.exitCooldown = 100;
         Interval.gameIntervals.clear();
         SyncedFieldMap.mapIDs.clear();
+		System.gc();
     }
 
 	public static void exitToInterlevel()
@@ -986,7 +987,6 @@ public class Game
 
 	public static void exitToCrash(Throwable e)
 	{
-		System.gc();
 
 		e.printStackTrace();
 
@@ -1329,7 +1329,6 @@ public class Game
 		cleanUp();
 		Panel.panel.zoomTimer = 0;
 		screen = new ScreenTitle();
-		System.gc();
 	}
 
 	public static void cleanUp()

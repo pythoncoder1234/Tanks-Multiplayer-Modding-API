@@ -221,9 +221,6 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 	public boolean standardUpdateEvent = true;
 
-	public Face[] horizontalFaces;
-	public Face[] verticalFaces;
-
 	public boolean isBoss = false;
 	public Tank possessor;
 	public Tank possessingTank = null;

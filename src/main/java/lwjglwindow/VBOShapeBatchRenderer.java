@@ -233,9 +233,7 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         this.colBuffer = newColBuffer;
 
         for (ShaderGroup.Attribute a: newAttributeBuffers.keySet())
-        {
             this.attributeBuffers.put(a, newAttributeBuffers.get(a));
-        }
 
         this.bufferStartPoints = newBufferStartPoints;
         this.size = newPos;

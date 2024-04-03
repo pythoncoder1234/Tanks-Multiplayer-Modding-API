@@ -1,26 +1,28 @@
 package tanks;
 
 import basewindow.IBatchRenderableObject;
+import tanks.obstacle.Face;
+import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnusedReturnValue")
 public class Chunk
 {
     public static final Level defaultLevel = new Level("{28,18|,|,}");
     public static final Tile emptyTile = new Tile();
-    public static boolean debug = false;
+    public static boolean debug = true;
 
     public static HashMap<Integer, Chunk> chunks = new HashMap<>();
+    public static ArrayList<Chunk> chunkList = new ArrayList<>();
     public static int chunkSize = 16;
 
     public final int chunkX, chunkY;
     public final HashSet<Obstacle> obstacles = new HashSet<>();
     public final HashSet<Movable> movables = new HashSet<>();
+    public final FaceList faces = new FaceList();
     public final Tile[][] tileGrid = new Tile[chunkSize][chunkSize];
 
     public Chunk(Level l, Random r, int x, int y)
@@ -38,6 +40,55 @@ public class Chunk
         }
     }
 
+    public void addMovable(Movable m)
+    {
+        if (m == null)
+            return;
+
+        movables.add(m);
+        faces.addFaces(m);
+    }
+
+    public void removeMovable(Movable m)
+    {
+        if (m == null)
+            return;
+
+        movables.remove(m);
+        faces.removeFaces(m);
+    }
+
+    public void addObstacle(Obstacle o)
+    {
+        if (o == null)
+            return;
+
+        obstacles.add(o);
+        faces.addFaces(o);
+    }
+
+    public void removeObstacle(Obstacle o)
+    {
+        if (o == null)
+            return;
+
+        obstacles.remove(o);
+        faces.removeFaces(o);
+    }
+
+    public static Stream<Chunk> getChunksInRange(double x1, double y1, double x2, double y2)
+    {
+        return getChunksInRange((int) (x1 / Game.tile_size), (int) (y1 / Game.tile_size),
+                (int) (x2 / Game.tile_size), (int) (y2 / Game.tile_size));
+    }
+
+    public static Stream<Chunk> getChunksInRange(int tx1, int ty1, int tx2, int ty2)
+    {
+        int x1 = tx1 / chunkSize, y1 = ty1 / chunkSize, x2 = tx2 / chunkSize, y2 = ty2 / chunkSize;
+        return chunkList.stream().filter(chunk -> Game.lessThan(true, x1, chunk.chunkX, x2)
+                && Game.lessThan(true, y1, chunk.chunkY, y2));
+    }
+
     public static Tile setTileColor(Level l, Random r, Tile t)
     {
         t.colR = l.colorR + (Game.fancyTerrain ? r.nextDouble() * l.colorVarR : 0);
@@ -50,7 +101,7 @@ public class Chunk
     public static void reset()
     {
         Random r = new Random(0);
-        for (Chunk c : chunks.values())
+        for (Chunk c : chunkList)
             for (int x = 0; x < chunkSize; x++)
                 for (int y = 0; y < chunkSize; y++)
                     c.tileGrid[x][y] = setTileColor(defaultLevel, r, new Tile());
@@ -58,7 +109,7 @@ public class Chunk
 
     public static void fillHeightGrid()
     {
-        for (Chunk c : chunks.values())
+        for (Chunk c : chunkList)
             for (int x = 0; x < chunkSize; x++)
                 for (int y = 0; y < chunkSize; y++)
                     c.tileGrid[x][y].height = c.tileGrid[x][y].groundHeight = -1000;
@@ -70,7 +121,10 @@ public class Chunk
         int y = toChunkTileCoords(o.posY);
 
         if (Objects.equals(tileGrid[x][y].surfaceObstacle, o))
+        {
             tileGrid[x][y].surfaceObstacle = null;
+            removeObstacle(o);
+        }
     }
 
     public void removeObstacleIfEquals(Obstacle o)
@@ -79,7 +133,10 @@ public class Chunk
         int y = toChunkTileCoords(o.posY);
 
         if (Objects.equals(tileGrid[x][y].obstacle, o))
+        {
             tileGrid[x][y].obstacle = null;
+            removeObstacle(o);
+        }
     }
 
     /** Automatically converts to chunk coordinates. */
@@ -110,9 +167,7 @@ public class Chunk
             tileGrid[x][y].obstacle = o;
         }
         else
-        {
             tileGrid[x][y].surfaceObstacle = o;
-        }
     }
 
     public static Tile getTile(int tileX, int tileY)
@@ -150,9 +205,63 @@ public class Chunk
 
         Drawing.drawing.setColor(255, 0, 0, 128);
 
-        for (Chunk c : chunks.values())
+        for (Chunk c : chunkList)
             Drawing.drawing.drawRect(addCoords(c.chunkX, chunkSize / 2.) * Game.tile_size, addCoords(c.chunkY, chunkSize / 2.) * Game.tile_size,
-                    chunkSize * Game.tile_size, chunkSize * Game.tile_size, 5, 20);
+                    chunkSize * Game.tile_size, chunkSize * Game.tile_size, 2);
+    }
+
+    public static class FaceList
+    {
+        public final TreeSet<Face> topFaces = new TreeSet<>();
+        public final TreeSet<Face> bottomFaces = new TreeSet<>();
+        public final TreeSet<Face> leftFaces = new TreeSet<>();
+        public final TreeSet<Face> rightFaces = new TreeSet<>();
+
+        public void addFaces(ISolidObject s)
+        {
+            for (Face f : s.getHorizontalFaces())
+            {
+                if (f.positiveCollision)
+                    topFaces.add(f);
+                else
+                    bottomFaces.add(f);
+            }
+
+            for (Face f : s.getVerticalFaces())
+            {
+                if (f.positiveCollision)
+                    leftFaces.add(f);
+                else
+                    rightFaces.add(f);
+            }
+        }
+
+        public void removeFaces(ISolidObject s)
+        {
+            for (Face f : s.getHorizontalFaces())
+            {
+                if (f.positiveCollision)
+                    topFaces.remove(f);
+                else
+                    bottomFaces.remove(f);
+            }
+
+            for (Face f : s.getVerticalFaces())
+            {
+                if (f.positiveCollision)
+                    leftFaces.remove(f);
+                else
+                    rightFaces.remove(f);
+            }
+        }
+
+        public void clear()
+        {
+            topFaces.clear();
+            bottomFaces.clear();
+            leftFaces.clear();
+            rightFaces.clear();
+        }
     }
 
     public static class Tile implements IBatchRenderableObject
@@ -160,6 +269,18 @@ public class Chunk
         public Obstacle obstacle, surfaceObstacle;
         public double colR, colG, colB, depth, height, groundHeight, lastHeight;
         public boolean solid, unbreakable;
+
+        public Tile updateHeight(double height)
+        {
+            this.height = Math.max(height, this.height);
+            return this;
+        }
+
+        public Tile updateGroundHeight(double gh)
+        {
+            this.groundHeight = Math.max(gh, this.height);
+            return this;
+        }
     }
 
     public static void initialize()
@@ -170,6 +291,7 @@ public class Chunk
     public static void populateChunks(Level l)
     {
         chunks.clear();
+        chunkList.clear();
 
         int sX = l.sizeX / chunkSize + 1, sY = l.sizeY / chunkSize + 1;
         Random r = new Random(0);
@@ -221,6 +343,7 @@ public class Chunk
 
     public static Chunk addChunk(int chunkX, int chunkY, Chunk c)
     {
+        chunkList.add(c);
         return chunks.put(encodeChunkCoords(chunkX, chunkY), c);
     }
 

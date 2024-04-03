@@ -29,7 +29,7 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
-- Chunk loading systemπ
+- Chunk loading system
 - Target type tank property - choices are allies or enemies, but maybe more in the future
 
 [Older Changelogs](changelog.md)

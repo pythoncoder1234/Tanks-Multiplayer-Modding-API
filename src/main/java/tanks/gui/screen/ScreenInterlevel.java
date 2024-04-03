@@ -164,7 +164,6 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
     Button back = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Back to my levels", () ->
 	{
 		Game.cleanUp();
-		System.gc();
 		Game.screen = ScreenPartyHost.isServer ? new ScreenPlaySavedLevels() : new ScreenSavedLevels();
 		fromSavedLevels = false;
 	}
@@ -174,7 +173,6 @@ public class ScreenInterlevel extends Screen implements IDarkScreen
 	{
 		Game.reset();
 		Game.cleanUp();
-		System.gc();
 		Game.screen = new ScreenMinigames();
 		fromMinigames = false;
 	}

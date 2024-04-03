@@ -26,7 +26,10 @@ import tanks.obstacle.Obstacle;
 import tanks.rendering.*;
 import tanks.tank.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class Panel
 {
@@ -781,6 +784,8 @@ public class Panel
         else
             Game.screen.draw();
 
+		Chunk.drawDebugStuff();
+
 		if (!(Game.screen instanceof ScreenExit || Game.screen instanceof ScreenIntro))
 			this.drawBar();
 
@@ -840,6 +845,13 @@ public class Panel
 			{
 				System.out.println(Game.screen.getClass().getSimpleName());
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_S);
+			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_B))
+			{
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_B);
+				Game.showHitboxes = !Game.showHitboxes;
+				notifs.add(new Notification("Hitboxes: " + (Game.showHitboxes ? "shown" : "hidden"), 200).setColor(255, 255, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_D))

@@ -42,8 +42,8 @@ public class ScreenDebug extends ScreenOptionsOverlay
         @Override
         public void run()
         {
-            Game.showTankHitboxes = !Game.showTankHitboxes;
-            tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+            Game.showHitboxes = !Game.showHitboxes;
+            tankHitboxes.setText("Hitboxes: ", Game.showHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         }
     });
 
@@ -127,7 +127,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
 
         grandpaMode.setText("Grandpa mode: ", Game.grandpaMode ? ScreenOptions.onText : ScreenOptions.offText);
         glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
-        tankHitboxes.setText("Tank Hitboxes: ", Game.showTankHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
+        tankHitboxes.setText("Hitboxes: ", Game.showHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         autocannon.setText("Autocannon: ", Game.autocannon ? ScreenOptions.onText : ScreenOptions.offText);
         pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);

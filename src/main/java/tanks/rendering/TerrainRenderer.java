@@ -482,22 +482,9 @@ public class TerrainRenderer
         Game.game.window.shaderDefault.set();
     }
 
-    public void redrawGround()
-    {
-        for (Chunk c : Chunk.chunks.values())
-            for (int i = 0; i < Chunk.chunkSize; i++)
-                for (int j = 0; j < Chunk.chunkSize; j++)
-                    drawTile(i + c.chunkX * Chunk.chunkSize, j + c.chunkY * Chunk.chunkSize, c);
-    }
-
     public void drawTile(int i, int j)
     {
-        drawTile(i, j, Chunk.getChunk(i, j));
-    }
-
-    public void drawTile(int i, int j, Chunk c)
-    {
-        Chunk.Tile t = c.getChunkTile(i, j);
+        Chunk.Tile t = Chunk.tileCoordsGet(i, j);
         double r = t.colR, g = t.colG, b = t.colB, depth = t.depth;
 
         currentColor[0] = (float) (r / 255.0);
@@ -596,7 +583,9 @@ public class TerrainRenderer
                 Chunk.getTile(x, y).height = Math.max(o.getTileHeight(), Chunk.getTile(x, y).height);
         }
 
-        redrawGround();
+        for (int i = 0; i < this.tiles.length; i++)
+            for (int j = 0; j < this.tiles[i].length; j++)
+                this.drawTile(i, j);
 
         Obstacle.draw_size = s;
     }
