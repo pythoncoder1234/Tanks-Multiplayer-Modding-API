@@ -804,9 +804,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 				idMap.remove(this.networkID);
 
 				if (this.affectsMaxLiveBullets)
-				{
-					this.item.liveBullets--;
-				}
+                    this.item.liveBullets--;
 
 				if (!this.isRemote)
 					this.onDestroy();

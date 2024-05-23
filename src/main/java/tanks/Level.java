@@ -376,6 +376,9 @@ public class Level
 							o.setMetadata(meta.toString());
 
 						Game.obstacles.add(o);
+						Chunk c = Chunk.getChunk(o.posX, o.posY);
+						if (c != null)
+							c.addObstacle(o);
 					}
 				}
 			}
@@ -695,8 +698,22 @@ public class Level
 			}
 		}
 
+		addLevelBorders();
+
 		if (!remote && sc == null || (sc instanceof ScreenLevelEditor))
 			Game.eventsOut.add(new EventEnterLevel());
+	}
+
+	public void addLevelBorders()
+	{
+		Chunk.getChunksInRange(0, 0, sizeX, 0).forEach(chunk ->
+				chunk.staticFaces.bottomFaces.add(chunk.borderFaces[0]));
+		Chunk.getChunksInRange(sizeX, 0, sizeX, sizeY).forEach(chunk ->
+				chunk.staticFaces.leftFaces.add(chunk.borderFaces[1]));
+		Chunk.getChunksInRange(0, sizeY, sizeX, sizeY).forEach(chunk ->
+				chunk.staticFaces.topFaces.add(chunk.borderFaces[2]));
+		Chunk.getChunksInRange(0, 0, 0, sizeY).forEach(chunk ->
+				chunk.staticFaces.rightFaces.add(chunk.borderFaces[3]));
 	}
 
 	public void updateModify()

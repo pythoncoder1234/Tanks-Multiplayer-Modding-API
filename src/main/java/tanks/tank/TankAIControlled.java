@@ -945,6 +945,10 @@ public class TankAIControlled extends Tank
 
 	public void updateTarget()
 	{
+		if ((this.shootAIType == ShootAI.none || this.shootAIType == ShootAI.sprinkler || this.shootAIType == ShootAI.wander)
+				&& !this.enableMovement && !this.transformMimic && this.sightTransformTank == null)
+			return;
+
 		if (this.transformMimic)
 			if (this.updateTargetMimic())
 				return;
@@ -965,7 +969,7 @@ public class TankAIControlled extends Tank
 			if ((m instanceof Tank t && correctTeam && !t.hidden && t.targetable && m != this) ||
 					(m instanceof Mine && !BulletAir.class.isAssignableFrom(this.bullet.bulletClass) && !this.isSupportTank() && isTargetSafe(m.posX, m.posY, m)))
 			{
-				boolean reachable = new Ray(this.posX, this.posY, this.getAngleInDirection(m.posX, m.posY), this.bullet.bounces, this).getTarget() == m;
+				boolean reachable = BulletArc.class.isAssignableFrom(this.bullet.bulletClass) || new Ray(this.posX, this.posY, this.getAngleInDirection(m.posX, m.posY), this.bullet.bounces, this).getTarget() == m;
 
 				double dist = Movable.distanceBetween(this, m);
 				if (dist < nearestDist)
@@ -1823,14 +1827,6 @@ public class TankAIControlled extends Tank
 
 	public void updateTurretWander()
 	{
-		Ray a = new Ray(this.posX, this.posY, this.angle, this.bullet.bounces, this);
-		a.moveOut(this.size / 10);
-		a.size = this.bullet.size;
-		a.ignoreDestructible = this.aimIgnoreDestructible;
-		a.ignoreShootThrough = true;
-
-		Movable m = a.getTarget();
-
 		if (this.shootAIType == ShootAI.sprinkler)
 		{
 			if (this.cooldown <= 0)
@@ -1848,6 +1844,14 @@ public class TankAIControlled extends Tank
 		}
 		else
 		{
+			Ray a = new Ray(this.posX, this.posY, this.angle, this.bullet.bounces, this);
+			a.moveOut(this.size / 10);
+			a.size = this.bullet.size;
+			a.ignoreDestructible = this.aimIgnoreDestructible;
+			a.ignoreShootThrough = true;
+
+			Movable m = a.getTarget();
+
 			if (!(m == null))
 				if (!Team.isAllied(m, this) && m instanceof Tank && !((Tank) m).hidden)
 					this.shoot();

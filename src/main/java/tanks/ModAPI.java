@@ -21,14 +21,17 @@ public class ModAPI
 {
     public static String version = "Mod API v1.2.3";
     public static boolean sendEvents = true;
-
-    // Directions in radians in terms of tank (the model is rotated 90 degrees)
-    public static final double up = Math.toRadians(-90);
     static ArrayList<Runnable> resetFunc = new ArrayList<>();
 
     public static ArrayList<FixedMenu> fixedMenus = new ArrayList<>();
     public static HashMap<Double, FixedMenu> ids = new HashMap<>();
     public static ArrayList<FixedMenu> removeMenus = new ArrayList<>();
+
+    // Directions in radians in terms of tank (the model is rotated 90 degrees)
+    public static final double up = Math.toRadians(-90);
+    public static final double down = Math.toRadians(90);
+    public static final double left = Math.toRadians(180);
+    public static final double right = Math.toRadians(0);
 
     /**
      * To add a new mod, add {@code Game.registerMinigame(yourMod.class)} to this function. Of course, type the name of your mod instead of "yourMod".<br><br>
@@ -40,9 +43,6 @@ public class ModAPI
         Game.registerMinigame(TeamDeathmatch.class);
 //        Game.registerMinigame(GameMap.class);
     }
-    public static final double down = Math.toRadians(90);
-    public static final double left = Math.toRadians(180);
-    public static final double right = Math.toRadians(0);
 
     public static void setUp()
     {

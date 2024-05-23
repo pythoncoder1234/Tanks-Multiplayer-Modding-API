@@ -48,6 +48,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	protected long lastTrace = 0;
 	protected static boolean lockTrace = false;
 
+	protected Ray ray;
 	protected double drawRange = -1;
 
 	public double mouseX;
@@ -140,6 +141,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         boolean left = Game.game.input.moveLeft.isPressed();
         boolean right = Game.game.input.moveRight.isPressed();
         boolean trace = Game.game.input.aim.isPressed();
+		ray = null;
 
         boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
 
@@ -207,7 +209,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
             double a = -1;
 
-            if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam))
+			ScreenGame g = ScreenGame.getInstance();
+            if (g != null && !g.freecam || ScreenGame.controlPlayer)
             {
                 if (left)
                     x -= 1;
@@ -465,7 +468,13 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			if (range >= 0)
 				this.drawRange = range;
 			else
-				r.getTarget();
+				this.ray = r;
+
+			if (this.ray != null)
+			{
+				this.ray.bounces = 1;
+				this.ray.getTarget();
+			}
 		}
 
 		super.update();

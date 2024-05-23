@@ -4,12 +4,8 @@ import basewindow.InputCodes;
 import tanks.*;
 import tanks.gui.Button;
 import tanks.obstacle.Face;
-import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 {
@@ -185,70 +181,6 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 
 		if (!Game.game.window.focused)
 			return;
-
-		Game.horizontalFaces.clear();
-		Game.verticalFaces.clear();
-
-		this.horizontalFaces[0].update(0, 0, Game.currentSizeX * Game.tile_size, 0);
-		this.horizontalFaces[1].update(0, Game.currentSizeY * Game.tile_size, Game.currentSizeX * Game.tile_size, Game.currentSizeY * Game.tile_size);
-		Game.horizontalFaces.add(this.horizontalFaces[0]);
-		Game.horizontalFaces.add(this.horizontalFaces[1]);
-
-		this.verticalFaces[0].update(0, 0, 0, Game.currentSizeY * Game.tile_size);
-		this.verticalFaces[1].update(Game.currentSizeX * Game.tile_size, 0, Game.currentSizeX * Game.tile_size, Game.currentSizeY * Game.tile_size);
-		Game.verticalFaces.add(this.verticalFaces[0]);
-		Game.verticalFaces.add(this.verticalFaces[1]);
-
-		for (Movable m : Game.movables)
-		{
-			if (Double.isNaN(m.posX) || Double.isNaN(m.posY))
-				throw new RuntimeException("Movable with NaN position: " + m + " " + m.lastPosX + " " + m.lastPosY);
-
-			if (m instanceof ISolidObject)
-			{
-				Game.horizontalFaces.addAll(Arrays.asList(((ISolidObject) m).getHorizontalFaces()));
-				Game.verticalFaces.addAll(Arrays.asList(((ISolidObject) m).getVerticalFaces()));
-			}
-		}
-
-		for (Obstacle o : Game.obstacles)
-		{
-			Face[] faces = o.getHorizontalFaces();
-			boolean[] valid = o.getValidHorizontalFaces(true);
-			for (int i = 0; i < faces.length; i++)
-			{
-				if (valid[i])
-					Game.horizontalFaces.add(faces[i]);
-			}
-
-			faces = o.getVerticalFaces();
-			valid = o.getValidVerticalFaces(true);
-			for (int i = 0; i < faces.length; i++)
-			{
-				if (valid[i])
-					Game.verticalFaces.add(faces[i]);
-			}
-		}
-
-		try
-		{
-			Collections.sort(Game.horizontalFaces);
-		}
-		catch (Exception e)
-		{
-			System.out.println(Game.horizontalFaces);
-			Game.exitToCrash(e);
-		}
-
-		try
-		{
-			Collections.sort(Game.verticalFaces);
-		}
-		catch (Exception e)
-		{
-			System.out.println(Game.verticalFaces);
-			Game.exitToCrash(e);
-		}
 
 		Obstacle.draw_size = Game.tile_size;
 		for (Effect e : Game.tracks)

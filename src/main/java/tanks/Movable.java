@@ -143,7 +143,7 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 
 	public void removeFaces()
 	{
-	getTouchingChunks().forEach(chunk -> chunk.faces.removeFaces(this));
+		getTouchingChunks().forEach(chunk -> chunk.faces.removeFaces(this));
 	}
 
 	public Stream<Chunk> getTouchingChunks()

@@ -472,6 +472,12 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		return this.horizontalFaces;
 	}
 
+	@Override
+	public boolean rayCollision()
+	{
+		return true;
+	}
+
 	public boolean[] getValidHorizontalFaces(boolean unbreakable)
 	{
 		this.validFaces[0] = (!this.hasNeighbor(0, -1, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);

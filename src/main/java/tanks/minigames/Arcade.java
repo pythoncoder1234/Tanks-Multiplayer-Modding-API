@@ -63,9 +63,7 @@ public class Arcade extends Minigame
     public HashMap<String, String> tankItemsMap = new HashMap<>();
 
     public double chainOpacity = 1;
-
     public Random random;
-
     public ArrayList<ItemDrop> drops = new ArrayList<>();
 
     public Arcade()

@@ -97,7 +97,7 @@ public class Game
 
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
-    public static final String version = "Tanks v1.5.2g";
+    public static final String version = "Tanks v1.5.2i";
     public static final int network_protocol = 54;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;

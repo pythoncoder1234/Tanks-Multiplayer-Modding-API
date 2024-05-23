@@ -42,7 +42,7 @@ public class Panel
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
 	public static boolean forceCenter = false;
-	public static boolean autoZoom = true;
+	public static boolean autoZoom = false;
 	public static double lastAutoZoomSpeed = 0;
 
 	public double panX, panY, panSpeed, panSpeedTarget;
@@ -852,6 +852,13 @@ public class Panel
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_B);
 				Game.showHitboxes = !Game.showHitboxes;
 				notifs.add(new Notification("Hitboxes: " + (Game.showHitboxes ? "shown" : "hidden"), 200).setColor(255, 255, 128));
+			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_G))
+			{
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_G);
+				Chunk.debug = !Chunk.debug;
+				notifs.add(new Notification("Chunk borders: " + (Chunk.debug ? "shown" : "hidden"), 200).setColor(255, 255, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_D))

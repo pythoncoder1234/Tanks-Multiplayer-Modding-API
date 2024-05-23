@@ -13,16 +13,19 @@ public class Chunk
 {
     public static final Level defaultLevel = new Level("{28,18|,|,}");
     public static final Tile emptyTile = new Tile();
-    public static boolean debug = true;
+    public static boolean debug = false;
 
     public static HashMap<Integer, Chunk> chunks = new HashMap<>();
     public static ArrayList<Chunk> chunkList = new ArrayList<>();
-    public static int chunkSize = 16;
+    public static int chunkSize = 8;
 
     public final int chunkX, chunkY;
+    public Face[] borderFaces = new Face[4];
     public final HashSet<Obstacle> obstacles = new HashSet<>();
     public final HashSet<Movable> movables = new HashSet<>();
     public final FaceList faces = new FaceList();
+    public final FaceList staticFaces = new FaceList();
+    public final FaceList[] faceLists = {faces, staticFaces};
     public final Tile[][] tileGrid = new Tile[chunkSize][chunkSize];
 
     public Chunk(Level l, Random r, int x, int y)
@@ -38,6 +41,28 @@ public class Chunk
                     tileGrid[i][j] = setTileColor(l, r, new Tile());
             }
         }
+
+        for (int i = 1; i <= 4; i++)
+            this.borderFaces[i-1] = getBorderFace(this, i, l.sizeX, l.sizeY);
+    }
+
+    int[] x1 = {0, 1, 0, 0}, x2 = {1, 1, 1, 0};
+    int[] y1 = {0, 0, 1, 0}, y2 = {0, 1, 1, 1};
+
+    /**
+     * @param side Integer from 1-4, indicating top, right, bottom, or left face
+     */
+    public Face getBorderFace(Chunk c, int side, int sizeX, int sizeY)
+    {
+        side--;
+        Face f = new Face(null,
+                Math.min(sizeX, (c.chunkX + x1[side]) * Chunk.chunkSize) * Game.tile_size,
+                Math.min(sizeY, (c.chunkY + y1[side]) * Chunk.chunkSize) * Game.tile_size,
+                Math.min(sizeX, (c.chunkX + x2[side]) * Chunk.chunkSize) * Game.tile_size,
+                Math.min(sizeY, (c.chunkY + y2[side]) * Chunk.chunkSize) * Game.tile_size,
+                side % 2 == 0, side <= 2, true, true);
+        c.borderFaces[side] = f;
+        return f;
     }
 
     public void addMovable(Movable m)
@@ -64,7 +89,7 @@ public class Chunk
             return;
 
         obstacles.add(o);
-        faces.addFaces(o);
+        staticFaces.addFaces(o);
     }
 
     public void removeObstacle(Obstacle o)
@@ -73,7 +98,7 @@ public class Chunk
             return;
 
         obstacles.remove(o);
-        faces.removeFaces(o);
+        staticFaces.removeFaces(o);
     }
 
     public static Stream<Chunk> getChunksInRange(double x1, double y1, double x2, double y2)
@@ -212,9 +237,13 @@ public class Chunk
 
     public static class FaceList
     {
+        /** dyn x, same y */
         public final TreeSet<Face> topFaces = new TreeSet<>();
+        /** dym x, same y */
         public final TreeSet<Face> bottomFaces = new TreeSet<>();
+        /** same x, dyn y */
         public final TreeSet<Face> leftFaces = new TreeSet<>();
+        /** same x, dyn y */
         public final TreeSet<Face> rightFaces = new TreeSet<>();
 
         public void addFaces(ISolidObject s)
