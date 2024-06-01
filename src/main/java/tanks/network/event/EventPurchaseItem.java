@@ -36,9 +36,8 @@ public class EventPurchaseItem extends PersonalEvent
     @Override
     public void execute()
     {
-        if (this.clientID != null && Game.screen instanceof ScreenGame)
+        if (this.clientID != null && Game.screen instanceof ScreenGame s)
         {
-            ScreenGame s = (ScreenGame) Game.screen;
             for (int i = 0; i < Game.players.size(); i++)
             {
                 if (Game.players.get(i).clientID.equals(this.clientID))

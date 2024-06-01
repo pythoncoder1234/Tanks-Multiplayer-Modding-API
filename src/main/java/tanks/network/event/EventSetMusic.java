@@ -65,9 +65,8 @@ public class EventSetMusic extends PersonalEvent
     @Override
     public void execute()
     {
-        if (Game.screen instanceof ScreenGame)
+        if (Game.screen instanceof ScreenGame s)
         {
-            ScreenGame s = (ScreenGame) Game.screen;
             s.introMusic = introMusic;
             s.mainMusic = music;
             s.endMusic = endMusic;

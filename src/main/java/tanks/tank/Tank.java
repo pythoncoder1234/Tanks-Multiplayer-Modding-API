@@ -173,7 +173,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	public ItemMine mine = (ItemMine) TankPlayer.default_mine.clone();
 
 	/** Age in frames*/
-	protected double age = 0, trueAge = 0;
+	protected double age = 0;
 
 	public double drawAge = 0;
 	public double destroyTimer = 0;
@@ -1230,9 +1230,9 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	}
 
 	@Override
-	public boolean rayCollision()
+	public boolean disableRayCollision()
 	{
-		return enableCollision;
+		return !enableCollision;
 	}
 
 	public double getDamageMultiplier(GameObject source)
@@ -1433,16 +1433,11 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	{
 		if (this.possessor == null)
 			return null;
-		else
-		{
-			Tank p = this.possessor;
-			while (p.possessor != null)
-			{
-				p = p.possessor;
-			}
 
-			return p;
-		}
+		Tank p = this.possessor;
+		while (p.possessor != null)
+			p = p.possessor;
+		return p;
 	}
 
 	public Tank getBottomLevelPossessing()

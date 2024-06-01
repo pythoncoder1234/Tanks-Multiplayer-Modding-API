@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class Game
 {
 	public enum Framework {lwjgl, libgdx}
@@ -987,7 +988,6 @@ public class Game
 
 	public static void exitToCrash(Throwable e)
 	{
-
 		e.printStackTrace();
 
 		if (Game.screen instanceof ScreenLevelEditor)
@@ -1102,10 +1102,7 @@ public class Game
 
 	public static Obstacle getObstacle(int posX, int posY)
 	{
-		Chunk c = Chunk.getChunk(posX / Chunk.chunkSize, posY / Chunk.chunkSize);
-		if (c != null)
-			return Objects.requireNonNullElse(c.getChunkTile(posX, posY), Chunk.emptyTile).obstacle;
-		return null;
+		return Objects.requireNonNullElse(Chunk.getTile(posX, posY), Chunk.emptyTile).obstacle;
 	}
 
 	public static Obstacle getSurfaceObstacle(int posX, int posY)
@@ -1126,6 +1123,25 @@ public class Game
 		return getSurfaceObstacle((int) (posX / Game.tile_size), (int) (posY / Game.tile_size));
 	}
 
+    public static <T extends GameObject> ArrayList<T> getInRange(double x1, double y1, double x2, double y2, Function<Chunk, Collection<T>> func)
+	{
+		ArrayList<T> out = new ArrayList<>();
+		Chunk.getChunksInRange(x1, y1, x2, y2).forEach(c -> out.addAll(func.apply(c)));
+		return out;
+	}
+
+	public static <T extends GameObject> ArrayList<T> getInRadius(double posX, double posY, double radius, Function<Chunk, Collection<T>> func)
+	{
+		ArrayList<T> out = new ArrayList<>();
+		Chunk.getChunksInRadius(posX, posY, radius).forEach(c ->
+		{
+			for (T o : func.apply(c))
+				if (Movable.squaredDistanceBetween(o.posX, o.posY, posX, posY) < radius * radius)
+					out.add(o);
+		});
+		return out;
+	}
+
 	public static void removeObstacle(Obstacle o)
 	{
 		Chunk c = Chunk.getChunk(o.posX, o.posY);
@@ -1135,27 +1151,27 @@ public class Game
 
 	public static boolean isSolid(int tileX, int tileY)
 	{
-		return Chunk.getTile(tileX, tileY).solid;
+		return Objects.requireNonNullElse(Chunk.getTile(tileX, tileY), Chunk.emptyTile).solid;
 	}
 
 	public static boolean isSolid(double posX, double posY)
 	{
-		return Chunk.getTile(posX, posY).solid;
+		return Objects.requireNonNullElse(Chunk.getTile(posX, posY), Chunk.emptyTile).solid;
 	}
 
 	public static boolean isUnbreakable(int tileX, int tileY)
 	{
-		return Chunk.getTile(tileX, tileY).unbreakable;
+		return Objects.requireNonNullElse(Chunk.getTile(tileX, tileY), Chunk.emptyTile).unbreakable;
 	}
 
 	public static boolean isUnbreakable(double posX, double posY)
 	{
-		return Chunk.getTile(posX, posY).unbreakable;
+		return Objects.requireNonNullElse(Chunk.getTile(posX, posY), Chunk.emptyTile).unbreakable;
 	}
 
 	public static double getTileHeight(double posX, double posY)
 	{
-		return Chunk.getTile(posX, posY).height;
+		return Objects.requireNonNullElse(Chunk.getTile(posX, posY), Chunk.emptyTile).height;
 	}
 
 	public static void removeSurfaceObstacle(Obstacle o)
@@ -1401,9 +1417,7 @@ public class Game
 			f.startReading();
 
 			while (f.hasNextLine())
-			{
-				line.append(f.nextLine()).append("\n");
-			}
+                line.append(f.nextLine()).append("\n");
 
 			Level l = new Level(line.substring(0, line.length() - 1));
 			l.loadLevel(s);

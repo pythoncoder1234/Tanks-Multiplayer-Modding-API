@@ -31,9 +31,8 @@ public class EventAddUUIDTextBox extends EventAddTextBox
     @Override
     public void execute()
     {
-        if (this.clientID == null && Game.screen instanceof ScreenOnline)
+        if (this.clientID == null && Game.screen instanceof ScreenOnline s)
         {
-            ScreenOnline s = (ScreenOnline) Game.screen;
             UUIDTextBox t;
 
             final int textBoxID = this.id;

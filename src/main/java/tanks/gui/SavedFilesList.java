@@ -100,7 +100,7 @@ public class SavedFilesList extends ButtonList
         }
 
         //this.buttons.sort(Comparator.comparing(o -> o.text) /*(int) Math.signum(times.get(o2) - times.get(o1))*/);
-        Collections.sort(buttons, (o1, o2) -> o1.text.compareTo(o2.text));
+        buttons.sort(Comparator.comparing(o -> o.text));
 
         this.sortButtons();
     }

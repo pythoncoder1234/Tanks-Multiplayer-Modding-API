@@ -298,9 +298,8 @@ public class ObstacleTrainTrack extends Obstacle
         @Override
         public boolean equals(Object obj)
         {
-            if (obj instanceof AnglePair)
+            if (obj instanceof AnglePair p)
             {
-                AnglePair p = ((AnglePair) obj);
                 return (a == p.a && b == p.b) || (a == p.b && b == p.a);
             }
 

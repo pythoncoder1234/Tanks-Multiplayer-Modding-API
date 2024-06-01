@@ -70,9 +70,8 @@ public class TeamDeathmatch extends Minigame
 
         for (Movable m : Game.movables)
         {
-            if (m instanceof TankMedic)
+            if (m instanceof TankMedic t)
             {
-                TankMedic t = (TankMedic) m;
                 t.health = 2;
                 t.baseHealth = 2;
                 t.baseModel = TankModels.fixed.base;

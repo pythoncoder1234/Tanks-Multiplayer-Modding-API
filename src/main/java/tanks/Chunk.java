@@ -9,9 +9,10 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnusedReturnValue")
-public class Chunk
+public class Chunk implements Comparable<Chunk>
 {
     public static final Level defaultLevel = new Level("{28,18|,|,}");
+    public static final Chunk zeroChunk = new Chunk();
     public static final Tile emptyTile = new Tile();
     public static boolean debug = false;
 
@@ -27,6 +28,8 @@ public class Chunk
     public final FaceList staticFaces = new FaceList();
     public final FaceList[] faceLists = {faces, staticFaces};
     public final Tile[][] tileGrid = new Tile[chunkSize][chunkSize];
+
+    public Chunk compareTo;
 
     public Chunk(Level l, Random r, int x, int y)
     {
@@ -46,6 +49,12 @@ public class Chunk
             this.borderFaces[i-1] = getBorderFace(this, i, l.sizeX, l.sizeY);
     }
 
+    private Chunk()
+    {
+        this.chunkX = 0;
+        this.chunkY = 0;
+    }
+
     int[] x1 = {0, 1, 0, 0}, x2 = {1, 1, 1, 0};
     int[] y1 = {0, 0, 1, 0}, y2 = {0, 1, 1, 1};
 
@@ -63,6 +72,49 @@ public class Chunk
                 side % 2 == 0, side <= 2, true, true);
         c.borderFaces[side] = f;
         return f;
+    }
+
+    public static ArrayList<Chunk> iterateOutwards(double posX, double posY, int radius)
+    {
+        return iterateOutwards((int) (posX / Game.tile_size), (int) (posY / Game.tile_size), radius);
+    }
+
+    public static ArrayList<Chunk> iterateOutwards(int tileX, int tileY, int radius)
+    {
+        ArrayList<Chunk> out = new ArrayList<>();
+        ArrayDeque<Chunk> queue = new ArrayDeque<>();
+        HashSet<Chunk> visited = new HashSet<>();
+
+        Chunk start = Chunk.getChunk(tileX, tileY, true);
+        queue.add(start);
+
+        while (!queue.isEmpty())
+        {
+            Chunk c = queue.poll();
+            for (int i = 0; i < 4; i++)
+            {
+                int newX = c.chunkX + Game.dirX[i];
+                int newY = c.chunkY + Game.dirY[i];
+                Chunk next = Chunk.getChunk(newX, newY);
+                if (next != null && start.manhattanDist(next) < radius && visited.add(next))
+                {
+                    out.add(next);
+                    queue.add(next);
+                }
+            }
+        }
+
+        return out;
+    }
+
+    public static double chunkToPixel(double chunkPos)
+    {
+        return chunkPos * Chunk.chunkSize * Game.tile_size;
+    }
+
+    public int manhattanDist(Chunk other)
+    {
+        return Math.abs(chunkX - other.chunkX) + Math.abs(chunkY - other.chunkY);
     }
 
     public void addMovable(Movable m)
@@ -89,7 +141,9 @@ public class Chunk
             return;
 
         obstacles.add(o);
-        staticFaces.addFaces(o);
+
+        if (o.tankCollision || o.bulletCollision)
+            staticFaces.addFaces(o);
     }
 
     public void removeObstacle(Obstacle o)
@@ -98,7 +152,9 @@ public class Chunk
             return;
 
         obstacles.remove(o);
-        staticFaces.removeFaces(o);
+
+        if (o.tankCollision || o.bulletCollision)
+            staticFaces.removeFaces(o);
     }
 
     public static Stream<Chunk> getChunksInRange(double x1, double y1, double x2, double y2)
@@ -114,6 +170,20 @@ public class Chunk
                 && Game.lessThan(true, y1, chunk.chunkY, y2));
     }
 
+    /** Expects all pixel coordinates. */
+    public static Stream<Chunk> getChunksInRadius(double x1, double y1, double radius)
+    {
+        return getChunksInRadius((int) (x1 / Game.tile_size), (int) (y1 / Game.tile_size), (int) (radius / Game.tile_size));
+    }
+
+    /** Expects all tile coordinates. */
+    public static Stream<Chunk> getChunksInRadius(int tx1, int ty1, int radius)
+    {
+        int x1 = tx1 / chunkSize, y1 = ty1 / chunkSize, cRad = radius / chunkSize;
+        return chunkList.stream().filter(chunk -> (chunk.chunkX - x1) * (chunk.chunkX - x1) +
+                (chunk.chunkY - y1) * (chunk.chunkY - y1) < cRad * cRad);
+    }
+
     public static Tile setTileColor(Level l, Random r, Tile t)
     {
         t.colR = l.colorR + (Game.fancyTerrain ? r.nextDouble() * l.colorVarR : 0);
@@ -125,11 +195,7 @@ public class Chunk
 
     public static void reset()
     {
-        Random r = new Random(0);
-        for (Chunk c : chunkList)
-            for (int x = 0; x < chunkSize; x++)
-                for (int y = 0; y < chunkSize; y++)
-                    c.tileGrid[x][y] = setTileColor(defaultLevel, r, new Tile());
+        populateChunks(defaultLevel);
     }
 
     public static void fillHeightGrid()
@@ -195,12 +261,13 @@ public class Chunk
             tileGrid[x][y].surfaceObstacle = o;
     }
 
+    /** Expects tile coordinates. */
     public static Tile getTile(int tileX, int tileY)
     {
         return getChunk(tileX / chunkSize, tileY / chunkSize).getChunkTile(tileX, tileY);
     }
 
-    /** Equivalent to <code>Chunk.getChunk(posX, posY).getChunkTile(posX, posY)</code> */
+    /** Expects pixel coordinates. */
     public static Tile getTile(double posX, double posY)
     {
         return getChunk(posX, posY).getChunkTile(posX, posY);
@@ -235,6 +302,13 @@ public class Chunk
                     chunkSize * Game.tile_size, chunkSize * Game.tile_size, 2);
     }
 
+    @Override
+    public int compareTo(Chunk o)
+    {
+        Chunk chunkToCompare = Objects.requireNonNullElse(compareTo, zeroChunk);
+        return Integer.compare(this.manhattanDist(chunkToCompare), o.manhattanDist(chunkToCompare)) | this.manhattanDist(o);
+    }
+
     public static class FaceList
     {
         /** dyn x, same y */
@@ -248,16 +322,32 @@ public class Chunk
 
         public void addFaces(ISolidObject s)
         {
+            if (s.disableRayCollision())
+                return;
+
+            boolean[] valid = s.getValidHorizontalFaces(false);
+            int i = -1;
             for (Face f : s.getHorizontalFaces())
             {
+                i++;
+
+                if (valid != null && !valid[i])
+                    continue;
+
                 if (f.positiveCollision)
                     topFaces.add(f);
                 else
                     bottomFaces.add(f);
             }
 
+            valid = s.getValidVerticalFaces(false);
+            i = -1;
             for (Face f : s.getVerticalFaces())
             {
+                i++;
+                if (valid != null && !valid[i])
+                    continue;
+
                 if (f.positiveCollision)
                     leftFaces.add(f);
                 else
@@ -267,6 +357,9 @@ public class Chunk
 
         public void removeFaces(ISolidObject s)
         {
+            if (s.disableRayCollision())
+                return;
+
             for (Face f : s.getHorizontalFaces())
             {
                 if (f.positiveCollision)
@@ -323,30 +416,11 @@ public class Chunk
         chunkList.clear();
 
         int sX = l.sizeX / chunkSize + 1, sY = l.sizeY / chunkSize + 1;
-        Random r = new Random(0);
+        Random r = new Random(l.tilesRandomSeed);
 
         for (int x = 0; x < sX; x++)
             for (int y = 0; y < sY; y++)
                 addChunk(x, y, new Chunk(l, r, x, y));
-    }
-
-    public static Obstacle getObstacle(double posX, double posY)
-    {
-        return getObstacle(posX, posY, false);
-    }
-
-    public static Obstacle getObstacle(double posX, double posY, boolean isTileCoords)
-    {
-        int x = (int) posX;
-        int y = (int) posY;
-
-        if (!isTileCoords)
-        {
-            posX /= Game.tile_size;
-            posY /= Game.tile_size;
-        }
-
-        return getChunk(posX, posY).tileGrid[x % chunkSize][y % chunkSize].obstacle;
     }
 
     public static Chunk getChunk(double posX, double posY)
@@ -358,8 +432,8 @@ public class Chunk
     {
         if (!isTileCoords)
         {
-            posX = posX / Game.tile_size - 0.5;
-            posY = posY / Game.tile_size - 0.5;
+            posX = posX / Game.tile_size;
+            posY = posY / Game.tile_size;
         }
 
         return getChunk((int) (posX / chunkSize), (int) (posY / chunkSize));

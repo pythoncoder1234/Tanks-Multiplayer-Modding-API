@@ -221,6 +221,12 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         this.fastRemoveOnExit = false;
     }
 
+    public Effect setRadius(double radius)
+    {
+        this.radius = radius;
+        return this;
+    }
+
     @Override
     public void draw()
     {

@@ -67,9 +67,8 @@ public class EventAddText extends PersonalEvent
     @Override
     public void execute()
     {
-        if (this.clientID == null && Game.screen instanceof ScreenOnline)
+        if (this.clientID == null && Game.screen instanceof ScreenOnline s)
         {
-            ScreenOnline s = (ScreenOnline) Game.screen;
             ScreenOnline.Text t = new ScreenOnline.Text(this.text, this.posX, this.posY, this.size, this.alignment);
             t.posX -= (Drawing.drawing.interfaceScaleZoom - 1) * Drawing.drawing.interfaceSizeX * (xAlignment + 1) / 2.0;
             t.posY -= (Drawing.drawing.interfaceScaleZoom - 1) * Drawing.drawing.interfaceSizeY * (yAlignment + 1) / 2.0;

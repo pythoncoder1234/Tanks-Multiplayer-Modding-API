@@ -8,7 +8,6 @@ import tanks.network.event.EventStatusEffectDeteriorate;
 import tanks.network.event.EventStatusEffectEnd;
 import tanks.obstacle.Face;
 import tanks.obstacle.ISolidObject;
-import tanks.obstacle.Obstacle;
 import tanks.tank.NameTag;
 import tanks.tank.Tank;
 import tanks.tank.TankProperty;
@@ -23,10 +22,6 @@ import static tanks.tank.TankProperty.Category.appearanceGeneral;
 
 public abstract class Movable extends GameObject implements IDrawableForInterface, ISolidObject
 {
-    public double posX;
-    public double posY;
-    public double posZ = 0;
-
 	public HashSet<Chunk> prevChunks = new HashSet<>();
 
 	public boolean inWater, prevInWater;
@@ -299,7 +294,7 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		return Game.enable3d && supportsTransparency() && drawTransparent;
 	}
 
-	/** Override to return true if the object is completely 3D and supports depth testing. */
+	/** Override to return true if the object is completely 3D (no text, images, etc. which are 2D) and supports depth testing. */
 	public boolean supportsTransparency()
 	{
 		return false;
@@ -636,22 +631,17 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 		return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
 	}
 
-	public static double squaredDistanceBetween(final Movable a, final Movable b)
+	public static double squaredDistanceBetween(final GameObject a, final GameObject b)
 	{
 		return squaredDistanceBetween(a.posX, a.posY, b.posX, b.posY);
 	}
 
-	public static double distanceBetween(final Movable a, final Movable b)
+	public static boolean withinRange(final GameObject a, final GameObject b, double range)
 	{
-		return distanceBetween(a.posX, a.posY, b.posX, b.posY);
-	}
-	
-	public static double distanceBetween(final Obstacle a, final Movable b)
-	{
-		return distanceBetween(a.posX, a.posY, b.posX, b.posY);
+		return squaredDistanceBetween(a, b) < range * range;
 	}
 
-	public static double distanceBetween(Obstacle a, Obstacle b)
+	public static double distanceBetween(final GameObject a, final GameObject b)
 	{
 		return distanceBetween(a.posX, a.posY, b.posX, b.posY);
 	}

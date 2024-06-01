@@ -42,17 +42,15 @@ public class EventTankControllerUpdateS extends EventTankUpdate
 
         if (this.clientID == null && (t instanceof TankRemote || (t instanceof TankPlayerController && (this.forced || !Game.clientID.equals(((TankPlayerController) t).clientID)))))
         {
-            if (t instanceof TankPlayerController && Game.clientID.equals(((TankPlayerController) t).clientID))
+            if (t instanceof TankPlayerController p && Game.clientID.equals(((TankPlayerController) t).clientID))
             {
-                TankPlayerController p = (TankPlayerController) t;
                 p.interpolatedOffX = this.posX - (t.posX - p.interpolatedOffX * (TankPlayerController.interpolationTime - p.interpolatedProgress) / TankPlayerController.interpolationTime);
                 p.interpolatedOffY = this.posY - (t.posY - p.interpolatedOffY * (TankPlayerController.interpolationTime - p.interpolatedProgress) / TankPlayerController.interpolationTime);
                 p.interpolatedProgress = 0;
             }
 
-            if (t instanceof TankRemote)
+            if (t instanceof TankRemote r)
             {
-                TankRemote r = (TankRemote) t;
                 double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
 
                 r.prevKnownPosX = r.posX;

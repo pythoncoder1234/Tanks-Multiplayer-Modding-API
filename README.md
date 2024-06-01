@@ -30,6 +30,9 @@ New Features:
 ---
 
 - Chunk loading system
+- Huge optimizations
+- Removed update skipping for now
+- Fixed many bugs
 - Target type tank property - choices are allies or enemies, but maybe more in the future
 
 [Older Changelogs](changelog.md)

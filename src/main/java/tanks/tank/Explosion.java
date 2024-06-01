@@ -101,14 +101,12 @@ public class Explosion extends Movable
 
         if (this.destroysObstacles && !ScreenPartyLobby.isClient)
         {
-            for (Obstacle o: Game.obstacles)
+            for (Obstacle o : Game.getInRadius(posX, posY, radius + Game.tile_size / 2, c -> c.obstacles))
             {
-                if (o.destructible && !Game.removeObstacles.contains(o) && withinExplosionRange(o))
-                {
-                    o.onDestroy(this);
-                    o.playDestroyAnimation(this.posX, this.posY, this.radius);
-                    Game.eventsOut.add(new EventObstacleDestroy(o.posX, o.posY, o.name, this.posX, this.posY, this.radius));
-                }
+                if (!o.destructible) continue;
+                o.onDestroy(this);
+                o.playDestroyAnimation(this.posX, this.posY, this.radius);
+                Game.eventsOut.add(new EventObstacleDestroy(o.posX, o.posY, o.name, this.posX, this.posY, this.radius));
             }
         }
 
@@ -122,18 +120,18 @@ public class Explosion extends Movable
         return withinExplosionRange(m, posX, posY, radius);
     }
 
-    public boolean withinExplosionRange(Obstacle o)
-    {
-        return Movable.distanceBetween(o, this) < radius + Game.tile_size / 2;
-    }
-
-    public static boolean withinExplosionRange(Movable m, double mineX, double mineY, double radius)
+    public static double getAdjustedRadius(Movable m, double radius)
     {
         double adjustedRadius = m instanceof Tank t ? radius - Game.tile_size * 0.95 + m.size * t.hitboxSize : radius;
         if (Game.vanillaMode)
             adjustedRadius = radius + m.size;
+        return adjustedRadius;
+    }
 
-        return Movable.squaredDistanceBetween(m.posX, m.posY, mineX, mineY) < adjustedRadius * adjustedRadius;
+    public static boolean withinExplosionRange(Movable m, double mineX, double mineY, double radius)
+    {
+        double r = getAdjustedRadius(m, radius);
+        return Movable.squaredDistanceBetween(m.posX, m.posY, mineX, mineY) < r * r;
     }
 
     @Override

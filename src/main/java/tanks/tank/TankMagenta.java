@@ -13,6 +13,7 @@ public class TankMagenta extends TankAIControlled
 		this.enableTargetEnemyReaction = true;
 		this.maxSpeed = 1.0;
 		this.enableMineLaying = false;
+		this.bulletAvoidBehvavior = BulletAvoidBehavior.dodge;
 		this.bullet.maxLiveBullets = 3;
 		this.cooldownRandom = 20;
 		this.cooldownBase = 40;
@@ -21,9 +22,7 @@ public class TankMagenta extends TankAIControlled
 		this.coinValue = 3;
 
 		if (Game.tankTextures)
-		{
-			this.baseModel = TankModels.cross.base;
-		}
+            this.baseModel = TankModels.cross.base;
 
 		this.description = "A medium-speed smart tank";
 	}

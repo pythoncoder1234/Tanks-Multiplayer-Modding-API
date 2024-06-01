@@ -83,9 +83,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	public RotationAboutPoint slantRotation;
 	public Translation slantTranslation;
 
-	public Face[] horizontalFaces;
-	public Face[] verticalFaces;
-
 	public Tank spectatingTank = null;
 
 	public double readyPanelCounter = 0;
@@ -461,9 +458,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		}
 
 		Crusade.currentCrusade.recordPerformance(ScreenGame.lastTimePassed, false);
-
 		Crusade.currentCrusade.retry = true;
-
 		this.saveRemainingTanks();
 
 		Crusade.currentCrusade.saveHotbars();
@@ -517,9 +512,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		cancelCountdown = true;
 
 		Crusade.currentCrusade.recordPerformance(ScreenGame.lastTimePassed, false);
-
 		Crusade.currentCrusade.retry = true;
-
 		this.saveRemainingTanks();
 
 		Panel.panel.zoomTimer = 0;
@@ -577,6 +570,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				endText = EndText.crusade;
 		}
 
+		for (int i = 0; i < drawables.length; i++)
+			drawables[i] = new ArrayList<>();
+		for (int i = 0; i < drawBeforeObstacles.length; i++)
+			drawBeforeObstacles[i] = new ArrayList<>();
+
 		options.image = "icons/gear.png";
 		options.imageSizeX = 50;
 		options.imageSizeY = 50;
@@ -617,22 +615,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		ScreenGame.finishTimer = ScreenGame.finishTimerMax;
 
-		for (int i = 0; i < this.drawables.length; i++)
-			this.drawables[i] = new ArrayList<>();
-
-		for (int i = 0; i < this.drawBeforeObstacles.length; i++)
-			this.drawBeforeObstacles[i] = new ArrayList<>();
-
 		slantRotation = new RotationAboutPoint(Game.game.window, 0, 0, 0, 0.5, 0.5, -1);
 		slantTranslation = new Translation(Game.game.window, 0, 0, 0);
-
-		this.horizontalFaces = new Face[2];
-		this.horizontalFaces[0] = new Face(null, 0, 0, Game.currentSizeX * Game.tile_size, 0, true, false, true, true);
-		this.horizontalFaces[1] = new Face(null, 0, Game.currentSizeY * Game.tile_size, Game.currentSizeX * Game.tile_size, Game.currentSizeY * Game.tile_size, true, true,true, true);
-
-		this.verticalFaces = new Face[2];
-		this.verticalFaces[0] = new Face(null, 0, 0,0, Game.currentSizeY * Game.tile_size, false, false,true, true);
-		this.verticalFaces[1] = new Face(null, Game.currentSizeX * Game.tile_size, 0, Game.currentSizeX * Game.tile_size, Game.currentSizeY * Game.tile_size, false, true, true, true);
 
 		if (!Crusade.crusadeMode)
 		{
@@ -943,6 +927,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			{
 				Drawing.drawing.movingCamera = !Drawing.drawing.movingCamera;
 				Panel.zoomTarget = -1;
+				spectatingTank = null;
 			}
 
 			zoomPressed = false;
@@ -1879,8 +1864,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 				if (o.bulletCollision)
 				{
-					Chunk.getTile(x, y).solid = false;
-					Chunk.getTile(x, y).unbreakable = false;
+					Chunk.Tile t = Chunk.getTile(x, y);
+					t.solid = false;
+					t.unbreakable = false;
 				}
 
 				if (o == Game.obstacleGrid[x][y])
@@ -1892,6 +1878,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				Game.removeObstacle(o);
 				Game.removeSurfaceObstacle(o);
 			}
+
+			for (Obstacle o1 : o.getNeighbors())
+				o1.refreshHitboxes();
 
 			Game.obstacles.remove(o);
 		}
@@ -1977,23 +1966,24 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		if ((Game.playerTank == null || Game.playerTank.destroy) && (spectatingTank == null || !Drawing.drawing.movingCamera) && Panel.panel.zoomTimer <= 0)
 		{
-			if (Game.game.window.validPressedButtons.contains(InputCodes.MOUSE_BUTTON_1))
+			Chunk c = Chunk.getChunk(x, y);
+			if (c == null)
+				return false;
+
+			for (Movable m : c.movables)
 			{
-				for (Movable m: Game.movables)
+				if (!(m instanceof Tank && !m.destroy))
+					continue;
+
+				if (x >= m.posX - m.size && x <= m.posX + m.size &&
+						y >= m.posY - m.size && y <= m.posY + m.size)
 				{
-					if (m instanceof Tank && !m.destroy && !((Tank) m).hidden)
-                    {
-                        if (x >= m.posX - m.size && x <= m.posX + m.size &&
-                                y >= m.posY - m.size && y <= m.posY + m.size)
-                        {
-                            this.spectatingTank = (Tank) m;
-                            Panel.panel.pastPlayerX.clear();
-                            Panel.panel.pastPlayerY.clear();
-                            Panel.panel.pastPlayerTime.clear();
-                            Drawing.drawing.movingCamera = true;
-                            return true;
-                        }
-                    }
+					this.spectatingTank = (Tank) m;
+					Panel.panel.pastPlayerX.clear();
+					Panel.panel.pastPlayerY.clear();
+					Panel.panel.pastPlayerTime.clear();
+					Drawing.drawing.movingCamera = true;
+					return true;
 				}
 			}
 		}
@@ -2111,7 +2101,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			arr[m.drawLevel].add(m);
 
 			if (m.showName)
-				drawables[m.nameTag.drawLevel].add(m.nameTag);
+				arr[m.nameTag.drawLevel].add(m.nameTag);
 		}
 
 		boolean batch = Game.enable3d && /*(Obstacle.draw_size <= 0 || Obstacle.draw_size >= Game.tile_size) && */Game.game.window.shapeRenderer.supportsBatching;
@@ -2271,24 +2261,28 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				{
 					for (Face f : faceList.topFaces)
 					{
+						if (shouldHide(f)) continue;
 						drawing.setColor(150, 50, 50);
 						drawing.fillRect(0.5 * (f.endX + f.startX), f.startY, f.endX - f.startX, 5);
 					}
 
 					for (Face f : faceList.bottomFaces)
 					{
+						if (shouldHide(f)) continue;
 						drawing.setColor(255, 50, 50);
 						drawing.fillRect(0.5 * (f.endX + f.startX), f.startY, f.endX - f.startX, 5);
 					}
 
 					for (Face f : faceList.leftFaces)
 					{
+						if (shouldHide(f)) continue;
 						drawing.setColor(50, 50, 150);
 						drawing.fillRect(f.startX, 0.5 * (f.endY + f.startY), 5, f.endY - f.startY);
 					}
 
 					for (Face f : faceList.rightFaces)
 					{
+						if (shouldHide(f)) continue;
 						drawing.setColor(50, 50, 255);
 						drawing.fillRect(f.startX, 0.5 * (f.endY + f.startY), 5, f.endY - f.startY);
 					}
@@ -2734,7 +2728,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		if (Game.showUPFMeter)
 		{
-			if (!paused)
+			if (isUpdatingGame() && Panel.panel.ageFrames % 5 == 0)
 			{
 				Tank.prevUPF.add(Tank.updatesPerFrame);
 				if (Tank.prevUPF.size() > 100)
@@ -2749,7 +2743,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				i++;
 			}
 
-			Drawing.drawing.setColor(0, 0, 0);
+			int br = Level.isDark() ? 255 : 0;
+			Drawing.drawing.setColor(br, br, br);
 			Drawing.drawing.setInterfaceFontSize(14);
 			for (i = 0; i <= 150; i += 10)
 				Drawing.drawing.drawInterfaceText(10, (100 - i) * 2 + 150, i + "");
@@ -2759,6 +2754,11 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		Drawing.drawing.setInterfaceFontSize(this.textSize);
     }
+
+	public static boolean shouldHide(Face f)
+	{
+		return (f.owner instanceof Tank t && (t.canHide || t.hidden)) || (f.owner instanceof TankAIControlled t1 && t1.invisible);
+	}
 
 	public static boolean isUpdatingGame()
 	{
@@ -2875,7 +2875,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	@Override
 	public void onFocusChange(boolean focused)
 	{
-		if (!focused && ((Game.autostart && !cancelCountdown) || (playing && !shopScreen && !npcShopScreen)))
+		if (!focused && Panel.pauseOnDefocus && ((Game.autostart && !cancelCountdown) || (playing && !shopScreen && !npcShopScreen)))
 			paused = true;
 	}
 
@@ -2896,13 +2896,13 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	@Override
 	public double getOffsetX()
 	{
-		return Drawing.drawing.getPlayerOffsetX() + Panel.panel.panX;
+		return Drawing.drawing.getPlayerOffsetX()/* + Panel.panel.panX*/;
 	}
 
 	@Override
 	public double getOffsetY()
 	{
-		return Drawing.drawing.getPlayerOffsetY() + Panel.panel.panY;
+		return Drawing.drawing.getPlayerOffsetY()/* + Panel.panel.panY*/;
 	}
 
 	@Override

@@ -343,9 +343,9 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
     }
 
     @Override
-    public boolean rayCollision()
+    public boolean disableRayCollision()
     {
-        return true;
+        return false;
     }
 
     @Override

@@ -15,6 +15,8 @@ public abstract class GameObject implements Cloneable
 {
     public ArrayList<LevelEditorSelector<? extends GameObject>> selectors;
 
+    public double posX, posY, posZ;
+
     Position[] positions = {Position.object_menu_left, Position.object_menu_right};
     Position extraSelPos /* Position of extra selectors */ = Position.editor_bottom_right;
     int currentPos = 0;
@@ -44,13 +46,13 @@ public abstract class GameObject implements Cloneable
 
     public LevelEditorSelector<?> getSelector(String id)
     {
-        if (this.hasCustomSelectors())
+        if (!this.hasCustomSelectors())
+            return null;
+
+        for (LevelEditorSelector<?> s : this.selectors)
         {
-            for (LevelEditorSelector<?> s : this.selectors)
-            {
-                if (id.equals(s.id))
-                    return s;
-            }
+            if (id.equals(s.id))
+                return s;
         }
 
         return null;
@@ -150,6 +152,8 @@ public abstract class GameObject implements Cloneable
         this.forAllSelectors(s -> s.prevObject = s.getPropertyBase());
     }
 
+    /** The save order of selectors; the selector that appears at index {@code saveOrder(i)} is saved at the {@code i}th position.
+     *  (0 <= {@code i} < total selector count) */
     public int saveOrder(int index)
     {
         return index;

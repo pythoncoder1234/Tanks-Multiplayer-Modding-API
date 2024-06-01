@@ -118,7 +118,7 @@ public class ScreenCrusadePreviewLevel extends Screen implements ILevelPreviewSc
                 int y = (int) (o.posY / Game.tile_size);
 
                 if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-                    Chunk.getTile(x, y).height = Math.max(o.getTileHeight(), Chunk.getTile(x, y).height);
+                    Chunk.getTile(x, y).updateHeight(o.getTileHeight());
             }
 
         if (Game.game.input.editorPause.isValid())

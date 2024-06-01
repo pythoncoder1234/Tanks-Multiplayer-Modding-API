@@ -471,10 +471,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 				this.ray = r;
 
 			if (this.ray != null)
-			{
-				this.ray.bounces = 1;
-				this.ray.getTarget();
-			}
+                this.ray.getTarget();
 		}
 
 		super.update();

@@ -610,6 +610,9 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
         int i = Double.compare(t1.size, t2.size);
         if (i != 0)
             return i;
+        if (t1.name == null || t2.name == null)
+            return 0;
+
         return t1.name.compareTo(t2.name);
     }
 

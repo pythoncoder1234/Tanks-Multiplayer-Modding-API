@@ -22,9 +22,8 @@ public class EventSortShopButtons extends PersonalEvent
     @Override
     public void execute()
     {
-        if (Game.screen instanceof ScreenGame && this.clientID == null)
+        if (Game.screen instanceof ScreenGame s && this.clientID == null)
         {
-            ScreenGame s = (ScreenGame) Game.screen;
             s.initializeShopList();
         }
     }

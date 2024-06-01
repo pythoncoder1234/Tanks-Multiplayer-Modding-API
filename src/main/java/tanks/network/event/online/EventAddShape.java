@@ -83,9 +83,8 @@ public class EventAddShape extends PersonalEvent
     @Override
     public void execute()
     {
-        if (this.clientID == null && Game.screen instanceof ScreenOnline)
+        if (this.clientID == null && Game.screen instanceof ScreenOnline s)
         {
-            ScreenOnline s = (ScreenOnline) Game.screen;
             ScreenOnline.Shape shape = new ScreenOnline.Shape(this.posX, this.posY, this.sizeX, this.sizeY, this.type, this.colorR, this.colorG, this.colorB, this.colorA);
             shape.posX -= (Drawing.drawing.interfaceScaleZoom - 1) * Drawing.drawing.interfaceSizeX * (xAlignment + 1) / 2.0;
             shape.posY -= (Drawing.drawing.interfaceScaleZoom - 1) * Drawing.drawing.interfaceSizeY * (yAlignment + 1) / 2.0;

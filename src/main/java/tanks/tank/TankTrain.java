@@ -12,7 +12,9 @@ import java.util.HashSet;
 
 public class TankTrain extends Tank implements IAvoidObject
 {
-    public static final String[] descriptions = new String[] {"Chuga chuga chuga chuga choo choo!", "Choo Choo!", "*queue thomas the tank engine theme song*", "To the nearest rail it goes!"};
+    public static final String[] descriptions = new String[] {
+            "chuga chuga chuga chuga choo choo", "choo choo", "*queue thomas the tank engine theme song*",
+            "To the nearest rail it goes!", "SUBWAY SURFERS", "I added trains lmao", "TRAIN"};
     public static final HashSet<TankProperty.Category> propertiesToCopy = new HashSet<>();
 
     static
@@ -243,7 +245,7 @@ public class TankTrain extends Tank implements IAvoidObject
         double nearest = 69420;
         ObstacleTrainTrack nearestObs = null;
 
-        for (Obstacle o : Game.obstacles)
+        for (Obstacle o : Game.getInRadius(posX, posY, searchDist, c -> c.obstacles))
         {
             if (o instanceof ObstacleTrainTrack)
             {

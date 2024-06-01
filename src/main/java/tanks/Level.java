@@ -206,7 +206,7 @@ public class Level
 		if (Game.deterministicMode)
 			random = new Random(Game.seed);
 		else
-			random = new Random();
+			random = new Random(tilesRandomSeed);
 
 		if (ScreenPartyHost.isServer)
 			ScreenPartyHost.includedPlayers.clear();
@@ -322,6 +322,8 @@ public class Level
 		Chunk.populateChunks(this);
 		this.reloadTiles();
 
+		boolean[][] solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
+
 		if (!((obstaclesPos.length == 1 && obstaclesPos[0].isEmpty()) || obstaclesPos.length == 0))
 		{
             for (String pos : obstaclesPos)
@@ -330,10 +332,10 @@ public class Level
 
                 String[] xPos = obs[0].split("\\.\\.\\.");
 
-                double startX;
+                int startX;
                 double endX;
 
-                startX = Double.parseDouble(xPos[0]);
+                startX = Integer.parseInt(xPos[0]);
                 endX = startX;
 
 				if (xPos.length > 1)
@@ -341,10 +343,10 @@ public class Level
 
 				String[] yPos = obs[1].split("\\.\\.\\.");
 
-				double startY;
+				int startY;
 				double endY;
 
-				startY = Double.parseDouble(yPos[0]);
+				startY = Integer.parseInt(yPos[0]);
 				endY = startY;
 
 				if (yPos.length > 1)
@@ -365,9 +367,9 @@ public class Level
                         meta.append("-").append(obs[j]);
                 }
 
-				for (double x = startX; x <= endX; x++)
+				for (int x = startX; x <= endX; x++)
 				{
-					for (double y = startY; y <= endY; y++)
+					for (int y = startY; y <= endY; y++)
 					{
 						Obstacle o = Game.registryObstacle.getEntry(name).getObstacle(x, y);
 						o.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
@@ -375,37 +377,32 @@ public class Level
 						if (meta != null)
 							o.setMetadata(meta.toString());
 
+						Chunk.Tile t = Chunk.getTile(x, y);
+
+						if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+						{
+							t.solid = true;
+							if (!o.shouldShootThrough)
+								t.unbreakable = true;
+						}
+
+						o.postOverride();
 						Game.obstacles.add(o);
-						Chunk c = Chunk.getChunk(o.posX, o.posY);
-						if (c != null)
-							c.addObstacle(o);
+
+						if (o.tankCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                            solidGrid[(int) (x / Game.tile_size)][(int) (y / Game.tile_size)] = true;
 					}
 				}
 			}
 		}
 
-		boolean[][] solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-
 		for (Obstacle o: Game.obstacles)
         {
-            int x = (int) (o.posX / Game.tile_size);
-            int y = (int) (o.posY / Game.tile_size);
-
-            o.postOverride();
-
             if (o.startHeight > 1)
                 continue;
 
-            if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-            {
-                Chunk.getTile(x, y).solid = true;
-
-                if (!o.shouldShootThrough)
-                    Chunk.getTile(x, y).unbreakable = true;
-            }
-
-            if (o.tankCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-                solidGrid[x][y] = true;
+			Chunk c = Chunk.getChunk(o.posX, o.posY);
+			c.addObstacle(o);
         }
 
 		boolean[][] tankGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
@@ -762,10 +759,10 @@ public class Level
 
             if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
             {
-                Chunk.getTile(x, y).solid = true;
-
-                if (!o.shouldShootThrough)
-                    Chunk.getTile(x, y).unbreakable = true;
+				Chunk.Tile t = Chunk.getTile(x, y);
+				t.solid = true;
+                if (o.shouldShootThrough)
+                    t.unbreakable = true;
             }
         }
 

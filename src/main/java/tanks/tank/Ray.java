@@ -1,15 +1,13 @@
 package tanks.tank;
 
-import tanks.Chunk;
-import tanks.Effect;
-import tanks.Game;
-import tanks.Movable;
+import tanks.*;
+import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenGame;
 import tanks.obstacle.Face;
 import tanks.obstacle.Obstacle;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.TreeSet;
 
 public class Ray
 {
@@ -24,14 +22,16 @@ public class Ray
 	public double vY;
 	public double angle;
 
+	public int maxChunkCheck = 12;
+
 	public boolean enableBounciness = true;
-	public boolean ignoreTanks = false;
+	public boolean ignoreTanks = false, ignoreBullets = true;
 	public boolean ignoreDestructible = false;
 	public boolean ignoreShootThrough = false;
 
 	public boolean trace = Game.traceAllRays;
 	public boolean dotted = false;
-	public HashSet<Chunk> chunks = new HashSet<>();
+	public TreeSet<Chunk> chunksToCheck = new TreeSet<>();
 
 	public double speed = 10;
 
@@ -90,6 +90,31 @@ public class Ray
 		return m;
 	}
 
+	public Ray setMaxChunks(int maxChunks)
+	{
+		this.maxChunkCheck = maxChunks;
+		return this;
+	}
+
+	public Ray setMaxDistance(double distance)
+	{
+		setMaxChunks((int) (distance / Game.tile_size / Chunk.chunkSize + 1));
+		return this;
+	}
+
+	public Ray setSize(double size)
+	{
+		this.size = size;
+		return this;
+	}
+
+	public Ray moveOut(double amount)
+	{
+		this.posX += this.vX * amount;
+		this.posY += this.vY * amount;
+		return this;
+	}
+
 	public Movable getTarget()
 	{
 		double remainder = 0;
@@ -101,41 +126,77 @@ public class Ray
 				isInsideObstacle(this.posX - size / 2, this.posY + size / 2))
 			return null;
 
-		for (Movable m : Chunk.getChunk(posX, posY).movables)
+		if (!ignoreTanks)
 		{
-			if (m instanceof Tank t && m != this.tank)
+			for (Movable m : Chunk.getChunk(posX, posY).movables)
 			{
-				if (this.posX + this.size / 2 >= t.posX - t.size / 2 &&
-						this.posX - this.size / 2 <= t.posX + t.size / 2 &&
-						this.posY + this.size / 2 >= t.posY - t.size / 2 &&
-						this.posY - this.size / 2 <= t.posY + t.size / 2)
-					return t;
+				if (m instanceof Tank t && m != this.tank)
+				{
+					if (this.posX + this.size / 2 >= t.posX - t.size / 2 &&
+							this.posX - this.size / 2 <= t.posX + t.size / 2 &&
+							this.posY + this.size / 2 >= t.posY - t.size / 2 &&
+							this.posY - this.size / 2 <= t.posY + t.size / 2)
+						return t;
+				}
 			}
 		}
 
 		boolean firstBounce = this.targetTank == null;
-		chunks.clear();
+		int totalChunksChecked = 0;
 
 		while (this.bounces >= 0 && this.bouncyBounces >= 0)
 		{
 			double collisionX = -1;
 			double collisionY = -1;
 			Result result = null;
+			Chunk current = Chunk.getChunk(posX, posY);
+			if (current == null)
+				return null;
 
-			chunkCheck : for (int chunksChecked = 0; chunksChecked < 12; chunksChecked++)
+			chunkCheck : for (int chunksChecked = 0; chunksChecked < maxChunkCheck; chunksChecked++)
 			{
-				double moveX = Chunk.chunkSize * Game.tile_size * chunksChecked * Math.cos(angle);
-				double moveY = Chunk.chunkSize * Game.tile_size * chunksChecked * Math.sin(angle);
+				double moveXBase = Chunk.chunkSize * Game.tile_size * Math.cos(angle);
+				double moveYBase = Chunk.chunkSize * Game.tile_size * Math.sin(angle);
+				double moveX = moveXBase * chunksChecked, moveXPrev = moveXBase * Math.max(0, chunksChecked - 1);
+				double moveY = moveYBase * chunksChecked, moveYPrev = moveYBase * Math.max(0, chunksChecked - 1);
 
 				// todo: make this slightly more efficient
-				chunks.add(Chunk.getChunk(posX + moveX, posX + moveY));
-				chunks.add(Chunk.getChunk(posX, posY + moveY));
-				chunks.add(Chunk.getChunk(posX + moveX, posY));
+				chunksToCheck.clear();
+				Chunk mid = chunksChecked > 0 ? Chunk.getChunk(posX + moveX, posY + moveY) : current;
+				addChunks(current, mid);
 
-				for (Chunk chunk : chunks)
+				if (mid == null || current.manhattanDist(mid) > 1)
+                    addChunks(current,
+							Chunk.getChunk(posX + moveXPrev, posY + moveY),
+							Chunk.getChunk(posX + moveX, posY + moveYPrev)
+					);
+
+				if (chunksToCheck.isEmpty())
+					break;
+
+				for (Chunk chunk : chunksToCheck)
 				{
 					if (chunk == null)
 						continue;
+
+					totalChunksChecked++;
+
+					if (Chunk.debug && trace && bounces == 1)
+					{
+						Game.effects.add(Effect.createNewEffect(
+								(chunk.chunkX + 0.5) * Chunk.chunkSize * Game.tile_size + (totalChunksChecked * 5),
+								(chunk.chunkY + 0.5) * Chunk.chunkSize * Game.tile_size,
+								150, Effect.EffectType.chain, 85
+						).setRadius(totalChunksChecked));
+
+						Game.effects.add(Effect.createNewEffect(posX + moveX, posY + moveY, 20, Effect.EffectType.laser));
+
+						if (mid == null || current.manhattanDist(mid) > 1)
+						{
+							Game.effects.add(Effect.createNewEffect(posX, posY + moveY, 20, Effect.EffectType.obstaclePiece));
+							Game.effects.add(Effect.createNewEffect(posX + moveX, posY, 20, Effect.EffectType.piece));
+						}
+					}
 
 					Result dynamic = checkCollisionIn(chunk.faces, firstBounce, collisionX, collisionY);
 					Result stat = checkCollisionIn(chunk.staticFaces, firstBounce, collisionX, collisionY);
@@ -373,7 +434,7 @@ public class Ray
 		if (f.owner instanceof Obstacle o && !o.bouncy)
 			passThrough = (this.ignoreDestructible && o.destructible) || (this.ignoreShootThrough && o.shouldShootThrough);
 
-		if (ignoreTanks && f.owner instanceof Tank)
+		if ((ignoreTanks && f.owner instanceof Tank) || (ignoreBullets && f.owner instanceof Bullet))
 			passThrough = true;
 
 		return passThrough;
@@ -389,10 +450,15 @@ public class Ray
 		if (!acquiredTarget)
 			this.getTarget();
 
-		return getFinalDist();
+		return Math.sqrt(getSquaredFinalDist());
 	}
 
 	public double getTargetDist(double mul, Tank m)
+	{
+		return Math.sqrt(getSquaredTargetDist(mul, m));
+	}
+
+	public double getSquaredTargetDist(double mul, Tank m)
 	{
 		this.bounceX.add(0, this.posX);
 		this.bounceY.add(0, this.posY);
@@ -400,16 +466,31 @@ public class Ray
 		if (this.getTarget(mul, m) != m)
 			return -1;
 
-		return getFinalDist();
+		return getSquaredFinalDist();
 	}
 
-	private double getFinalDist()
+	private double getSquaredFinalDist()
 	{
 		double dist = 0;
 		for (int i = 0; i < this.bounceX.size() - 1; i++)
-            dist += Math.sqrt(Math.pow(this.bounceX.get(i + 1) - this.bounceX.get(i), 2) + Math.pow(this.bounceY.get(i + 1) - this.bounceY.get(i), 2));
+            dist += Math.pow(this.bounceX.get(i + 1) - this.bounceX.get(i), 2) + Math.pow(this.bounceY.get(i + 1) - this.bounceY.get(i), 2);
+
+		if (this.bounces >= 0)
+			dist += Chunk.chunkToPixel(maxChunkCheck);
 
 		return dist;
+	}
+
+	private void addChunks(Chunk compare, Chunk... chunks)
+	{
+		for (Chunk c : chunks)
+		{
+			if (c == null)
+				continue;
+
+			c.compareTo = compare;
+			chunksToCheck.add(c);
+		}
 	}
 
 	public double getAngleInDirection(double x, double y)
@@ -433,17 +514,11 @@ public class Ray
 		return angle;
 	}
 
-	public static boolean isInsideObstacle(double x, double y)
+	public boolean isInsideObstacle(double x, double y)
 	{
 		int ox = (int) (x / Game.tile_size);
 		int oy = (int) (y / Game.tile_size);
 
 		return !(ox >= 0 && ox < Game.currentSizeX && oy >= 0 && oy < Game.currentSizeY) || Game.isSolid(ox, oy);
-	}
-
-	public void moveOut(double amount)
-	{
-		this.posX += this.vX * amount;
-		this.posY += this.vY * amount;
 	}
 }

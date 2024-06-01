@@ -50,10 +50,8 @@ public class ObstacleWater extends ObstacleLiquid
     @Override
     public void onObjectEntry(Movable m)
     {
-        if (m instanceof Tank)
+        if (m instanceof Tank t)
         {
-            Tank t = (Tank) m;
-
             if (t.posZ < -1)
                 t.inWater = true;
 

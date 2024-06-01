@@ -1881,7 +1881,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				int y = (int) (o.posY / Game.tile_size);
 
 				if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-					Chunk.getTile(x, y).height = Math.max(o.getTileHeight(), Chunk.getTile(x, y).height);
+					Chunk.getTile(x, y).updateHeight(o.getTileHeight());
 			}
 		}
 
@@ -2295,10 +2295,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 			{
-				Chunk.getTile(x, y).solid = true;
-
+				Chunk.Tile t = Chunk.getTile(x, y);
+				t.solid = true;
 				if (!o.shouldShootThrough)
-					Chunk.getTile(x, y).unbreakable = true;
+					t.unbreakable = true;
 			}
 		}
 

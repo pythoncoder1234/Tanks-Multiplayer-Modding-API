@@ -835,9 +835,17 @@ public class Panel
 
 		if (Game.game.window.pressedKeys.contains(InputCodes.KEY_F3))
 		{
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_F8))
+			{
+				Game.recordMode = !Game.recordMode;
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_F8);
+			}
+
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
 			{
-				Game.game.window.constrainMouse = !Game.game.window.constrainMouse;
+				Panel.pauseOnDefocus = !Panel.pauseOnDefocus;
+				Panel.notifs.add(new Notification("Pause on lost focus: \u00a7255200000255"
+						+ (Panel.pauseOnDefocus ? "enabled" : "disabled")).setColor(255, 255, 128));
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_P);
 			}
 
@@ -851,14 +859,16 @@ public class Panel
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_B);
 				Game.showHitboxes = !Game.showHitboxes;
-				notifs.add(new Notification("Hitboxes: " + (Game.showHitboxes ? "shown" : "hidden"), 200).setColor(255, 255, 128));
+				notifs.add(new Notification("Collision boxes: \u00a7255200000255"
+						+ (Game.showHitboxes ? "shown" : "hidden"), 200).setColor(255, 255, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_G))
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_G);
 				Chunk.debug = !Chunk.debug;
-				notifs.add(new Notification("Chunk borders: " + (Chunk.debug ? "shown" : "hidden"), 200).setColor(255, 255, 128));
+				notifs.add(new Notification("Chunk borders: \u00a7255200000255"
+						+ (Chunk.debug ? "shown" : "hidden"), 200).setColor(255, 255, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_D))
@@ -928,6 +938,7 @@ public class Panel
 				brightness = 255;
 
 			Drawing.drawing.setColor(brightness, brightness, brightness);
+			Drawing.drawing.setFontSize(16);
 
 			String text;
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))

@@ -159,10 +159,9 @@ public class Player
     @Override
     public boolean equals(Object obj)
     {
-        if (!(obj instanceof Player))
+        if (!(obj instanceof Player p))
             return super.equals(obj);
 
-        Player p = ((Player) obj);
         return Objects.equals(this.clientID, p.clientID);
     }
 

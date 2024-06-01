@@ -332,9 +332,8 @@ public class ModAPI
 
         for (Movable m : Game.movables)
         {
-            if (m instanceof Tank)
+            if (m instanceof Tank t)
             {
-                Tank t = (Tank) m;
                 double distance = (t.posX - x) * (t.posX - x) + (t.posY - y) * (t.posY - y);
 
                 if (distance <= radius * radius)
@@ -400,7 +399,7 @@ public class ModAPI
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
-    // Drawing functions added in this mod api
+    // Drawing functions added in this modding api
 
     /**
      * Abbreviations of renderers to draw fixed stuff
@@ -467,8 +466,8 @@ public class ModAPI
         ModAPI.fillObstacle((int) Math.round(x - sizeFactor / 4), (int) Math.round(y - sizeFactor / 4), (int) Math.round(x + sizeFactor / 4), (int) Math.round(y + sizeFactor / 4), "normal", height * sizeFactor);
 
         sizeFactor *= 4;
-        x -= sizeFactor / 2;
-        y -= sizeFactor / 2;
+        x -= (int) (sizeFactor / 2);
+        y -= (int) (sizeFactor / 2);
 
         for (int i = 0; i < sizeFactor / 2; i++)
         {

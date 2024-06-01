@@ -183,15 +183,15 @@ public class Hotbar
 
                 isMine = i instanceof ItemMine;
 
-                if (i instanceof ItemMine)
+                if (i instanceof ItemMine im)
                 {
-                    uses = ((ItemMine) i).maxLiveMines - ((ItemMine) i).liveMines;
-                    rcMax = ((ItemMine) i).maxLiveMines;
+                    uses = im.maxLiveMines - im.liveMines;
+                    rcMax = im.maxLiveMines;
                 }
-                else if (i instanceof ItemShield)
+                else if (i instanceof ItemShield is)
                 {
-                    uses = (int) ((((ItemShield) i).max - Game.playerTank.health) / ((ItemShield) i).amount);
-                    rcMax = (int) (((ItemShield) i).max / ((ItemShield) i).amount);
+                    uses = (int) ((is.max - Game.playerTank.health) / is.amount);
+                    rcMax = (int) (is.max / is.amount);
                 }
 
                 rcCooldownFrac = Math.max(0, (i.cooldown - 20) / (i.cooldownBase - 20));
