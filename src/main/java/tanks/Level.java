@@ -379,7 +379,7 @@ public class Level
 
 						Chunk.Tile t = Chunk.getTile(x, y);
 
-						if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+						if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && o.startHeight < 1)
 						{
 							t.solid = true;
 							if (!o.shouldShootThrough)
@@ -754,7 +754,7 @@ t = customTanksMap.get(type).instantiate(type, x, y, angle);
             if (o.startHeight > 1)
                 continue;
 
-            if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+            if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && o.startHeight < 1)
             {
 				Chunk.Tile t = Chunk.getTile(x, y);
 				t.solid = true;

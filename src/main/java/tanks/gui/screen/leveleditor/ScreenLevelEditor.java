@@ -2293,7 +2293,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			if (o.startHeight > 1)
 				continue;
 
-			if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+			if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && o.startHeight < 1)
 			{
 				Chunk.Tile t = Chunk.getTile(x, y);
 				t.solid = true;

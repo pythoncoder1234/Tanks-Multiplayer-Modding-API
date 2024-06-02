@@ -155,7 +155,7 @@ public class TankRemote extends Tank
 
 		double angDiff = Movable.angleBetween(this.lastAngle, this.currentAngle);
 		this.angle = this.lastAngle - frac * angDiff;
-		this.basePitch = (1 - frac) * this.lastPitch + frac * this.currentPitch;
+		this.pitch = (1 - frac) * this.lastPitch + frac * this.currentPitch;
 
 		this.checkCollision();
 

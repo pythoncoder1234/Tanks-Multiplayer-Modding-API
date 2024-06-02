@@ -3,6 +3,7 @@ package tanks.gui.screen;
 import basewindow.BaseFile;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.ModAPI;
 import tanks.gui.Button;
 
 import java.util.ArrayList;
@@ -15,7 +16,9 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
     public static boolean[] selectedExtensions;
     public Button description = new Button(this.centerX + 140, this.centerY - this.objYSpace * 5, 40, 40, "",
             "Extension names in §000220000255green §255255255255are saved in the---extension registry, and will be loaded---on the next game launch." +
-                    "------If auto loading extensions is enabled, all---extensions in this list will be loaded.");    public Button enabled = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 3, this.objWidth, this.objHeight, "", new Runnable()
+                    "------If auto loading extensions is enabled, all---extensions in this list will be loaded.");
+
+    public Button enabled = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 3, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -25,7 +28,8 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
             enabled.setText("Enabled: ", Game.enableExtensions ? ScreenOptions.onText : ScreenOptions.offText);
         }
     });
-    public Button back = new Button(this.centerX, this.centerY + this.objYSpace * 4.5, this.objWidth, this.objHeight, "Back", () ->
+
+    public Button back = new Button(this.centerX, this.centerY + this.objYSpace * 5.5, this.objWidth, this.objHeight, "Back", () ->
     {
         Game.screen = new ScreenOptionsMisc();
 
@@ -34,7 +38,9 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
             ScreenOptions.saveExtensions();
             Game.extensionRegistry.loadRegistry();
         }
-    });    public Button autoLoad = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 3, this.objWidth, this.objHeight, "", new Runnable()
+    });
+
+    public Button autoLoad = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 3, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -44,6 +50,17 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
             autoLoad.setText("Auto Load: ", Game.autoLoadExtensions ? ScreenOptions.onText : ScreenOptions.offText);
         }
     });
+
+    public Button autoLoad2 = new Button(this.centerX, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            modified = true;
+            ModAPI.autoLoadExtensions = !ModAPI.autoLoadExtensions;
+            autoLoad2.setText("ModAPI Load: ", ModAPI.autoLoadExtensions ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    }, "Only auto loads extensions---if running ModAPI");
 
     public ScreenOptionsExtensions()
     {
@@ -100,6 +117,7 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
 
         enabled.setText("Enabled: ", Game.enableExtensions ? ScreenOptions.onText : ScreenOptions.offText);
         autoLoad.setText("Auto Load: ", Game.autoLoadExtensions ? ScreenOptions.onText : ScreenOptions.offText);
+        autoLoad2.setText("ModAPI Load: ", ModAPI.autoLoadExtensions ? ScreenOptions.onText : ScreenOptions.offText);
     }
 
     @Override
@@ -108,6 +126,7 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
         description.update();
         enabled.update();
         autoLoad.update();
+        autoLoad2.update();
         back.update();
 
         super.update();
@@ -156,6 +175,7 @@ public class ScreenOptionsExtensions extends ScreenOptionsOverlay
 
         enabled.draw();
         autoLoad.draw();
+        autoLoad2.draw();
         back.draw();
         description.draw();
     }

@@ -161,7 +161,7 @@ public class TankTrain extends Tank implements IAvoidObject
                     if (parts.length > 2 && !parts[2].isEmpty())
                     {
                         this.showName = true;
-                        this.nameTag.name = parts[2].replaceAll("\\+\\+", "-");
+                        this.nameTag.name.text = parts[2].replaceAll("\\+\\+", "-");
                     }
 
                     t = t1;

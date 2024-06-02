@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class ModAPI
 {
     public static String version = "Mod API v1.2.3";
+    public static boolean autoLoadExtensions = false;
     public static boolean sendEvents = true;
     static ArrayList<Runnable> resetFunc = new ArrayList<>();
 
@@ -292,6 +293,12 @@ public class ModAPI
     public static double distanceBetween(double x, double y, Tank t)
     {
         return Math.sqrt((t.posX - x) * (t.posX - x) + (t.posY - y) * (t.posY - y));
+    }
+
+    @Deprecated
+    public static ArrayList<Tank> withinRange(double x, double y, double radius)
+    {
+        return withinRange(x, y, radius, true).stream().map(Map.Entry::getKey).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**

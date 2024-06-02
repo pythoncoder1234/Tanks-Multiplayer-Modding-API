@@ -14,11 +14,9 @@ import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
 import tanks.network.Client;
-import tanks.network.ClientHandler;
 import tanks.network.MessageReader;
 import tanks.network.NetworkEventMap;
 import tanks.network.event.EventBeginLevelCountdown;
-import tanks.network.event.EventPing;
 import tanks.network.event.INetworkEvent;
 import tanks.network.event.IStackableEvent;
 import tanks.network.event.online.IOnlineServerEvent;
@@ -615,18 +613,7 @@ public class Panel
 		}
 
 		if (ScreenPartyLobby.isClient)
-		{
-			Client.handler.pingTimer -= Panel.frameFrequency;
-
-			if (Client.handler.pingTimer <= 0)
-			{
-				Game.eventsOut.add(new EventPing());
-				Client.handler.pingTimer = 150;
-				ClientHandler.lastLatencyTime = System.currentTimeMillis();
-			}
-
-			Client.handler.reply();
-		}
+            Client.handler.reply();
 
 		if (Game.steamNetworkHandler.initialized)
 			Game.steamNetworkHandler.update();
@@ -752,11 +739,8 @@ public class Panel
 		}
 
 		Drawing.drawing.setLighting(Level.currentLightIntensity, Level.currentShadowIntensity);
-
 		this.lights.clear();
-
 		Game.screen.setupLights();
-
 		Game.game.window.createLights(this.lights, Drawing.drawing.scale);
 
 		if (!Game.game.window.drawingShadow)
@@ -784,17 +768,12 @@ public class Panel
 
 		Chunk.drawDebugStuff();
 
+		if (Game.enableExtensions)
+            for (Extension e : Game.extensionRegistry.extensions)
+                e.draw();
+
 		if (!(Game.screen instanceof ScreenExit || Game.screen instanceof ScreenIntro))
 			this.drawBar();
-
-		if (Game.enableExtensions)
-		{
-			for (int i = 0; i < Game.extensionRegistry.extensions.size(); i++)
-			{
-				Extension e = Game.extensionRegistry.extensions.get(i);
-				e.draw();
-			}
-		}
 
         if (!notifs.isEmpty())
 		{
@@ -821,11 +800,13 @@ public class Panel
 		if (Game.screen.showDefaultMouse)
 			this.drawMouseTarget();
 
+		if (Game.framework == Game.Framework.libgdx)
+		{
+			Drawing.drawing.setColor(0, 0, 0, 0);
+			Drawing.drawing.fillInterfaceRect(0, 0, 0, 0);
+		}
+
 		Drawing.drawing.setColor(255, 255, 255);
-
-		Drawing.drawing.setColor(0, 0, 0, 0);
-		Drawing.drawing.fillInterfaceRect(0, 0, 0, 0);
-
 		Game.screen.drawPostMouse();
 
 		if (!Game.game.window.drawingShadow && (Game.screen instanceof ScreenGame && !(((ScreenGame) Game.screen).paused && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient)))
@@ -1171,8 +1152,8 @@ public class Panel
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);
 			partyIpLen += 50;
 
-			s = "Latency: " + ClientHandler.latency + "ms";
-			double[] col = getLatencyColor(ClientHandler.latency);
+			s = "Latency: " + Client.handler.lastLatency + "ms";
+			double[] col = getLatencyColor(Client.handler.lastLatency);
 			Drawing.drawing.setColor(col[0], col[1], col[2]);
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - 10 - offset, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, s);
 		}

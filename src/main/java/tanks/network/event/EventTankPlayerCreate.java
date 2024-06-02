@@ -109,10 +109,10 @@ public class EventTankPlayerCreate extends PersonalEvent
 			}
 
 			t.showName = true;
-			t.nameTag.name = this.username;
+			t.nameTag.name.text = this.username;
 
 			if (Game.enableChatFilter)
-				t.nameTag.name = Game.chatFilter.filterChat(t.nameTag.name);
+				t.nameTag.name.text = Game.chatFilter.filterChat(t.nameTag.name.text);
 		}
 
         switch (team)

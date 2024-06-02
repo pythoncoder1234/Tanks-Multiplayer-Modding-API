@@ -136,11 +136,8 @@ public abstract class Screen implements IBatchRenderableObject
 			for (ArrayList<IDrawable> arr : g.drawBeforeTerrain)
 			{
 				for (IDrawable a : arr)
-				{
-					if (a != null)
-						a.draw();
-				}
-
+                    if (a != null)
+                        a.draw();
 				arr.clear();
 			}
 		}

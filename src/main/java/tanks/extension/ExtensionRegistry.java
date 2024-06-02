@@ -2,6 +2,7 @@ package tanks.extension;
 
 import basewindow.BaseFile;
 import tanks.Game;
+import tanks.ModAPI;
 
 import java.io.File;
 import java.io.InputStream;
@@ -56,7 +57,7 @@ public class ExtensionRegistry
 
 			try
 			{
-				if (Game.autoLoadExtensions)
+				if (Game.autoLoadExtensions || ModAPI.autoLoadExtensions)
 				{
 					ArrayList<String> files = Game.game.fileManager.getFile(Game.homedir + Game.extensionDir).getSubfiles();
 

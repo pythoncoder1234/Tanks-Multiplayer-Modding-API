@@ -179,9 +179,9 @@ public class Chunk implements Comparable<Chunk>
     /** Expects all tile coordinates. */
     public static Stream<Chunk> getChunksInRadius(int tx1, int ty1, int radius)
     {
-        int x1 = tx1 / chunkSize, y1 = ty1 / chunkSize, cRad = Math.max(1, radius / chunkSize);
+        double x1 = (double) tx1 / chunkSize, y1 = (double) ty1 / chunkSize, cRad = Math.ceil((double) radius / chunkSize) + 1;
         return chunkList.stream().filter(chunk -> (chunk.chunkX - x1) * (chunk.chunkX - x1) +
-                (chunk.chunkY - y1) * (chunk.chunkY - y1) < cRad * cRad);
+                (chunk.chunkY - y1) * (chunk.chunkY - y1) <= cRad * cRad);
     }
 
     public static Tile setTileColor(Level l, Random r, Tile t)
@@ -250,7 +250,7 @@ public class Chunk implements Comparable<Chunk>
 
     public void setObstacle(int x, int y, Obstacle o)
     {
-        if (!o.isSurfaceTile || tileGrid[x][y] == null)
+        if ((!o.isSurfaceTile || tileGrid[x][y] == null) && o.startHeight < 1)
         {
             if (tileGrid[x][y].obstacle != null && tileGrid[x][y].obstacle.isSurfaceTile)
                 tileGrid[x][y].surfaceObstacle = tileGrid[x][y].obstacle;

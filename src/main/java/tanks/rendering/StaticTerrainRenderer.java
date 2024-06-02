@@ -1,6 +1,9 @@
 package tanks.rendering;
 
-import basewindow.*;
+import basewindow.BaseStaticBatchRenderer;
+import basewindow.IBatchRenderableObject;
+import basewindow.ShaderGroup;
+import tanks.Chunk;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.screen.ILevelPreviewScreen;
@@ -75,8 +78,8 @@ public class StaticTerrainRenderer extends TerrainRenderer
 
         if (o instanceof Obstacle)
             sg = ((Obstacle) o).renderer;
-        else if (o instanceof Tile && ((Tile) o).obstacleAbove != null)
-            sg = ((Tile) o).obstacleAbove.tileRenderer;
+        else if (o instanceof Chunk.Tile && ((Chunk.Tile) o).obstacle != null)
+            sg = ((Chunk.Tile) o).obstacle.tileRenderer;
 
         if (!outOfBounds)
             s = this.getRenderer(sg);
@@ -246,13 +249,9 @@ public class StaticTerrainRenderer extends TerrainRenderer
     public void reset()
     {
         for (RegionRenderer r : this.renderers.values())
-        {
             r.renderer.free();
-        }
 
         this.outOfBoundsRenderer.renderer.free();
-
-        this.tiles = null;
         this.renderers.clear();
         this.staged = false;
 

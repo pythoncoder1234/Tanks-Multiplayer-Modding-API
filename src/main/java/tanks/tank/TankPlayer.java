@@ -81,12 +81,12 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (enableDestroyCheat)
 		{
 			this.showName = true;
-			this.nameTag.name = "Destroy cheat enabled!!!";
+			this.nameTag.name.text = "Destroy cheat enabled!!!";
 		}
 
-		if (Game.nameInMultiplayer && ScreenPartyHost.isServer)
+		if (Game.alwaysShowName && ScreenPartyHost.isServer)
 		{
-			this.nameTag.name = Game.player.username;
+			this.nameTag.name.text = Game.player.username;
 			this.showName = true;
 		}
 

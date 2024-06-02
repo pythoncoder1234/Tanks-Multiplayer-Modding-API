@@ -160,7 +160,7 @@ public class Game
 
 	public static boolean enableChatFilter = true;
 	public static boolean showSpeedrunTimer = false;
-	public static boolean nameInMultiplayer = true;
+	public static boolean alwaysShowName = true;
 
 	public static boolean previewCrusades = true;
 
