@@ -406,7 +406,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 				Game.obstacleGrid[x][y] = this;
 			}
 
-			if (this.isSurfaceTile)
+			if (this.isSurfaceTile && Game.obstacleGrid[x][y] != this)
 				Game.surfaceTileGrid[x][y] = this;
 
 			Game.setObstacle(posX, posY, this);

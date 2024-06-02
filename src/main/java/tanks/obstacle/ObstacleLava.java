@@ -18,6 +18,7 @@ public class ObstacleLava extends ObstacleLiquid
         super(name, posX, posY);
 
         this.enableStacking = true;
+        this.isSurfaceTile = true;
 
         this.colorR = 255;
         this.colorG = 84;
@@ -48,7 +49,7 @@ public class ObstacleLava extends ObstacleLiquid
 
         if (Game.effectsEnabled && !ScreenGame.finished)
         {
-            if (Math.random() < Game.effectMultiplier * 0.003)
+            if (Math.random() < Game.effectMultiplier * 0.05)
             {
                 Effect e;
                 if (Game.enable3d)
@@ -119,7 +120,7 @@ public class ObstacleLava extends ObstacleLiquid
         double prog = Math.sin(System.currentTimeMillis() / 700. + offset) * 10;
 
         if (frac < 1 || extra != 0)
-            Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
+            Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac), 255, 1);
         else
             Drawing.drawing.setColor(this.colorR, this.colorG + prog, this.colorB + prog);
 

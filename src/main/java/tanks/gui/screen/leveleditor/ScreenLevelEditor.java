@@ -1280,7 +1280,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						for (int i = 0; i < Game.obstacles.size(); i++)
 						{
 							Obstacle m = Game.obstacles.get(i);
-							if (Movable.distanceBetween(m, mouseTank) < 50)
+							if (Movable.withinRange(m, mouseTank, 50))
 							{
 								skip = true;
 								this.undoActions.add(new EditorAction.ActionObstacle(m, false));
@@ -1359,7 +1359,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 									{
 										if (o.tankCollision || mouseObstacle.tankCollision || o.isSurfaceTile == mouseObstacle.isSurfaceTile || o.getClass() == mouseObstacle.getClass())
 										{
-											if (o.isSurfaceTile || mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight < o.stackHeight + o.startHeight)
+											if ((o.isSurfaceTile && mouseObstacle.tankCollision) || mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight < o.stackHeight + o.startHeight)
 												skip = true;
 										}
 									}
@@ -2004,7 +2004,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				int x = (int) (mouseObstacle.posX / Game.tile_size);
 				int y = (int) (mouseObstacle.posY / Game.tile_size);
 
-				if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && Game.obstacleGrid[x][y] == null)
+				if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY &&
+						(Game.obstacleGrid[x][y] == null || (Game.surfaceTileGrid[x][y] == null &&
+								Game.obstacleGrid[x][y].isSurfaceTile != mouseObstacle.isSurfaceTile && !mouseObstacle.tankCollision)))
 				{
 					mouseObstacle.startHeight = mouseObstacleStartHeight;
 
