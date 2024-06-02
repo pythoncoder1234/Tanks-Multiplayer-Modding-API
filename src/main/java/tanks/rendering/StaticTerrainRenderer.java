@@ -334,48 +334,13 @@ public class StaticTerrainRenderer extends TerrainRenderer
             if (size >= 0)
             {
                 for (int x = xStart; x <= xEnd; x++)
-                {
                     for (int y = yStart; y <= yEnd; y++)
-                    {
                         if (x != 0 || y != 0)
-                        {
                             this.drawMap(this.outOfBoundsRenderer, x, y);
-                        }
-                    }
-                }
             }
         }
 
-        for (int i = 0; i < 10; i++)
-        {
-            for (Class<? extends ShaderGroup> s : this.renderers.keySet())
-            {
-                try
-                {
-                    RendererDrawLayer drawLayer = s.getAnnotation(RendererDrawLayer.class);
-                    if ((drawLayer == null && i == 5) || (drawLayer != null && drawLayer.value() == i))
-                    {
-                        ShaderGroup so = getShader(s);
-                        so.set();
-
-                        if (so instanceof IObstacleSizeShader)
-                            ((IObstacleSizeShader) so).setSize((float) (Obstacle.draw_size / Game.tile_size));
-
-                        if (so instanceof IObstacleTimeShader)
-                            ((IObstacleTimeShader) so).setTime((int) (age * 10));
-
-                        if (so instanceof IShrubHeightShader)
-                            ((IShrubHeightShader) so).setShrubHeight(getShrubHeight());
-
-                        this.drawMap(this.renderers.get(s), 0, 0);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Game.exitToCrash(e);
-                }
-            }
-        }
+        renderShaders();
 
         Game.game.window.shaderDefault.set();
     }

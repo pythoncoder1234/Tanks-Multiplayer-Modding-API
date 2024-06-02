@@ -1121,6 +1121,8 @@ public class Game
 		return getSurfaceObstacle((int) (posX / Game.tile_size), (int) (posY / Game.tile_size));
 	}
 
+	/** Iterates through all chunks, applies {@code func} to the ones within the specified position range,
+	 * and filters through the collection it returns. Expects all pixel coordinates. */
     public static <T extends GameObject> ArrayList<T> getInRange(double x1, double y1, double x2, double y2, Function<Chunk, Collection<T>> func)
 	{
 		ArrayList<T> out = new ArrayList<>();
@@ -1128,6 +1130,8 @@ public class Game
 		return out;
 	}
 
+	/** Iterates through all chunks, applies {@code func} to the ones within {@code radius} of the position,
+	 * and filters through the collection it returns. Expects all pixel coordinates. */
 	public static <T extends GameObject> ArrayList<T> getInRadius(double posX, double posY, double radius, Function<Chunk, Collection<T>> func)
 	{
 		ArrayList<T> out = new ArrayList<>();
@@ -1193,10 +1197,12 @@ public class Game
 
 		if (!Game.enable3dBg || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
 			return 0;
-        return Chunk.getTile(px, py).depth;
+
+		Chunk.Tile t = Chunk.getTile(x, y);
+        return t.groundHeight + t.depth;
     }
 
-	public static double sampleTerrainGroundHeight(double px, double py)
+	public static double sampleDefaultGroundHeight(double px, double py)
 	{
 		int x = (int) (px / Game.tile_size);
 		int y = (int) (py / Game.tile_size);

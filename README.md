@@ -31,7 +31,9 @@ New Features:
 
 - Chunk loading system
 - Huge optimizations
+- Freecam control player (F7 to toggle)
 - Removed update skipping for now
+- Renamed `Game.sampleTerrainGroundHeight` to `Game.sampleDefaultGroundHeight`
 - Fixed many bugs
 - Target type tank property - choices are allies or enemies, but maybe more in the future
 

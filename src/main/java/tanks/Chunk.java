@@ -179,7 +179,7 @@ public class Chunk implements Comparable<Chunk>
     /** Expects all tile coordinates. */
     public static Stream<Chunk> getChunksInRadius(int tx1, int ty1, int radius)
     {
-        int x1 = tx1 / chunkSize, y1 = ty1 / chunkSize, cRad = radius / chunkSize;
+        int x1 = tx1 / chunkSize, y1 = ty1 / chunkSize, cRad = Math.max(1, radius / chunkSize);
         return chunkList.stream().filter(chunk -> (chunk.chunkX - x1) * (chunk.chunkX - x1) +
                 (chunk.chunkY - y1) * (chunk.chunkY - y1) < cRad * cRad);
     }
@@ -189,7 +189,7 @@ public class Chunk implements Comparable<Chunk>
         t.colR = l.colorR + (Game.fancyTerrain ? r.nextDouble() * l.colorVarR : 0);
         t.colG = l.colorG + (Game.fancyTerrain ? r.nextDouble() * l.colorVarG : 0);
         t.colB = l.colorB + (Game.fancyTerrain ? r.nextDouble() * l.colorVarB : 0);
-        t.depth = Game.fancyTerrain ? r.nextDouble() * 10 : 0;
+        t.depth= Game.fancyTerrain ? r.nextDouble() * 10 : 0;
         return t;
     }
 

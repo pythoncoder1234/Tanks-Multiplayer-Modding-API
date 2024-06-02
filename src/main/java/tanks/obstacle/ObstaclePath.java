@@ -127,6 +127,6 @@ public class ObstaclePath extends Obstacle
 
     public double getGroundHeight()
     {
-        return Game.sampleTerrainGroundHeight(this.posX, this.posY);
+        return Game.sampleDefaultGroundHeight(this.posX, this.posY);
     }
 }

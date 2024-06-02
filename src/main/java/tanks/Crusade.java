@@ -401,6 +401,7 @@ public class Crusade
 		{
 			if (p.remainingLives > 1)
 				return false;
+
 			if (p.remainingLives == 1)
 			{
 				boolean found = false;

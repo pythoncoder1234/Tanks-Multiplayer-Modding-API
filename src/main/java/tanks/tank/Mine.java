@@ -104,10 +104,10 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
         if (Game.enable3d && Game.enable3dBg && Game.fancyTerrain && firstFrame)
         {
             firstFrame = false;
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX - this.size / 2, this.posY - this.size / 2));
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX + this.size / 2, this.posY - this.size / 2));
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX - this.size / 2, this.posY + this.size / 2));
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX + this.size / 2, this.posY + this.size / 2));
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX - this.size / 2, this.posY - this.size / 2));
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX + this.size / 2, this.posY - this.size / 2));
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX - this.size / 2, this.posY + this.size / 2));
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX + this.size / 2, this.posY + this.size / 2));
         }
 
         if (Game.enable3d)

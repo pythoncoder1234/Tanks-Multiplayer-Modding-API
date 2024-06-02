@@ -115,10 +115,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
                 int y = (int) (o.posY / Game.tile_size);
 
                 if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-                {
-                    Chunk.getTile(x, y).updateHeight(o.getTileHeight());
-                    Chunk.getTile(x, y).groundHeight = Math.max(o.getGroundHeight(), Chunk.getTile(x, y).groundHeight);
-                }
+                    Chunk.getTile(x, y).updateHeight(o.getTileHeight()).updateGroundHeight(o.getGroundHeight());
             }
         }
 

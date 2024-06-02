@@ -118,7 +118,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
     @SuppressWarnings("unchecked")
     public ArrayList<IDrawable>[] drawables = (ArrayList<IDrawable>[]) (new ArrayList[10]);
 	@SuppressWarnings("unchecked")
-    public ArrayList<IDrawable>[] drawBeforeObstacles = (ArrayList<IDrawable>[]) (new ArrayList[10]);
+    public ArrayList<IDrawable>[] drawBeforeTerrain = (ArrayList<IDrawable>[]) (new ArrayList[10]);
 
 	public static boolean controlPlayer = false;
     public boolean freecam = false;
@@ -572,8 +572,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		for (int i = 0; i < drawables.length; i++)
 			drawables[i] = new ArrayList<>();
-		for (int i = 0; i < drawBeforeObstacles.length; i++)
-			drawBeforeObstacles[i] = new ArrayList<>();
+		for (int i = 0; i < drawBeforeTerrain.length; i++)
+			drawBeforeTerrain[i] = new ArrayList<>();
 
 		options.image = "icons/gear.png";
 		options.imageSizeX = 50;
@@ -950,24 +950,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		Game.player.hotbar.update();
 		minimap.update();
-
-		for (Obstacle o: Game.obstacles)
-		{
-			int x = (int) (o.posX / Game.tile_size);
-			int y = (int) (o.posY / Game.tile_size);
-
-			if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-				Chunk.getTile(x, y).updateGroundHeight(o.getGroundHeight());
-		}
-
-		for (int i = 0; i < Game.currentSizeX; i++)
-		{
-			for (int j = 0; j < Game.currentSizeY; j++)
-			{
-				if (Chunk.getTile(i, j).groundHeight <= -1000)
-					Chunk.getTile(i, j).groundHeight = 0;
-			}
-		}
 
 		String prevMusic = this.music;
 		this.music = null;
@@ -1456,7 +1438,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             ItemBar b = Game.player.hotbar.itemBar;
             this.selectedArcBullet = b.selected > -1 && b.slots[b.selected] instanceof ItemBullet && BulletArc.class.isAssignableFrom(((ItemBullet) b.slots[b.selected]).bulletClass);
 
-			if (!freecam && Game.followingCam)
+			if ((!freecam || controlPlayer) && Game.followingCam)
 				updateFollowingCam();
 
             Obstacle.draw_size = Math.min(Game.tile_size, Obstacle.draw_size);
@@ -2056,6 +2038,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	{
 		if (Game.enable3d)
 		{
+			Chunk.fillHeightGrid();
+
 			for (Obstacle o : Game.obstacles)
             {
                 o.postOverride();
@@ -2076,6 +2060,15 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 						this.drawables[9].add(e);
 				}
             }
+
+			for (int i = 0; i < Game.currentSizeX; i++)
+			{
+				for (int j = 0; j < Game.currentSizeY; j++)
+				{
+					if (Chunk.getTile(i, j).groundHeight <= -1000)
+						Chunk.getTile(i, j).groundHeight = 0;
+				}
+			}
         }
 
         this.setPerspective();
@@ -2097,7 +2090,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 		for (Movable m : Game.movables)
 		{
-			ArrayList<IDrawable>[] arr = m.drawBeforeObstacles() ? drawBeforeObstacles : drawables;
+			ArrayList<IDrawable>[] arr = m.drawBeforeObstacles() ? drawBeforeTerrain : drawables;
 			arr[m.drawLevel].add(m);
 
 			if (m.showName)
@@ -2123,17 +2116,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 			if (TankPlayer.shootStickEnabled && !TankPlayer.shootStickHidden)
 				drawables[9].add(TankPlayer.shootStick);
-		}
-
-        for (ArrayList<IDrawable> arr : this.drawBeforeObstacles)
-		{
-			for (IDrawable a : arr)
-			{
-				if (a != null)
-					a.draw();
-			}
-
-			arr.clear();
 		}
 
 		for (int i = 0; i < this.drawables.length; i++)

@@ -421,7 +421,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
             this.angle = this.getAngleInDirection(this.mouseX, this.mouseY);
         }
 
-        if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam))
+        if (!(Game.screen instanceof ScreenGame g && g.freecam && !ScreenGame.controlPlayer))
         {
             if (shoot && this.getItem(false).cooldown <= 0 && !this.disabled)
                 this.shoot();

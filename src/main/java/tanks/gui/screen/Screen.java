@@ -5,6 +5,8 @@ import tanks.*;
 import tanks.obstacle.Obstacle;
 import tanks.rendering.StaticTerrainRenderer;
 
+import java.util.ArrayList;
+
 public abstract class Screen implements IBatchRenderableObject
 {
 	public String music = null;
@@ -46,8 +48,6 @@ public abstract class Screen implements IBatchRenderableObject
 	public boolean drawn = false;
 
 	public boolean hideSpeedrunTimer = false;
-
-	public IBatchRenderableObject[][] tiles;
 
 	public double lastObsSize;
 
@@ -108,7 +108,7 @@ public abstract class Screen implements IBatchRenderableObject
 		double frac = 0;
 
 		if (this instanceof ScreenGame || this instanceof ILevelPreviewScreen || (this instanceof IOverlayScreen
-				&& !(this instanceof IConditionalOverlayScreen && !((IConditionalOverlayScreen) this).isOverlayEnabled())))
+				&& !(this instanceof IConditionalOverlayScreen c && !c.isOverlayEnabled())))
 			frac = Obstacle.draw_size / Game.tile_size;
 
 		if (this.forceInBounds)
@@ -130,6 +130,20 @@ public abstract class Screen implements IBatchRenderableObject
 		}
 
 		Drawing.drawing.setColor(Level.currentColorR, Level.currentColorG, Level.currentColorB);
+
+		if (Game.enable3d && Game.screen instanceof ScreenGame g)
+		{
+			for (ArrayList<IDrawable> arr : g.drawBeforeTerrain)
+			{
+				for (IDrawable a : arr)
+				{
+					if (a != null)
+						a.draw();
+				}
+
+				arr.clear();
+			}
+		}
 
 		if (stageOnly && Drawing.drawing.terrainRenderer instanceof StaticTerrainRenderer r)
 			r.stage();

@@ -357,8 +357,6 @@ public class Panel
 			}
 		}
 
-		Chunk.fillHeightGrid();
-
 		if (ScreenPartyHost.isServer)
 		{
 			synchronized (ScreenPartyHost.disconnectedPlayers)
