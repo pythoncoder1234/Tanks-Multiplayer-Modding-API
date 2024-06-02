@@ -20,7 +20,7 @@ public class NameTag implements IDrawable, ISyncable
 
     public NameTag(Tank t, double ox, double oy, double oz, String name)
     {
-        this(t, ox, oy, oz, name, t.colorR, t.colorG, t.colorB);
+        this(t, ox, oy, oz, name, -9999, 0, 0);
     }
 
     public NameTag(Movable m, double ox, double oy, double oz, String name, double colR, double colG, double colB)
@@ -36,6 +36,13 @@ public class NameTag implements IDrawable, ISyncable
     @Override
     public void draw()
     {
+        if (this.name.colorR < -9000)
+        {
+            this.name.colorR = tank.colorR;
+            this.name.colorG = tank.colorG;
+            this.name.colorB = tank.colorB;
+        }
+
         this.name.fontSize = size * (1 - this.tank.destroyTimer / Game.tile_size) * Math.min(this.tank.drawAge / Game.tile_size, 1);
         this.name.drawText(tank.posX + ox, tank.posY + oy, tank.posZ + oz);
         this.name.shadowColor().drawText(tank.posX + ox + 2, tank.posY + oy + 2, tank.posZ + oz);

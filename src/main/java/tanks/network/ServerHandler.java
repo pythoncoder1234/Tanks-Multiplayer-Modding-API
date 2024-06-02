@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ServerHandler extends ChannelInboundHandlerAdapter
 {
 	public MessageReader reader = new MessageReader();
-	public SynchronizedList<INetworkEvent> events = new SynchronizedList<>();
+	public final SynchronizedList<INetworkEvent> events = new SynchronizedList<>();
 	protected HashMap<Integer, IStackableEvent> stackedEvents = new HashMap<>();
 	protected long lastStackedEventSend = 0;
 

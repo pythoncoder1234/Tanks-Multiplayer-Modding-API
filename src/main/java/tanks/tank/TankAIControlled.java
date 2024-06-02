@@ -601,6 +601,12 @@ public class TankAIControlled extends Tank
 	{
 		if (this.age <= 0)
 		{
+			if (Game.grandpaMode)
+			{
+				this.bulletAvoidBehvavior = BulletAvoidBehavior.aggressive_dodge;
+				this.targetEnemySightBehavior = TargetEnemySightBehavior.sidewind;
+			}
+
 			this.baseMaxSpeed = this.maxSpeed;
 			this.dealsDamage = !this.isSupportTank();
 			this.baseColorR = this.colorR;

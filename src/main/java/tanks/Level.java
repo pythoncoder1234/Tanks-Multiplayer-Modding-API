@@ -743,6 +743,7 @@ t = customTanksMap.get(type).instantiate(type, x, y, angle);
         Game.surfaceTileGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
 		Drawing.drawing.setScreenBounds(Game.tile_size * sizeX, Game.tile_size * sizeY);
+		Chunk.populateChunks(Game.currentLevel);
 
 		for (Obstacle o: Game.obstacles)
         {

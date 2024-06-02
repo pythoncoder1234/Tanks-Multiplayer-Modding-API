@@ -1862,7 +1862,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			}
 
 			for (Obstacle o1 : o.getNeighbors())
-				o1.refreshHitboxes();
+				o1.onNeighborUpdate();
 
 			Game.obstacles.remove(o);
 		}
@@ -2036,41 +2036,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	@Override
 	public void draw()
 	{
-		if (Game.enable3d)
-		{
-			Chunk.fillHeightGrid();
-
-			for (Obstacle o : Game.obstacles)
-            {
-                o.postOverride();
-
-                if (o.startHeight > 1)
-                    continue;
-
-                int x = (int) (o.posX / Game.tile_size);
-                int y = (int) (o.posY / Game.tile_size);
-
-                if (Game.fancyTerrain && Game.enable3d && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-                    Chunk.getTile(x, y).updateHeight(o.getTileHeight()).updateGroundHeight(o.getGroundHeight());
-
-				if (!Game.game.window.drawingShadow)
-				{
-					Effect e = o.getCompanionEffect();
-					if (e != null)
-						this.drawables[9].add(e);
-				}
-            }
-
-			for (int i = 0; i < Game.currentSizeX; i++)
-			{
-				for (int j = 0; j < Game.currentSizeY; j++)
-				{
-					if (Chunk.getTile(i, j).groundHeight <= -1000)
-						Chunk.getTile(i, j).groundHeight = 0;
-				}
-			}
-        }
-
         this.setPerspective();
 
         Drawing.drawing.setColor(174, 92, 16);

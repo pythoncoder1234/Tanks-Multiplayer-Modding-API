@@ -47,9 +47,7 @@ public class ObstacleShrubbery extends Obstacle
 		}
 
 		this.update = true;
-
 		this.renderer = ShaderShrubbery.class;
-
 		this.description = "A destructible bush in which you can hide by standing still";
 	}
 

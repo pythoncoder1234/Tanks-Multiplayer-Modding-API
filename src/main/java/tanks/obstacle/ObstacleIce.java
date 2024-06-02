@@ -44,9 +44,7 @@ public class ObstacleIce extends Obstacle
     public void onObjectEntry(Movable m)
     {
         if (m instanceof Tank)
-        {
             m.addStatusEffect(StatusEffect.ice, 0, 5, 10);
-        }
     }
 
     @Override

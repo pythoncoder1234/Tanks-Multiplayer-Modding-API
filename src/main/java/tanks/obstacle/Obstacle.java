@@ -315,9 +315,19 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	}
 
+	public void afterAdd()
+	{
+
+	}
+
 	public void update()
 	{
 
+	}
+
+	public void onNeighborUpdate()
+	{
+		refreshHitboxes();
 	}
 
 	public void reactToHit(double bx, double by)
@@ -457,16 +467,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 		return col;
 	}
-
-	public void updateFaces()
-	{
-		Chunk c = Chunk.getChunk(posX, posY);
-		if (c == null)
-			return;
-
-        c.removeObstacle(this);
-		c.addObstacle(this);
-    }
 
 	@Override
 	public Face[] getHorizontalFaces()

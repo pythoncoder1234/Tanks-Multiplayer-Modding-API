@@ -31,8 +31,9 @@ New Features:
 
 - Chunk loading system
 - Huge optimizations
-- Freecam control player (F7 to toggle)
-- F3+F8 turns on Record mode, which hides the info bar and speedrun timer
+- Freecam control player (`F7` to toggle)
+- Added `Obstacle.afterAdd` and `Obstacle.onNeighborUpdate`
+- `F3`+`F8` turns on Record mode, which hides the info bar and speedrun timer
 - Removed update skipping for now
 - Renamed `Game.sampleTerrainGroundHeight` to `Game.sampleDefaultGroundHeight`
 - Fixed many bugs

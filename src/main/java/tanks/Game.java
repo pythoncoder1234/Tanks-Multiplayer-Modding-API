@@ -863,9 +863,11 @@ public class Game
 
 	public static void addObstacle(Obstacle o)
 	{
-		o.removed = false;
 		Game.obstacles.add(o);
 		Game.redrawObstacles.add(o);
+		o.removed = false;
+		o.postOverride();
+
 		Chunk c = Chunk.getChunk(o.posX, o.posY);
 		if (c != null)
 			c.addObstacle(o);
@@ -875,6 +877,11 @@ public class Game
 
 		if (x >= 0 && y >= 0 && x < Game.currentSizeX && y < Game.currentSizeY && Game.enable3d)
 			Game.redrawGroundTiles.add(new int[]{x, y});
+
+		o.afterAdd();
+
+		for (Obstacle o1 : o.getNeighbors())
+			o1.onNeighborUpdate();
 	}
 
 	public static boolean usernameInvalid(String username)

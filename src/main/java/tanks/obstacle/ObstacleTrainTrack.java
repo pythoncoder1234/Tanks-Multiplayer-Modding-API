@@ -4,10 +4,12 @@ package tanks.obstacle;
 import basewindow.Model;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.tank.IAvoidObject;
 import tanks.tank.TankTrain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static tanks.Game.dirX;
 import static tanks.Game.dirY;
@@ -51,16 +53,7 @@ public class ObstacleTrainTrack extends Obstacle
     @Override
     public void draw()
     {
-        if (firstFrame)
-            setOrientation();
-
         batchDraw = turn == 0;
-
-        if (redraw && batchDraw)
-        {
-            redraw = false;
-            Game.redrawObstacles.add(this);
-        }
 
         if (turn > 0)
         {
@@ -78,12 +71,12 @@ public class ObstacleTrainTrack extends Obstacle
             for (int i = -1; i <= 1; i++)
             {
                 Drawing.drawing.setColor(this.stackColorR[i + 1], this.stackColorG[i + 1], this.stackColorB[i + 1]);
-                Drawing.drawing.fillInterfaceRect(this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, offX * 2.86 + 7, offY * 2.86 + 7);
+                Drawing.drawing.fillRect(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, offX * 2.86 + 7, offY * 2.86 + 7);
             }
 
             Drawing.drawing.setColor(192, 192, 192);
-            Drawing.drawing.fillInterfaceRect(this.posX + offX, this.posY + offY, offY * 3 + 5, offX * 3 + 5);
-            Drawing.drawing.fillInterfaceRect(this.posX - offX, this.posY - offY, offY * 3 + 5, offX * 3 + 5);
+            Drawing.drawing.fillRect(this, this.posX + offX, this.posY + offY, offY * 3 + 5, offX * 3 + 5);
+            Drawing.drawing.fillRect(this, this.posX - offX, this.posY - offY, offY * 3 + 5, offX * 3 + 5);
         }
         else
         {
@@ -104,18 +97,28 @@ public class ObstacleTrainTrack extends Obstacle
         }
     }
 
+    @Override
+    public void afterAdd()
+    {
+        setOrientation();
+    }
+
+    @Override
+    public void onNeighborUpdate()
+    {
+        super.onNeighborUpdate();
+
+        updateTurn();
+        if (turn != 0 && batchDraw)
+            Drawing.drawing.terrainRenderer.getRenderer(this, posX, posY, false).renderer.delete(this);
+        batchDraw = turn == 0;
+        if (redraw && batchDraw)
+            Game.redrawObstacles.add(this);
+    }
+
     public static boolean exists(Obstacle o)
     {
-        if (o == null)
-            return false;
-
-        int x = (int) (o.posX / Game.tile_size);
-        int y = (int) (o.posY / Game.tile_size);
-
-        if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
-            return false;
-
-        return Game.obstacleGrid[x][y] == o;
+        return IAvoidObject.exists(o);
     }
 
     @Override
@@ -173,13 +176,7 @@ public class ObstacleTrainTrack extends Obstacle
 
     public void updateTurn()
     {
-        this.turn = 0;
-
-        Integer i = AnglePair.get(this);
-        if (i == null)
-            return;
-
-        this.turn = i;
+        this.turn = Objects.requireNonNullElse(AnglePair.get(this), 0);
     }
 
     public int connectedX()

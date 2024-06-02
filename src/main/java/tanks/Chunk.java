@@ -250,11 +250,11 @@ public class Chunk implements Comparable<Chunk>
 
     public void setObstacle(int x, int y, Obstacle o)
     {
-        if ((!o.isSurfaceTile || tileGrid[x][y] == null) && o.startHeight < 1)
+        Obstacle o1 = tileGrid[x][y].obstacle;
+        if ((!o.isSurfaceTile || o1 == null || o1 == o) && o.startHeight < 1)
         {
-            if (tileGrid[x][y].obstacle != null && tileGrid[x][y].obstacle.isSurfaceTile)
-                tileGrid[x][y].surfaceObstacle = tileGrid[x][y].obstacle;
-
+            if (o1 != null && o1 != o && o1.isSurfaceTile)
+                tileGrid[x][y].surfaceObstacle = o1;
             tileGrid[x][y].obstacle = o;
         }
         else
@@ -271,13 +271,6 @@ public class Chunk implements Comparable<Chunk>
     public static Tile getTile(double posX, double posY)
     {
         return getChunk(posX, posY).getChunkTile(posX, posY);
-    }
-
-    public static Tile tileCoordsGet(double posX, double posY)
-    {
-        posX = (posX + 0.5) * Game.tile_size;
-        posY = (posY + 0.5) * Game.tile_size;
-        return getTile(posX, posY);
     }
 
     public static int toChunkTileCoords(double a)

@@ -24,10 +24,7 @@ import tanks.obstacle.Obstacle;
 import tanks.rendering.*;
 import tanks.tank.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class Panel
 {
@@ -75,7 +72,6 @@ public class Panel
 	public long lastFrameSec = (long) (System.currentTimeMillis() / 1000.0 * frameSampling);
 
 	public long startTime = System.currentTimeMillis();
-	public long frameStartTime = System.currentTimeMillis();
 
 	public long lastFrameNano = 0;
 
@@ -823,7 +819,7 @@ public class Panel
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
 			{
 				Panel.pauseOnDefocus = !Panel.pauseOnDefocus;
-				Panel.notifs.add(new Notification("Pause on lost focus: \u00a7255200000255"
+				notifs.add(new Notification("Pause on lost focus: \u00a7255200000255"
 						+ (Panel.pauseOnDefocus ? "enabled" : "disabled")).setColor(255, 255, 128));
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_P);
 			}
@@ -853,6 +849,7 @@ public class Panel
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_D))
 			{
 				ArrayList<ChatMessage> chat = null;
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_D);
 
 				if (ScreenPartyLobby.isClient)
                     chat = ScreenPartyLobby.chat;
@@ -865,16 +862,15 @@ public class Panel
 					{
 						chat.clear();
 					}
+					notifs.add(new Notification("Chat cleared", 200).setColor(255, 255, 128));
 				}
-
-				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_D);
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_A))
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_A);
 				Drawing.drawing.terrainRenderer.reset();
-				Panel.notifs.add(new Notification("Terrain reloaded!").setColor(255, 255, 128));
+				notifs.add(new Notification("Terrain reloaded!").setColor(255, 255, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_T))
@@ -909,7 +905,7 @@ public class Panel
 
 				Game.game.shaderInstances = newShaders;
 				Drawing.drawing.terrainRenderer.reset();
-				Panel.notifs.add(new Notification("Shaders reloaded!").setColor(255, 255, 128));
+				notifs.add(new Notification("Shaders reloaded!").setColor(255, 255, 128));
 			}
 
 			int brightness = 0;
@@ -917,14 +913,16 @@ public class Panel
 				brightness = 255;
 
 			Drawing.drawing.setColor(brightness, brightness, brightness);
-			Drawing.drawing.setFontSize(16);
+			Drawing.drawing.setInterfaceFontSize(16);
+
+			double mx = Game.game.window.absoluteMouseX, my = Game.game.window.absoluteMouseY;
 
 			String text;
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
 				text = "(" + (int) Game.game.window.absoluteWidth + ", " + (int) Game.game.window.absoluteHeight + ")";
 
 			else if (Game.game.window.pressedKeys.contains(InputCodes.KEY_S))
-				text = "(" + (int) Game.game.window.absoluteMouseX + ", " + (int) Game.game.window.absoluteMouseY + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
+				text = "(" + (int) mx + ", " + (int) my + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
 
 			else {
 				int posX = (int) (((Math.round(Drawing.drawing.getMouseX() / Game.tile_size + 0.5) * Game.tile_size - Game.tile_size / 2) - 25) / 50);
@@ -936,9 +934,25 @@ public class Panel
 				}
 
 				text = "(" + posX + ", " + posY + ")";
+
+				if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+				{
+					Chunk.Tile t1 = Chunk.getTile(posX, posY);
+
+					if (Game.glowEnabled && Level.isDark() && t1.obstacle != null)
+					{
+						Obstacle o = t1.obstacle;
+						if ((o.colorR + o.colorG + o.colorB + o.colorA / 2) / 4 > 200)
+                            Drawing.drawing.setColor(0, 0, 0, 128);
+					}
+
+					if (t1 != null)
+                        text += " O: " + (t1.obstacle != null ? t1.obstacle.name : "none") + " SO: " + (t1.surfaceObstacle != null ? t1.surfaceObstacle.name : "none");
+					Game.game.window.fontRenderer.drawString(mx + 10, my + 30, Drawing.drawing.fontSize, Drawing.drawing.fontSize, 					"H: " + (int) t1.height + " GH: " + (int) t1.groundHeight);
+				}
 			}
 
-			Game.game.window.fontRenderer.drawString(Game.game.window.absoluteMouseX + 10, Game.game.window.absoluteMouseY + 10, Drawing.drawing.fontSize, Drawing.drawing.fontSize, text);
+			Game.game.window.fontRenderer.drawString(mx + 10, my + 10, Drawing.drawing.fontSize, Drawing.drawing.fontSize, text);
 		}
 	}
 

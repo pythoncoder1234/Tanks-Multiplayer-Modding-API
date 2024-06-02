@@ -27,8 +27,8 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
                 Game.currentSizeX = screenLevelEditor.level.sizeX;
             }
 
-            Drawing.drawing.terrainRenderer.reset();
             screenLevelEditor.level.reloadTiles();
+            Drawing.drawing.terrainRenderer.reset();
         }
                 , screenLevelEditor.level.sizeX + "");
 
@@ -50,8 +50,8 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
                 Game.currentSizeY = screenLevelEditor.level.sizeY;
             }
 
-            Drawing.drawing.terrainRenderer.reset();
             screenLevelEditor.level.reloadTiles();
+            Drawing.drawing.terrainRenderer.reset();
         }
                 , screenLevelEditor.level.sizeY + "");
 

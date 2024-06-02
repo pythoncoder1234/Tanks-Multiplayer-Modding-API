@@ -478,6 +478,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				{
 					currentPlaceable = Placeable.playerTank;
 					mouseTank = new TankPlayer(0, 0, 0);
+
+					if (!mouseTank.hasCustomSelectors())
+						mouseTank.registerSelectors();
+					mouseTank.initSelectors(this);
+
 					((TankPlayer) mouseTank).setDefaultColor();
 				}
 				else if (currentPlaceable == Placeable.playerTank)
@@ -502,6 +507,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				{
 					currentPlaceable = Placeable.playerTank;
 					mouseTank = new TankPlayer(0, 0, 0);
+
+					if (!mouseTank.hasCustomSelectors())
+						mouseTank.registerSelectors();
+					mouseTank.initSelectors(this);
+
 					((TankPlayer) mouseTank).setDefaultColor();
 				}
 			}

@@ -472,7 +472,7 @@ public class TerrainRenderer
 
     public void drawTile(int i, int j)
     {
-        Chunk.Tile t = Chunk.tileCoordsGet(i, j);
+        Chunk.Tile t = Chunk.getTile(i, j);
         double r = t.colR, g = t.colG, b = t.colB, depth = t.depth;
 
         currentColor[0] = (float) (r / 255.0);
@@ -487,22 +487,22 @@ public class TerrainRenderer
 
         if (Game.enable3d)
         {
-            Obstacle o = Game.obstacleGrid[i][j];
+            Obstacle o = t.obstacle;
             if (o != null && o.replaceTiles && !o.removed)
             {
-                double extra = Game.tile_size;
+                double extra = 15;
 
                 if (i > 0)
-                    extra = Math.max(extra, -Game.getTileHeight(i-1, j));
+                    extra = Math.max(extra, -Game.sampleGroundHeight(i-1, j));
 
                 if (j > 0)
-                    extra = Math.max(extra, -Game.getTileHeight(i, j - 1));
+                    extra = Math.max(extra, -Game.sampleGroundHeight(i, j - 1));
 
                 if (i < Game.currentSizeX - 1)
-                    extra = Math.max(extra, -Game.getTileHeight(i + 1, j));
+                    extra = Math.max(extra, -Game.sampleGroundHeight(i + 1, j));
 
                 if (j < Game.currentSizeY - 1)
-                    extra = Math.max(extra, -Game.getTileHeight(i, j + 1));
+                    extra = Math.max(extra, -Game.sampleGroundHeight(i, j + 1));
 
                 o.drawTile(t, r, g, b, depth, extra);
             }

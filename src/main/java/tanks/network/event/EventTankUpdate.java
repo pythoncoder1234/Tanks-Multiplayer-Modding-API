@@ -76,28 +76,7 @@ public class EventTankUpdate extends PersonalEvent implements IStackableEvent
 
 			if (t instanceof TankRemote r)
 			{
-				double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
-
-				r.prevKnownPosX = r.posX;
-				r.prevKnownPosY = r.posY;
-				r.prevKnownVX = r.vX;
-				r.prevKnownVY = r.vY;
-				r.prevKnownVXFinal = r.lastFinalVX;
-				r.prevKnownVYFinal = r.lastFinalVY;
-
-				r.currentKnownPosX = this.posX;
-				r.currentKnownPosY = this.posY;
-				r.currentKnownVX = this.vX;
-				r.currentKnownVY = this.vY;
-
-				r.timeSinceRefresh = 0;
-				r.interpolationTime = iTime;
-				r.lastUpdate = time;
-
-				r.lastAngle = r.angle;
-				r.lastPitch = r.pitch;
-				r.currentAngle = this.angle;
-				r.currentPitch = this.pitch;
+				setPrevPositions(r);
 			}
 			else
 			{
@@ -115,5 +94,31 @@ public class EventTankUpdate extends PersonalEvent implements IStackableEvent
 	public int getIdentifier()
 	{
 		return this.tank;
+	}
+
+	public void setPrevPositions(TankRemote r)
+	{
+		double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
+
+		r.prevKnownPosX = r.posX;
+		r.prevKnownPosY = r.posY;
+		r.prevKnownVX = r.vX;
+		r.prevKnownVY = r.vY;
+		r.prevKnownVXFinal = r.lastFinalVX;
+		r.prevKnownVYFinal = r.lastFinalVY;
+
+		r.currentKnownPosX = this.posX;
+		r.currentKnownPosY = this.posY;
+		r.currentKnownVX = this.vX;
+		r.currentKnownVY = this.vY;
+
+		r.timeSinceRefresh = 0;
+		r.interpolationTime = iTime;
+		r.lastUpdate = time;
+
+		r.lastAngle = r.angle;
+		r.lastPitch = r.pitch;
+		r.currentAngle = this.angle;
+		r.currentPitch = this.pitch;
 	}
 }

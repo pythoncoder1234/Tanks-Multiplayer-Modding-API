@@ -10,7 +10,7 @@ import tanks.tank.TankAIControlled;
 
 public class ObstacleConveyor extends Obstacle
 {
-    public static float speedMult = 1f;
+    public static float speedMult = 0.5f;
     public static float speedAdj = -0.5f;
     public static final StatusEffect conveyor_effect = new StatusEffect("conveyor_speed",
             new AttributeModifier(AttributeModifier.max_speed, AttributeModifier.Operation.add, 0));
@@ -33,6 +33,8 @@ public class ObstacleConveyor extends Obstacle
         this.enableStacking = false;
         this.enableGroupID = true;
         this.enableRotation = true;
+        this.drawLevel = 1;
+        this.batchDraw = false;
         this.update = true;
         this.checkForObjects = true;
 
@@ -58,11 +60,16 @@ public class ObstacleConveyor extends Obstacle
         double offset = (age * finishedSpeed * this.speed * speedMult + (finishedSpeed >= 1 ? speedAdj : 1)) % 50 - 25;
         double percent = (offset + 25) / 50;
 
-        Drawing.drawing.setColor(0, 0, 0);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, 0, draw_size, draw_size, 15);
-
-        Drawing.drawing.setColor(30, 30, 30);
-        Drawing.drawing.fillRect(this, this.posX, this.posY, (35 * multX + 15) * (draw_size / Game.tile_size), (35 * multY + 15) * (draw_size / Game.tile_size));
+        if (Game.enable3d)
+        {
+            Drawing.drawing.setColor(0, 0, 0);
+            Drawing.drawing.fillBox(this, this.posX, this.posY, 0, draw_size, draw_size, 15);
+        }
+        else
+        {
+            Drawing.drawing.setColor(30, 30, 30);
+            Drawing.drawing.fillRect(this, this.posX, this.posY, (35 * multX + 15) * (draw_size / Game.tile_size), (35 * multY + 15) * (draw_size / Game.tile_size));
+        }
 
         double s = draw_size * 0.25;
 
@@ -148,7 +155,7 @@ public class ObstacleConveyor extends Obstacle
         selector.buttonText = "Speed: %.1f";
 
         if (!selector.modified)
-            selector.number = 4;
+            selector.number = 2;
     }
 
     @Override

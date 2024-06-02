@@ -13,7 +13,9 @@ import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemBullet;
 import tanks.hotbar.item.ItemMine;
 import tanks.network.event.*;
-import tanks.obstacle.*;
+import tanks.obstacle.ISolidObject;
+import tanks.obstacle.Obstacle;
+import tanks.obstacle.ObstacleLiquid;
 
 import java.util.*;
 
@@ -674,13 +676,13 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		prevInWater = inWater;
 		inWater = false;
 
-		double s = this.size * this.hitboxSize / 2 + 10;
 		double maxTouchingZ = -9999;
 		boolean allow = true;
+		double s = size / 2;
 
-		for (double x = this.posX - s; x <= this.posX + s; x += Game.tile_size)
+		for (double x = posX - s; x <= posX + s; x += Game.tile_size)
 		{
-			for (double y = this.posY - s; y <= this.posY + s; y += Game.tile_size)
+			for (double y = posY - s; y <= posY + s; y += Game.tile_size)
 			{
 				Obstacle o = Game.getObstacle(x, y);
 				if (!(o instanceof ObstacleLiquid))
@@ -691,12 +693,12 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 				double horizontalDist = Math.abs(posX - o.posX);
 				double verticalDist = Math.abs(posY - o.posY);
-				double bound = size / 2 + Game.tile_size / 2;
+				double bound = size * 0.9;
 
 				if ((horizontalDist <= bound || verticalDist <= bound) && maxTouchingZ < o.getTileHeight())
 				{
 					maxTouchingZ = o.getTileHeight();
-					allow = Math.abs(posZ - maxTouchingZ) < Game.tile_size / 2 || !(horizontalDist <= bound * 0.9 || verticalDist <= bound * 0.9);
+					allow = Math.abs(posZ - maxTouchingZ) < Game.tile_size;
 				}
 			}
 		}
@@ -710,8 +712,8 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 			tiltFirstFrame = false;
 			maxSpeedModifier *= 1 / mult * (allow ? 1 : 0);
-			posZ += (allow ? 2 : 0.3) * mult * Panel.frameFrequency;
-			basePitch = Math.min(allow ? 0.3 : Math.PI, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
+			posZ += (allow ? 2 : 1) * mult * Panel.frameFrequency;
+			basePitch = Math.min(allow ? 0.3 : 0.6, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
 		}
 		else if (Math.abs(posZ - maxTouchingZ) < 1)
 		{
