@@ -1,11 +1,12 @@
 package tanks;
+
 import basewindow.BaseFile;
-import tanks.gui.screen.ScreenPartyLobby;
-import tanks.network.event.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.ItemBar;
 import tanks.hotbar.item.Item;
+import tanks.network.event.*;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
 import tanks.tank.TankPlayer;
@@ -400,14 +401,14 @@ public class Crusade
 		{
 			if (p.remainingLives > 1)
 				return false;
-			else if (p.remainingLives == 1)
+			if (p.remainingLives == 1)
 			{
 				boolean found = false;
-				for (Movable m: Game.movables)
+				for (Movable m : Game.movables)
 				{
 					if (m instanceof TankPlayer && ((TankPlayer) m).player == p && m.destroy)
 						return false;
-					else if (m instanceof TankPlayerRemote && ((TankPlayerRemote) m).player == p && m.destroy)
+					if (m instanceof TankPlayerRemote && ((TankPlayerRemote) m).player == p && m.destroy)
 						return false;
 
 					if ((m instanceof TankPlayer && ((TankPlayer) m).player == p) || (m instanceof TankPlayerRemote && ((TankPlayerRemote) m).player == p))

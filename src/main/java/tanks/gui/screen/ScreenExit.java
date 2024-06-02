@@ -31,8 +31,7 @@ public class ScreenExit extends Screen
 
             if (Game.game.window.platformHandler == null)
                 System.exit(0);
-            else
-                Game.game.window.platformHandler.quit();
+            Game.game.window.platformHandler.quit();
         }
     }
 

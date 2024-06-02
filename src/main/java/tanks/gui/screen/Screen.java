@@ -131,8 +131,8 @@ public abstract class Screen implements IBatchRenderableObject
 
 		Drawing.drawing.setColor(Level.currentColorR, Level.currentColorG, Level.currentColorB);
 
-		if (stageOnly && Drawing.drawing.terrainRenderer instanceof StaticTerrainRenderer)
-			((StaticTerrainRenderer) Drawing.drawing.terrainRenderer).stage();
+		if (stageOnly && Drawing.drawing.terrainRenderer instanceof StaticTerrainRenderer r)
+			r.stage();
 		else
 			Drawing.drawing.terrainRenderer.draw();
 

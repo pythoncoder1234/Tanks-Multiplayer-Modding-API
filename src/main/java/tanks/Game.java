@@ -925,25 +925,23 @@ public class Game
 
 		if (days > 7)
 			return days + "d";
-		else if (days > 0)
-			return days + "d " + hours % 24 + "h";
-		else if (hours > 0)
-			return hours % 24 + "h " + mins % 60 + "m";
-		else if (mins > 0)
-			return mins % 60 + "m";
-		else
-			return "less than 1m";
-	}
+        if (days > 0)
+            return days + "d " + hours % 24 + "h";
+        if (hours > 0)
+            return hours % 24 + "h " + mins % 60 + "m";
+        if (mins > 0)
+            return mins % 60 + "m";
+        return "less than 1m";
+    }
 
 	public static String formatString(String s)
 	{
 		if (s.isEmpty())
 			return s;
-		else if (s.length() == 1)
-			return s.toUpperCase();
-		else
-			return Character.toUpperCase(s.charAt(0)) + s.substring(1).replace("-", " ").replace("_", " ").toLowerCase();
-	}
+        if (s.length() == 1)
+            return s.toUpperCase();
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1).replace("-", " ").replace("_", " ").toLowerCase();
+    }
 
 	public static void reset()
     {
@@ -1195,9 +1193,8 @@ public class Game
 
 		if (!Game.enable3dBg || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
 			return 0;
-		else
-			return Chunk.getTile(px, py).depth;
-	}
+        return Chunk.getTile(px, py).depth;
+    }
 
 	public static double sampleTerrainGroundHeight(double px, double py)
 	{
@@ -1474,13 +1471,13 @@ public class Game
 
 			if (ia != ib)
 				return ia - ib;
-			else if ((la.toString().isEmpty() || lb.toString().isEmpty()) && la.toString().length() + lb.toString().length() > 0)
-				return lb.toString().length() - la.toString().length();
-			else if (la.toString().length() != lb.toString().length())
-				return la.toString().length() - lb.toString().length();
-			else if (!la.toString().contentEquals(lb))
-				return la.toString().compareTo(lb.toString());
-		}
+            if ((la.toString().isEmpty() || lb.toString().isEmpty()) && la.toString().length() + lb.toString().length() > 0)
+                return lb.toString().length() - la.toString().length();
+            if (la.toString().length() != lb.toString().length())
+                return la.toString().length() - lb.toString().length();
+            if (!la.toString().contentEquals(lb))
+                return la.toString().compareTo(lb.toString());
+        }
 
 		return 0;
 	}

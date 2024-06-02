@@ -377,8 +377,7 @@ public class ScreenAddSavedTank extends Screen implements IConditionalOverlayScr
     {
         if (drawBehindScreen)
             return ((Screen) tankScreen).getOffsetX();
-        else
-            return super.getOffsetX();
+        return super.getOffsetX();
     }
 
     @Override
@@ -386,8 +385,7 @@ public class ScreenAddSavedTank extends Screen implements IConditionalOverlayScr
     {
         if (drawBehindScreen)
             return ((Screen) tankScreen).getOffsetY();
-        else
-            return super.getOffsetY();
+        return super.getOffsetY();
     }
 
     @Override
@@ -395,8 +393,7 @@ public class ScreenAddSavedTank extends Screen implements IConditionalOverlayScr
     {
         if (drawBehindScreen)
             return ((Screen) tankScreen).getScale();
-        else
-            return super.getScale();
+        return super.getScale();
     }
 
     @Override

@@ -2285,11 +2285,10 @@ public class TankAIControlled extends Tank
 
         if (this.transformMimic)
             return !(m.getClass().equals(this.getClass())) && m.size == this.size;
-        else if (this.isSupportTank())
+        if (this.isSupportTank())
             return Team.isAllied(m, this) && m != this && t.canBeHealed()
 					&& !(m.getClass().equals(this.getClass()));
-        else
-            return !Team.isAllied(m, this) && !t.hidden && t.targetable;
+        return !Team.isAllied(m, this) && !t.hidden && t.targetable;
     }
 
     public void setPathfindingTileProperties(Tile t, Obstacle o)
@@ -3262,9 +3261,8 @@ public class TankAIControlled extends Tank
 				return "<" + this.name + ">";
 			return this.name;
 		}
-		else
-			return tankString();
-	}
+        return tankString();
+    }
 
 	public String tankString()
 	{

@@ -36,8 +36,7 @@ public class Face implements Comparable<Face>
 
         if (!horizontal)
             return cx != 0 ? cx : cy;
-        else
-            return cy != 0 ? cy : cx;
+        return cy != 0 ? cy : cx;
     }
 
     public void update(double x1, double y1, double x2, double y2)
@@ -52,7 +51,6 @@ public class Face implements Comparable<Face>
     {
         if (this.horizontal)
             return Math.round(this.startX) + "-" + Math.round(this.endX) + " " + Math.round(this.startY);
-        else
-            return Math.round(this.startX) + " " + Math.round(this.startY) + "-" + Math.round(this.endY);
+        return Math.round(this.startX) + " " + Math.round(this.startY) + "-" + Math.round(this.endY);
     }
 }

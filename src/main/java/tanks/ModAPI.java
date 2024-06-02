@@ -349,8 +349,7 @@ public class ModAPI
 
             return tanks.entrySet().stream().sorted(comparator).collect(Collectors.toList());
         }
-        else
-            return new ArrayList<>(tanks.entrySet());
+        return new ArrayList<>(tanks.entrySet());
     }
 
     /**
@@ -384,8 +383,7 @@ public class ModAPI
     {
         if (number % 1 != 0)
             return "" + number;
-        else
-            return "" + (int) number;
+        return "" + (int) number;
     }
 
     public static String capitalize(String s)

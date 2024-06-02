@@ -72,7 +72,7 @@ public class AttributeModifier
 
         if (this.expired)
             return in;
-        else if (this.age < this.warmupAge)
+        if (this.age < this.warmupAge)
             val = this.value * this.age / this.warmupAge;
         else if (this.age < this.deteriorationAge || this.deteriorationAge <= 0)
             val = this.value;
@@ -81,13 +81,12 @@ public class AttributeModifier
 
         if (this.effect == Operation.set)
             return val;
-        else if (this.effect == Operation.add)
+        if (this.effect == Operation.add)
             return in + val;
-        else if (this.effect == Operation.multiply)
+        if (this.effect == Operation.multiply)
 			return in * (val + 1);
-		else
-			return in;
-	}
+        return in;
+    }
 	
 	public AttributeModifier(Type type, Operation op, double amount)
 	{

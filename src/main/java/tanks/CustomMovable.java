@@ -46,8 +46,7 @@ public class CustomMovable extends Movable
             {
                 if (endedFuncName && endedParameters)
                     throw new RuntimeException("Expected ';' at " + getStringAround(i));
-
-                else if (!endedFuncName)
+                if (!endedFuncName)
                     funcName.append(c);
 
                 else if (!endedParameters)

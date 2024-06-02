@@ -608,9 +608,8 @@ public class LWJGLWindow extends BaseWindow
 
 		if (in < lower || in > upper)
 			return -1;
-		else
-			return (in - lower) / scale;
-	}
+        return (in - lower) / scale;
+    }
 
 	public void createLights(ArrayList<double[]> lights, double scale)
 	{
@@ -825,9 +824,8 @@ public class LWJGLWindow extends BaseWindow
 
 		if (s != null)
 			return s;
-		else
-			return "";
-	}
+        return "";
+    }
 
 	@Override
 	public void setClipboard(String s)
@@ -866,12 +864,10 @@ public class LWJGLWindow extends BaseWindow
 			String s2 = BaseWindow.keyNames.get(key);
 			if (s2 == null)
 				return "Key " + key;
-			else
-				return s2;
-		}
-		else
-			return s;
-	}
+            return s2;
+        }
+        return s;
+    }
 
 	@Override
 	public int translateKey(int key)
@@ -1070,9 +1066,8 @@ public class LWJGLWindow extends BaseWindow
 	{
 		if (!this.shadowsEnabled)
 			return 0;
-		else
-			return this.shaderHandler.quality;
-	}
+        return this.shaderHandler.quality;
+    }
 
 	@Override
 	public void setLighting(double light, double glowLight, double shadow, double glowShadow)

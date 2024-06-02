@@ -171,8 +171,7 @@ public class ScreenSelectorMusic extends Screen implements IConditionalOverlaySc
     {
         if (drawBehindScreen)
             return screen.getOffsetX();
-        else
-            return super.getOffsetX();
+        return super.getOffsetX();
     }
 
     @Override
@@ -180,8 +179,7 @@ public class ScreenSelectorMusic extends Screen implements IConditionalOverlaySc
     {
         if (drawBehindScreen)
             return screen.getOffsetY();
-        else
-            return super.getOffsetY();
+        return super.getOffsetY();
     }
 
     @Override
@@ -189,8 +187,7 @@ public class ScreenSelectorMusic extends Screen implements IConditionalOverlaySc
     {
         if (drawBehindScreen)
             return screen.getScale();
-        else
-            return super.getScale();
+        return super.getScale();
     }
 
     @Override

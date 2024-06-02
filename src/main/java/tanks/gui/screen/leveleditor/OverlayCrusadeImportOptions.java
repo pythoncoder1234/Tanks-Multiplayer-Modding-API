@@ -385,8 +385,7 @@ public class OverlayCrusadeImportOptions extends ScreenLevelEditorOverlay
             {
                 if (replace)
                     return getCrusade(false);
-                else
-                    throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
         else

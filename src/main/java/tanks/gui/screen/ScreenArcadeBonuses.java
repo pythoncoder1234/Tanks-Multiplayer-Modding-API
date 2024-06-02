@@ -495,15 +495,13 @@ public class ScreenArcadeBonuses extends Screen implements IDarkScreen
     {
         if (odd)
             return fireworks2;
-        else
-            return fireworks1;
+        return fireworks1;
     }
 
     public ArrayList<Firework> getOtherFireworkArray()
     {
         if (odd)
             return fireworks1;
-        else
-            return fireworks2;
+        return fireworks2;
     }
 }

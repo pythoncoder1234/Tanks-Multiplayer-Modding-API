@@ -352,8 +352,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
     {
         if (allLoaded)
             return (i + index * 10) % index;
-        else
-            return i;
+        return i;
     }
 
     public static class ScreenLevel

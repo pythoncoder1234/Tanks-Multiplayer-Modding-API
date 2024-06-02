@@ -174,19 +174,19 @@ public class MessageReader
 
 		if (e instanceof EventPing && ((EventPing) e).iteration <= 2)
 			return ((EventPing) e).iteration;
-		else if (e instanceof IOnlineServerEvent)
-			s.sendEventAndClose(new EventKick("This is a party, please join parties through the party menu"));
-		else if (e instanceof IServerThreadEvent)
-			((IServerThreadEvent) e).execute(s);
-		else
-		{
-			synchronized (Game.eventsIn)
-			{
-				Game.eventsIn.add(e);
-			}
-		}
+        if (e instanceof IOnlineServerEvent)
+            s.sendEventAndClose(new EventKick("This is a party, please join parties through the party menu"));
+        else if (e instanceof IServerThreadEvent)
+            ((IServerThreadEvent) e).execute(s);
+        else
+        {
+            synchronized (Game.eventsIn)
+            {
+                Game.eventsIn.add(e);
+            }
+        }
 
-		return -1;
+        return -1;
 	}
 
 	public static void updateLastMessageTime()

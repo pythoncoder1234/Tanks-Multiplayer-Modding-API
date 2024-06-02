@@ -161,10 +161,10 @@ public abstract class Item extends GameObject
 
 		if (p instanceof UIPropertySelector)
 			return ((UIPropertySelector) p).values[(int) o];
-		else if (p instanceof UIPropertyImageSelector)
-			return ((UIPropertyImageSelector) p).values[(int) o];
+        if (p instanceof UIPropertyImageSelector)
+            return ((UIPropertyImageSelector) p).values[(int) o];
 
-		return o;
+        return o;
 	}
 
 	public void setProperty(String s, Object value)
@@ -197,20 +197,17 @@ public abstract class Item extends GameObject
         {
             return null;
         }
-		else if (this.player == Game.player)
-		{
-			return Game.playerTank;
-		}
-		else
-		{
-			for (Movable m: Game.movables)
-			{
-				if (m instanceof TankPlayerRemote && ((TankPlayerRemote) m).player.clientID.equals(this.player.clientID))
-					return (Tank) m;
-			}
-		}
+        if (this.player == Game.player)
+        {
+            return Game.playerTank;
+        }
+        for (Movable m: Game.movables)
+        {
+            if (m instanceof TankPlayerRemote && ((TankPlayerRemote) m).player.clientID.equals(this.player.clientID))
+                return (Tank) m;
+        }
 
-		return null;
+        return null;
 	}
 
 	public void updateCooldown(double reload)

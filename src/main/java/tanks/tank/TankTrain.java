@@ -265,8 +265,7 @@ public class TankTrain extends Tank implements IAvoidObject
     {
         if (o.turn == 4 || o.turn == 2)
             return Math.abs(this.vX) > Math.abs(this.vY);
-        else
-            return Math.abs(this.vX) < Math.abs(this.vY);
+        return Math.abs(this.vX) < Math.abs(this.vY);
     }
 
     @Override

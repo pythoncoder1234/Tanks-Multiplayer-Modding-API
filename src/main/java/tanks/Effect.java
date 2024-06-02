@@ -221,9 +221,39 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         this.fastRemoveOnExit = false;
     }
 
+    public Effect setColor(double r, double g, double b)
+    {
+        this.colR = r;
+        this.colG = g;
+        this.colB = b;
+        return this;
+    }
+
+    public Effect setColor(double r, double g, double b, double noise)
+    {
+        this.colR = r + (Math.random() - 0.5) * noise;
+        this.colG = g + (Math.random() - 0.5) * noise;
+        this.colB = b + (Math.random() - 0.5) * noise;
+        return this;
+    }
+
+    public Effect setGlowColor(double r, double g, double b)
+    {
+        this.glowR = r;
+        this.glowG = g;
+        this.glowB = b;
+        return this;
+    }
+
     public Effect setRadius(double radius)
     {
         this.radius = radius;
+        return this;
+    }
+
+    public Effect setSize(double size)
+    {
+        this.size = size;
         return this;
     }
 

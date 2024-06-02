@@ -38,11 +38,8 @@ public class SyncedFieldMap
     {
         if (!freeIDs.isEmpty())
             return freeIDs.remove(0);
-        else
-        {
-            currentID++;
-            return currentID - 1;
-        }
+        currentID++;
+        return currentID - 1;
     }
 
     public void put(String fieldName)

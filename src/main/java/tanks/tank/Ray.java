@@ -267,14 +267,14 @@ public class Ray
 
 					return m;
 				}
-				else if (result.collisionFace().owner instanceof Obstacle o && o.bouncy)
-					this.bouncyBounces--;
-				else if (result.collisionFace().owner instanceof Obstacle o && !o.allowBounce)
-					this.bounces = -1;
-				else
-					this.bounces--;
+                if (result.collisionFace().owner instanceof Obstacle o && o.bouncy)
+                    this.bouncyBounces--;
+                else if (result.collisionFace().owner instanceof Obstacle o && !o.allowBounce)
+                    this.bounces = -1;
+                else
+                    this.bounces--;
 
-				bounceX.add(result.collisionX());
+                bounceX.add(result.collisionX());
 				bounceY.add(result.collisionY());
 
 				if (this.bounces >= 0)

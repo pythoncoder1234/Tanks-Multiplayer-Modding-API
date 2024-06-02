@@ -86,19 +86,19 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-			else if (c[i] == '\u00A7')
-			{
-				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + c[i + 3]);
-				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + c[i + 6]);
-				int b = Integer.parseInt(c[i + 7] + "" + c[i + 8] + c[i + 9]);
-				int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + c[i + 12]);
-				this.window.setColor(r, g, b, a);
+            if (c[i] == '\u00A7')
+            {
+                int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + c[i + 3]);
+                int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + c[i + 6]);
+                int b = Integer.parseInt(c[i + 7] + "" + c[i + 8] + c[i + 9]);
+                int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + c[i + 12]);
+                this.window.setColor(r, g, b, a);
 
-				i += 12;
-			}
-			else
-				curX += (drawChar(curX, y, z, sX, sY, c[i], true) + 1) * sX * 4;
-		}
+                i += 12;
+            }
+            else
+                curX += (drawChar(curX, y, z, sX, sY, c[i], true) + 1) * sX * 4;
+        }
 
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 	}
@@ -139,13 +139,13 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-			else if (c[i] == '\u00A7')
-				i += 12;
-			else if (this.chars.indexOf(c[i]) == -1)
-				c[i] = '?';
-			else
-				w += (charSizes[this.chars.indexOf(c[i])] + 1) * sX * 4;
-		}
+            if (c[i] == '\u00A7')
+                i += 12;
+            else if (this.chars.indexOf(c[i]) == -1)
+                c[i] = '?';
+            else
+                w += (charSizes[this.chars.indexOf(c[i])] + 1) * sX * 4;
+        }
 
 		return Math.max(w - sX * 4, 0);
 	}

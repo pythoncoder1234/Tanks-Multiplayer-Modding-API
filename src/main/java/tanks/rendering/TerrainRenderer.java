@@ -62,23 +62,19 @@ public class TerrainRenderer
     {
         ShaderGroup s = Game.game.shaderInstances.get(shaderClass);
         if (s != null)
+            return s;
+
+        try
         {
+            s = shaderClass.getConstructor(BaseWindow.class).newInstance(Game.game.window);
+            s.initialize();
+            Game.game.shaderInstances.put(shaderClass, s);
             return s;
         }
-        else
+        catch (Exception e)
         {
-            try
-            {
-                s = shaderClass.getConstructor(BaseWindow.class).newInstance(Game.game.window);
-                s.initialize();
-                Game.game.shaderInstances.put(shaderClass, s);
-                return s;
-            }
-            catch (Exception e)
-            {
-                Game.exitToCrash(e);
-                return null;
-            }
+            Game.exitToCrash(e);
+            return null;
         }
     }
 
@@ -445,7 +441,7 @@ public class TerrainRenderer
             }
         }
 
-        if (!(Game.screen instanceof IBlankBackgroundScreen || (Game.screen instanceof IConditionalOverlayScreen && !((IConditionalOverlayScreen) Game.screen).isOverlayEnabled())))
+        if (!(Game.screen instanceof IBlankBackgroundScreen || (Game.screen instanceof IConditionalOverlayScreen c && !c.isOverlayEnabled()))
         {
             for (int i = 0; i < 10; i++)
             {

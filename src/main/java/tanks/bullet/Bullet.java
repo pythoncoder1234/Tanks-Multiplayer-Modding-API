@@ -841,50 +841,29 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 				{
 					this.ageFrac -= 1;
 
-					if (this.effect.equals(BulletEffect.ice) || this.effect.equals(BulletEffect.ember))
+					boolean ember = this.effect.equals(BulletEffect.ember);
+					boolean ice = this.effect.equals(BulletEffect.ice);
+					if (ice || ember)
 					{
 						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
-						double var = 50;
 						e.maxAge /= 2;
+						e.setColor(ember ? 255 : 128, ember ? 180 : 255, ember ? 0 : 255, 50);
 
-						double r1 = 128;
-						double g1 = 255;
-						double b1 = 255;
-
-						if (this.effect.equals(BulletEffect.ember))
-						{
-							r1 = 255;
-							g1 = 180;
-							b1 = 0;
-						}
-
-						e.colR = Math.min(255, Math.max(0, r1 + Math.random() * var - var / 2));
-						e.colG = Math.min(255, Math.max(0, g1 + Math.random() * var - var / 2));
-						e.colB = Math.min(255, Math.max(0, b1 + Math.random() * var - var / 2));
-
-						if (this.effect.equals(BulletEffect.ice))
-						{
-							e.glowR = 90;
-							e.glowG = 180;
-							e.glowB = 180;
-						}
+						if (ice)
+                            e.setGlowColor(90, 180, 180);
 
 						if (Game.enable3d)
 							e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
 						else
 							e.setPolarMotion(Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
 
-
 						Game.effects.add(e);
 					}
 					else if (Game.fancyBulletTrails && this.effect.equals(BulletEffect.darkFire))
 					{
 						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
-						double var = 50;
 						e.maxAge /= 4;
-						e.colR = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
-						e.colG = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
-						e.colB = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
+						e.setColor(0, 0, 0, 50);
 						e.enableGlow = false;
 
 						if (Game.enable3d)
@@ -897,11 +876,8 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 					else if (Game.fancyBulletTrails && (this.effect.equals(BulletEffect.fire) || this.effect.equals(BulletEffect.fireTrail)))
 					{
 						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
-						double var = 50;
 						e.maxAge /= 4;
-						e.colR = 255;
-						e.colG = Math.min(255, Math.max(0, 180 + Math.random() * var - var / 2));
-						e.colB = Math.min(255, Math.max(0, 64 + Math.random() * var - var / 2));
+						e.setColor(300, 180, 64, 50);    // r will always show as 255
 
 						if (Game.enable3d)
 							e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 12);

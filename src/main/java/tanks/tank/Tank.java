@@ -267,12 +267,9 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	{
 		if (!freeIDs.isEmpty())
 			return freeIDs.remove(0);
-		else
-		{
-			currentID++;
-			return currentID - 1;
-		}
-	}
+        currentID++;
+        return currentID - 1;
+    }
 
 	public void registerNetworkID()
 	{
@@ -640,11 +637,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		if (!ScreenGame.finished && Math.random() * Panel.frameFrequency < boost * Game.effectMultiplier && Game.effectsEnabled)
 		{
 			Effect e = Effect.createNewEffect(this.posX, this.posY, Game.tile_size / 2, Effect.EffectType.piece);
-			double var = 50;
-
-			e.colR = Math.min(255, Math.max(0, 255 + Math.random() * var - var / 2));
-			e.colG = Math.min(255, Math.max(0, 180 + Math.random() * var - var / 2));
-			e.colB = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
+			e.setColor(255, 180, 0, 50);
 
 			if (Game.enable3d)
 				e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * Math.PI, Math.random());
@@ -666,11 +659,8 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 			for (double a = 0; a < 2 * Math.PI; a += Math.PI / Game.effectMultiplier * 0.05)
 			{
-				Effect e = Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.snow);
-				e.size = 5;
-				e.colR = 40;
-				e.colG = 120;
-				e.colB = 255;
+				Effect e = Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.snow)
+						.setSize(5).setColor(40, 120, 255);
 				e.vX = Math.cos(a) * Math.random() * mult;
 				e.vY = Math.sin(a) * Math.random() * mult;
 				e.vZ = Math.random() * mult;

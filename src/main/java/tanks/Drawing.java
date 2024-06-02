@@ -479,17 +479,15 @@ public class Drawing
 	{
 		if (Game.screen.enableMargins)
 			return (scale * (x + Game.screen.getOffsetX()) + Math.max(0, Panel.windowWidth - this.sizeX * scale) / 2);
-		else
-			return scale * (x + Game.screen.getOffsetX());
-	}
+        return scale * (x + Game.screen.getOffsetX());
+    }
 
 	public double getPointY(double y)
 	{
 		if (Game.screen.enableMargins)
 			return (scale * (y + Game.screen.getOffsetY()) + Math.max(0, Panel.windowHeight - statsHeight - this.sizeY * scale) / 2);
-		else
-			return scale * (y + Game.screen.getOffsetY());
-	}
+        return scale * (y + Game.screen.getOffsetY());
+    }
 
 	public double getInterfacePointX(double x)
 	{
@@ -1475,26 +1473,21 @@ public class Drawing
 		{
 			if (Game.followingCam)
 				return -result * Panel.panel.zoomTimer;
-			else if (less && !greater)
-				return margin;
-			else if (greater && !less)
-				return -margin - (sizeX - (Panel.windowWidth) / scale);
-			else
-				return -result;
-		}
-		else
-		{
-			if (Game.followingCam)
-				return -result * Panel.panel.zoomTimer;
-			else if (less && !greater)
-				return margin;
-			else if (greater && !less)
-				return -margin;
-			else
-				return 0;
-		}
+            if (less && !greater)
+                return margin;
+            if (greater && !less)
+                return -margin - (sizeX - (Panel.windowWidth) / scale);
+            return -result;
+        }
+        if (Game.followingCam)
+            return -result * Panel.panel.zoomTimer;
+        if (less && !greater)
+            return margin;
+        if (greater && !less)
+            return -margin;
+        return 0;
 
-		//return 0 - result;
+        //return 0 - result;
 	}
 
 	public double getPlayerOffsetY()
@@ -1526,26 +1519,21 @@ public class Drawing
 		{
 			if (Game.followingCam)
 				return -result * Panel.panel.zoomTimer;
-			else if (less && !greater)
-				return margin;
-			else if (greater && !less)
-				return -margin - (sizeY - (Panel.windowHeight - statsHeight) / scale);
-			else
-				return 0 - result;
-		}
-		else
-		{
-			if (Game.followingCam)
-				return -result * Panel.panel.zoomTimer;
-			else if (less && !greater)
-				return margin;
-			else if (greater && !less)
-				return -margin;
-			else
-				return 0;
-		}
+            if (less && !greater)
+                return margin;
+            if (greater && !less)
+                return -margin - (sizeY - (Panel.windowHeight - statsHeight) / scale);
+            return 0 - result;
+        }
+        if (Game.followingCam)
+            return -result * Panel.panel.zoomTimer;
+        if (less && !greater)
+            return margin;
+        if (greater && !less)
+            return -margin;
+        return 0;
 
-		//return 0 - result;
+        //return 0 - result;
 	}
 
 	public double getPlayerMouseOffsetX()
@@ -1582,10 +1570,9 @@ public class Drawing
 		if (right)
 			return (Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeX) / 2
 					+ Drawing.drawing.interfaceSizeX - Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale;
-		else
-			return (Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeX) / 2
-				+ Drawing.drawing.interfaceSizeX - Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale;
-	}
+        return (Game.game.window.absoluteWidth / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeX) / 2
+            + Drawing.drawing.interfaceSizeX - Game.game.window.getEdgeBounds() / Drawing.drawing.interfaceScale;
+    }
 
 	/**
 	 *	Gets interface coordinate position of top/bottom edge of screen
@@ -1595,42 +1582,37 @@ public class Drawing
 		if (bottom)
 			return ((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2
 					+ Drawing.drawing.interfaceSizeY;
-		else
-			return -((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2;
-	}
+        return -((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2;
+    }
 
 
 	public double gameToAbsoluteX(double x, double sizeX)
 	{
 		if (Game.screen.enableMargins)
 			return (scale * (x + Game.screen.getOffsetX() - sizeX / 2) + Math.max(0, Panel.windowWidth - this.sizeX * scale) / 2);
-		else
-			return scale * (x + Game.screen.getOffsetX() - sizeX / 2);
-	}
+        return scale * (x + Game.screen.getOffsetX() - sizeX / 2);
+    }
 
 	public double gameToAbsoluteY(double y, double sizeY)
 	{
 		if (Game.screen.enableMargins)
 			return (scale * (y + Game.screen.getOffsetY() - sizeY / 2) + Math.max(0, Panel.windowHeight - statsHeight - this.sizeY * scale) / 2);
-		else
-			return scale * (y + Game.screen.getOffsetY() - sizeY / 2);
-	}
+        return scale * (y + Game.screen.getOffsetY() - sizeY / 2);
+    }
 
 	public double absoluteToGameX(double x)
 	{
 		if (Game.screen.enableMargins)
 			return (x - Math.max(0, Panel.windowWidth - this.sizeX * scale) / 2) / scale - Game.screen.getOffsetX();
-		else
-			return x / scale - Game.screen.getOffsetX();
-	}
+        return x / scale - Game.screen.getOffsetX();
+    }
 
 	public double absoluteToGameY(double y)
 	{
 		if (Game.screen.enableMargins)
 			return (y - Math.max(0, Panel.windowHeight - statsHeight - this.sizeY * scale) / 2) / scale - Game.screen.getOffsetY();
-		else
-			return y / scale - Game.screen.getOffsetY();
-	}
+        return y / scale - Game.screen.getOffsetY();
+    }
 
 	public double interfaceToAbsoluteX(double x)
 	{
@@ -1664,9 +1646,8 @@ public class Drawing
 
 		if (!Game.followingCam || !(Game.screen instanceof ScreenGame))
 			return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
-		else
-			return false;
-	}
+        return false;
+    }
 
 	public boolean isIncluded(double x1, double y1, double x2, double y2)
 	{
@@ -1693,9 +1674,8 @@ public class Drawing
 	{
 		if (Game.followingCam)
 			return 0;
-		else
-			return 20;
-	}
+        return 20;
+    }
 
 	public ArrayList<String> wrapText(String msg, double max, double fontSize)
 	{

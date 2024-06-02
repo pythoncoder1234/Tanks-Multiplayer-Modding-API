@@ -334,9 +334,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		{
 			if (unbreakable)
 				return Game.isUnbreakable(x, y);
-			else
-				return Game.isSolid(x, y);
-		}
+            return Game.isSolid(x, y);
+        }
 
 		return false;
 	}

@@ -477,25 +477,22 @@ public class Level
 
 					continue;
 				}
-				else
-				{
-					if (customTanksMap.get(type) != null)
-                        t = customTanksMap.get(type).instantiate(type, x, y, angle);
-					else
-						t = Game.registryTank.getEntry(type).getTank(x, y, angle);
+                if (customTanksMap.get(type) != null)
+t = customTanksMap.get(type).instantiate(type, x, y, angle);
+                else
+                    t = Game.registryTank.getEntry(type).getTank(x, y, angle);
 
-					t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
+                t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 
-					t.crusadeID = currentCrusadeID;
-					currentCrusadeID++;
+                t.crusadeID = currentCrusadeID;
+                currentCrusadeID++;
 
-					if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks && Crusade.currentCrusade.retry && !Crusade.currentCrusade.livingTankIDs.contains(t.crusadeID))
-						tanksToRemove.add(t);
-					else if (!metadata.isEmpty())
-						t.setMetadata(metadata.toString());
-				}
+                if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks && Crusade.currentCrusade.retry && !Crusade.currentCrusade.livingTankIDs.contains(t.crusadeID))
+                    tanksToRemove.add(t);
+                else if (!metadata.isEmpty())
+                    t.setMetadata(metadata.toString());
 
-				// Don't do this in your code! We only want to dynamically generate tank IDs on level load!
+                // Don't do this in your code! We only want to dynamically generate tank IDs on level load!
 				t.networkID = Tank.nextFreeNetworkID();
 				Tank.idMap.put(t.networkID, t);
 
