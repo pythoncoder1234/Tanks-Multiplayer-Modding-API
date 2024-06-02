@@ -382,7 +382,7 @@ public class Chunk implements Comparable<Chunk>
     public static class Tile implements IBatchRenderableObject
     {
         public Obstacle obstacle, surfaceObstacle;
-        public double colR, colG, colB, depth, height, groundHeight, lastHeight;
+        public double colR, colG, colB, depth, height = -1000, groundHeight, lastHeight;
         public boolean solid, unbreakable;
 
         public Tile updateHeight(double height)
@@ -393,7 +393,7 @@ public class Chunk implements Comparable<Chunk>
 
         public Tile updateGroundHeight(double gh)
         {
-            this.groundHeight = Math.max(gh, this.height);
+            this.groundHeight = Math.max(gh, this.groundHeight);
             return this;
         }
     }

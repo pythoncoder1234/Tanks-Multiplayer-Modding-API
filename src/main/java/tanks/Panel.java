@@ -905,7 +905,7 @@ public class Panel
 
 				Game.game.shaderInstances = newShaders;
 				Drawing.drawing.terrainRenderer.reset();
-				notifs.add(new Notification("Shaders reloaded!").setColor(255, 255, 128));
+				notifs.add(new Notification("Shaders reloaded! (Remember to Cmd+F9)").setColor(255, 255, 128));
 			}
 
 			int brightness = 0;
@@ -948,7 +948,7 @@ public class Panel
 
 					if (t1 != null)
                         text += " O: " + (t1.obstacle != null ? t1.obstacle.name : "none") + " SO: " + (t1.surfaceObstacle != null ? t1.surfaceObstacle.name : "none");
-					Game.game.window.fontRenderer.drawString(mx + 10, my + 30, Drawing.drawing.fontSize, Drawing.drawing.fontSize, 					"H: " + (int) t1.height + " GH: " + (int) t1.groundHeight);
+					Game.game.window.fontRenderer.drawString(mx + 10, my + 30, Drawing.drawing.fontSize, Drawing.drawing.fontSize, "H: " + (int) t1.height + " GH: " + (int) t1.groundHeight);
 				}
 			}
 

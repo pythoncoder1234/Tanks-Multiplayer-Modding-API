@@ -493,16 +493,16 @@ public class TerrainRenderer
                 double extra = 15;
 
                 if (i > 0)
-                    extra = Math.max(extra, -Game.sampleGroundHeight(i-1, j));
+                    extra = Math.max(extra, -Chunk.getTile(i-1, j).height);
 
                 if (j > 0)
-                    extra = Math.max(extra, -Game.sampleGroundHeight(i, j - 1));
+                    extra = Math.max(extra, -Chunk.getTile(i, j - 1).height);
 
                 if (i < Game.currentSizeX - 1)
-                    extra = Math.max(extra, -Game.sampleGroundHeight(i + 1, j));
+                    extra = Math.max(extra, -Chunk.getTile(i + 1, j).height);
 
                 if (j < Game.currentSizeY - 1)
-                    extra = Math.max(extra, -Game.sampleGroundHeight(i, j + 1));
+                    extra = Math.max(extra, -Chunk.getTile(i, j + 1).height);
 
                 o.drawTile(t, r, g, b, depth, extra);
             }
