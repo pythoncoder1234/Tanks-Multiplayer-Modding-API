@@ -22,14 +22,14 @@ vec3 getNormal(mat4 transform)
 void getVertVecs(out vec4 pos, out vec3 normal)
 {
     pos = getPos(getTransform());
-    //    pos.z += sin(5.0 * (pos.x + pos.y) + (0.1f * pos.x * pos.y) + time / 1000.0f) * 3.0f - 6.0f;
+//    pos.z += sin(5.0 * (pos.x + pos.y) + (0.1f * pos.x * pos.y) + time / 1000.0f) * 3.0f - 6.0f;
     normal = gl_Normal;
 }
 
 vec4 getColor(vec4 colorIn)
 {
     vec4 pos = getPos(getTransform());
-    float offset = sin(8.0 * (pos.x + pos.y) + (0.1 * pos.x * pos.y) + time / 1000.0f) * 0.08f;
+    float offset = sin((8.0 * (pos.x + pos.y) + (0.2 * pos.x * pos.y) + time / 1000.0f)) * 0.1f;
 
-    return vec4(colorIn.xyz, colorIn.a);
+    return vec4(colorIn.xyz + vec3(offset, offset, offset), colorIn.a);
 }

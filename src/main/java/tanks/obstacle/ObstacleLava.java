@@ -51,7 +51,7 @@ public class ObstacleLava extends ObstacleLiquid
 
         if (Game.effectsEnabled && !ScreenGame.finished)
         {
-            if (Math.random() < Game.effectMultiplier * 0.008)
+            if (Math.random() * Panel.frameFrequency < 0.008)
             {
                 Effect e;
                 if (Game.enable3d)
