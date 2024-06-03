@@ -233,6 +233,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 	public boolean tiltFirstFrame = true;
 	public int tiltDirection;
+	public boolean customPosZBehavior;
 
 	public Tank(String name, double x, double y, double size, double r, double g, double b)
 	{
@@ -676,59 +677,62 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		prevInWater = inWater;
 		inWater = false;
 
-		double maxTouchingZ = -9999;
-		boolean allow = true;
-		double s = size / 2;
-
-		for (double x = posX - s; x <= posX + s; x += Game.tile_size)
+		if (!customPosZBehavior)
 		{
-			for (double y = posY - s; y <= posY + s; y += Game.tile_size)
+			double maxTouchingZ = -9999;
+			boolean allow = true;
+			double s = size / 2;
+
+			for (double x = posX - s; x <= posX + s; x += Game.tile_size)
 			{
-				Obstacle o = Game.getObstacle(x, y);
-				if (!(o instanceof ObstacleLiquid))
+				for (double y = posY - s; y <= posY + s; y += Game.tile_size)
 				{
-					maxTouchingZ = Math.max(0, maxTouchingZ);
-					continue;
-				}
+					Obstacle o = Game.getObstacle(x, y);
+					if (!(o instanceof ObstacleLiquid))
+					{
+						maxTouchingZ = Math.max(0, maxTouchingZ);
+						continue;
+					}
 
-				double horizontalDist = Math.abs(posX - o.posX);
-				double verticalDist = Math.abs(posY - o.posY);
-				double bound = size * 0.9;
+					double horizontalDist = Math.abs(posX - o.posX);
+					double verticalDist = Math.abs(posY - o.posY);
+					double bound = size * 0.9;
 
-				if ((horizontalDist <= bound || verticalDist <= bound) && maxTouchingZ < o.getTileHeight())
-				{
-					maxTouchingZ = o.getTileHeight();
-					allow = Math.abs(posZ - maxTouchingZ) < Game.tile_size;
+					if ((horizontalDist <= bound || verticalDist <= bound) && maxTouchingZ < o.getTileHeight())
+					{
+						maxTouchingZ = o.getTileHeight();
+						allow = Math.abs(posZ - maxTouchingZ) < Game.tile_size;
+					}
 				}
 			}
-		}
 
-		double mult = 1;
+			double mult = 1;
 
-		if (posZ < maxTouchingZ)
-		{
-			if (tiltFirstFrame)
-				tiltDirection = (int) -Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
+			if (posZ < maxTouchingZ)
+			{
+				if (tiltFirstFrame)
+					tiltDirection = (int) -Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
 
-			tiltFirstFrame = false;
-			maxSpeedModifier *= 1 / mult * (allow ? 1 : 0);
-			posZ += (allow ? 2 : 1) * mult * Panel.frameFrequency;
-			basePitch = Math.min(allow ? 0.3 : 0.6, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
-		}
-		else if (Math.abs(posZ - maxTouchingZ) < 1)
-		{
-			posZ = maxTouchingZ;
-			tiltFirstFrame = true;
-		}
-		else if (posZ > maxTouchingZ)
-		{
-			posZ -= size / 70;
+				tiltFirstFrame = false;
+				maxSpeedModifier *= 1 / mult * (allow ? 1 : 0);
+				posZ += (allow ? 2 : 1) * mult * Panel.frameFrequency;
+				basePitch = Math.min(allow ? 0.3 : 0.6, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
+			}
+			else if (Math.abs(posZ - maxTouchingZ) < 1)
+			{
+				posZ = maxTouchingZ;
+				tiltFirstFrame = true;
+			}
+			else if (posZ > maxTouchingZ)
+			{
+				posZ -= size / 70;
 
-			if (tiltFirstFrame)
-				tiltDirection = (int) Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
+				if (tiltFirstFrame)
+					tiltDirection = (int) Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
 
-			tiltFirstFrame = false;
-			basePitch = Math.min(0.2, Math.abs(basePitch) + 0.04 / mult * Panel.frameFrequency) * tiltDirection;
+				tiltFirstFrame = false;
+				basePitch = Math.min(0.2, Math.abs(basePitch) + 0.04 / mult * Panel.frameFrequency) * tiltDirection;
+			}
 		}
 
 		super.update();

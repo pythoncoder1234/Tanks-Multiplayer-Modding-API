@@ -20,12 +20,11 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
     {
         super(name, x, y, Game.tile_size, 235, 145, 103, angle, ShootAI.straight);
 
-        this.maxSpeed = 2.5;
+        this.maxSpeed = 0;
         this.enableLookingAtTargetEnemy = false;
         this.enableMineLaying = false;
         this.enablePathfinding = true;
-        this.seekChance = 1;
-        this.health = 2;
+        this.customPosZBehavior = true;
         this.enableBulletAvoidance = false;
         this.enableDefensiveFiring = false;
         this.size = 75;
@@ -38,7 +37,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
     {
         super.draw();
 
-        Drawing.drawing.setColor(255, 255, 255);
+        Drawing.drawing.setColor(0, 0, 0);
         Drawing.drawing.drawModel(shoeModel, this.posX, this.posY, Math.max(10, this.posZ), size, size, size, this.getSpeed() > 0 ? this.getPolarDirection() : this.orientation);
         Drawing.drawing.drawModel(sunglassesModel, this.posX, this.posY, Math.max(10, this.posZ), size, size, size, this.angle);
     }
@@ -74,6 +73,9 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
             {
                 Drawing.drawing.playGlobalSound("stomp.ogg", 1, 1.5f);
 
+                if (targetEnemy != null)
+                    setPolarMotion(getAngleInDirection(targetEnemy.posX, targetEnemy.posY), 2.5);
+
                 double dist, radius = getRadius();
 
                 for (Movable m : Game.movables)
@@ -82,9 +84,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
                         continue;
 
                     if (m instanceof Tank)
-                    {
                         ((Tank) m).damage((radius - dist) / radius * (this.size / 25) * (dist < this.size * 1.5 ? 3 : 1), this);
-                    }
                     else if (m instanceof Bullet || m instanceof Mine)
                         m.destroy = true;
                 }
@@ -97,12 +97,6 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
         prevState = currentState;
 
         super.update();
-
-        if (!this.bouncing || currentState.equals(State.collideWithObstacle))
-        {
-            this.setPolarMotion(0, 0);
-            this.setPolarAcceleration(0, 0);
-        }
     }
 
     @Override
@@ -117,10 +111,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
         if (this.targetEnemy != null && Movable.distanceBetween(this.targetEnemy, this) < this.size * 5)
         {
             if (Math.signum(this.vZ) != Math.signum(this.lastVZ))
-            {
                 this.vZ *= 1.25;
-                this.jumpCounter *= 1.3;
-            }
         }
 
         super.preUpdate();
@@ -140,22 +131,17 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
                 maxHeight = Math.max(maxHeight, (o.startHeight + o.stackHeight) * Game.tile_size);
         }
 
-        if (posZ < maxHeight && vZ > 0)
+        if (posZ <= maxHeight - Game.tile_size)
             return State.collideWithObstacle;
 
-        if (posZ < maxHeight && vZ < 0)
+        if (posZ <= maxHeight)
+        {
+            posZ = maxHeight;
+            vZ = 0;
             return State.onObstacle;
+        }
 
         return State.inAir;
-    }
-
-    @Override
-    public void setPathfindingTileProperties(Tile t, Obstacle o)
-    {
-        if (o != null && ((o.enableStacking ? o.stackHeight : 0) + o.startHeight) * Game.tile_size > this.size * 1.75)
-            t.type = Tile.Type.solid;
-        else
-            t.type = Tile.Type.empty;
     }
 
     @Override
@@ -167,7 +153,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
     @Override
     public boolean damage(double amount, GameObject source, boolean playDamageSound)
     {
-        return super.damage(amount * 0.25, source, playDamageSound);
+        return super.damage(amount * 0.2, source, playDamageSound);
     }
 
     @Override

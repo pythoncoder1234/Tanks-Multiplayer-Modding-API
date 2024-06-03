@@ -1359,7 +1359,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 									{
 										if (o.tankCollision || mouseObstacle.tankCollision || o.isSurfaceTile == mouseObstacle.isSurfaceTile || o.getClass() == mouseObstacle.getClass())
 										{
-											if ((o.isSurfaceTile && mouseObstacle.tankCollision) || mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight < o.stackHeight + o.startHeight)
+											if ((o.isSurfaceTile && mouseObstacle.tankCollision) || o.isSurfaceTile == mouseObstacle.isSurfaceTile || mouseObstacleStartHeight >= o.startHeight && mouseObstacleStartHeight < o.stackHeight + o.startHeight)
 												skip = true;
 										}
 									}

@@ -492,17 +492,12 @@ public class TerrainRenderer
             {
                 double extra = 15;
 
-                if (i > 0)
-                    extra = Math.max(extra, -Chunk.getTile(i-1, j).height);
-
-                if (j > 0)
-                    extra = Math.max(extra, -Chunk.getTile(i, j - 1).height);
-
-                if (i < Game.currentSizeX - 1)
-                    extra = Math.max(extra, -Chunk.getTile(i + 1, j).height);
-
-                if (j < Game.currentSizeY - 1)
-                    extra = Math.max(extra, -Chunk.getTile(i, j + 1).height);
+                for (int dir = 0; dir < 4; dir++)
+                {
+                    Chunk.Tile neighbor = Chunk.getTile(i + Game.dirX[dir], j + Game.dirY[dir]);
+                    if (neighbor != null)
+                        extra = Math.max(extra, -neighbor.height);
+                }
 
                 o.drawTile(t, r, g, b, depth, extra);
             }

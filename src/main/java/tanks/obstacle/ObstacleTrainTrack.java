@@ -110,7 +110,8 @@ public class ObstacleTrainTrack extends Obstacle
 
         updateTurn();
         if (turn != 0 && batchDraw)
-            Drawing.drawing.terrainRenderer.getRenderer(this, posX, posY, false).renderer.delete(this);
+            Drawing.drawing.terrainRenderer.remove(this);
+
         batchDraw = turn == 0;
         if (redraw && batchDraw)
             Game.redrawObstacles.add(this);

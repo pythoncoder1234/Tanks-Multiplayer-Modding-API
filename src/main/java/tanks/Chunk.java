@@ -226,6 +226,12 @@ public class Chunk implements Comparable<Chunk>
         if (Objects.equals(tileGrid[x][y].obstacle, o))
         {
             tileGrid[x][y].obstacle = null;
+            if (tileGrid[x][y].surfaceObstacle != null)
+            {
+                tileGrid[x][y].obstacle = tileGrid[x][y].surfaceObstacle;
+                tileGrid[x][y].surfaceObstacle = null;
+            }
+
             removeObstacle(o);
         }
     }

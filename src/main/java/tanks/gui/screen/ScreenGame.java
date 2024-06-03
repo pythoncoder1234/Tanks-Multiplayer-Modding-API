@@ -1844,10 +1844,12 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				if (Game.enable3d)
 					Game.redrawGroundTiles.add(new int[]{x, y});
 
-				if (o.bulletCollision)
+				Chunk.Tile t = Chunk.getTile(x, y);
+				if (t.obstacle == o)
 				{
-					Chunk.Tile t = Chunk.getTile(x, y);
 					t.solid = false;
+					t.height = 0;
+					t.groundHeight = 0;
 					t.unbreakable = false;
 				}
 
@@ -2070,7 +2072,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		}
 
 		for (Effect e: Game.effects)
-			drawables[e.drawLayer].add(e);
+            drawables[e.drawLayer].add(e);
 
 		for (Cloud c: Game.clouds)
 			drawables[c.drawLevel].add(c);

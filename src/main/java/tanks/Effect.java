@@ -260,6 +260,9 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
     @Override
     public void draw()
     {
+        if (type == EffectType.ray && Movable.distanceBetween(posX, posY, 676, 321) < 25)
+            type = type;
+
         if (this.maxAge > 0 && this.maxAge < this.age)
             return;
 

@@ -102,10 +102,7 @@ public class ImmediateModeShapeRenderer extends BaseShapeRenderer
 
         glBegin(GL_TRIANGLE_FAN);
         for (double i = 0; i < Math.PI * 2; i += Math.PI * 2 / sides)
-        {
             glVertex3d(x + Math.cos(i) * sX / 2, y + Math.sin(i) * sY / 2, z);
-        }
-
         glEnd();
 
         if (depthTest)
