@@ -1657,8 +1657,7 @@ public class ScreenCrusadeStats extends Screen implements IDarkScreen, IHiddenCh
         {
             if (screen.onlyRecord)
                 return super.getXOffset() + 267;
-            else
-                return super.getXOffset();
+            return super.getXOffset();
         }
     }
 

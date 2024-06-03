@@ -129,19 +129,16 @@ public class Extension
             {
                 return Game.game.fileManager.getInternalFileContents("/" + file);
             }
-            else
-            {
-                InputStream i = this.jarFile.getInputStream(this.jarFile.getEntry(file));
-                Scanner s = new Scanner(new InputStreamReader(i));
+            InputStream i = this.jarFile.getInputStream(this.jarFile.getEntry(file));
+            Scanner s = new Scanner(new InputStreamReader(i));
 
-                while (s.hasNextLine())
-                    strings.add(s.nextLine());
+            while (s.hasNextLine())
+                strings.add(s.nextLine());
 
-                i.close();
-                s.close();
+            i.close();
+            s.close();
 
-                return strings;
-            }
+            return strings;
         }
         catch (Exception e)
         {

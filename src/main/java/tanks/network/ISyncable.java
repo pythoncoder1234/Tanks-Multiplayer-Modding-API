@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 import static java.lang.reflect.Modifier.isStatic;
 
-/**`
+/**
  * An interface that allows an object to implement synced fields
  * using a {@link SyncedFieldMap}.
  * */

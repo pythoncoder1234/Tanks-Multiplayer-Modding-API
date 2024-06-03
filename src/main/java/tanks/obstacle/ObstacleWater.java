@@ -53,7 +53,6 @@ public class ObstacleWater extends ObstacleLiquid
         if (m instanceof Tank)
         {
             Tank t = (Tank) m;
-
             if (t.posZ < -1)
                 t.inWater = true;
 

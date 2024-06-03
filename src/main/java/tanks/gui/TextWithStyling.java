@@ -49,6 +49,13 @@ public class TextWithStyling implements ISyncable
         Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, this.colorA);
     }
 
+    public void drawText(double posX, double posY, double posZ)
+    {
+        setColor();
+        Drawing.drawing.setFontSize(this.fontSize);
+        Drawing.drawing.drawText(posX, posY, posZ, this.text);
+    }
+
     public void drawText(double posX, double posY)
     {
         setColor();

@@ -19,6 +19,8 @@ public abstract class ScreenElement
         public double sY;
         public boolean fadeStart = false;
 
+        public int colorR = 50, colorG = 200, colorB = 50;
+
         public Notification(String text)
         {
             this(text, 500);
@@ -26,7 +28,7 @@ public abstract class ScreenElement
 
         public Notification(String text, int duration)
         {
-            this.text = Drawing.drawing.wrapText(text, 300, 16);
+            this.text = Drawing.drawing.wrapText(text, 250, 16);
             this.duration = duration;
             this.sY = Math.max(4, this.text.size()) * 20;
         }
@@ -51,7 +53,7 @@ public abstract class ScreenElement
             Drawing.drawing.drawPopup(x + 158 + addX, y + addY + sY / 2, 315, sY + 10, 5, 5);
             Drawing.drawing.setInterfaceFontSize(16);
 
-            Drawing.drawing.setColor(50, 200, 50, 64);
+            Drawing.drawing.setColor(colorR, colorG, colorB);
             Drawing.drawing.fillInterfaceProgressRect(x + 157.5 + addX, y + addY + sY - 2.5, 303, 5, 1 - Math.min(duration, age + fadeDuration - 10) / duration);
 
             Drawing.drawing.setColor(255, 255, 255, colA);
@@ -64,6 +66,14 @@ public abstract class ScreenElement
             Drawing.drawing.setColor(255, 255, 255, colA);
             Drawing.drawing.setInterfaceFontSize(16);
             Drawing.drawing.drawInterfaceText(x + 27 + addX, y + addY + 20, "!");
+        }
+
+        public Notification setColor(int r, int g, int b)
+        {
+            this.colorR = r;
+            this.colorG = g;
+            this.colorB = b;
+            return this;
         }
     }
 

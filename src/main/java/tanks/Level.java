@@ -217,7 +217,7 @@ public class Level
 		if (Game.deterministicMode)
 			random = new Random(Game.seed);
 		else
-			random = new Random();
+			random = new Random(tilesRandomSeed);
 
 		if (ScreenPartyHost.isServer)
 			ScreenPartyHost.includedPlayers.clear();
@@ -316,9 +316,8 @@ public class Level
 
 		if (sc instanceof ScreenLevelEditor)
 		{
-			ScreenLevelEditor s = (ScreenLevelEditor) sc;
-
-			s.level = this;
+            ScreenLevelEditor s = (ScreenLevelEditor) sc;
+            s.level = this;
 
 			s.selectedTiles = new boolean[sizeX][sizeY];
 			Game.movables.remove(Game.playerTank);
@@ -332,9 +331,12 @@ public class Level
 			s.teams = this.teamsList;
 		}
 
+		Chunk.populateChunks(this);
 		this.reloadTiles();
 
-		if (!((obstaclesPos.length == 1 && obstaclesPos[0].equals("")) || obstaclesPos.length == 0))
+		boolean[][] solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
+
+		if (!((obstaclesPos.length == 1 && obstaclesPos[0].isEmpty()) || obstaclesPos.length == 0))
 		{
             for (String pos : obstaclesPos)
             {
@@ -342,10 +344,10 @@ public class Level
 
                 String[] xPos = obs[0].split("\\.\\.\\.");
 
-                double startX;
+                int startX;
                 double endX;
 
-                startX = Double.parseDouble(xPos[0]);
+                startX = Integer.parseInt(xPos[0]);
                 endX = startX;
 
 				if (xPos.length > 1)
@@ -353,10 +355,10 @@ public class Level
 
 				String[] yPos = obs[1].split("\\.\\.\\.");
 
-				double startY;
+				int startY;
 				double endY;
 
-				startY = Double.parseDouble(yPos[0]);
+				startY = Integer.parseInt(yPos[0]);
 				endY = startY;
 
 				if (yPos.length > 1)
@@ -367,56 +369,52 @@ public class Level
 				if (obs.length >= 3)
 					name = obs[2];
 
-				String meta = null;
+				StringBuilder meta = null;
 
 				if (obs.length >= 4)
                 {
-                    meta = obs[3];
+                    meta = new StringBuilder(obs[3]);
 
                     for (int j = 4; j < obs.length; j++)
-                        meta += "-" + obs[j];
+                        meta.append("-").append(obs[j]);
                 }
 
-				for (double x = startX; x <= endX; x++)
+				for (int x = startX; x <= endX; x++)
 				{
-					for (double y = startY; y <= endY; y++)
+					for (int y = startY; y <= endY; y++)
 					{
 						Obstacle o = Game.registryObstacle.getEntry(name).getObstacle(x, y);
 						o.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 
 						if (meta != null)
-							o.setMetadata(meta);
+							o.setMetadata(meta.toString());
 
+						Chunk.Tile t = Chunk.getTile(x, y);
+
+						if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && o.startHeight < 1)
+						{
+							t.solid = true;
+							if (!o.shouldShootThrough)
+								t.unbreakable = true;
+						}
+
+						o.postOverride();
 						Game.obstacles.add(o);
+
+						if (o.tankCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+                            solidGrid[(int) (x / Game.tile_size)][(int) (y / Game.tile_size)] = true;
 					}
 				}
 			}
 		}
 
-		Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-		Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-		boolean[][] solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-
 		for (Obstacle o: Game.obstacles)
         {
-            int x = (int) (o.posX / Game.tile_size);
-            int y = (int) (o.posY / Game.tile_size);
-
-            o.postOverride();
-
             if (o.startHeight > 1)
                 continue;
 
-            if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-            {
-                Game.game.solidGrid[x][y] = true;
-
-                if (!o.shouldShootThrough)
-                    Game.game.unbreakableGrid[x][y] = true;
-            }
-
-            if (o.tankCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-                solidGrid[x][y] = true;
+			Chunk c = Chunk.getChunk(o.posX, o.posY);
+			c.addObstacle(o);
         }
 
 		boolean[][] tankGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
@@ -435,7 +433,7 @@ public class Level
 
 		ArrayList<Tank> tanksToRemove = new ArrayList<>();
 
-		if (!preset[2].equals(""))
+		if (!preset[2].isEmpty())
 		{
             for (String s : tanks)
             {
@@ -491,25 +489,22 @@ public class Level
 
 					continue;
 				}
-				else
-				{
-					if (customTanksMap.get(type) != null)
-                        t = customTanksMap.get(type).instantiate(type, x, y, angle);
-					else
-						t = Game.registryTank.getEntry(type).getTank(x, y, angle);
+                if (customTanksMap.get(type) != null)
+t = customTanksMap.get(type).instantiate(type, x, y, angle);
+                else
+                    t = Game.registryTank.getEntry(type).getTank(x, y, angle);
 
-					t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
+                t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 
-					t.crusadeID = currentCrusadeID;
-					currentCrusadeID++;
+                t.crusadeID = currentCrusadeID;
+                currentCrusadeID++;
 
-					if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks && Crusade.currentCrusade.retry && !Crusade.currentCrusade.livingTankIDs.contains(t.crusadeID))
-						tanksToRemove.add(t);
-					else if (metadata.length() == 0)
-						t.setMetadata(metadata.toString());
-				}
+                if (Crusade.crusadeMode && !Crusade.currentCrusade.respawnTanks && Crusade.currentCrusade.retry && !Crusade.currentCrusade.livingTankIDs.contains(t.crusadeID))
+                    tanksToRemove.add(t);
+                else if (metadata.length() > 0)
+                    t.setMetadata(metadata.toString());
 
-				// Don't do this in your code! We only want to dynamically generate tank IDs on level load!
+                // Don't do this in your code! We only want to dynamically generate tank IDs on level load!
 				t.networkID = Tank.nextFreeNetworkID();
 				Tank.idMap.put(t.networkID, t);
 
@@ -709,8 +704,22 @@ public class Level
 			}
 		}
 
+		addLevelBorders();
+
 		if (!remote && sc == null || (sc instanceof ScreenLevelEditor))
 			Game.eventsOut.add(new EventEnterLevel());
+	}
+
+	public void addLevelBorders()
+	{
+		Chunk.getChunksInRange(0, 0, sizeX, 0).forEach(chunk ->
+				chunk.staticFaces.bottomFaces.add(chunk.borderFaces[0]));
+		Chunk.getChunksInRange(sizeX, 0, sizeX, sizeY).forEach(chunk ->
+				chunk.staticFaces.leftFaces.add(chunk.borderFaces[1]));
+		Chunk.getChunksInRange(0, sizeY, sizeX, sizeY).forEach(chunk ->
+				chunk.staticFaces.topFaces.add(chunk.borderFaces[2]));
+		Chunk.getChunksInRange(0, 0, 0, sizeY).forEach(chunk ->
+				chunk.staticFaces.rightFaces.add(chunk.borderFaces[3]));
 	}
 
 	public void updateModify()
@@ -742,42 +751,11 @@ public class Level
 
         currentLightIntensity = light;
         currentShadowIntensity = shadow;
-
-        Game.tilesR = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesG = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesB = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesDepth = new double[Game.currentSizeX][Game.currentSizeY];
-        Game.tilesFlash = new double[Game.currentSizeX][Game.currentSizeY];
         Game.obstacleGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
         Game.surfaceTileGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
-        for (int i = 0; i < Game.currentSizeX; i++)
-        {
-            for (int j = 0; j < Game.currentSizeY; j++)
-            {
-                if (Game.fancyTerrain)
-                {
-                    Game.tilesR[i][j] = (colorR + Math.random() * colorVarR);
-                    Game.tilesG[i][j] = (colorG + Math.random() * colorVarG);
-                    Game.tilesB[i][j] = (colorB + Math.random() * colorVarB);
-					Game.tilesDepth[i][j] = Math.random() * 10;
-				}
-				else
-				{
-					Game.tilesR[i][j] = colorR;
-					Game.tilesG[i][j] = colorG;
-					Game.tilesB[i][j] = colorB;
-					Game.tilesDepth[i][j] = 0;
-				}
-			}
-		}
-
-		Game.game.heightGrid = new double[Game.currentSizeX][Game.currentSizeY];
-		Game.game.groundHeightGrid = new double[Game.currentSizeX][Game.currentSizeY];
 		Drawing.drawing.setScreenBounds(Game.tile_size * sizeX, Game.tile_size * sizeY);
-
-		Game.game.solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
-		Game.game.unbreakableGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
+		Chunk.populateChunks(Game.currentLevel);
 
 		for (Obstacle o: Game.obstacles)
         {
@@ -789,12 +767,12 @@ public class Level
             if (o.startHeight > 1)
                 continue;
 
-            if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
+            if (o.bulletCollision && x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY && o.startHeight < 1)
             {
-                Game.game.solidGrid[x][y] = true;
-
-                if (!o.shouldShootThrough)
-                    Game.game.unbreakableGrid[x][y] = true;
+				Chunk.Tile t = Chunk.getTile(x, y);
+				t.solid = true;
+                if (o.shouldShootThrough)
+                    t.unbreakable = true;
             }
         }
 

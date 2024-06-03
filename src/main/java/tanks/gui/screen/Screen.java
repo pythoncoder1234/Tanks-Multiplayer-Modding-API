@@ -5,6 +5,8 @@ import tanks.*;
 import tanks.obstacle.Obstacle;
 import tanks.rendering.StaticTerrainRenderer;
 
+import java.util.ArrayList;
+
 public abstract class Screen implements IBatchRenderableObject
 {
 	public String music = null;
@@ -46,8 +48,6 @@ public abstract class Screen implements IBatchRenderableObject
 	public boolean drawn = false;
 
 	public boolean hideSpeedrunTimer = false;
-
-	public IBatchRenderableObject[][] tiles;
 
 	public double lastObsSize;
 
@@ -100,8 +100,8 @@ public abstract class Screen implements IBatchRenderableObject
 		{
 			for (int j = 0; j < Game.currentSizeY; j++)
 			{
-				if (Game.game.heightGrid[i][j] <= -1000)
-					Game.game.heightGrid[i][j] = 0;
+				if (Chunk.getTile(i, j).height <= -1000)
+					Chunk.getTile(i, j).height = 0;
 			}
 		}
 
@@ -131,9 +131,24 @@ public abstract class Screen implements IBatchRenderableObject
 
 		Drawing.drawing.setColor(Level.currentColorR, Level.currentColorG, Level.currentColorB);
 
+		if (Game.enable3d && Game.screen instanceof ScreenGame)
+		{
+            ScreenGame g = (ScreenGame) Game.screen;
+            for (ArrayList<IDrawable> arr : g.drawBeforeTerrain)
+			{
+				for (IDrawable a : arr)
+                    if (a != null)
+                        a.draw();
+				arr.clear();
+			}
+		}
+
 		if (stageOnly && Drawing.drawing.terrainRenderer instanceof StaticTerrainRenderer)
-			((StaticTerrainRenderer) Drawing.drawing.terrainRenderer).stage();
-		else
+        {
+            StaticTerrainRenderer r = (StaticTerrainRenderer) Drawing.drawing.terrainRenderer;
+            r.stage();
+        }
+        else
 			Drawing.drawing.terrainRenderer.draw();
 
 		Drawing.drawing.trackRenderer.draw();
@@ -145,11 +160,6 @@ public abstract class Screen implements IBatchRenderableObject
 		}
 
 		this.lastObsSize = Obstacle.draw_size;
-	}
-
-	public double getFlashCol(double col, int i, int j)
-	{
-		return col * (1 - Game.tilesFlash[i][j]) + Game.tilesFlash[i][j] * 255;
 	}
 
 	public double getOffsetX()

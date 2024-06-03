@@ -50,8 +50,12 @@ public class EventReturnToCrusade extends PersonalEvent
     {
         ScreenInterlevel.title = msg1;
         ScreenInterlevel.topText = msg2;
-        Crusade.currentCrusade.win = win;
-        Crusade.currentCrusade.lose = lose;
+
+//        if (
+        {
+            Crusade.currentCrusade.win = win;
+            Crusade.currentCrusade.lose = lose;
+        }
     }
 
     @Override

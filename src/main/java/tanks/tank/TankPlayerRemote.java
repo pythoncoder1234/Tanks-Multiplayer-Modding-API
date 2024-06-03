@@ -401,7 +401,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
         if (Game.bulletLocked || this.destroy)
             return;
 
-        Drawing.drawing.playGlobalSound("lay_mine.ogg", (float) (Mine.mine_size / m.size));
+        Drawing.drawing.playGameSound("lay_mine.ogg", this, Game.tile_size * 20, (float) (Mine.mine_size / m.size));
 
         Game.eventsOut.add(new EventLayMine(m));
         Game.movables.add(m);
@@ -447,7 +447,7 @@ public class TankPlayerRemote extends Tank implements IServerPlayerTank
             speed = Double.MIN_NORMAL;
 
         if (b.itemSound != null)
-            Drawing.drawing.playGlobalSound(b.itemSound, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
+            Drawing.drawing.playGameSound(b.itemSound, this, Game.tile_size * 20, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
 
         b.addPolarMotion(this.angle + offset, speed);
         b.speed = speed;

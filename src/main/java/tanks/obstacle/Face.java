@@ -31,10 +31,12 @@ public class Face implements Comparable<Face>
 
     public int compareTo(Face f)
     {
-        if (this.horizontal)
-            return (int) Math.signum(this.startY - f.startY);
-        else
-            return (int) Math.signum(this.startX - f.startX);
+        int cx = Double.compare(this.startX, f.startX);
+        int cy = Double.compare(this.startY, f.startY);
+
+        if (!horizontal)
+            return cx != 0 ? cx : cy;
+        return cy != 0 ? cy : cx;
     }
 
     public void update(double x1, double y1, double x2, double y2)
@@ -48,8 +50,7 @@ public class Face implements Comparable<Face>
     public String toString()
     {
         if (this.horizontal)
-            return this.startX + "-" + this.endX + " " + this.startY;
-        else
-            return this.startX + " " + this.startY + "-" + this.endY;
+            return Math.round(this.startX) + "-" + Math.round(this.endX) + " " + Math.round(this.startY);
+        return Math.round(this.startX) + " " + Math.round(this.startY) + "-" + Math.round(this.endY);
     }
 }

@@ -50,16 +50,16 @@ public class CustomShape extends FixedMenu
         switch (this.type)
         {
             case fillRect:
-                Drawing.drawing.fillInterfaceRect(x, y, this.sizeX, this.sizeY);
+                Drawing.drawing.fillRect(x, y, this.sizeX, this.sizeY);
                 break;
             case fillOval:
-                ModAPI.fixedShapes.fillOval(x, y, this.sizeX, this.sizeY);
+                Drawing.drawing.fillOval(x, y, this.sizeX, this.sizeY);
                 break;
             case drawRect:
-                ModAPI.fixedShapes.drawRect(x, y, this.sizeX, this.sizeY);
+                Drawing.drawing.drawRect(x, y, this.sizeX, this.sizeY);
                 break;
             case drawOval:
-                ModAPI.fixedShapes.drawOval(x, y, this.sizeX, this.sizeY);
+                Drawing.drawing.drawOval(x, y, this.sizeX, this.sizeY);
                 break;
         }
     }

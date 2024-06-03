@@ -3,8 +3,12 @@ package tanks.bullet;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemBullet;
-import tanks.network.event.*;
+import tanks.network.event.EventBulletAddAttributeModifier;
+import tanks.network.event.EventBulletBounce;
+import tanks.network.event.EventBulletDestroyed;
+import tanks.network.event.EventBulletUpdate;
 import tanks.obstacle.Obstacle;
 import tanks.tank.*;
 
@@ -13,7 +17,7 @@ import java.util.HashMap;
 
 import static tanks.tank.TankProperty.Category.appearanceGlow;
 
-public class Bullet extends Movable implements IDrawableLightSource
+public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 {
 	public static int currentID = 0;
 	public static ArrayList<Integer> freeIDs = new ArrayList<>();
@@ -185,6 +189,8 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 	@BulletProperty(id = "sound", name = "Shot sound", category = BulletProperty.Category.firing)
 	public String itemSound = "shoot.ogg";
+	@BulletProperty(id = "range", name = "Bullet sound range", category = BulletProperty.Category.firing)
+	public double soundRange = Game.tile_size * 36;
 	@BulletProperty(id = "sound_pitch_variation", name = "Sound pitch variation", category = BulletProperty.Category.firing)
 	public double pitchVariation = 0;
 
@@ -309,56 +315,13 @@ public class Bullet extends Movable implements IDrawableLightSource
 				}
 
 				if (this.damage <= 0 && this.playBounceSound)
-					Drawing.drawing.playSound("bump.ogg", (float) (bullet_size / size));
+					Drawing.drawing.playGameSound("bump.ogg", this, soundRange, (float) (bullet_size / size));
 			}
 
-			boolean kill = t.damage(this.damage * this.frameDamageMultipler, this);
-
-			if (kill)
-			{
-				if (!this.heavy)
-					this.destroy = true;
-
-				if (this.tank.equals(Game.playerTank))
-				{
-					if (Game.currentGame != null && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
-						Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
-					else
-						Game.player.hotbar.coins += t.coinValue;
-				}
-				else if (this.tank instanceof TankPlayerRemote && Crusade.crusadeMode)
-				{
-					((TankPlayerRemote) this.tank).player.hotbar.coins += t.coinValue;
-					Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
-				}
-				else if ((!Game.currentLevel.shop.isEmpty() || !Game.currentLevel.startingItems.isEmpty()) && !(t instanceof TankPlayer || t instanceof TankPlayerRemote))
-				{
-					if (this.tank instanceof TankPlayerRemote)
-					{
-						((TankPlayerRemote) this.tank).player.hotbar.coins += t.coinValue;
-						Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
-					}
-				}
-				else if (Game.currentGame != null && Game.currentGame.playerKillCoins > 0)
-				{
-					if (this.tank instanceof TankPlayer)
-					{
-						((TankPlayer) this.tank).player.hotbar.coins += Game.currentGame.playerKillCoins;
-						Game.eventsOut.add(new EventUpdateCoins(((TankPlayer) this.tank).player));
-					}
-
-					else if (this.tank instanceof TankPlayerRemote)
-					{
-						((TankPlayerRemote) this.tank).player.hotbar.coins += Game.currentGame.playerKillCoins;
-						Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
-					}
-				}
-			}
-			else if (this.playPopSound)
-				Drawing.drawing.playGlobalSound("damage.ogg", (float) (bullet_size / size));
+			t.damage(this.damage * this.frameDamageMultipler, this, this.playPopSound);
 		}
 		else if (this.playPopSound && !this.heavy)
-			Drawing.drawing.playGlobalSound("bullet_explode.ogg", (float) (bullet_size / size));
+			Drawing.drawing.playGameSound("bullet_explode.ogg", this, soundRange, (float) (bullet_size / size));
 	}
 
 	public void collidedWithObject(Movable o)
@@ -384,10 +347,10 @@ public class Bullet extends Movable implements IDrawableLightSource
         }
 	}
 
-	protected void pop()
+	public void pop()
 	{
-		if (this.playPopSound)
-			Drawing.drawing.playGlobalSound("bullet_explode.ogg", (float) (bullet_size / size));
+		if (this.playPopSound && !(ScreenPartyLobby.isClient && Game.vanillaMode))
+			Drawing.drawing.playGameSound("bullet_explode.ogg", this, soundRange, (float) (bullet_size / size));
 
 		this.destroy = true;
 		this.vX = 0;
@@ -435,8 +398,8 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 		if (this.playBounceSound && b.playBounceSound)
 		{
-			Drawing.drawing.playSound("bump.ogg", (float) (bullet_size / size), 0.5f);
-			Drawing.drawing.playSound("bump.ogg", (float) (bullet_size / b.size), 0.5f);
+			Drawing.drawing.playGameSound("bump.ogg", this, soundRange, (float) (bullet_size / size), 0.5f);
+			Drawing.drawing.playGameSound("bump.ogg", this, soundRange, (float) (bullet_size / b.size), 0.5f);
 		}
 
 		this.addTrail();
@@ -487,7 +450,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 			}
 
 			if (this.playBounceSound)
-				Drawing.drawing.playSound("bump.ogg", (float) (bullet_size / h.size), 1f);
+				Drawing.drawing.playGameSound("bump.ogg", this, soundRange, (float) (bullet_size / h.size), 1f);
 
 			if (h.bulletHitKnockback > 0)
 				h.push(l, h.bulletHitKnockback);
@@ -511,35 +474,6 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 		if (!heavy)
             this.pop();
-	}
-
-	public void checkCollisionLocal()
-	{
-		if (this.destroy)
-			return;
-
-		for (int i = 0; i < Game.obstacles.size(); i++)
-		{
-			Obstacle o = Game.obstacles.get(i);
-
-			if (!o.checkForObjects)
-				continue;
-
-			double dx = this.posX - o.posX;
-			double dy = this.posY - o.posY;
-
-			double horizontalDist = Math.abs(dx);
-			double verticalDist = Math.abs(dy);
-
-			double s = this.size;
-			if (useCustomWallCollision)
-				s = this.wallCollisionSize;
-
-			double bound = s / 2 + Game.tile_size / 2;
-
-			if (horizontalDist < bound && verticalDist < bound)
-				o.onObjectEntryLocal(this);
-		}
 	}
 
 	@Override
@@ -621,7 +555,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 				this.collisionY = this.posY - (this.posY - this.size / 2);
 			}
 
-			if (collided && this.age == 0)
+			if (!this.tank.isRemote && collided && this.age == 0)
 			{
 				this.destroy = true;
 				this.posX = prevX;
@@ -640,13 +574,13 @@ public class Bullet extends Movable implements IDrawableLightSource
 
 		for (int i = 0; i < Game.movables.size(); i++)
 		{
-			Movable o = Game.movables.get(i);
+			Movable m = Game.movables.get(i);
 
-			if (o instanceof Tank && !o.destroy)
+			if (m instanceof Tank && !m.destroy)
 			{
-                Tank t = (Tank) o;
-                double horizontalDist = Math.abs(this.posX - o.posX);
-				double verticalDist = Math.abs(this.posY - o.posY);
+                Tank t = (Tank) m;
+                double horizontalDist = Math.abs(this.posX - m.posX);
+				double verticalDist = Math.abs(this.posY - m.posY);
 
 				double bound = this.size / 2 + t.size * t.hitboxSize / 2;
 
@@ -664,11 +598,11 @@ public class Bullet extends Movable implements IDrawableLightSource
 					this.inside.add(t);
 				}
 			}
-			else if (((o instanceof Bullet && ((Bullet) o).enableCollision && (((Bullet) o).bulletCollision && ((Bullet) o).externalBulletCollision && this.bulletCollision)) || o instanceof Mine) && o != this && !o.destroy)
+			else if (((m instanceof Bullet && ((Bullet) m).enableCollision && (((Bullet) m).bulletCollision && ((Bullet) m).externalBulletCollision && this.bulletCollision)) || m instanceof Mine) && m != this && !m.destroy)
 			{
-				double distSq = Math.pow(this.posX - o.posX, 2) + Math.pow(this.posY - o.posY, 2);
+				double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
 
-				double s = o.size;
+				double s = m.size;
 
 				double bound = this.size / 2 + s / 2;
 
@@ -677,13 +611,13 @@ public class Bullet extends Movable implements IDrawableLightSource
 					this.collisionX = this.posX;
 					this.collisionY = this.posY;
 
-					if (!this.insideOld.contains(o))
+					if (!this.insideOld.contains(m))
 					{
 						this.collided();
-						this.collidedWithObject(o);
+						this.collidedWithObject(m);
 					}
 
-					this.inside.add(o);
+					this.inside.add(m);
 				}
 			}
 		}
@@ -700,11 +634,9 @@ public class Bullet extends Movable implements IDrawableLightSource
 			this.justBounced = true;
 
 			if (this.bounces < 0 || this.bouncyBounces < 0 || !allowBounce)
-			{
-				this.pop();
-			}
+                this.pop();
 			else if (this.playBounceSound)
-				Drawing.drawing.playGlobalSound("bounce.ogg", (float) (bullet_size / size));
+				Drawing.drawing.playGameSound("bounce.ogg", this, Game.tile_size * 35, (float) (bullet_size / size));
 
 			if (!destroy)
 			{
@@ -741,7 +673,12 @@ public class Bullet extends Movable implements IDrawableLightSource
         if (horizontalDist < bound && verticalDist < bound)
         {
             if (o.checkForObjects)
-                o.onObjectEntry(this);
+			{
+				if (!this.tank.isRemote)
+					o.onObjectEntry(this);
+				else
+					o.onObjectEntryLocal(this);
+			}
 
             if (!o.bulletCollision)
                 return output;
@@ -803,11 +740,18 @@ public class Bullet extends Movable implements IDrawableLightSource
 
         return output;
     }
+
+	@Override
+	public boolean disableRayCollision()
+	{
+		return true;
+	}
+
 	public Ray getRay()
 	{
 		Ray r = new Ray(posX, posY, this.getAngleInDirection(this.posX + this.vX, this.posY + this.vY), this.bounces, tank);
 		r.ignoreTanks = true;
-		r.size = this.size;
+		r.size = Math.max(10, this.size);
 		return r;
 	}
 
@@ -871,9 +815,7 @@ public class Bullet extends Movable implements IDrawableLightSource
 				idMap.remove(this.networkID);
 
 				if (this.affectsMaxLiveBullets)
-				{
-					this.item.liveBullets--;
-				}
+                    this.item.liveBullets--;
 
 				if (!this.isRemote)
 					this.onDestroy();
@@ -903,50 +845,29 @@ public class Bullet extends Movable implements IDrawableLightSource
 				{
 					this.ageFrac -= 1;
 
-					if (this.effect.equals(BulletEffect.ice) || this.effect.equals(BulletEffect.ember))
+					boolean ember = this.effect.equals(BulletEffect.ember);
+					boolean ice = this.effect.equals(BulletEffect.ice);
+					if (ice || ember)
 					{
 						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
-						double var = 50;
 						e.maxAge /= 2;
+						e.setColor(ember ? 255 : 128, ember ? 180 : 255, ember ? 0 : 255, 50);
 
-						double r1 = 128;
-						double g1 = 255;
-						double b1 = 255;
-
-						if (this.effect.equals(BulletEffect.ember))
-						{
-							r1 = 255;
-							g1 = 180;
-							b1 = 0;
-						}
-
-						e.colR = Math.min(255, Math.max(0, r1 + Math.random() * var - var / 2));
-						e.colG = Math.min(255, Math.max(0, g1 + Math.random() * var - var / 2));
-						e.colB = Math.min(255, Math.max(0, b1 + Math.random() * var - var / 2));
-
-						if (this.effect.equals(BulletEffect.ice))
-						{
-							e.glowR = 90;
-							e.glowG = 180;
-							e.glowB = 180;
-						}
+						if (ice)
+                            e.setGlowColor(90, 180, 180);
 
 						if (Game.enable3d)
 							e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
 						else
 							e.setPolarMotion(Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 4);
 
-
 						Game.effects.add(e);
 					}
 					else if (Game.fancyBulletTrails && this.effect.equals(BulletEffect.darkFire))
 					{
 						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
-						double var = 50;
 						e.maxAge /= 4;
-						e.colR = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
-						e.colG = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
-						e.colB = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
+						e.setColor(0, 0, 0, 50);
 						e.enableGlow = false;
 
 						if (Game.enable3d)
@@ -959,11 +880,8 @@ public class Bullet extends Movable implements IDrawableLightSource
 					else if (Game.fancyBulletTrails && (this.effect.equals(BulletEffect.fire) || this.effect.equals(BulletEffect.fireTrail)))
 					{
 						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
-						double var = 50;
 						e.maxAge /= 4;
-						e.colR = 255;
-						e.colG = Math.min(255, Math.max(0, 180 + Math.random() * var - var / 2));
-						e.colB = Math.min(255, Math.max(0, 64 + Math.random() * var - var / 2));
+						e.setColor(300, 180, 64, 50);    // r will always show as 255
 
 						if (Game.enable3d)
 							e.set3dPolarMotion(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * this.size / 50.0 * 12);
@@ -975,36 +893,23 @@ public class Bullet extends Movable implements IDrawableLightSource
 				}
 
 				while (this.quarterAgeFrac >= 0.25)
-				{
-					this.quarterAgeFrac -= 0.25;
-				}
+                    this.quarterAgeFrac -= 0.25;
 
 				while (this.halfAgeFrac >= 0.5)
-				{
-					this.halfAgeFrac -= 0.5;
-				}
+                    this.halfAgeFrac -= 0.5;
 			}
 		}
 
 		if (this.destroyTimer >= maxDestroyTimer && noTrails)
-		{
-			Game.removeMovables.add(this);
-		}
+            Game.removeMovables.add(this);
 
 		if (this.effect != BulletEffect.none && !this.addedTrail && !this.destroy && Movable.absoluteAngleBetween(this.getPolarDirection(), this.lastTrailAngle) >= 0.001)
-		{
-			this.addTrail(true);
-		}
+            this.addTrail(true);
 
 		this.addedTrail = false;
 
 		if (this.enableCollision)
-		{
-			if (!this.tank.isRemote)
-				this.checkCollision();
-			else
-				this.checkCollisionLocal();
-		}
+            this.checkCollision();
 
 		this.age += Panel.frameFrequency;
 
@@ -1241,4 +1146,21 @@ public class Bullet extends Movable implements IDrawableLightSource
 		return this.lightInfo;
 	}
 
+	@Override
+	public void onExploded(Explosion e)
+	{
+		this.destroy = true;
+	}
+
+	@Override
+	public void applyExplosionKnockback(double angle, double power, Explosion e)
+	{
+		this.addPolarMotion(angle, power * e.bulletKnockback * Math.pow(Game.tile_size, 2) / Math.max(1, Math.pow(this.size, 2)));
+	}
+
+	@Override
+	public double getSize()
+	{
+		return this.size;
+	}
 }

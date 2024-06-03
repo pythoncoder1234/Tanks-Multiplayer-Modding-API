@@ -1,6 +1,9 @@
 package tanks.rendering;
 
-import basewindow.*;
+import basewindow.BaseStaticBatchRenderer;
+import basewindow.IBatchRenderableObject;
+import basewindow.ShaderGroup;
+import tanks.Chunk;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.screen.ILevelPreviewScreen;
@@ -75,8 +78,8 @@ public class StaticTerrainRenderer extends TerrainRenderer
 
         if (o instanceof Obstacle)
             sg = ((Obstacle) o).renderer;
-        else if (o instanceof Tile && ((Tile) o).obstacleAbove != null)
-            sg = ((Tile) o).obstacleAbove.tileRenderer;
+        else if (o instanceof Chunk.Tile && ((Chunk.Tile) o).obstacle != null)
+            sg = ((Chunk.Tile) o).obstacle.tileRenderer;
 
         if (!outOfBounds)
             s = this.getRenderer(sg);
@@ -246,13 +249,9 @@ public class StaticTerrainRenderer extends TerrainRenderer
     public void reset()
     {
         for (RegionRenderer r : this.renderers.values())
-        {
             r.renderer.free();
-        }
 
         this.outOfBoundsRenderer.renderer.free();
-
-        this.tiles = null;
         this.renderers.clear();
         this.staged = false;
 
@@ -334,74 +333,20 @@ public class StaticTerrainRenderer extends TerrainRenderer
             if (size >= 0)
             {
                 for (int x = xStart; x <= xEnd; x++)
-                {
                     for (int y = yStart; y <= yEnd; y++)
-                    {
                         if (x != 0 || y != 0)
-                        {
                             this.drawMap(this.outOfBoundsRenderer, x, y);
-                        }
-                    }
-                }
             }
         }
 
-        for (int i = 0; i < 10; i++)
-        {
-            for (Class<? extends ShaderGroup> s : this.renderers.keySet())
-            {
-                try
-                {
-                    RendererDrawLayer drawLayer = s.getAnnotation(RendererDrawLayer.class);
-                    if ((drawLayer == null && i == 5) || (drawLayer != null && drawLayer.value() == i))
-                    {
-                        ShaderGroup so = getShader(s);
-                        so.set();
-
-                        if (so instanceof IObstacleSizeShader)
-                            ((IObstacleSizeShader) so).setSize((float) (Obstacle.draw_size / Game.tile_size));
-
-                        if (so instanceof IObstacleTimeShader)
-                            ((IObstacleTimeShader) so).setTime((int) (age * 10));
-
-                        if (so instanceof IShrubHeightShader)
-                            ((IShrubHeightShader) so).setShrubHeight(getShrubHeight());
-
-                        this.drawMap(this.renderers.get(s), 0, 0);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Game.exitToCrash(e);
-                }
-            }
-        }
+        renderShaders();
 
         Game.game.window.shaderDefault.set();
     }
 
     public void stageObstacles()
     {
-        if (!Game.enable3d)
-            return;
-
-        double d = Obstacle.draw_size;
-        Obstacle.draw_size = Game.tile_size;
-        for (Obstacle o: Game.obstacles)
-        {
-            int i = Math.max(0, Math.min(Game.currentSizeX - 1, (int) (o.posX / Game.tile_size)));
-            int j = Math.max(0, Math.min(Game.currentSizeY - 1, (int) (o.posY / Game.tile_size)));
-            double r = Game.tilesR[i][j];
-            double g = Game.tilesG[i][j];
-            double b = Game.tilesB[i][j];
-            this.currentDepth = Game.tilesDepth[i][j];
-            currentColor[0] = (float) (r / 255.0);
-            currentColor[1] = (float) (g / 255.0);
-            currentColor[2] = (float) (b / 255.0);
-
-            if (o.batchDraw)
-                o.draw();
-        }
-        Obstacle.draw_size = d;
+        if (Game.enable3d)
+            super.stageObstacles();
     }
 }

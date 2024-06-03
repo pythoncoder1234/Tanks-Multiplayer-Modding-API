@@ -48,13 +48,14 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	protected long lastTrace = 0;
 	protected static boolean lockTrace = false;
 
+	protected Ray ray;
 	protected double drawRange = -1;
 
 	public double mouseX;
 	public double mouseY;
 
 	public static Model sunglassesModel;
-	public static boolean hi = false;
+	public static boolean hi = true;
 
 	public TankPlayer(double x, double y, double angle)
     {
@@ -80,12 +81,12 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (enableDestroyCheat)
 		{
 			this.showName = true;
-			this.nameTag.name = "Destroy cheat enabled!!!";
+			this.nameTag.name.text = "Destroy cheat enabled!!!";
 		}
 
-		if (Game.nameInMultiplayer && ScreenPartyHost.isServer)
+		if (Game.alwaysShowName && ScreenPartyHost.isServer)
 		{
-			this.nameTag.name = Game.player.username;
+			this.nameTag.name.text = Game.player.username;
 			this.showName = true;
 		}
 
@@ -140,6 +141,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         boolean left = Game.game.input.moveLeft.isPressed();
         boolean right = Game.game.input.moveRight.isPressed();
         boolean trace = Game.game.input.aim.isPressed();
+		ray = null;
 
         boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
 
@@ -207,7 +209,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
             double a = -1;
 
-            if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam))
+			ScreenGame g = ScreenGame.getInstance();
+            if (g != null && !g.freecam || ScreenGame.controlPlayer)
             {
                 if (left)
                     x -= 1;
@@ -418,8 +421,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
             this.angle = this.getAngleInDirection(this.mouseX, this.mouseY);
         }
 
-
-        if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam))
+        if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).freecam && !ScreenGame.controlPlayer))
         {
             if (shoot && this.getItem(false).cooldown <= 0 && !this.disabled)
                 this.shoot();
@@ -460,6 +462,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 
 			r.vX /= 2;
 			r.vY /= 2;
+			r.ignoreTanks = Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_ALT);
 			r.trace = true;
 			r.dotted = true;
 			r.moveOut(10 * this.size / Game.tile_size);
@@ -467,7 +470,10 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			if (range >= 0)
 				this.drawRange = range;
 			else
-				r.getTarget();
+				this.ray = r;
+
+			if (this.ray != null)
+                this.ray.getTarget();
 		}
 
 		super.update();
@@ -535,7 +541,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			speed = Double.MIN_NORMAL;
 
 		if (b.itemSound != null)
-            Drawing.drawing.playGlobalSound(b.itemSound, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
+			Drawing.drawing.playGameSound(b.itemSound, this, Game.tile_size * 20, (float) ((Bullet.bullet_size / b.size) * (1 - (Math.random() * 0.5) * b.pitchVariation)));
 
 		b.setPolarMotion(this.angle + offset, speed);
 		b.speed = speed;
@@ -551,7 +557,13 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (b.moveOut)
 			b.moveOut(50 * this.size / Game.tile_size);
 
-		b.setTargetLocation(this.mouseX, this.mouseY);
+		if (!Game.followingCam)
+			b.setTargetLocation(this.mouseX, this.mouseY);
+		else if (Game.screen instanceof ScreenGame)
+        {
+            ScreenGame g = (ScreenGame) Game.screen;
+            b.setTargetLocation(posX + Math.cos(angle) * g.fcArcAim, posY + Math.sin(angle) * g.fcArcAim);
+        }
 
 		Game.eventsOut.add(new EventShootBullet(b));
 		Game.movables.add(b);
@@ -568,7 +580,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (Game.bulletLocked || this.destroy)
 			return;
 
-		Drawing.drawing.playGlobalSound("lay_mine.ogg", (float) (Mine.mine_size / m.size));
+		Drawing.drawing.playGameSound("lay_mine.ogg", this, Game.tile_size * 20, (float) (Mine.mine_size / m.size));
 
 		Game.eventsOut.add(new EventLayMine(m));
 		Game.movables.add(m);

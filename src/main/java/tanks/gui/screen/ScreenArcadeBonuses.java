@@ -268,7 +268,7 @@ public class ScreenArcadeBonuses extends Screen implements IDarkScreen
                 fireworksToSpawn = (int) fireworks;
         }
 
-        if (age >= firstBonusTime + interBonusTime * 5 && this.getFireworkArray().size() == 0)
+        if (age >= firstBonusTime + interBonusTime * 5 && this.getFireworkArray().isEmpty())
         {
             ScreenInterlevel.title = Translation.translate("You scored %d points!", score);
             Panel.win = true;
@@ -495,15 +495,13 @@ public class ScreenArcadeBonuses extends Screen implements IDarkScreen
     {
         if (odd)
             return fireworks2;
-        else
-            return fireworks1;
+        return fireworks1;
     }
 
     public ArrayList<Firework> getOtherFireworkArray()
     {
         if (odd)
             return fireworks1;
-        else
-            return fireworks2;
+        return fireworks2;
     }
 }

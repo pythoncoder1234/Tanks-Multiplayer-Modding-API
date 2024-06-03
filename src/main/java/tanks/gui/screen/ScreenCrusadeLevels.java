@@ -12,7 +12,6 @@ import tanks.tank.TankAIControlled;
 import tanks.tank.TankSpawnMarker;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
@@ -101,11 +100,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         TerrainRenderer r = Drawing.drawing.terrainRenderer;
         Drawing.drawing.terrainRenderer = l.renderer;
 
-        for (int i = 0; i < Game.game.heightGrid.length; i++)
-        {
-            Arrays.fill(Game.game.heightGrid[i], -1000);
-            Arrays.fill(Game.game.groundHeightGrid[i], -1000);
-        }
+        Chunk.fillHeightGrid();
 
         if (Game.enable3d)
         {
@@ -120,10 +115,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
                 int y = (int) (o.posY / Game.tile_size);
 
                 if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-                {
-                    Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
-                    Game.game.groundHeightGrid[x][y] = Math.max(o.getGroundHeight(), Game.game.groundHeightGrid[x][y]);
-                }
+                    Chunk.getTile(x, y).updateHeight(o.getTileHeight()).updateGroundHeight(o.getGroundHeight());
             }
         }
 
@@ -357,8 +349,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
     {
         if (allLoaded)
             return (i + index * 10) % index;
-        else
-            return i;
+        return i;
     }
 
     public static class ScreenLevel

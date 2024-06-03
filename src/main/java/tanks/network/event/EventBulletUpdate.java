@@ -58,5 +58,4 @@ public class EventBulletUpdate extends PersonalEvent
             b.vY = this.vY;
         }
     }
-
 }

@@ -30,7 +30,7 @@ public class ScreenOptionsShadows extends ScreenOptionsOverlay
         @Override
         public void run()
         {
-            if (shadowQuality.inputText.length() == 0)
+            if (shadowQuality.inputText.isEmpty())
                 shadowQuality.inputText = shadowQuality.previousInputText;
 
             Game.shadowQuality = Integer.parseInt(shadowQuality.inputText);

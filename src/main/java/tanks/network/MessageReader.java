@@ -9,16 +9,9 @@ import tanks.gui.screen.ScreenPartyLobby;
 
 import java.util.UUID;
 
-public class MessageReader 
+public class MessageReader
 {
-	public static final int max_event_size = 1048576;
-
-	/**
-	 *  When this value is set to true, all network events will be printed in the console.
-	 *  To debug network events, set this variable to true (via debug mode or relaunch) and reproduce the bug.
-	 *  A list of network event classes (most recent event last) will be printed to the console.
-	 *  */
-	public static boolean debugNetworkEvents = false;
+	public static final int max_event_size = 104857600;
 
 	public static int downstreamBytes;
 	public static int upstreamBytes;
@@ -34,15 +27,19 @@ public class MessageReader
 
 	protected int lastID;
 
-	public int queueMessage(ByteBuf m, UUID clientID)
+	public void queueMessage(ClientHandler c, ByteBuf m, UUID clientID)
 	{
-		return this.queueMessage(null, m, clientID);
+		this.queueMessage(null, c, m, clientID);
 	}
 
-	public synchronized int queueMessage(ServerHandler s, ByteBuf m, UUID clientID)
+
+	public void queueMessage(ServerHandler s, ByteBuf m, UUID clientID)
 	{
-		int reply = -1;
-		
+		this.queueMessage(s, null, m, clientID);
+	}
+
+	public synchronized void queueMessage(ServerHandler s, ClientHandler c, ByteBuf m, UUID clientID)
+	{
 		try
 		{
 			byte[] bytes = new byte[59];
@@ -77,22 +74,24 @@ public class MessageReader
 							ScreenPartyLobby.connections.clear();
 						}
 
-						return -1;
+						return;
 					}
 				}
-				
+
 				reading = true;
 
 				while (queue.readableBytes() >= endpoint)
 				{
-					reply = this.readMessage(s, queue, clientID);
+					this.readMessage(s, c, queue, clientID);
 					queue.discardReadBytes();
-					
+
 					reading = false;
-					
+
 					if (queue.readableBytes() >= 4)
 					{
 						endpoint = queue.readInt();
+						downstreamBytes += endpoint + 4;
+						updateLastMessageTime();
 
 						if (endpoint > MessageReader.max_event_size)
 						{
@@ -110,7 +109,7 @@ public class MessageReader
 								ScreenPartyLobby.connections.clear();
 							}
 
-							return -1;
+							return;
 						}
 
 						reading = true;
@@ -149,17 +148,12 @@ public class MessageReader
 				ScreenPartyLobby.connections.clear();
 			}
 		}
-
-		return reply;
 	}
 
-	public synchronized int readMessage(ServerHandler s, ByteBuf m, UUID clientID) throws Exception
+	public synchronized void readMessage(ServerHandler s, ClientHandler ch, ByteBuf m, UUID clientID) throws Exception
 	{
 		int i = m.readInt();
 		Class<? extends INetworkEvent> c = NetworkEventMap.get(i);
-
-		if (debugNetworkEvents)		// see javadoc for the variable
-			System.out.println(NetworkEventMap.get(this.lastID));
 
 		if (c == null)
 			throw new Exception("Invalid network event: " + i + " (Previous event: " + NetworkEventMap.get(this.lastID) + ")");
@@ -170,14 +164,16 @@ public class MessageReader
 		e.read(m);
 
 		if (e instanceof PersonalEvent)
+		{
 			((PersonalEvent) e).clientID = clientID;
+		}
 
-		if (e instanceof EventPing && ((EventPing) e).iteration <= 2)
-			return ((EventPing) e).iteration;
-		else if (e instanceof IOnlineServerEvent)
+		if (e instanceof IOnlineServerEvent)
 			s.sendEventAndClose(new EventKick("This is a party, please join parties through the party menu"));
-		else if (e instanceof IServerThreadEvent)
+		else if (e instanceof IServerThreadEvent && s != null)
 			((IServerThreadEvent) e).execute(s);
+		else if (e instanceof IClientThreadEvent && ch != null)
+			((IClientThreadEvent) e).execute(ch);
 		else
 		{
 			synchronized (Game.eventsIn)
@@ -185,8 +181,6 @@ public class MessageReader
 				Game.eventsIn.add(e);
 			}
 		}
-
-		return -1;
 	}
 
 	public static void updateLastMessageTime()

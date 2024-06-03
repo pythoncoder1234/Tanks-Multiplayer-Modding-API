@@ -34,7 +34,6 @@ public class TankOrange extends TankAIControlled
 		this.cooldownRandom = 0;
 		this.bullet.effect = Bullet.BulletEffect.none;
 		this.bullet.bounces = 0;
-		this.bullet.damage = 0.1;
 		this.bullet.name = "Flamethrower";
 
 		this.coinValue = 4;

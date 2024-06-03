@@ -84,15 +84,10 @@ public class EventAddButton extends PersonalEvent
         if (this.clientID == null && Game.screen instanceof ScreenOnline)
         {
             ScreenOnline s = (ScreenOnline) Game.screen;
-            Button b;
-
-            final int buttonID = this.id;
-            b = new Button(this.posX, this.posY, this.sizeX, this.sizeY, this.text, () ->
+            Button b = new Button(this.posX, this.posY, this.sizeX, this.sizeY, this.text, () ->
             {
-                Game.eventsOut.add(new EventPressedButton(buttonID));
-
-                if (wait)
-                    Game.screen = new ScreenOnlineWaiting();
+                Game.eventsOut.add(new EventPressedButton(id));
+                if (wait) Game.screen = new ScreenOnlineWaiting();
             }, hover);
 
             b.enabled = this.enabled;

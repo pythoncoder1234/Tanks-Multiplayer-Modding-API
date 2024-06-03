@@ -38,7 +38,7 @@ public class ItemShield extends Item
 
         Game.eventsOut.add(new EventTankUpdateHealth(t, this));
 
-        Drawing.drawing.playGlobalSound("shield.ogg");
+        Drawing.drawing.playGameSound("shield.ogg", t, Game.tile_size * 20, 1f);
 
         if (Crusade.crusadeMode && Crusade.currentCrusade != null && this.player != null)
             Crusade.currentCrusade.getCrusadePlayer(this.player).addItemUse(this);

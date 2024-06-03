@@ -3,6 +3,7 @@ package tanks.obstacle;
 import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
+import tanks.rendering.ShaderLava;
 import tanks.tank.Mine;
 import tanks.tank.Tank;
 
@@ -18,6 +19,7 @@ public class ObstacleLava extends ObstacleLiquid
         super(name, posX, posY);
 
         this.enableStacking = true;
+        this.isSurfaceTile = true;
 
         this.colorR = 255;
         this.colorG = 84;
@@ -25,6 +27,7 @@ public class ObstacleLava extends ObstacleLiquid
         this.glow = 1;
 
         this.update = true;
+        this.renderer = ShaderLava.class;
 
         this.description = "A pool of hot lava that severely damages tanks";
     }
@@ -48,12 +51,13 @@ public class ObstacleLava extends ObstacleLiquid
 
         if (Game.effectsEnabled && !ScreenGame.finished)
         {
-            if (Math.random() < Game.effectMultiplier * 0.003)
+            if (Math.random() * Panel.frameFrequency < 0.008)
             {
                 Effect e;
                 if (Game.enable3d)
                 {
                     e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Game.tile_size, this.posY + (Math.random() - 0.5) * Game.tile_size, 0, Effect.EffectType.piece);
+                    e.setSize(Math.random() * 5);
                     e.colR = 255;
                     e.colG = Math.random() * 128 + 64;
                     e.colB = 0;
@@ -63,6 +67,7 @@ public class ObstacleLava extends ObstacleLiquid
                 else
                 {
                     e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Game.tile_size, this.posY + (Math.random() - 0.5) * Game.tile_size, Effect.EffectType.piece);
+                    e.setSize(Math.random() * 5);
                     e.colR = 255;
                     e.colG = Math.random() * 128 + 64;
                     e.colB = 0;
@@ -93,11 +98,8 @@ public class ObstacleLava extends ObstacleLiquid
     @Override
     public void draw()
     {
-        if (!Game.enable3d)
-        {
-            Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
-            Drawing.drawing.fillRect(this, this.posX, this.posY, Obstacle.draw_size, Obstacle.draw_size);
-        }
+        Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, this.colorA);
+        Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Game.tile_size, Game.tile_size, 0, (byte) 61);
     }
 
     @Override
@@ -115,14 +117,6 @@ public class ObstacleLava extends ObstacleLiquid
     @Override
     public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
     {
-        double frac = Obstacle.draw_size / Game.tile_size;
-        double prog = Math.sin(System.currentTimeMillis() / 700. + offset) * 10;
 
-        if (frac < 1 || extra != 0)
-            Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
-        else
-            Drawing.drawing.setColor(this.colorR, this.colorG + prog, this.colorB + prog);
-
-        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * (1 - frac) + extra, (byte) 61);
     }
 }

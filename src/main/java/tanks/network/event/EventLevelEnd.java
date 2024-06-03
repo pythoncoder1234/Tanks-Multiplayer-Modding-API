@@ -66,7 +66,6 @@ public class EventLevelEnd extends PersonalEvent
 		ScreenPartyLobby.readyPlayers.clear();
 		ScreenPartyLobby.includedPlayers.clear();
 
-		System.gc();
 	}
 
 	@Override

@@ -107,10 +107,13 @@ public class ObstaclePath extends Obstacle
     {
         double colorFactor = 1;
 
-        int x = (int) (this.posX / 50);
-        int y = (int) (this.posY / 50);
+        int x = (int) (this.posX / Game.tile_size);
+        int y = (int) (this.posY / Game.tile_size);
         if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
-            colorFactor = (Game.tilesR[x][y] + Game.tilesG[x][y] + Game.tilesB[x][y]) / 255;
+        {
+            Chunk.Tile t = Chunk.getTile(x, y);
+            colorFactor = (t.colR + t.colG + t.colB) / 255;
+        }
 
         this.colorR = 170 * colorFactor + randomR;
         this.colorG = 105 * colorFactor + randomG;
@@ -124,6 +127,6 @@ public class ObstaclePath extends Obstacle
 
     public double getGroundHeight()
     {
-        return Game.sampleTerrainGroundHeight(this.posX, this.posY);
+        return Game.sampleDefaultGroundHeight(this.posX, this.posY);
     }
 }

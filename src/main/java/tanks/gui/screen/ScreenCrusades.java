@@ -157,9 +157,8 @@ public class ScreenCrusades extends Screen
 
 		if (f.exists())
 			return Game.player.loadCrusade(f);
-		else
-			return null;
-	}
+        return null;
+    }
 
 	@Override
 	public void update()

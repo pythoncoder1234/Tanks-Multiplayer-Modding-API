@@ -44,7 +44,7 @@ public class Cloud implements IDrawable, IBatchRenderableObject
 
     public void draw()
     {
-        if (!Game.followingCam || !Game.enable3d || !Drawing.drawing.movingCamera)
+        if (!(Game.followingCam && Game.firstPerson) || !Game.enable3d || !Drawing.drawing.movingCamera)
             return;
 
         double fade = Math.min(1 - (Math.max(0, (this.posX - Game.currentSizeX * Game.tile_size) / 2000)), Math.min(0, this.posX) / 1000 + 1);

@@ -233,9 +233,7 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         this.colBuffer = newColBuffer;
 
         for (ShaderGroup.Attribute a: newAttributeBuffers.keySet())
-        {
             this.attributeBuffers.put(a, newAttributeBuffers.get(a));
-        }
 
         this.bufferStartPoints = newBufferStartPoints;
         this.size = newPos;
@@ -497,7 +495,11 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * 4, new float[4 * size]);
         for (ShaderGroup.Attribute a: attributeBuffers.keySet())
         {
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.attributeVBOs.get(a));
+            Integer av = this.attributeVBOs.get(a);
+            if (av == null)
+                continue;
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, av);
             GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long) Float.BYTES * pos * a.count, new float[a.count * size]);
         }
     }

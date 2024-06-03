@@ -7,14 +7,22 @@ import tanks.network.event.INetworkEvent;
 import tanks.tank.Explosion;
 import tanks.tank.Tank;
 
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 public class DamageListener extends EventListener
 {
     public DamageListener(DamageListenerFunc f, boolean killOnly)
     {
-        super(getFunc(f, killOnly), new HashSet<>(Collections.singletonList(EventTankUpdateHealth.class)));
+        super(getFunc(f, killOnly), of(EventTankUpdateHealth.class));
+    }
+
+    public static <E> Set<E> of(E e1)
+    {
+        Set<E> classes1 = new HashSet<>();
+        classes1.add(e1);
+        return classes1;
     }
 
     public static EventListenerFunc getFunc(DamageListenerFunc f, boolean killOnly)
@@ -76,16 +84,32 @@ public class DamageListener extends EventListener
         add(e, false);
     }
 
-    public static class DamagedTank
+    public static final class DamagedTank
     {
-        public Tank target, attacker;
-        public Movable source;
+        private final Tank target;
+        private final Tank attacker;
+        private final Movable source;
 
-        DamagedTank(Tank target, Tank attacker, Movable source)
+        public DamagedTank(Tank target, Tank attacker, Movable source)
         {
             this.target = target;
             this.attacker = attacker;
             this.source = source;
+        }
+
+        public Tank target()
+        {
+            return target;
+        }
+
+        public Tank attacker()
+        {
+            return attacker;
+        }
+
+        public Movable source()
+        {
+            return source;
         }
 
         @Override
@@ -93,5 +117,26 @@ public class DamageListener extends EventListener
         {
             return target.hashCode();
         }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            DamagedTank that = (DamagedTank) obj;
+            return Objects.equals(this.target, that.target) &&
+                   Objects.equals(this.attacker, that.attacker) &&
+                   Objects.equals(this.source, that.source);
+        }
+
+        @Override
+        public String toString()
+        {
+            return "DamagedTank[" +
+                   "target=" + target + ", " +
+                   "attacker=" + attacker + ", " +
+                   "source=" + source + ']';
+        }
+
     }
 }

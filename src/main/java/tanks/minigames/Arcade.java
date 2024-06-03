@@ -63,9 +63,7 @@ public class Arcade extends Minigame
     public HashMap<String, String> tankItemsMap = new HashMap<>();
 
     public double chainOpacity = 1;
-
     public Random random;
-
     public ArrayList<ItemDrop> drops = new ArrayList<>();
 
     public Arcade()
@@ -604,7 +602,7 @@ public class Arcade extends Minigame
             else if (other)
                 y += Game.currentSizeY - 4;
 
-            if (!Game.game.solidGrid[x][y])
+            if (!Chunk.getTile(x, y).solid)
             {
                 found = true;
 

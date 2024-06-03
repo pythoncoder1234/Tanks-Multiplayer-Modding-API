@@ -29,7 +29,7 @@ public class ScreenCrusadeDescription extends Screen
         @Override
         public void run()
         {
-            if (description.inputText.isEmpty())
+            if (!description.inputText.isEmpty())
                 crusade.description = description.inputText;
             else
                 crusade.description = null;

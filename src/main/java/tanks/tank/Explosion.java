@@ -1,14 +1,10 @@
 package tanks.tank;
 
 import tanks.*;
-import tanks.bullet.Bullet;
-import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.Item;
 import tanks.network.event.EventExplosion;
-import tanks.network.event.EventMineChangeTimer;
 import tanks.network.event.EventObstacleDestroy;
-import tanks.network.event.EventUpdateCoins;
 import tanks.obstacle.Obstacle;
 
 public class Explosion extends Movable
@@ -54,7 +50,7 @@ public class Explosion extends Movable
 
     public void explode()
     {
-        Drawing.drawing.playSound("explosion.ogg", (float) (Mine.mine_radius / this.radius));
+        Drawing.drawing.playGameSound("explosion.ogg", this, Game.tile_size * 25, (float) (Mine.mine_radius / this.radius));
 
         if (Game.effectsEnabled)
         {
@@ -83,93 +79,35 @@ public class Explosion extends Movable
 
             for (Movable m: Game.movables)
             {
-                double distSq = Math.pow(Math.abs(m.posX - this.posX), 2) + Math.pow(Math.abs(m.posY - this.posY), 2);
-                if (distSq < knockbackRadius * knockbackRadius)
+                if (!(m instanceof IExplodable))
+                    continue;
+                IExplodable m1 = (IExplodable) m;
+
+                double distSq = Movable.squaredDistanceBetween(this, m);
+                double kr2 = knockbackRadius * knockbackRadius;
+
+                if (distSq < kr2)
                 {
-                    double power = (1 - distSq / Math.pow(knockbackRadius, 2));
-                    if (m instanceof Bullet)
-                    {
-                        Bullet b = (Bullet) m;
-                        double angle = this.getAngleInDirection(m.posX, m.posY);
-                        m.addPolarMotion(angle, power * this.bulletKnockback * Math.pow(Bullet.bullet_size, 2) / Math.max(1, Math.pow(b.size, 2)));
-                        b.collisionX = m.posX;
-                        b.collisionY = m.posY;
-                        b.addTrail();
-                    }
-                    else if (m instanceof Tank)
-                    {
-                        Tank t = (Tank) m;
-                        double angle = this.getAngleInDirection(m.posX, m.posY);
-                        m.addPolarMotion(angle, power * this.tankKnockback * Math.pow(Game.tile_size, 2) / Math.max(1, Math.pow(m.size, 2)));
-                        t.recoilSpeed = m.getSpeed();
-                        if (t.recoilSpeed > t.maxSpeed)
-                        {
-                            t.inControlOfMotion = false;
-                            t.tookRecoil = true;
-                        }
-                    }
+                    m1.applyExplosionKnockback(
+                            this.getAngleInDirection(m.posX, m.posY),
+                            1 - distSq / kr2,
+                            this
+                    );
                 }
 
                 if (withinExplosionRange(m))
-                {
-                    if (m instanceof Tank && !m.destroy && ((Tank) m).getDamageMultiplier(this) > 0)
-                    {
-                        if (!(Team.isAllied(this, m) && !this.team.friendlyFire) && !ScreenGame.finishedQuick)
-                        {
-                            Tank t = (Tank) m;
-                            boolean kill = t.damage(this.damage, this);
-
-                            if (kill)
-                            {
-                                if (this.tank.equals(Game.playerTank))
-                                {
-                                    if (Game.currentGame != null && (t instanceof TankPlayer || t instanceof TankPlayerRemote))
-                                        Game.player.hotbar.coins += Game.currentGame.playerKillCoins;
-                                    else
-                                        Game.player.hotbar.coins += t.coinValue;
-                                }
-                                else if (this.tank instanceof TankPlayerRemote && (Crusade.crusadeMode || !Game.currentLevel.shop.isEmpty() || !Game.currentLevel.startingItems.isEmpty()))
-                                {
-                                    if (t instanceof TankPlayer || t instanceof TankPlayerRemote)
-                                    {
-                                        if (Game.currentGame != null && Game.currentGame.playerKillCoins > 0)
-                                            ((TankPlayerRemote) this.tank).player.hotbar.coins += Game.currentGame.playerKillCoins;
-                                        else
-                                            ((TankPlayerRemote) this.tank).player.hotbar.coins += t.coinValue;
-                                    }
-                                    Game.eventsOut.add(new EventUpdateCoins(((TankPlayerRemote) this.tank).player));
-                                }
-                            }
-                            else
-                                Drawing.drawing.playGlobalSound("damage.ogg");
-                        }
-                    }
-                    else if (m instanceof Mine && !m.destroy)
-                    {
-                        if (((Mine) m).timer > 10 && !this.isRemote)
-                        {
-                            ((Mine) m).timer = 10;
-                            Game.eventsOut.add(new EventMineChangeTimer((Mine) m));
-                        }
-                    }
-                    else if (m instanceof Bullet && !m.destroy)
-                    {
-                        m.destroy = true;
-                    }
-                }
+                    m1.onExploded(this);
             }
         }
 
         if (this.destroysObstacles && !ScreenPartyLobby.isClient)
         {
-            for (Obstacle o: Game.obstacles)
+            for (Obstacle o : Game.getInRadius(posX, posY, radius + Game.tile_size / 2, c -> c.obstacles))
             {
-                if (o.destructible && !Game.removeObstacles.contains(o) && withinExplosionRange(o))
-                {
-                    o.onDestroy(this);
-                    o.playDestroyAnimation(this.posX, this.posY, this.radius);
-                    Game.eventsOut.add(new EventObstacleDestroy(o.posX, o.posY, o.name, this.posX, this.posY, this.radius));
-                }
+                if (!o.destructible) continue;
+                o.onDestroy(this);
+                o.playDestroyAnimation(this.posX, this.posY, this.radius);
+                Game.eventsOut.add(new EventObstacleDestroy(o.posX, o.posY, o.name, this.posX, this.posY, this.radius));
             }
         }
 
@@ -183,18 +121,18 @@ public class Explosion extends Movable
         return withinExplosionRange(m, posX, posY, radius);
     }
 
-    public boolean withinExplosionRange(Obstacle o)
+    public static double getAdjustedRadius(Movable m, double radius)
     {
-        return Movable.distanceBetween(o, this) < radius + Game.tile_size / 2;
+        double adjustedRadius = m instanceof Tank ? radius - Game.tile_size * 0.95 + m.size * ((Tank) m).hitboxSize : radius;
+        if (Game.vanillaMode)
+            adjustedRadius = radius + m.size;
+        return adjustedRadius;
     }
 
     public static boolean withinExplosionRange(Movable m, double mineX, double mineY, double radius)
     {
-        double adjustedRadius = m instanceof Tank ? radius - Game.tile_size * 0.95 + m.size * ((Tank) m).hitboxSize : radius;
-        if (Game.vanillaMode && ScreenPartyLobby.isClient)
-            adjustedRadius = radius + m.size;
-
-        return (m.posX-mineX)*(m.posX-mineX) + (m.posY-mineY)*(m.posY-mineY) < adjustedRadius * adjustedRadius;
+        double r = getAdjustedRadius(m, radius);
+        return Movable.squaredDistanceBetween(m.posX, m.posY, mineX, mineY) < r * r;
     }
 
     @Override

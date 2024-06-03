@@ -232,13 +232,12 @@ public class ItemBullet extends Item
 	{
 		if (BulletArc.class.isAssignableFrom(this.bulletClass))
 			return this.speed / 3.125 * 1000.0;
-		else if (BulletFlame.class.isAssignableFrom(this.bulletClass))
-			return 400;
-		else if (BulletAir.class.isAssignableFrom(this.bulletClass))
-			return 800;
-		else
-			return -1;
-	}
+        if (BulletFlame.class.isAssignableFrom(this.bulletClass))
+            return 100 * this.speed;
+        if (BulletAir.class.isAssignableFrom(this.bulletClass))
+            return 200 * this.speed;
+        return -1;
+    }
 
 	public static void initializeMaps()
 	{

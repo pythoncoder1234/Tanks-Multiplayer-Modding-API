@@ -10,16 +10,6 @@ import tanks.tank.Tank;
 
 public class Minimap extends FixedMenu
 {
-    public Tank focusedTank;
-
-    public boolean draggable = false;
-    public Level level = Game.currentLevel;
-    public int posX = (int) (Panel.windowWidth - size);
-    public int posY = (int) (Panel.windowHeight - size - Drawing.drawing.statsHeight);
-    public static boolean enabled;
-    public boolean centered = true;
-    public boolean forceDisabled;
-
     public static double scale = 1f;
     public static float panSpeed = 1;
     public static int posOffsetX = 0;
@@ -30,7 +20,16 @@ public class Minimap extends FixedMenu
     public static boolean darkMode = true;
     public static boolean obstaclesMode = true;
 
-    String closeControl = Game.game.input.minimapToggle.input1.getInputName() + " to close";
+    public Tank focusedTank;
+
+    public double lastToggleTime;
+    public boolean draggable = false;
+    public Level level = Game.currentLevel;
+    public int posX = (int) (Panel.windowWidth - size);
+    public int posY = (int) (Panel.windowHeight - size - Drawing.drawing.statsHeight);
+    public static boolean enabled;
+    public boolean centered = true;
+    public boolean forceDisabled;
 
     public Minimap()
     {
@@ -40,12 +39,16 @@ public class Minimap extends FixedMenu
     @Override
     public void draw()
     {
-        if (!enabled || Game.obstacleGrid == null)
+        if ((!enabled && age - lastToggleTime > 10) || Game.obstacleGrid == null)
             return;
 
         focusedTank = ScreenGame.focusedTank();
 
-        double colA = 255 * (Obstacle.draw_size / Game.tile_size);
+        double percentage = Math.min(1, (age - lastToggleTime) / 10);
+        if (!enabled)
+            percentage = 1 - percentage;
+
+        double colA = 255 * (Obstacle.draw_size / Game.tile_size) * percentage;
 
         double drawSize = 4 * scale;
         int cX = (int) ((centered ? focusedTank.posX : panOffsetX * 13 / scale) / Game.tile_size);
@@ -87,7 +90,10 @@ public class Minimap extends FixedMenu
                         if (obstaclesMode)
                         {
                             if (inside)
-                                Drawing.drawing.setColor(Game.tilesR[gridX][gridY], Game.tilesG[gridX][gridY], Game.tilesB[gridX][gridY], colA);
+                            {
+                                Chunk.Tile t = Chunk.getTile(gridX, gridY);
+                                Drawing.drawing.setColor(t.colR, t.colG, t.colB, colA);
+                            }
                             else
                                 Drawing.drawing.setColor(174, 92, 16, colA);
 
@@ -205,8 +211,11 @@ public class Minimap extends FixedMenu
         if (Game.game.input.minimapToggle.isValid())
         {
             Game.game.input.minimapToggle.invalidate();
+            lastToggleTime = age;
             enabled = !enabled;
         }
+
+        super.update();
 
         if (!enabled)
             return;

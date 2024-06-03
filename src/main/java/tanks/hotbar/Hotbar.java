@@ -45,9 +45,6 @@ public class Hotbar
 		if (this.persistent)
 			this.hidden = false;
 
-		if (ScreenGame.finished)
-			this.hidden = true;
-
 		this.hideTimer = Math.max(0, this.hideTimer - Panel.frameFrequency);
 
 		if (this.hideTimer <= 0 && !this.persistent)
@@ -188,13 +185,15 @@ public class Hotbar
 
                 if (i instanceof ItemMine)
                 {
-                    uses = ((ItemMine) i).maxLiveMines - ((ItemMine) i).liveMines;
-                    rcMax = ((ItemMine) i).maxLiveMines;
+                    ItemMine im = (ItemMine) i;
+                    uses = im.maxLiveMines - im.liveMines;
+                    rcMax = im.maxLiveMines;
                 }
                 else if (i instanceof ItemShield)
                 {
-                    uses = (int) ((((ItemShield) i).max - Game.playerTank.health) / ((ItemShield) i).amount);
-                    rcMax = (int) (((ItemShield) i).max / ((ItemShield) i).amount);
+                    ItemShield is = (ItemShield) i;
+                    uses = (int) ((is.max - Game.playerTank.health) / is.amount);
+                    rcMax = (int) (is.max / is.amount);
                 }
 
                 rcCooldownFrac = Math.max(0, (i.cooldown - 20) / (i.cooldownBase - 20));
@@ -241,7 +240,7 @@ public class Hotbar
                 if (uses > 0 || rcMax == 0)
                     Drawing.drawing.setColor(0, 150, 255, a);
                 else
-                    Drawing.drawing.setColor(255, 128, 0);
+                    Drawing.drawing.setColor(255, 255, 0);
 
                 Drawing.drawing.fillInterfaceOval(x + 175, y, 18, 18);
 

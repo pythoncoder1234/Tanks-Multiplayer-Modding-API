@@ -102,7 +102,7 @@ public class TanksOnlineMessageReader
 
         if (e instanceof EventPing)
             return true;
-        else if (e instanceof IOnlineServerEvent)
+        if (e instanceof IOnlineServerEvent)
             ((IOnlineServerEvent) e).execute(s);
         else if (e instanceof EventSendClientDetails)
             s.sendEventAndClose(new EventKick("This is not the party you are looking for..."));

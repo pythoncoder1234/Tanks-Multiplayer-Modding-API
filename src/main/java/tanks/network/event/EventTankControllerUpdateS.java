@@ -53,23 +53,7 @@ public class EventTankControllerUpdateS extends EventTankUpdate
             if (t instanceof TankRemote)
             {
                 TankRemote r = (TankRemote) t;
-                double iTime = Math.min(100, (time - r.lastUpdate) / 10.0);
-
-                r.prevKnownPosX = r.posX;
-                r.prevKnownPosY = r.posY;
-                r.prevKnownVX = r.vX;
-                r.prevKnownVY = r.vY;
-                r.prevKnownVXFinal = r.lastFinalVX;
-                r.prevKnownVYFinal = r.lastFinalVY;
-
-                r.currentKnownPosX = this.posX;
-                r.currentKnownPosY = this.posY;
-                r.currentKnownVX = this.vX;
-                r.currentKnownVY = this.vY;
-
-                r.timeSinceRefresh = 0;
-                r.interpolationTime = iTime;
-                r.lastUpdate = time;
+                setPrevPositions(r);
             }
 
             t.posX = this.posX;

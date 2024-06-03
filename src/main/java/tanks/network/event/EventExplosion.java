@@ -5,6 +5,8 @@ import tanks.Game;
 import tanks.tank.Explosion;
 import tanks.tank.Tank;
 
+import java.util.Objects;
+
 public class EventExplosion extends PersonalEvent
 {
     public double posX;
@@ -39,9 +41,7 @@ public class EventExplosion extends PersonalEvent
     {
         if (clientID == null)
         {
-            sourceTank = Tank.idMap.get(source);
-            if (sourceTank == null)
-                sourceTank = Game.dummyTank;
+            sourceTank = Game.requireNonNullElse(Tank.idMap.get(source), Game.dummyTank);
             Explosion e = new Explosion(this.posX, this.posY, this.radius, 0, destroysObstacles, sourceTank);
             e.explode();
         }

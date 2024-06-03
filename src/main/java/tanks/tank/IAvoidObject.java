@@ -18,12 +18,6 @@ public interface IAvoidObject
         if (o == null)
             return false;
 
-        int x = (int) (o.posX / Game.tile_size);
-        int y = (int) (o.posY / Game.tile_size);
-
-        if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY)
-            return false;
-
-        return Game.obstacleGrid[x][y] == o;
+        return Game.getObstacle(o.posX, o.posY) == o;
     }
 }

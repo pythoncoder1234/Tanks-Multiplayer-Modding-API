@@ -14,11 +14,9 @@ import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
 import tanks.hotbar.Hotbar;
 import tanks.network.Client;
-import tanks.network.ClientHandler;
 import tanks.network.MessageReader;
 import tanks.network.NetworkEventMap;
 import tanks.network.event.EventBeginLevelCountdown;
-import tanks.network.event.EventPing;
 import tanks.network.event.INetworkEvent;
 import tanks.network.event.IStackableEvent;
 import tanks.network.event.online.IOnlineServerEvent;
@@ -39,7 +37,7 @@ public class Panel
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
 	public static boolean forceCenter = false;
-	public static boolean autoZoom = true;
+	public static boolean autoZoom = false;
 	public static double lastAutoZoomSpeed = 0;
 
 	public double panX, panY, panSpeed, panSpeedTarget;
@@ -74,11 +72,12 @@ public class Panel
 	public long lastFrameSec = (long) (System.currentTimeMillis() / 1000.0 * frameSampling);
 
 	public long startTime = System.currentTimeMillis();
-	public long frameStartTime = System.currentTimeMillis();
 
 	public long lastFrameNano = 0;
 
 	public int lastFPS = 0;
+	public int lastWorstFPS = 0;
+	public double worstFPS = 0;
 
 	public ScreenOverlayOnline onlineOverlay;
 
@@ -139,6 +138,7 @@ public class Panel
 
 		ModAPI.setUp();
 		Game.resetTiles();
+		Chunk.initialize();
 
 		if (Game.game.fullscreen)
 			Game.game.window.setFullscreen(Game.game.fullscreen);
@@ -306,6 +306,8 @@ public class Panel
 
 		Game.game.window.showKeyboard = false;
 
+//		Panel.frameFrequency *= 5;
+
 		synchronized (Game.eventsIn)
 		{
 			stackedEventsIn.clear();
@@ -347,12 +349,6 @@ public class Panel
 				for (EventListener l : Game.eventListenerSet)
 					l.func.apply(l.eventsThisFrame);
 			}
-		}
-
-		for (int i = 0; i < Game.game.heightGrid.length; i++)
-		{
-			Arrays.fill(Game.game.heightGrid[i], -1000);
-			Arrays.fill(Game.game.groundHeightGrid[i], -1000);
 		}
 
 		if (ScreenPartyHost.isServer)
@@ -613,18 +609,7 @@ public class Panel
 		}
 
 		if (ScreenPartyLobby.isClient)
-		{
-			Client.handler.pingTimer -= Panel.frameFrequency;
-
-			if (Client.handler.pingTimer <= 0)
-			{
-				Game.eventsOut.add(new EventPing());
-				Client.handler.pingTimer = 150;
-				ClientHandler.lastLatencyTime = System.currentTimeMillis();
-			}
-
-			Client.handler.reply();
-		}
+            Client.handler.reply();
 
 		if (Game.steamNetworkHandler.initialized)
 			Game.steamNetworkHandler.update();
@@ -750,11 +735,8 @@ public class Panel
 		}
 
 		Drawing.drawing.setLighting(Level.currentLightIntensity, Level.currentShadowIntensity);
-
 		this.lights.clear();
-
 		Game.screen.setupLights();
-
 		Game.game.window.createLights(this.lights, Drawing.drawing.scale);
 
 		if (!Game.game.window.drawingShadow)
@@ -763,12 +745,15 @@ public class Panel
 			if (lastFrameSec < time && lastFrameSec != firstFrameSec)
 			{
 				lastFPS = (int) (frames * 1.0 * frameSampling);
+				lastWorstFPS = (int) worstFPS;
+				worstFPS = lastFPS;
 				frames = 0;
 			}
 
 			lastFrameSec = time;
 			frames++;
 			ageFrames++;
+			worstFPS = Math.min(worstFPS, 100 / Panel.frameFrequency);
 			Game.screen.screenAge += Panel.frameFrequency;
 		}
 
@@ -777,17 +762,14 @@ public class Panel
         else
             Game.screen.draw();
 
-		if (!(Game.screen instanceof ScreenExit || Game.screen instanceof ScreenIntro))
-			this.drawBar();
+		Chunk.drawDebugStuff();
 
 		if (Game.enableExtensions)
-		{
-			for (int i = 0; i < Game.extensionRegistry.extensions.size(); i++)
-			{
-				Extension e = Game.extensionRegistry.extensions.get(i);
-				e.draw();
-			}
-		}
+            for (Extension e : Game.extensionRegistry.extensions)
+                e.draw();
+
+		if (!(Game.screen instanceof ScreenExit || Game.screen instanceof ScreenIntro))
+			this.drawBar();
 
         if (!notifs.isEmpty())
 		{
@@ -814,11 +796,13 @@ public class Panel
 		if (Game.screen.showDefaultMouse)
 			this.drawMouseTarget();
 
+		if (Game.framework == Game.Framework.libgdx)
+		{
+			Drawing.drawing.setColor(0, 0, 0, 0);
+			Drawing.drawing.fillInterfaceRect(0, 0, 0, 0);
+		}
+
 		Drawing.drawing.setColor(255, 255, 255);
-
-		Drawing.drawing.setColor(0, 0, 0, 0);
-		Drawing.drawing.fillInterfaceRect(0, 0, 0, 0);
-
 		Game.screen.drawPostMouse();
 
 		if (!Game.game.window.drawingShadow && (Game.screen instanceof ScreenGame && !(((ScreenGame) Game.screen).paused && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient)))
@@ -826,9 +810,17 @@ public class Panel
 
 		if (Game.game.window.pressedKeys.contains(InputCodes.KEY_F3))
 		{
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_F8))
+			{
+				Game.recordMode = !Game.recordMode;
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_F8);
+			}
+
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
 			{
-				Game.game.window.constrainMouse = !Game.game.window.constrainMouse;
+				Panel.pauseOnDefocus = !Panel.pauseOnDefocus;
+				notifs.add(new Notification("Pause on lost focus: \u00a7255200000255"
+						+ (Panel.pauseOnDefocus ? "enabled" : "disabled")).setColor(255, 255, 128));
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_P);
 			}
 
@@ -838,9 +830,26 @@ public class Panel
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_S);
 			}
 
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_B))
+			{
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_B);
+				Game.showHitboxes = !Game.showHitboxes;
+				notifs.add(new Notification("Collision boxes: \u00a7255200000255"
+						+ (Game.showHitboxes ? "shown" : "hidden"), 200).setColor(255, 255, 128));
+			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_G))
+			{
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_G);
+				Chunk.debug = !Chunk.debug;
+				notifs.add(new Notification("Chunk borders: \u00a7255200000255"
+						+ (Chunk.debug ? "shown" : "hidden"), 200).setColor(255, 255, 128));
+			}
+
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_D))
 			{
 				ArrayList<ChatMessage> chat = null;
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_D);
 
 				if (ScreenPartyLobby.isClient)
                     chat = ScreenPartyLobby.chat;
@@ -853,16 +862,15 @@ public class Panel
 					{
 						chat.clear();
 					}
+					notifs.add(new Notification("Chat cleared", 200).setColor(255, 255, 128));
 				}
-
-				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_D);
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_A))
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_A);
 				Drawing.drawing.terrainRenderer.reset();
-				Panel.notifs.add(new Notification("Terrain reloaded!"));
+				notifs.add(new Notification("Terrain reloaded!").setColor(255, 255, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_T))
@@ -897,7 +905,7 @@ public class Panel
 
 				Game.game.shaderInstances = newShaders;
 				Drawing.drawing.terrainRenderer.reset();
-				Panel.notifs.add(new Notification("Shaders reloaded!"));
+				notifs.add(new Notification("Shaders reloaded! (Remember to Cmd+F9)").setColor(255, 255, 128));
 			}
 
 			int brightness = 0;
@@ -905,13 +913,16 @@ public class Panel
 				brightness = 255;
 
 			Drawing.drawing.setColor(brightness, brightness, brightness);
+			Drawing.drawing.setInterfaceFontSize(16);
+
+			double mx = Game.game.window.absoluteMouseX, my = Game.game.window.absoluteMouseY;
 
 			String text;
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
 				text = "(" + (int) Game.game.window.absoluteWidth + ", " + (int) Game.game.window.absoluteHeight + ")";
 
 			else if (Game.game.window.pressedKeys.contains(InputCodes.KEY_S))
-				text = "(" + (int) Game.game.window.absoluteMouseX + ", " + (int) Game.game.window.absoluteMouseY + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
+				text = "(" + (int) mx + ", " + (int) my + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
 
 			else {
 				int posX = (int) (((Math.round(Drawing.drawing.getMouseX() / Game.tile_size + 0.5) * Game.tile_size - Game.tile_size / 2) - 25) / 50);
@@ -923,9 +934,25 @@ public class Panel
 				}
 
 				text = "(" + posX + ", " + posY + ")";
+
+				if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+				{
+					Chunk.Tile t1 = Chunk.getTile(posX, posY);
+
+					if (Game.glowEnabled && Level.isDark() && t1.obstacle != null)
+					{
+						Obstacle o = t1.obstacle;
+						if ((o.colorR + o.colorG + o.colorB + o.colorA / 2) / 4 > 200)
+                            Drawing.drawing.setColor(0, 0, 0, 128);
+					}
+
+					if (t1 != null)
+                        text += " O: " + (t1.obstacle != null ? t1.obstacle.name : "none") + " SO: " + (t1.surfaceObstacle != null ? t1.surfaceObstacle.name : "none");
+					Game.game.window.fontRenderer.drawString(mx + 10, my + 30, Drawing.drawing.fontSize, Drawing.drawing.fontSize, "H: " + (int) t1.height + " GH: " + (int) t1.groundHeight);
+				}
 			}
 
-			Game.game.window.fontRenderer.drawString(Game.game.window.absoluteMouseX + 10, Game.game.window.absoluteMouseY + 10, Drawing.drawing.fontSize, Drawing.drawing.fontSize, text);
+			Game.game.window.fontRenderer.drawString(mx + 10, my + 10, Drawing.drawing.fontSize, Drawing.drawing.fontSize, text);
 		}
 	}
 
@@ -1116,7 +1143,7 @@ public class Panel
 			boundary += 40;
 
 		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, Game.version);
-		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS);
+		Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS + "§255227186032/" + lastWorstFPS + "§255227186255");
 
 		Game.game.window.fontRenderer.drawString(boundary + 600, offset + (int) (Panel.windowHeight - 40 + 10), 0.6, 0.6, Game.screen.screenHint);
 
@@ -1139,8 +1166,8 @@ public class Panel
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - partyIpLen, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, s);
 			partyIpLen += 50;
 
-			s = "Latency: " + ClientHandler.latency + "ms";
-			double[] col = getLatencyColor(ClientHandler.latency);
+			s = "Latency: " + Client.handler.lastLatency + "ms";
+			double[] col = getLatencyColor(Client.handler.lastLatency);
 			Drawing.drawing.setColor(col[0], col[1], col[2]);
 			Game.game.window.fontRenderer.drawString(Panel.windowWidth - Game.game.window.fontRenderer.getStringSizeX(0.4, s) - 10 - offset, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, s);
 		}

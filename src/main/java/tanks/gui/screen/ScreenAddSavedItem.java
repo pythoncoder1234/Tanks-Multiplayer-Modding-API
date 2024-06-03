@@ -297,8 +297,7 @@ public class ScreenAddSavedItem extends Screen implements IConditionalOverlayScr
     {
         if (drawBehindScreen)
             return ((Screen)itemScreen).getOffsetX();
-        else
-            return super.getOffsetX();
+        return super.getOffsetX();
     }
 
     @Override
@@ -306,8 +305,7 @@ public class ScreenAddSavedItem extends Screen implements IConditionalOverlayScr
     {
         if (drawBehindScreen)
             return ((Screen)itemScreen).getOffsetY();
-        else
-            return super.getOffsetY();
+        return super.getOffsetY();
     }
 
     @Override
@@ -315,8 +313,7 @@ public class ScreenAddSavedItem extends Screen implements IConditionalOverlayScr
     {
         if (drawBehindScreen)
             return ((Screen)itemScreen).getScale();
-        else
-            return super.getScale();
+        return super.getScale();
     }
 
     @Override

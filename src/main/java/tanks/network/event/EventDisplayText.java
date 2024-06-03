@@ -13,7 +13,7 @@ public class EventDisplayText extends EventAddFixedMenu
     public FixedText.types location = null;
     public boolean afterGameStarted;
     public int duration;
-    public boolean hasItems = Game.currentLevel != null && (Game.currentLevel.shop.size() > 0 || Game.currentLevel.startingItems.size() > 0 || Crusade.crusadeMode);
+    public boolean hasItems = Game.currentLevel != null && (!Game.currentLevel.shop.isEmpty() || !Game.currentLevel.startingItems.isEmpty() || Crusade.crusadeMode);
 
 
     public EventDisplayText()

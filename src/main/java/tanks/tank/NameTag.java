@@ -1,8 +1,9 @@
 package tanks.tank;
 
-import tanks.Drawing;
 import tanks.Game;
 import tanks.IDrawable;
+import tanks.Movable;
+import tanks.gui.TextWithStyling;
 import tanks.network.ISyncable;
 import tanks.network.SyncedFieldMap;
 
@@ -12,40 +13,39 @@ public class NameTag implements IDrawable, ISyncable
     public boolean syncEnabled;
 
     public Tank tank;
-    public double ox;
-    public double oy;
-    public double oz;
+    public double ox, oy, oz;
     public double size = 20;
-    public String name;
+    public TextWithStyling name;
     public int drawLevel = 9;
 
-    public NameTag(Tank m, double ox, double oy, double oz, String name)
+    public NameTag(Tank t, double ox, double oy, double oz, String name)
     {
-        this.tank = m;
+        this(t, ox, oy, oz, name, -9999, 0, 0);
+    }
+
+    public NameTag(Movable m, double ox, double oy, double oz, String name, double colR, double colG, double colB)
+    {
+        this.tank = (Tank) m;
         this.ox = ox;
         this.oy = oy;
         this.oz = oz;
-        this.name = name;
+        this.name = new TextWithStyling(name, colR, colG, colB);
     }
+
 
     @Override
     public void draw()
     {
-        Drawing.drawing.setFontSize(size * ((Game.tile_size - this.tank.destroyTimer) / Game.tile_size) * Math.min(this.tank.drawAge / Game.tile_size, 1));
+        if (this.name.colorR < -9000)
+        {
+            this.name.colorR = tank.colorR;
+            this.name.colorG = tank.colorG;
+            this.name.colorB = tank.colorB;
+        }
 
-        Drawing.drawing.setColor(this.tank.secondaryColorR, this.tank.secondaryColorG, this.tank.secondaryColorB, 255, 0);
-
-        if (Game.enable3d)
-            Drawing.drawing.drawText(tank.posX + ox + 2, tank.posY + oy + 2, tank.posZ + oz + 2, name);
-        else
-            Drawing.drawing.drawText(tank.posX + ox + 2, tank.posY + oy + 2, name);
-
-        Drawing.drawing.setColor(this.tank.colorR, this.tank.colorG, this.tank.colorB, 255, 0.5);
-
-        if (Game.enable3d)
-            Drawing.drawing.drawText(tank.posX + ox, tank.posY + oy, tank.posZ + oz, name);
-        else
-            Drawing.drawing.drawText(tank.posX + ox, tank.posY + oy, name);
+        this.name.fontSize = size * (1 - this.tank.destroyTimer / Game.tile_size) * Math.min(this.tank.drawAge / Game.tile_size, 1);
+        this.name.drawText(tank.posX + ox, tank.posY + oy, tank.posZ + oz);
+        this.name.shadowColor().drawText(tank.posX + ox + 2, tank.posY + oy + 2, tank.posZ + oz);
     }
 
     @Override

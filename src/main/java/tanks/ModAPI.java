@@ -19,16 +19,20 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ModAPI
 {
-    public static String version = "Mod API v1.2.1";
+    public static String version = "Mod API v1.2.3";
+    public static boolean autoLoadExtensions = false;
     public static boolean sendEvents = true;
-
-    // Directions in radians in terms of tank (the model is rotated 90 degrees)
-    public static final double up = Math.toRadians(-90);
     static ArrayList<Runnable> resetFunc = new ArrayList<>();
 
     public static ArrayList<FixedMenu> fixedMenus = new ArrayList<>();
     public static HashMap<Double, FixedMenu> ids = new HashMap<>();
     public static ArrayList<FixedMenu> removeMenus = new ArrayList<>();
+
+    // Directions in radians in terms of tank (the model is rotated 90 degrees)
+    public static final double up = Math.toRadians(-90);
+    public static final double down = Math.toRadians(90);
+    public static final double left = Math.toRadians(180);
+    public static final double right = Math.toRadians(0);
 
     /**
      * To add a new mod, add {@code Game.registerMinigame(yourMod.class)} to this function. Of course, type the name of your mod instead of "yourMod".<br><br>
@@ -40,9 +44,6 @@ public class ModAPI
         Game.registerMinigame(TeamDeathmatch.class);
 //        Game.registerMinigame(GameMap.class);
     }
-    public static final double down = Math.toRadians(90);
-    public static final double left = Math.toRadians(180);
-    public static final double right = Math.toRadians(0);
 
     public static void setUp()
     {
@@ -294,6 +295,12 @@ public class ModAPI
         return Math.sqrt((t.posX - x) * (t.posX - x) + (t.posY - y) * (t.posY - y));
     }
 
+    @Deprecated
+    public static ArrayList<Tank> withinRange(double x, double y, double radius)
+    {
+        return withinRange(x, y, radius, true).stream().map(Map.Entry::getKey).collect(Collectors.toCollection(ArrayList::new));
+    }
+
     /**
      * Tests if any {@link Tank} is within the radius of an area (in pixels or tiles,
      * which is determined by the <code>isTileCoords</code> parameter).
@@ -350,8 +357,7 @@ public class ModAPI
 
             return tanks.entrySet().stream().sorted(comparator).collect(Collectors.toList());
         }
-        else
-            return new ArrayList<>(tanks.entrySet());
+        return new ArrayList<>(tanks.entrySet());
     }
 
     /**
@@ -385,13 +391,12 @@ public class ModAPI
     {
         if (number % 1 != 0)
             return "" + number;
-        else
-            return "" + (int) number;
+        return "" + (int) number;
     }
 
     public static String capitalize(String s)
     {
-        if (s.length() == 0)
+        if (s.isEmpty())
             throw new RuntimeException("Capitalizing string without letters in it or of size 0");
 
         if (!(Game.lessThan('A', s.charAt(1), 'Z') || Game.lessThan('a', s.charAt(1), 'z')))
@@ -400,7 +405,7 @@ public class ModAPI
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
-    // Drawing functions added in this mod api
+    // Drawing functions added in this modding api
 
     /**
      * Abbreviations of renderers to draw fixed stuff
@@ -467,8 +472,8 @@ public class ModAPI
         ModAPI.fillObstacle((int) Math.round(x - sizeFactor / 4), (int) Math.round(y - sizeFactor / 4), (int) Math.round(x + sizeFactor / 4), (int) Math.round(y + sizeFactor / 4), "normal", height * sizeFactor);
 
         sizeFactor *= 4;
-        x -= sizeFactor / 2;
-        y -= sizeFactor / 2;
+        x -= (int) (sizeFactor / 2);
+        y -= (int) (sizeFactor / 2);
 
         for (int i = 0; i < sizeFactor / 2; i++)
         {

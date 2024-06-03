@@ -22,11 +22,11 @@ public class OverlayCrusadeImport extends ScreenLevelEditorOverlay
     public static int coins = 50;
 
     public static Button selected = null;
-    public Button back = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Back", this::escape
+    public Button back = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", this::escape
     );
     public SavedFilesList fullCrusadesList;
     public SavedFilesList crusadesList;
-    public Button next = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 4, this.objWidth, this.objHeight, "Continue", () -> Game.screen = new OverlayCrusadeImportOptions(this, editor));
+    public Button next = new Button(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Continue", () -> Game.screen = new OverlayCrusadeImportOptions(this, editor));
 
     public OverlayCrusadeImport(Screen previous, ScreenLevelEditor editor)
     {

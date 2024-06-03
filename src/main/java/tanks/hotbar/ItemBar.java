@@ -236,18 +236,27 @@ public class ItemBar
 				if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_BRACKET) && Game.cannonSpeed > 0.21)
 				{
 					Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_LEFT_BRACKET);
-					Game.cannonSpeed -= 0.2;
+					Game.cannonSpeed -= 0.2f;
 					Panel.currentMessage = new CenterMessage("Autocannon speed: %.1fx", Game.cannonSpeed);
 				}
 
 				if (Game.game.window.pressedKeys.contains(InputCodes.KEY_RIGHT_BRACKET) && Game.cannonSpeed < 3)
 				{
 					Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_RIGHT_BRACKET);
-					Game.cannonSpeed += 0.2;
+					Game.cannonSpeed += 0.2f;
 					Panel.currentMessage = new CenterMessage("Autocannon speed: %.1fx", Game.cannonSpeed);
 				}
 			}
 		}
+
+		/*Tank t = this.player.tank;
+		if (t != null)
+		{
+			if (this.selected >= 0 && this.slots[this.selected] instanceof ItemBullet b && BulletArc.class.isAssignableFrom(b.bulletClass))
+                t.pitch -= Movable.angleBetween(t.pitch, Math.PI / 6) * 0.05 * Panel.frameFrequency;
+			else if (t.pitch != 0)
+                t.pitch -= t.pitch * 0.05 * Panel.frameFrequency;
+		}*/
 
 		if (this.player.hotbar.persistent || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).shopScreen))
 		{

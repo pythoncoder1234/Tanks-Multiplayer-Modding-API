@@ -300,8 +300,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
     {
         if (gameObject instanceof Obstacle)
             return ScreenLevelEditor.currentPlaceable == ScreenLevelEditor.Placeable.obstacle && editor.mouseObstacle.getSelector(this.id) != null;
-        else
-            return ScreenLevelEditor.currentPlaceable != ScreenLevelEditor.Placeable.obstacle && editor.mouseTank.getSelector(this.id) != null;
+        return ScreenLevelEditor.currentPlaceable != ScreenLevelEditor.Placeable.obstacle && editor.mouseTank.getSelector(this.id) != null;
     }
 
     public ArrayList<EditorButton> getLocation(Position p)

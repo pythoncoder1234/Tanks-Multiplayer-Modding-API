@@ -15,9 +15,7 @@ import java.util.HashMap;
 public class CrusadePlayer
 {
     public Player player;
-
     public ItemBar itemBar;
-
     public int coins;
 
     public CrusadePlayer(Player p)

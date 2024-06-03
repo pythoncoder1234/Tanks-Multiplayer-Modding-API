@@ -3,6 +3,7 @@ package tanks.gui.screen;
 import basewindow.BaseFile;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.ModAPI;
 import tanks.Panel;
 import tanks.gui.Button;
 import tanks.tank.Tank;
@@ -146,6 +147,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
             f.println("last_version=" + Game.lastVersion);
             f.println("enable_extensions=" + Game.enableExtensions);
             f.println("auto_load_extensions=" + Game.autoLoadExtensions);
+			f.println("modapi_auto_load=" + ModAPI.autoLoadExtensions);
 
             for (String s : extraOptions)
                 f.println(s);
@@ -207,223 +209,222 @@ public class ScreenOptions extends ScreenOptionsOverlay
 				if (optionLine[0].charAt(0) == '#')
 					continue;
 
-				switch (optionLine[0].toLowerCase())
-				{
-					case "username":
-						if (optionLine.length >= 2)
-							Game.player.username = optionLine[1];
-						else
-							Game.player.username = "";
-						break;
-					case "fancy_terrain":
-						Game.fancyTerrain = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "effects":
-						Game.effectsEnabled = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "effect_multiplier":
-						Game.effectMultiplier = Integer.parseInt(optionLine[1]) / 100.0;
-						break;
-					case "bullet_trails":
-						Game.bulletTrails = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "fancy_bullet_trails":
-						Game.fancyBulletTrails = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "glow":
-						Game.glowEnabled = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "3d":
-						Game.enable3d = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "3d_ground":
-						Game.enable3dBg = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "shadows_enabled":
-						Game.shadowsEnabled = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "shadow_quality":
-						Game.shadowQuality = Integer.parseInt(optionLine[1]);
-						break;
-					case "vsync":
-						Game.vsync = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "max_fps":
-						Game.maxFPS = Integer.parseInt(optionLine[1]);
-						break;
-					case "antialiasing":
-						Game.antialiasing = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "mouse_target":
-						Panel.showMouseTarget = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "mouse_target_height":
-						Panel.showMouseTargetHeight = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "pause_on_lost_focus":
-						Panel.pauseOnDefocus = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "constrain_mouse":
-						Game.constrainMouse = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "enable_vibrations":
-						Game.enableVibrations = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "mobile_joystick":
-						TankPlayer.controlStickMobile = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "snap_joystick":
-						TankPlayer.controlStickSnap = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "dual_joystick":
-						TankPlayer.setShootStick(Boolean.parseBoolean(optionLine[1]));
-						break;
-					case "sound":
-						Game.soundsEnabled = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "music":
-						Game.musicEnabled = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "sound_volume":
-						Game.soundVolume = Float.parseFloat(optionLine[1]);
-						break;
-					case "music_volume":
-						Game.musicVolume =  Float.parseFloat(optionLine[1]);
-						break;
-					case "auto_start":
-						Game.autostart = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "full_stats":
-						Game.fullStats = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "timer":
-						Game.showSpeedrunTimer = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "deterministic":
-						Game.deterministicMode = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "info_bar":
-						Drawing.drawing.showStats(Boolean.parseBoolean(optionLine[1]));
-						break;
-					case "warn_before_closing":
-						Game.warnBeforeClosing = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "perspective":
-						ScreenOptionsGraphics.viewNum = Integer.parseInt(optionLine[1]);
-						switch (ScreenOptionsGraphics.viewNum)
-						{
-							case 0:
-								Game.angledView = false;
-								Game.followingCam = false;
-								Game.firstPerson = false;
-								break;
-							case 1:
-								Game.angledView = true;
-								Game.followingCam = false;
-								Game.firstPerson = false;
-								break;
-							case 2:
-								Game.angledView = false;
-								Game.followingCam = true;
-								Game.firstPerson = false;
-								break;
-							case 3:
-								Game.angledView = false;
-								Game.followingCam = true;
-								Game.firstPerson = true;
-						}
-						break;
-					case "bullet_indicator":
-						Game.xrayBullets = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "tank_textures":
-						Game.tankTextures = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "preview_crusades":
-						Game.previewCrusades = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "fullscreen":
-						Game.game.fullscreen = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "port":
-						Game.port = Integer.parseInt(optionLine[1]);
-						break;
-					case "last_party":
-						if (optionLine.length >= 2)
-							Game.lastParty = optionLine[1];
-						else
-							Game.lastParty = "";
-						break;
-					case "last_online_server":
-						if (optionLine.length >= 2)
-							Game.lastOnlineServer = optionLine[1];
-						else
-							Game.lastOnlineServer = "";
-						break;
-					case "show_ip":
-						Game.showIP = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "chat_filter":
-						Game.enableChatFilter = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "auto_ready":
-						Game.autoReady = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "tps":
-						Tank.updatesPerSecond = Integer.parseInt(optionLine[1]);
-						break;
-					case "anticheat":
-						TankPlayerRemote.checkMotion = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "anticheat_weak":
-						TankPlayerRemote.weakTimeCheck = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "disable_party_friendly_fire":
-						Game.disablePartyFriendlyFire = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "party_countdown":
-						Game.partyStartTime = Double.parseDouble(optionLine[1]);
-						break;
-					case "tank_secondary_color":
-						Game.player.enableSecondaryColor = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "tank_red":
-						Game.player.colorR = Integer.parseInt(optionLine[1]);
-						break;
-					case "tank_green":
-						Game.player.colorG = Integer.parseInt(optionLine[1]);
-						break;
-					case "tank_blue":
-						Game.player.colorB = Integer.parseInt(optionLine[1]);
-						break;
-					case "tank_red_2":
-						Game.player.turretColorR = Integer.parseInt(optionLine[1]);
-						break;
-					case "tank_green_2":
-						Game.player.turretColorG = Integer.parseInt(optionLine[1]);
-						break;
-					case "tank_blue_2":
-						Game.player.turretColorB = Integer.parseInt(optionLine[1]);
-						break;
-					case "chroma":
-						Game.player.chromaaa = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "translation":
-						Translation.setCurrentTranslation(optionLine[1]);
-						break;
-					case "last_version":
-						Game.lastVersion = optionLine[1];
-						break;
-					case "enable_extensions":
-						Game.enableExtensions = Boolean.parseBoolean(optionLine[1]);
-						break;
-					case "auto_load_extensions":
-						Game.autoLoadExtensions = Boolean.parseBoolean(optionLine[1]);
-						break;
-					default:
-						extraOptions.add(line);
-						break;
-				}
+                switch (optionLine[0].toLowerCase())
+                {
+                    case "username":
+                        if (optionLine.length >= 2)
+                            Game.player.username = optionLine[1];
+                        else
+                            Game.player.username = "";
+                        break;
+                    case "fancy_terrain":
+                        Game.fancyTerrain = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "effects":
+                        Game.effectsEnabled = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "effect_multiplier":
+                        Game.effectMultiplier = Integer.parseInt(optionLine[1]) / 100.0;
+                        break;
+                    case "bullet_trails":
+                        Game.bulletTrails = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "fancy_bullet_trails":
+                        Game.fancyBulletTrails = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "glow":
+                        Game.glowEnabled = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "3d":
+                        Game.enable3d = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "3d_ground":
+                        Game.enable3dBg = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "shadows_enabled":
+                        Game.shadowsEnabled = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "shadow_quality":
+                        Game.shadowQuality = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "vsync":
+                        Game.vsync = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "max_fps":
+                        Game.maxFPS = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "antialiasing":
+                        Game.antialiasing = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "mouse_target":
+                        Panel.showMouseTarget = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "mouse_target_height":
+                        Panel.showMouseTargetHeight = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "pause_on_lost_focus":
+                        Panel.pauseOnDefocus = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "constrain_mouse":
+                        Game.constrainMouse = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "enable_vibrations":
+                        Game.enableVibrations = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "mobile_joystick":
+                        TankPlayer.controlStickMobile = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "snap_joystick":
+                        TankPlayer.controlStickSnap = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "dual_joystick":
+                        TankPlayer.setShootStick(Boolean.parseBoolean(optionLine[1]));
+                        break;
+                    case "sound":
+                        Game.soundsEnabled = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "music":
+                        Game.musicEnabled = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "sound_volume":
+                        Game.soundVolume = Float.parseFloat(optionLine[1]);
+                        break;
+                    case "music_volume":
+                        Game.musicVolume = Float.parseFloat(optionLine[1]);
+                        break;
+                    case "auto_start":
+                        Game.autostart = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "full_stats":
+                        Game.fullStats = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "timer":
+                        Game.showSpeedrunTimer = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "deterministic":
+                        Game.deterministicMode = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "info_bar":
+                        Drawing.drawing.showStats(Boolean.parseBoolean(optionLine[1]));
+                        break;
+                    case "warn_before_closing":
+                        Game.warnBeforeClosing = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "perspective":
+                        ScreenOptionsGraphics.viewNum = Integer.parseInt(optionLine[1]);
+                        switch (ScreenOptionsGraphics.viewNum)
+                        {
+                            case 0:
+                                Game.angledView = false;
+                                Game.followingCam = false;
+                                Game.firstPerson = false;
+                                break;
+                            case 1:
+                                Game.angledView = true;
+                                Game.followingCam = false;
+                                Game.firstPerson = false;
+                                break;
+                            case 2:
+                                Game.angledView = false;
+                                Game.followingCam = true;
+                                Game.firstPerson = false;
+                                break;
+                            case 3:
+                                Game.angledView = false;
+                                Game.followingCam = true;
+                                Game.firstPerson = true;
+                        }
+                        break;
+                    case "bullet_indicator":
+                        Game.xrayBullets = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "tank_textures":
+                        Game.tankTextures = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "preview_crusades":
+                        Game.previewCrusades = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "fullscreen":
+                        Game.game.fullscreen = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "port":
+                        Game.port = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "last_party":
+                        if (optionLine.length >= 2)
+                            Game.lastParty = optionLine[1];
+                        break;
+                    case "last_online_server":
+                        if (optionLine.length >= 2)
+                            Game.lastOnlineServer = optionLine[1];
+                        break;
+                    case "show_ip":
+                        Game.showIP = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "chat_filter":
+                        Game.enableChatFilter = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "auto_ready":
+                        Game.autoReady = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "tps":
+                        Tank.updatesPerSecond = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "anticheat":
+                        TankPlayerRemote.checkMotion = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "anticheat_weak":
+                        TankPlayerRemote.weakTimeCheck = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "disable_party_friendly_fire":
+                        Game.disablePartyFriendlyFire = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "party_countdown":
+                        Game.partyStartTime = Double.parseDouble(optionLine[1]);
+                        break;
+                    case "tank_secondary_color":
+                        Game.player.enableSecondaryColor = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "tank_red":
+                        Game.player.colorR = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "tank_green":
+                        Game.player.colorG = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "tank_blue":
+                        Game.player.colorB = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "tank_red_2":
+                        Game.player.turretColorR = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "tank_green_2":
+                        Game.player.turretColorG = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "tank_blue_2":
+                        Game.player.turretColorB = Integer.parseInt(optionLine[1]);
+                        break;
+                    case "chroma":
+                        Game.player.chromaaa = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "translation":
+                        Translation.setCurrentTranslation(optionLine[1]);
+                        break;
+                    case "last_version":
+                        Game.lastVersion = optionLine[1];
+                        break;
+                    case "enable_extensions":
+                        Game.enableExtensions = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "auto_load_extensions":
+                        Game.autoLoadExtensions = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    case "modapi_auto_load":
+                        ModAPI.autoLoadExtensions = Boolean.parseBoolean(optionLine[1]);
+                        break;
+                    default:
+                        extraOptions.add(line);
+                        break;
+                }
 			}
 			f.stopReading();
 

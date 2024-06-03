@@ -1,9 +1,6 @@
 package tanks.bullet;
 
-import tanks.Drawing;
-import tanks.Game;
-import tanks.IDrawableWithGlow;
-import tanks.Movable;
+import tanks.*;
 import tanks.hotbar.item.ItemBullet;
 import tanks.network.event.EventTankControllerAddVelocity;
 import tanks.tank.Tank;
@@ -76,7 +73,7 @@ public abstract class BulletGas extends Bullet implements IDrawableWithGlow
 
         double frac = 0;
         if (this.life > 0)
-            frac = Math.pow(this.startSize, 2) / Math.pow(this.size, 2);
+            frac = Math.pow(this.startSize / this.size, 2) * Panel.frameFrequency * 0.8 / speed;
 
         this.damage = this.baseDamage * frac;
         this.tankHitKnockback = this.baseTankKB * frac;

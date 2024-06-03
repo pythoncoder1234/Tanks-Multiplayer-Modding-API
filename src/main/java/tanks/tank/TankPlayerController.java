@@ -50,9 +50,9 @@ public class TankPlayerController extends Tank implements ILocalPlayerTank
         this.angle = angle;
         this.orientation = angle;
 
-        if (Game.nameInMultiplayer)
+        if (Game.alwaysShowName)
         {
-            this.nameTag.name = Game.player.username;
+            this.nameTag.name.text = Game.player.username;
             this.showName = true;
         }
     }

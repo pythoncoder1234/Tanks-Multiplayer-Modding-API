@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ServerHandler extends ChannelInboundHandlerAdapter
 {
 	public MessageReader reader = new MessageReader();
-	public SynchronizedList<INetworkEvent> events = new SynchronizedList<>();
+	public final SynchronizedList<INetworkEvent> events = new SynchronizedList<>();
 	protected HashMap<Integer, IStackableEvent> stackedEvents = new HashMap<>();
 	protected long lastStackedEventSend = 0;
 
@@ -35,8 +35,9 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 	public String rawUsername;
 	public String username;
 
-	public long lastMessage = -1;
-	public long latency = 0;
+	public long lastPingSent;
+	public long lastLatency;
+	public boolean pingReceived = true;
 
 	public boolean closed = false;
 
@@ -81,12 +82,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 			}
 		}
 
-		//System.out.println(eventFrequencies);
-
-		for (String s: eventFrequencies.keySet())
-		{
-			System.out.println(s + ": " + eventFrequencies.get(s));
-		}
+//		//System.out.println(eventFrequencies);
+//
+//		for (String s: eventFrequencies.keySet())
+//		{
+//			System.out.println(s + ": " + eventFrequencies.get(s));
+//		}
 	}
 
 	@Override
@@ -97,22 +98,10 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 
 		this.ctx = ctx;
 		ByteBuf buffy = (ByteBuf) msg;
-		int reply = this.reader.queueMessage(this, buffy, this.clientID);
+		this.reader.queueMessage(this, buffy, this.clientID);
 
 		if (steamID == null)
 			ReferenceCountUtil.release(msg);
-
-		if (reply >= 0)
-		{
-			if (lastMessage < 0)
-				lastMessage = System.currentTimeMillis();
-
-			long time = System.currentTimeMillis();
-			latency = time - lastMessage;
-			lastMessage = time;
-
-			this.sendEvent(new EventPing(reply));
-		}
 	}
 
 	public void reply()
@@ -120,21 +109,20 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 		synchronized (this.events)
 		{
 			INetworkEvent prev = null;
-            for (INetworkEvent e : this.events)
-            {
-                if (e instanceof IStackableEvent && ((IStackableEvent) e).isStackable())
-				{
-                    IStackableEvent s = (IStackableEvent) e;
-                    this.stackedEvents.put(IStackableEvent.f(NetworkEventMap.get(e.getClass()) + IStackableEvent.f(s.getIdentifier())), s);
-				}
-                else
-                {
-                    if (prev != null)
-                        this.sendEvent(prev, false);
+			for (int i = 0; i < this.events.size(); i++)
+			{
+				INetworkEvent e = this.events.get(i);
 
-                    prev = e;
-                }
-            }
+				if (e instanceof IStackableEvent && ((IStackableEvent) e).isStackable())
+					this.stackedEvents.put(IStackableEvent.f(NetworkEventMap.get(e.getClass()) + IStackableEvent.f(((IStackableEvent) e).getIdentifier())), (IStackableEvent) e);
+				else
+				{
+					if (prev != null)
+						this.sendEvent(prev,false);
+
+					prev = e;
+				}
+			}
 
 			long time = System.currentTimeMillis() * Game.networkRate / 1000;
 			if (time != lastStackedEventSend)
@@ -159,6 +147,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter
 				this.ctx.flush();
 
 			this.events.clear();
+
+			if (pingReceived && System.currentTimeMillis() - lastPingSent > 1000)
+			{
+				pingReceived = false;
+				lastPingSent = System.currentTimeMillis();
+				this.sendEvent(new EventPing(false));
+			}
 		}
 	}
 

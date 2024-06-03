@@ -5,14 +5,13 @@ import tanks.gui.screen.ScreenPartyLobby;
 import tanks.hotbar.item.ItemMine;
 import tanks.network.event.EventMineChangeTimer;
 import tanks.network.event.EventMineRemove;
-import tanks.obstacle.Face;
 import tanks.obstacle.ISolidObject;
 import tanks.obstacle.Obstacle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Mine extends Movable implements IAvoidObject, IDrawableLightSource, ISolidObject
+public class Mine extends Movable implements IAvoidObject, IDrawableLightSource, ISolidObject, IExplodable
 {
     public static double mine_size = 30;
     public static double mine_radius = Game.tile_size * 2.5;
@@ -51,8 +50,7 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
 
     public double[] lightInfo = new double[]{0, 0, 0, 0, 0, 0, 0};
 
-    public Face[] horizontalFaces;
-    public Face[] verticalFaces;
+    private boolean firstFrame = true;
 
     public Mine(double x, double y, double timer, Tank t, ItemMine item)
     {
@@ -103,12 +101,13 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
     {
         Drawing.drawing.setColor(this.outlineColorR, this.outlineColorG, this.outlineColorB, 255, 0.5);
 
-        if (Game.enable3d && Game.enable3dBg && Game.fancyTerrain)
+        if (Game.enable3d && Game.enable3dBg && Game.fancyTerrain && firstFrame)
         {
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX - this.size / 2, this.posY - this.size / 2));
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX + this.size / 2, this.posY - this.size / 2));
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX - this.size / 2, this.posY + this.size / 2));
-            this.height = Math.max(this.height, Game.sampleTerrainGroundHeight(this.posX + this.size / 2, this.posY + this.size / 2));
+            firstFrame = false;
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX - this.size / 2, this.posY - this.size / 2));
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX + this.size / 2, this.posY - this.size / 2));
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX - this.size / 2, this.posY + this.size / 2));
+            this.height = Math.max(this.height, Game.sampleDefaultGroundHeight(this.posX + this.size / 2, this.posY + this.size / 2));
         }
 
         if (Game.enable3d)
@@ -166,9 +165,9 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
             this.explode();
 
         int beepTime = ((int) this.timer / 10);
-        if (this.timer <= 150 && beepTime % 2 == 1 && this.lastBeep != beepTime && this.tank == Game.playerTank)
+        if (!destroy && this.timer <= 150 && beepTime % 2 == 1 && this.lastBeep != beepTime && this.tank == Game.playerTank)
         {
-            Drawing.drawing.playSound("beep.ogg", 1f, 0.25f);
+            Drawing.drawing.playGameSound("beep.ogg", this, Game.tile_size * 24, 1f, 0.25f);
             this.lastBeep = beepTime;
         }
 
@@ -334,6 +333,28 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
     }
 
     @Override
+    public void onExploded(Explosion explosion)
+    {
+        if (this.isRemote) return;
+        if (this.timer <= 10) return;
+
+        this.timer = 10;
+        Game.eventsOut.add(new EventMineChangeTimer(this));
+    }
+
+    @Override
+    public boolean disableRayCollision()
+    {
+        return false;
+    }
+
+    @Override
+    public double getSize()
+    {
+        return this.size;
+    }
+
+    @Override
     public boolean lit()
     {
         return Game.fancyLights;
@@ -348,45 +369,5 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
         this.lightInfo[5] = this.outlineColorG;
         this.lightInfo[6] = this.outlineColorB;
         return this.lightInfo;
-    }
-
-    @Override
-    public Face[] getHorizontalFaces()
-    {
-        double s = this.size / 2;
-
-        if (this.horizontalFaces == null)
-        {
-            this.horizontalFaces = new Face[2];
-            this.horizontalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX + s, this.posY - s, true, true, true, true);
-            this.horizontalFaces[1] = new Face(this, this.posX - s, this.posY + s, this.posX + s, this.posY + s, true, false,true, true);
-        }
-        else
-        {
-            this.horizontalFaces[0].update(this.posX - s, this.posY - s, this.posX + s, this.posY - s);
-            this.horizontalFaces[1].update(this.posX - s, this.posY + s, this.posX + s, this.posY + s);
-        }
-
-        return this.horizontalFaces;
-    }
-
-    @Override
-    public Face[] getVerticalFaces()
-    {
-        double s = this.size / 2;
-
-        if (this.verticalFaces == null)
-        {
-            this.verticalFaces = new Face[2];
-            this.verticalFaces[0] = new Face(this, this.posX - s, this.posY - s, this.posX - s, this.posY + s, false, true, true, true);
-            this.verticalFaces[1] = new Face(this, this.posX + s, this.posY - s, this.posX + s, this.posY + s, false, false, true, true);
-        }
-        else
-        {
-            this.verticalFaces[0].update(this.posX - s, this.posY - s, this.posX - s, this.posY + s);
-            this.verticalFaces[1].update(this.posX + s, this.posY - s, this.posX + s, this.posY + s);
-        }
-
-        return this.verticalFaces;
     }
 }

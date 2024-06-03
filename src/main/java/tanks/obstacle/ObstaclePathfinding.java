@@ -57,7 +57,6 @@ public class ObstaclePathfinding extends Obstacle
     {
         if (teams.contains(t.team))
             return 0;
-        else
-            return 100;
+        return 100;
     }
 }

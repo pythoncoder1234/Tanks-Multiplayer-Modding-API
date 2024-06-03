@@ -13,7 +13,7 @@ public class EventUpdateLevelTime extends PersonalEvent
     {
         b.writeDouble(ScreenGame.lastTimePassed);
 
-        if (Crusade.currentCrusade != null)
+        if (Crusade.crusadeMode)
             b.writeDouble(Crusade.currentCrusade.timePassed);
     }
 
@@ -22,7 +22,7 @@ public class EventUpdateLevelTime extends PersonalEvent
     {
         ScreenGame.lastTimePassed = b.readDouble();
 
-        if (Crusade.currentCrusade != null)
+        if (Crusade.crusadeMode)
             Crusade.currentCrusade.timePassed = b.readDouble();
     }
 

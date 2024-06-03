@@ -320,7 +320,7 @@ public class ScreenPartyHost extends Screen
 
                             Drawing.drawing.setInterfaceFontSize(this.textSize / 2);
                             Drawing.drawing.setColor(0, 0, 0);
-                            Drawing.drawing.drawUncenteredInterfaceText(this.centerX - w - 260, y - Drawing.drawing.fontSize * 18, server.connections.get(i).latency + "ms");
+                            Drawing.drawing.drawUncenteredInterfaceText(this.centerX - w - 260, y - Drawing.drawing.fontSize * 18, server.connections.get(i).lastLatency + "ms");
                         }
                         catch (Exception e)
                         {

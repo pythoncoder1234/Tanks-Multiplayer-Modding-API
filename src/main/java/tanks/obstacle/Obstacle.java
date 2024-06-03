@@ -9,11 +9,15 @@ import tanks.editor.selector.RotationSelector;
 import tanks.editor.selector.StackHeightSelector;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
+import tanks.network.event.EventObstacleDestroy;
 import tanks.rendering.ShaderGroundObstacle;
 import tanks.rendering.ShaderObstacle;
+import tanks.tank.Explosion;
 import tanks.tank.TankAIControlled;
 
-public class Obstacle extends GameObject implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IBatchRenderableObject
+import java.util.ArrayList;
+
+public class Obstacle extends GameObject implements IDrawableForInterface, ISolidObject, IDrawableWithGlow, IBatchRenderableObject, IExplodable
 {
 	public static final int default_max_height = 8;
 
@@ -58,8 +62,6 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	public Class<? extends ShaderGroup> renderer = ShaderObstacle.class;
 	public Class<? extends ShaderGroup> tileRenderer = ShaderGroundObstacle.class;
 
-	public double posX;
-	public double posY;
 	public double colorR;
 	public double colorG;
 	public double colorB;
@@ -265,6 +267,17 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	}
 
 	@Override
+	public void onExploded(Explosion explosion)
+	{
+		if (!this.destructible || removed)
+			return;
+
+		this.onDestroy(explosion);
+		this.playDestroyAnimation(explosion.posX, explosion.posY, explosion.radius);
+		Game.eventsOut.add(new EventObstacleDestroy(this.posX, this.posY, this.name, explosion.posX, explosion.posY, explosion.radius + Game.tile_size / 2));
+	}
+
+    @Override
 	public boolean isGlowEnabled()
 	{
 		return false;
@@ -302,9 +315,19 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	}
 
+	public void afterAdd()
+	{
+
+	}
+
 	public void update()
 	{
 
+	}
+
+	public void onNeighborUpdate()
+	{
+		refreshHitboxes();
 	}
 
 	public void reactToHit(double bx, double by)
@@ -320,10 +343,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY)
 		{
 			if (unbreakable)
-				return Game.game.unbreakableGrid[x][y];
-			else
-				return Game.game.solidGrid[x][y];
-		}
+				return Game.isUnbreakable(x, y);
+            return Game.isSolid(x, y);
+        }
 
 		return false;
 	}
@@ -365,6 +387,9 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public void postOverride()
 	{
+		if (this.startHeight > 0)
+			return;
+
 		int x = (int) (this.posX / Game.tile_size);
 		int y = (int) (this.posY / Game.tile_size);
 
@@ -381,8 +406,10 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 				Game.obstacleGrid[x][y] = this;
 			}
 
-			if (this.isSurfaceTile)
+			if (this.isSurfaceTile && Game.obstacleGrid[x][y] != this)
 				Game.surfaceTileGrid[x][y] = this;
+
+			Game.setObstacle(posX, posY, this);
 		}
 	}
 
@@ -413,8 +440,12 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			sel.setMetadata(metadata[i]);
 		}
 
-		if (metadata.length - this.selectorCount() == 1)
-			this.startHeight = Double.parseDouble(metadata[metadata.length - 1]);
+		try
+		{
+			if (metadata.length - this.selectorCount() == 1)
+				this.startHeight = Double.parseDouble(metadata[metadata.length - 1]);
+		}
+		catch (Exception ignored) {}
 
 		this.updateSelectors();
 	}
@@ -451,10 +482,10 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 		return this.horizontalFaces;
 	}
 
-	public boolean[] getValidHorizontalFaces(boolean unbreakable)
+    public boolean[] getValidHorizontalFaces(boolean unbreakable)
 	{
-		this.validFaces[0] = (!this.hasNeighbor(0, -1, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
-		this.validFaces[1] = (!this.hasNeighbor(0, 1, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
+		this.validFaces[0] = (!this.hasNeighbor(0, -1, unbreakable) || this.startHeight > 1) && (this.tankCollision || this.bulletCollision);
+		this.validFaces[1] = (!this.hasNeighbor(0, 1, unbreakable) || this.startHeight > 1) && (this.tankCollision || this.bulletCollision);
 		return this.validFaces;
 	}
 
@@ -474,8 +505,8 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 
 	public boolean[] getValidVerticalFaces(boolean unbreakable)
 	{
-		this.validFaces[0] = (!this.hasNeighbor(-1, 0, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
-		this.validFaces[1] = (!this.hasNeighbor(1, 0, unbreakable) || this.startHeight > 1) && !(!this.tankCollision && !this.bulletCollision);
+		this.validFaces[0] = (!this.hasNeighbor(-1, 0, unbreakable) || this.startHeight > 1) && (this.tankCollision || this.bulletCollision);
+		this.validFaces[1] = (!this.hasNeighbor(1, 0, unbreakable) || this.startHeight > 1) && (this.tankCollision || this.bulletCollision);
 		return this.validFaces;
 	}
 
@@ -542,6 +573,31 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	public void onDestroy(Movable source)
 	{
 		Game.removeObstacles.add(this);
+	}
+
+	public void refreshHitboxes()
+	{
+		if (!tankCollision && !bulletCollision)
+			return;
+
+		Chunk.FaceList f = Chunk.getChunk(posX, posY).staticFaces;
+		f.removeFaces(this);
+		f.addFaces(this);
+	}
+
+	public ArrayList<Obstacle> getNeighbors()
+	{
+		ArrayList<Obstacle> neighbors = new ArrayList<>();
+		for (int i = 0; i < 4; i++)
+		{
+			double newX = posX + Game.tile_size * Game.dirX[i];
+			double newY = posY + Game.tile_size * Game.dirY[i];
+
+			Obstacle o = Game.getObstacle(newX, newY);
+			if (o != null)
+				neighbors.add(o);
+		}
+		return neighbors;
 	}
 
 	public void playDestroyAnimation(double posX, double posY, double radius)

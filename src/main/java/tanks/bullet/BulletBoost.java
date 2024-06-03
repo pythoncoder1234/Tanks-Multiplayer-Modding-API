@@ -87,9 +87,7 @@ public class BulletBoost extends Bullet
 
 			double radius = 250000;
 			if (distsq <= radius)
-			{
-				Drawing.drawing.playSound("boost.ogg", (float) (10.0 / this.size), (float) ((radius - distsq) / radius));
-			}
+                Drawing.drawing.playGameSound("boost.ogg", this, soundRange, (float) (10.0 / this.size), (float) ((radius - distsq) / radius));
 		}
 
 		if (Game.effectsEnabled)

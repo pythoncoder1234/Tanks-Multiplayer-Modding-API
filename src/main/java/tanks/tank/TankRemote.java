@@ -40,14 +40,14 @@ public class TankRemote extends Tank
 
 	public ArrayList<TankAIControlled> parentTransformations = new ArrayList<>();
 
-	public TankRemote(String name, double x, double y, double angle, Team team, double size, double ts, double tl, double r, double g, double b, double lives, double baselives)
+	public TankRemote(String name, double x, double y, double angle, Team team, double size, double ts, double tl, double r, double g, double b, double lives, double baseHealth)
 	{
 		super(name, x, y, size, r, g, b);
 		this.angle = angle;
 		this.orientation = angle;
 		this.team = team;
 		this.health = lives;
-		this.baseHealth = baselives;
+		this.baseHealth = baseHealth;
 		this.isRemote = true;
 		this.isCopy = false;
 		this.tank = null;
@@ -73,11 +73,9 @@ public class TankRemote extends Tank
 		this.mandatoryKill = t.mandatoryKill;
 		this.drawAge = t.drawAge;
 		this.managedMotion = false;
-
-		this.copyTank(t);
-
 		this.invulnerable = true;
 
+		this.copyTank(t);
 		this.setNetworkID(t.networkID);
 	}
 
@@ -155,7 +153,7 @@ public class TankRemote extends Tank
 
 		double angDiff = Movable.angleBetween(this.lastAngle, this.currentAngle);
 		this.angle = this.lastAngle - frac * angDiff;
-		this.basePitch = (1 - frac) * this.lastPitch + frac * this.currentPitch;
+		this.pitch = (1 - frac) * this.lastPitch + frac * this.currentPitch;
 
 		this.checkCollision();
 

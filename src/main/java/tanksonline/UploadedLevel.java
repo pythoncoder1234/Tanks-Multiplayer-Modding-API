@@ -64,8 +64,7 @@ public class UploadedLevel
 
                 return UploadResult.success;
             }
-            else
-                return UploadResult.nameTaken;
+            return UploadResult.nameTaken;
         }
         catch (Exception e)
         {

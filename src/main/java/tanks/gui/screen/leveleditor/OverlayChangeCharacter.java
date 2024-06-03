@@ -13,7 +13,7 @@ public class OverlayChangeCharacter extends ScreenLevelEditorOverlay
         @Override
         public void run()
         {
-            if (start.inputText.length() > 0)
+            if (!start.inputText.isEmpty())
                 ((OverlayGenerateTeams) previous).start = Integer.parseInt(start.inputText);
             else
                 start.setText(start.previousInputText);
@@ -43,7 +43,7 @@ public class OverlayChangeCharacter extends ScreenLevelEditorOverlay
         @Override
         public void run()
         {
-            if (step.inputText.length() > 0)
+            if (!step.inputText.isEmpty())
                 ((OverlayGenerateTeams) previous).step = Integer.parseInt(step.inputText);
             else
                 step.setText(step.previousInputText);
@@ -60,7 +60,7 @@ public class OverlayChangeCharacter extends ScreenLevelEditorOverlay
         @Override
         public void run()
         {
-            if (charNum.inputText.length() > 0)
+            if (!charNum.inputText.isEmpty())
                 ((OverlayGenerateTeams) previous).changedChar = Integer.parseInt(charNum.inputText) - 1;
             else
                 charNum.setText(charNum.previousInputText);

@@ -10,16 +10,16 @@ import io.netty.util.ReferenceCountUtil;
 import tanks.Crusade;
 import tanks.Game;
 import tanks.Panel;
-import tanks.gui.screen.ScreenOverlayOnline;
-import tanks.gui.screen.ScreenPartyLobby;
 import tanks.network.event.*;
 import tanks.network.event.online.EventSendOnlineClientDetails;
+import tanks.gui.screen.ScreenOverlayOnline;
+import tanks.gui.screen.ScreenPartyLobby;
 
 import java.util.HashMap;
 import java.util.UUID;
 
-public class ClientHandler extends ChannelInboundHandlerAdapter 
-{	
+public class ClientHandler extends ChannelInboundHandlerAdapter
+{
 	public String message = "";
 	public MessageReader reader = new MessageReader();
 	protected HashMap<Integer, IStackableEvent> stackedEvents = new HashMap<>();
@@ -28,9 +28,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 	public ChannelHandlerContext ctx;
 	public SteamID steamID;
 
-	public double pingTimer = 150;
-	public static long lastLatencyTime = -1;
-	public static long latency = 0;
+	public long lastPingSent;
+	public long lastLatency;
 
 	public boolean online;
 
@@ -43,9 +42,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 	}
 
 	@Override
-    public void channelActive(ChannelHandlerContext ctx)
-    {
-    	if (this.connectionID != Client.connectionID)
+	public void channelActive(ChannelHandlerContext ctx)
+	{
+		if (this.connectionID != Client.connectionID)
 		{
 			ScreenPartyLobby.isClient = false;
 
@@ -55,7 +54,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 			return;
 		}
 
-    	if (this.online)
+		if (this.online)
 		{
 			Game.connectedToOnline = true;
 			Panel.panel.onlineOverlay = new ScreenOverlayOnline();
@@ -77,12 +76,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 		}
 
 		ScreenPartyLobby.isClient = true;
+	}
 
-		this.sendEvent(new EventPing());
-		ClientHandler.lastLatencyTime = System.currentTimeMillis();
-    }
-
-    public void close()
+	public void close()
 	{
 		if (Client.handler.ctx != null)
 			Client.handler.ctx.close();
@@ -119,7 +115,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 
 		b.writeInt(i);
 		e.write(b);
-		
+
 		ByteBuf b2 = ctx.channel().alloc().buffer();
 		b2.writeInt(b.readableBytes());
 		MessageReader.upstreamBytes += b.readableBytes() + 4;
@@ -130,10 +126,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 			ctx.channel().writeAndFlush(b2);
 		else
 			ctx.channel().write(b2);
-		
+
 		ReferenceCountUtil.release(b);
 	}
-	
+
 	public synchronized void sendEventAndClose(INetworkEvent e)
 	{
 		if (steamID != null)
@@ -151,8 +147,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 	}
 
 	@Override
-    public void channelInactive(ChannelHandlerContext ctx)
-    {
+	public void channelInactive(ChannelHandlerContext ctx)
+	{
 		if (ScreenPartyLobby.isClient)
 		{
 			EventKick e = new EventKick("You have lost connection");
@@ -161,7 +157,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 		}
 
 		ScreenPartyLobby.isClient = false;
-    	Game.connectedToOnline = false;
+		Game.connectedToOnline = false;
 
 		Crusade.crusadeMode = false;
 		Crusade.currentCrusade = null;
@@ -170,41 +166,28 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 			ReferenceCountUtil.release(this.reader.queue);
 
 		Client.connectionID = null;
-    }
-	
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg)
-    {
+	}
+
+	@Override
+	public void channelRead(ChannelHandlerContext ctx, Object msg)
+	{
 		this.ctx = ctx;
 		ByteBuf buffy = (ByteBuf) msg;
-		int reply = this.reader.queueMessage(buffy, null);
+		this.reader.queueMessage(this, buffy, null);
 		ReferenceCountUtil.release(msg);
+	}
 
-		if (reply >= 0)
-		{
-			if (lastLatencyTime < 0)
-				lastLatencyTime = System.currentTimeMillis();
-
-			long time = System.currentTimeMillis();
-			latency = time - lastLatencyTime;
-			lastLatencyTime = time;
-
-			this.sendEvent(new EventPing(reply));
-		}
-    }
-
-    public void reply()
+	public void reply()
 	{
 		synchronized (Game.eventsOut)
 		{
 			INetworkEvent prev = null;
-			for (INetworkEvent e : Game.eventsOut)
+			for (int i = 0; i < Game.eventsOut.size(); i++)
 			{
+				INetworkEvent e = Game.eventsOut.get(i);
+
 				if (e instanceof IStackableEvent && ((IStackableEvent) e).isStackable())
-				{
-                    IStackableEvent s = (IStackableEvent) e;
-                    this.stackedEvents.put(IStackableEvent.f(NetworkEventMap.get(e.getClass()) + IStackableEvent.f(s.getIdentifier())), s);
-				}
+					this.stackedEvents.put(IStackableEvent.f(NetworkEventMap.get(e.getClass()) + IStackableEvent.f(((IStackableEvent) e).getIdentifier())), (IStackableEvent) e);
 				else
 				{
 					if (prev != null)
@@ -238,11 +221,11 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 			Game.eventsOut.clear();
 		}
 	}
-    
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e)
-    {
-		System.err.println("A network exception has occurred: " + e);
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable e)
+	{
+		System.err.println("A network exception has occurred: " + e.toString());
 		Game.logger.println("A network exception has occurred: " + e);
 		e.printStackTrace();
 		e.printStackTrace(Game.logger);
@@ -252,6 +235,6 @@ public class ClientHandler extends ChannelInboundHandlerAdapter
 		Game.eventsIn.add(ev);
 
 		ScreenPartyLobby.isClient = false;
-        ctx.close();
-    }
+		ctx.close();
+	}
 }

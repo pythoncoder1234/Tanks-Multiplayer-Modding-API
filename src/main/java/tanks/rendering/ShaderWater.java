@@ -19,6 +19,7 @@ public class ShaderWater extends RendererShader implements IObstacleTimeShader
         this.shaderBase.setUp("/shaders/main.vert", new String[]{"/shaders/main_water.vert"}, "/shaders/main.frag", null);
         this.shaderShadowMap.setUp("/shaders/shadow_map.vert", new String[]{"/shaders/main_water.vert"}, "/shaders/shadow_map.frag", null);
     }
+
     @Override
     public void setTime(int time)
     {

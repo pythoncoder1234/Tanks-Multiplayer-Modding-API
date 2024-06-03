@@ -1,6 +1,8 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
+import tanks.Drawing;
+import tanks.Game;
 import tanks.bullet.Bullet;
 
 public class EventBulletBounce extends PersonalEvent
@@ -52,6 +54,9 @@ public class EventBulletBounce extends PersonalEvent
 		
 		if (b != null && this.clientID == null)
 		{
+			if (!Game.vanillaMode)
+				Drawing.drawing.playGameSound("bounce.ogg", b, Game.tile_size * 35, (float) (Bullet.bullet_size / b.size));
+
 			b.posX = this.posX;
 			b.posY = this.posY;
 			b.vX = this.vX;

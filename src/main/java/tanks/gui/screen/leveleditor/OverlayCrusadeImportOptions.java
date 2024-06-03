@@ -90,7 +90,7 @@ public class OverlayCrusadeImportOptions extends ScreenLevelEditorOverlay
         {
             tankCount = this.tankButtons.size();
             for (Button b : this.tankButtons)
-                ((ButtonObject) b).bgColA = 128;
+                b.bgColA = 128;
         }
         else
         {
@@ -112,7 +112,7 @@ public class OverlayCrusadeImportOptions extends ScreenLevelEditorOverlay
         {
             tankCount = 0;
             for (Button b : this.tankButtons)
-                ((ButtonObject) b).bgColA = 0;
+                b.bgColA = 0;
         }
         else
         {
@@ -385,8 +385,7 @@ public class OverlayCrusadeImportOptions extends ScreenLevelEditorOverlay
             {
                 if (replace)
                     return getCrusade(false);
-                else
-                    throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
         else

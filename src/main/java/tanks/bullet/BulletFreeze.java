@@ -32,7 +32,6 @@ public class BulletFreeze extends Bullet
 	public void onDestroy()
 	{
 		Game.movables.add(new AreaEffectFreeze(this.posX, this.posY));
-		Drawing.drawing.playGlobalSound("freeze.ogg");
 	}
 
 	@Override

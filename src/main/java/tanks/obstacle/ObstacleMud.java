@@ -1,6 +1,5 @@
 package tanks.obstacle;
 
-import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.rendering.ShaderMud;
@@ -113,7 +112,7 @@ public class ObstacleMud extends Obstacle
             if (distsq <= radius && Math.random() < Panel.frameFrequency * 0.05 && speed > 0 && Game.playerTank != null && !Game.playerTank.destroy)
             {
                 int sound = (int) (Math.random() * 8 + 1);
-                Drawing.drawing.playSound("mud" + sound + ".ogg", (float) ((speed / 3.0f) + 0.5f) * 1.25f, (float) (speed * 0.025 * (radius - distsq) / radius));
+                Drawing.drawing.playGameSound("mud" + sound + ".ogg", m, Game.tile_size * 10, (float) ((speed / 3.0f) + 0.5f) * 1.25f, (float) (speed * 0.025 * (radius - distsq) / radius));
             }
         }
     }

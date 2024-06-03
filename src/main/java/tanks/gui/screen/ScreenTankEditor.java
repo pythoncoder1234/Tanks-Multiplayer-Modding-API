@@ -48,9 +48,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         this.tankScreen.removeTank(this.tank);
         this.tankScreen.refreshTanks(this.tank);
         for (String m : this.tankMusics)
-        {
             Drawing.drawing.removeSyncedMusic(m, 500);
-        }
     }
     );
 
@@ -84,7 +82,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
                 return t;
             }
-            else if (f.getType().equals(double.class))
+            if (f.getType().equals(double.class))
             {
                 TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
                 t.function = () ->
@@ -110,7 +108,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
                 return t;
             }
-            else if (p.miscType().equals(TankProperty.MiscType.emblem))
+            if (p.miscType().equals(TankProperty.MiscType.emblem))
             {
                 final String[] emblems = RegistryModelTank.toStringArray(Game.registryModelTank.tankEmblems);
                 SelectorImage t = new SelectorImage(0, 0, this.objWidth, this.objHeight, p.name(), emblems, () -> {}, "");
@@ -150,7 +148,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 t.imageB = 255;
                 return t;
             }
-            else if (f.getType().equals(String.class))
+            if (f.getType().equals(String.class))
             {
                 TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
                 t.function = () ->
@@ -176,7 +174,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
                 return t;
             }
-            else if (f.getType().equals(boolean.class))
+            if (f.getType().equals(boolean.class))
             {
                 Selector t = new Selector(0, 0, this.objWidth, this.objHeight, p.name(), new String[]{"Yes", "No"}, () -> {}, "");
 
@@ -201,7 +199,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 t.hoverText = formatDescription(p);
                 return t;
             }
-            else if (f.getType().isEnum())
+            if (f.getType().isEnum())
             {
                 Class<? extends Enum> e = (Class<? extends Enum>) f.getType();
                 Enum<?>[] values = e.getEnumConstants();
@@ -231,7 +229,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 t.hoverText = formatDescription(p);
                 return t;
             }
-            else if (Item.class.isAssignableFrom(f.getType()))
+            if (Item.class.isAssignableFrom(f.getType()))
             {
                 Item i = (Item) f.get(tank);
                 i.importProperties();
@@ -257,7 +255,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
                 return b;
             }
-            else if (Tank.class.isAssignableFrom(f.getType()))
+            if (Tank.class.isAssignableFrom(f.getType()))
             {
                 SelectorDrawable b = new SelectorDrawable(0, 0, 350, 40, p.name(), () -> {});
                 b.tank = (Tank) f.get(tank);
@@ -302,7 +300,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
                 return b;
             }
-            else if (IModel.class.isAssignableFrom(f.getType()))
+            if (IModel.class.isAssignableFrom(f.getType()))
             {
                 IModel[] models = null;
                 String[] modelDirs;
@@ -349,7 +347,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
                 return t;
             }
-            else if (p.miscType() == TankProperty.MiscType.music)
+            if (p.miscType() == TankProperty.MiscType.music)
             {
                 HashSet<String> a = ((HashSet<String>) f.get(tank));
                 ArrayList<String> musics = new ArrayList<>();
@@ -390,7 +388,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 s.selectedOptions = selectedMusicsArray;
                 return s;
             }
-            else if (p.miscType() == TankProperty.MiscType.spawnedTanks)
+            if (p.miscType() == TankProperty.MiscType.spawnedTanks)
             {
                 SelectorDrawable s = new SelectorDrawable(0, 0, 350, 40, p.name());
                 ArrayList<TankAIControlled.SpawnedTankEntry> a = ((ArrayList<TankAIControlled.SpawnedTankEntry>) f.get(tank));
@@ -556,10 +554,9 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
             if (c1.equals(c2))
                 return 0;
-            else if (c1.isAssignableFrom(c2))
+            if (c1.isAssignableFrom(c2))
                 return -1;
-            else
-                return 1;
+            return 1;
         });
 
         Tab general = new TabGeneral(this, "General", TankProperty.Category.general);

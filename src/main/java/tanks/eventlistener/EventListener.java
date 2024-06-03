@@ -5,7 +5,6 @@ import tanks.network.event.EventShootBullet;
 import tanks.network.event.INetworkEvent;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,11 +27,12 @@ public class EventListener
 
     public static void addListener(EventListenerFunc e, Class<? extends INetworkEvent> cls)
     {
-        HashSet<Class<? extends INetworkEvent>> set = new HashSet<>();
-        set.add(cls);
-        addListener(e, set);
+        Set<Class<? extends INetworkEvent>> classes1 = new java.util.HashSet<>();
+        classes1.add(cls);
+        addListener(e, classes1);
     }
 
+    /** Use {@link Set#of()} for the <code>classes</code> parameter */
     public static void addListener(EventListenerFunc e, Set<Class<? extends INetworkEvent>> classes)
     {
         addListener(new EventListener(e, classes));

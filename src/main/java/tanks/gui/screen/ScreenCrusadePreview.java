@@ -92,7 +92,11 @@ public class ScreenCrusadePreview extends Screen implements IItemScreen
         }
     });
 
-    public Button quit = new Button(this.centerX, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", () -> Game.screen = previous);
+    public Button quit = new Button(this.centerX, this.centerY + this.objYSpace * 5, this.objWidth, this.objHeight, "Back", () ->
+    {
+        Game.screen = previous;
+        System.gc();
+    });
 
     public Button options = new Button(this.centerX - this.objXSpace, 60, this.objWidth, this.objHeight, "Overview", () -> mode = Mode.options);
 

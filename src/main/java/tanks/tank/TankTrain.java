@@ -12,7 +12,9 @@ import java.util.HashSet;
 
 public class TankTrain extends Tank implements IAvoidObject
 {
-    public static final String[] descriptions = new String[] {"Chuga chuga chuga chuga choo choo!", "Choo Choo!", "*queue thomas the tank engine theme song*", "To the nearest rail it goes!"};
+    public static final String[] descriptions = new String[] {
+            "chuga chuga chuga chuga choo choo", "choo choo", "*queue thomas the tank engine theme song*",
+            "To the nearest rail it goes!", "SUBWAY SURFERS", "I added trains lmao", "TRAIN"};
     public static final HashSet<TankProperty.Category> propertiesToCopy = new HashSet<>();
 
     static
@@ -156,10 +158,10 @@ public class TankTrain extends Tank implements IAvoidObject
                     if (parts.length > 1 && !parts[1].equals("all") && (team == null || !parts[1].equals(team.name)))
                         continue;
 
-                    if (parts.length > 2 && parts[2].length() > 0)
+                    if (parts.length > 2 && !parts[2].isEmpty())
                     {
                         this.showName = true;
-                        this.nameTag.name = parts[2].replaceAll("\\+\\+", "-");
+                        this.nameTag.name.text = parts[2].replaceAll("\\+\\+", "-");
                     }
 
                     t = t1;
@@ -215,9 +217,7 @@ public class TankTrain extends Tank implements IAvoidObject
         if (collided == 0)
         {
             double relative = Math.sqrt(Math.pow((t.vX-this.vX), 2) + Math.pow((t.vY-this.vY), 2));
-
-            if (!t.damage(relative / this.getSpeed() * damageOnCollide, this))
-                Drawing.drawing.playGlobalSound("damage.ogg", 1f);
+            t.damage(relative / this.getSpeed() * damageOnCollide, this);
         }
 
         collided = 5;
@@ -245,7 +245,7 @@ public class TankTrain extends Tank implements IAvoidObject
         double nearest = 69420;
         ObstacleTrainTrack nearestObs = null;
 
-        for (Obstacle o : Game.obstacles)
+        for (Obstacle o : Game.getInRadius(posX, posY, searchDist, c -> c.obstacles))
         {
             if (o instanceof ObstacleTrainTrack)
             {
@@ -265,8 +265,7 @@ public class TankTrain extends Tank implements IAvoidObject
     {
         if (o.turn == 4 || o.turn == 2)
             return Math.abs(this.vX) > Math.abs(this.vY);
-        else
-            return Math.abs(this.vX) < Math.abs(this.vY);
+        return Math.abs(this.vX) < Math.abs(this.vY);
     }
 
     @Override

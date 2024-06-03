@@ -90,7 +90,7 @@ public class ScreenPreviewShareLevel extends Screen implements ILevelPreviewScre
                 int y = (int) (o.posY / Game.tile_size);
 
                 if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-                    Game.game.heightGrid[x][y] = Math.max(o.getTileHeight(), Game.game.heightGrid[x][y]);
+                    Chunk.getTile(x, y).updateHeight(o.getTileHeight());
             }
     }
 

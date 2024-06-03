@@ -22,7 +22,6 @@ public class TankBlack extends TankAIControlled
 		this.turretAimSpeed = 0.06;
 		this.enablePathfinding = true;
 		this.targetEnemySightBehavior = TargetEnemySightBehavior.sidewind;
-		this.avoidanceSeekOpenSpaces = true;
 		this.bulletAvoidBehvavior = BulletAvoidBehavior.back_off;
 
 		this.coinValue = 10;

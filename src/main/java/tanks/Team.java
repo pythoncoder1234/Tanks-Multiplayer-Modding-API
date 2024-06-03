@@ -43,19 +43,17 @@ public class Team
 			return true;
 		if (a.team == null || b.team == null)
 			return false;
-		else
-			return a.team.equals(b.team);
-	}
+        return a.team.equals(b.team);
+    }
 	
 	public static double[] getObjectColor(double r, double g, double b, Movable m)
 	{
 		if (m.team == null)
 			return setTeamColor(r, g, b);
-		else if (!m.team.enableColor)
-            return setTeamColor(r, g, b);
-		else
-			return setTeamColor(m.team.teamColorR, m.team.teamColorG, m.team.teamColorB);
-	}
+        if (!m.team.enableColor)
+return setTeamColor(r, g, b);
+        return setTeamColor(m.team.teamColorR, m.team.teamColorG, m.team.teamColorB);
+    }
 
 	protected static double[] setTeamColor(double r, double g, double b)
     {
@@ -69,11 +67,10 @@ public class Team
 	{
 		if (m.team == null)
 			return setTeamColor(col, r, g, b);
-		else if (!m.team.enableColor)
-			return setTeamColor(col, r, g, b);
-		else
-			return setTeamColor(col, m.team.teamColorR, m.team.teamColorG, m.team.teamColorB);
-	}
+        if (!m.team.enableColor)
+            return setTeamColor(col, r, g, b);
+        return setTeamColor(col, m.team.teamColorR, m.team.teamColorG, m.team.teamColorB);
+    }
 
 	protected static double[] setTeamColor(double[] col, double r, double g, double b)
 	{
@@ -93,5 +90,11 @@ public class Team
         }
 
 		return super.equals(obj);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return this.name.hashCode();
 	}
 }

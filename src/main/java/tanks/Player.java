@@ -161,8 +161,8 @@ public class Player
     {
         if (!(obj instanceof Player))
             return super.equals(obj);
+        Player p = (Player) obj;
 
-        Player p = ((Player) obj);
         return Objects.equals(this.clientID, p.clientID);
     }
 

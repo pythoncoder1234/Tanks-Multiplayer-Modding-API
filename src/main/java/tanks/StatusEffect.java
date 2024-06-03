@@ -85,9 +85,9 @@ public class StatusEffect
 
                 if (a.effect == AttributeModifier.Operation.add)
                     return in + val;
-                else if (a.effect == AttributeModifier.Operation.multiply)
+                if (a.effect == AttributeModifier.Operation.multiply)
                     return in * (val + 1);
-                else if (a.effect == AttributeModifier.Operation.set)
+                if (a.effect == AttributeModifier.Operation.set)
                     return val;
             }
         }
