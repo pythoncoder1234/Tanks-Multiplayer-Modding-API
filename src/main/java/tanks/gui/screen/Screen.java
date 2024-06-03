@@ -100,8 +100,12 @@ public abstract class Screen implements IBatchRenderableObject
 		{
 			for (int j = 0; j < Game.currentSizeY; j++)
 			{
-				if (Chunk.getTile(i, j).height <= -1000)
-					Chunk.getTile(i, j).height = 0;
+				Chunk.Tile t = Chunk.getTile(i, j);
+				if (t.height <= -1000)
+					t.height = 0;
+
+				if (t.groundHeight <= -1000)
+					t.groundHeight = 0;
 			}
 		}
 

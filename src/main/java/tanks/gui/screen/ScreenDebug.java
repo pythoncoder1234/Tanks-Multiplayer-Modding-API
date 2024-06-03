@@ -37,27 +37,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         }
     });
 
-    Button tankHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.showHitboxes = !Game.showHitboxes;
-            tankHitboxes.setText("Hitboxes: ", Game.showHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button obstacleHitboxes = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            Game.showObstacleHitboxes = !Game.showObstacleHitboxes;
-            obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
-        }
-    });
-
-    Button pathfinding = new Button(this.centerX + this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
+    Button pathfinding = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -67,7 +47,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         }
     });
 
-    Button upfMeter = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "", new Runnable()
+    Button upfMeter = new Button(this.centerX + this.objXSpace, this.centerY, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -77,7 +57,7 @@ public class ScreenDebug extends ScreenOptionsOverlay
         }
     });
 
-            Button allNums = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
+    Button allNums = new Button(this.centerX + this.objXSpace, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "", new Runnable()
     {
         @Override
         public void run()
@@ -127,8 +107,6 @@ public class ScreenDebug extends ScreenOptionsOverlay
 
         grandpaMode.setText("Grandpa mode: ", Game.grandpaMode ? ScreenOptions.onText : ScreenOptions.offText);
         glipping.setText("Glipping: ", Game.game.window.allowGlipping ? ScreenOptions.onText : ScreenOptions.offText);
-        tankHitboxes.setText("Hitboxes: ", Game.showHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
-        obstacleHitboxes.setText("Obstacle Hitboxes: ", Game.showObstacleHitboxes ? ScreenOptions.onText : ScreenOptions.offText);
         autocannon.setText("Autocannon: ", Game.autocannon ? ScreenOptions.onText : ScreenOptions.offText);
         pathfinding.setText("Show Pathfinding: ", Game.showPathfinding ? ScreenOptions.onText : ScreenOptions.offText);
         allNums.setText("All Numbers: ", Game.allowAllNumbers ? ScreenOptions.onText : ScreenOptions.offText);
@@ -233,8 +211,6 @@ public class ScreenDebug extends ScreenOptionsOverlay
         grandpaMode.update();
         autocannon.update();
         tankIDs.update();
-        tankHitboxes.update();
-        obstacleHitboxes.update();
         pathfinding.update();
         upfMeter.update();
         allNums.update();
@@ -274,8 +250,6 @@ public class ScreenDebug extends ScreenOptionsOverlay
         traceAllRays.draw();
         allNums.draw();
         grandpaMode.draw();
-        obstacleHitboxes.draw();
-        tankHitboxes.draw();
         pathfinding.draw();
         tankIDs.draw();
         glipping.draw();

@@ -119,7 +119,7 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
             for (double i = height; i < height + 6; i++)
             {
                 double frac = ((i - height + 1) / 6 + 1) / 2;
-                boolean shouldXRay = i == height + 5 && Game.xrayBullets && inBounds && Game.obstacleGrid[x][y] == null;
+                boolean shouldXRay = i == height + 5 && Game.xrayBullets && inBounds && Game.getObstacle(x, y) == null;
 
                 Drawing.drawing.setColor(this.outlineColorR * frac, this.outlineColorG  * frac, this.outlineColorB * frac, 255, 0.5);
                 Drawing.drawing.fillOval(this.posX, this.posY, this.posZ + i + 1.5, this.size, this.size, !shouldXRay, false);
@@ -223,8 +223,8 @@ public class Mine extends Movable implements IAvoidObject, IDrawableLightSource,
         {
             for (int y = y1; y < y2; y++)
             {
-                checkCollisionWith(Game.obstacleGrid[x][y]);
-                checkCollisionWith(Game.surfaceTileGrid[x][y]);
+                checkCollisionWith(Game.getObstacle(x, y));
+                checkCollisionWith(Game.getSurfaceObstacle(x, y));
             }
         }
     }

@@ -31,6 +31,9 @@ public class Chunk implements Comparable<Chunk>
 
     public Chunk compareTo;
 
+    /** The variable that caches the previous call to {@link Chunk#getChunk} */
+    private static Chunk prevChunk;
+
     public Chunk(Level l, Random r, int x, int y)
     {
         this.chunkX = x;
@@ -189,7 +192,7 @@ public class Chunk implements Comparable<Chunk>
         t.colR = l.colorR + (Game.fancyTerrain ? r.nextDouble() * l.colorVarR : 0);
         t.colG = l.colorG + (Game.fancyTerrain ? r.nextDouble() * l.colorVarG : 0);
         t.colB = l.colorB + (Game.fancyTerrain ? r.nextDouble() * l.colorVarB : 0);
-        t.depth= Game.fancyTerrain ? r.nextDouble() * 10 : 0;
+        t.depth = Game.fancyTerrain ? r.nextDouble() * 10 : 0;
         return t;
     }
 
@@ -256,21 +259,30 @@ public class Chunk implements Comparable<Chunk>
 
     public void setObstacle(int x, int y, Obstacle o)
     {
-        Obstacle o1 = tileGrid[x][y].obstacle;
-        if ((!o.isSurfaceTile || o1 == null || o1 == o) && o.startHeight < 1)
+        Tile t = tileGrid[x][y];
+        Obstacle o1 = t.obstacle;
+        if ((!o.isSurfaceTile || o1 == null || o1 == o))
         {
-            if (o1 != null && o1 != o && o1.isSurfaceTile)
-                tileGrid[x][y].surfaceObstacle = o1;
-            tileGrid[x][y].obstacle = o;
+            if (o.startHeight < 1)
+            {
+                if (o1 != null && o1 != o && o1.isSurfaceTile)
+                    t.surfaceObstacle = o1;
+                t.obstacle = o;
+                t.height = t.groundHeight = -1000;
+                t.updateHeight(o.getTileHeight()).updateGroundHeight(o.getGroundHeight());
+            }
         }
         else
-            tileGrid[x][y].surfaceObstacle = o;
+            t.surfaceObstacle = o;
     }
 
     /** Expects tile coordinates. */
     public static Tile getTile(int tileX, int tileY)
     {
-        return getChunk(tileX / chunkSize, tileY / chunkSize).getChunkTile(tileX, tileY);
+        Chunk c = getChunk(tileX / chunkSize, tileY / chunkSize);
+        if (c == null)
+            return null;
+        return c.getChunkTile(tileX, tileY);
     }
 
     /** Expects pixel coordinates. */
@@ -413,6 +425,7 @@ public class Chunk implements Comparable<Chunk>
     {
         chunks.clear();
         chunkList.clear();
+        prevChunk = null;
 
         int sX = l.sizeX / chunkSize + 1, sY = l.sizeY / chunkSize + 1;
         Random r = new Random(l.tilesRandomSeed);
@@ -440,7 +453,13 @@ public class Chunk implements Comparable<Chunk>
 
     public static Chunk getChunk(int chunkX, int chunkY)
     {
-        return chunks.get(encodeChunkCoords(chunkX, chunkY));
+        if (prevChunk != null && prevChunk.chunkX == chunkX && prevChunk.chunkY == chunkY)
+            return prevChunk;
+
+        Chunk c = chunks.get(encodeChunkCoords(chunkX, chunkY));
+        if (c != null)
+            prevChunk = c;
+        return c;
     }
 
     public static Chunk addChunk(int chunkX, int chunkY, Chunk c)

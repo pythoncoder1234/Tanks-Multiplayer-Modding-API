@@ -1,6 +1,5 @@
 package tanks.obstacle;
 
-import basewindow.IBatchRenderableObject;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyLobby;
@@ -52,41 +51,22 @@ public class ObstacleSand extends Obstacle
     @Override
     public void draw()
     {
-        if (Game.getObstacle(posX, posY) instanceof ObstacleWater)
-            return;
+        double z = 0;
+        if (Game.getObstacle(posX, posY) instanceof ObstacleWater w)
+            z = w.getGroundHeight() + w.baseGroundHeight;
 
-        double maxHeight = Game.sampleGroundHeight(posX, posY);
+        double maxHeight = Game.sampleDefaultGroundHeight(posX, posY);
 
         for (int i = 0; i < 4; i++)
         {
             double x = posX + Game.dirX[i] * Game.tile_size;
             double y = posY + Game.dirY[i] * Game.tile_size;
 
-            maxHeight = Math.max(maxHeight, Game.sampleGroundHeight(x, y) - 2);
+            maxHeight = Math.max(maxHeight, Game.sampleDefaultGroundHeight(x, y) - 2);
         }
 
         Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
-        Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Game.tile_size, Game.tile_size, maxHeight);
-    }
-
-    @Override
-    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
-    {
-        ObstacleSand s = null;
-        for (int i = 0; i < 4; i++)
-        {
-            double x = posX + Game.dirX[i] * Game.tile_size;
-            double y = posY + Game.dirY[i] * Game.tile_size;
-            if (Game.getObstacle(x, y) instanceof ObstacleWater && Game.getSurfaceObstacle(x, y) instanceof ObstacleSand s1)
-                s = s1;
-        }
-
-        if (s == null)
-            Drawing.drawing.setColor(r, g, b);
-        else
-            Drawing.drawing.setColor(s.colorR, s.colorG, s.colorB);
-
-        Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra);
+        Drawing.drawing.fillBox(this, this.posX, this.posY, z, Game.tile_size, Game.tile_size, maxHeight);
     }
 
     @Override

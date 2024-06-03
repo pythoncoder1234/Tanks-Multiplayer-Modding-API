@@ -326,6 +326,9 @@ public class ButtonList
 
     public void filter(String s)
     {
+        if (s.isEmpty())
+            return;
+
         for (int i = 0; i < this.buttons.size(); i++)
         {
             if (!buttons.get(i).text.toLowerCase().contains(s.toLowerCase()))

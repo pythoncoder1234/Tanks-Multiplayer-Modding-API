@@ -690,7 +690,8 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 					Obstacle o = Game.getObstacle(x, y);
 					if (!(o instanceof ObstacleLiquid))
 					{
-						maxTouchingZ = Math.max(0, maxTouchingZ);
+						if (o == null || !o.tankCollision)
+							maxTouchingZ = Math.max(0, maxTouchingZ);
 						continue;
 					}
 

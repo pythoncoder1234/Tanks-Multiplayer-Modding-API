@@ -31,6 +31,7 @@ public class OverlayEditorMenu extends ScreenLevelEditorOverlay
         editor.save();
 
         Game.cleanUp();
+        System.gc();
         Game.screen = new ScreenSavedLevels();
     },
             "Shift click to force save---with no tank references"

@@ -155,7 +155,7 @@ public class ObstacleWater extends ObstacleLiquid
         else
             Drawing.drawing.setColor(r, g, b);
 
-        Drawing.drawing.fillBox(tile, this.posX, this.posY, -Game.tile_size * stackHeight + d - extra, Game.tile_size, Game.tile_size, extra);
+        Drawing.drawing.fillBox(tile, this.posX, this.posY, -Game.tile_size * stackHeight - extra, Game.tile_size, Game.tile_size, extra + d);
     }
 
     @Override

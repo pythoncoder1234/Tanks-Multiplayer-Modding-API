@@ -31,5 +31,5 @@ vec4 getColor(vec4 colorIn)
     vec4 pos = getPos(getTransform());
     float offset = sin(5.0 * (pos.x + pos.y) + (0.1 * pos.x * pos.y) + time / 1000.0f) * 0.08f;
 
-    return vec4(colorIn.xyz + vec3(offset, offset, offset), colorIn.a);
+    return colorIn + vec4(offset, offset, offset, 0);
 }

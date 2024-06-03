@@ -103,6 +103,8 @@ public class Panel
 	public ArrayList<double[]> lights = new ArrayList<>();
 	HashMap<Integer, IStackableEvent> stackedEventsIn = new HashMap<>();
 
+	public double screenShakeDuration = 0, screenShakeMult = 1;
+
 	public static void initialize()
 	{
 		if (!initialized)
@@ -824,12 +826,6 @@ public class Panel
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_P);
 			}
 
-			if (Game.debug && Game.game.window.shift && Game.game.window.pressedKeys.contains(InputCodes.KEY_S))
-			{
-				System.out.println(Game.screen.getClass().getSimpleName());
-				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_S);
-			}
-
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_B))
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_B);
@@ -905,7 +901,7 @@ public class Panel
 
 				Game.game.shaderInstances = newShaders;
 				Drawing.drawing.terrainRenderer.reset();
-				notifs.add(new Notification("Shaders reloaded! (Remember to Cmd+F9)").setColor(255, 255, 128));
+				notifs.add(new Notification("Shaders reloaded! (Remember to rebuild)").setColor(255, 255, 128));
 			}
 
 			int brightness = 0;
@@ -947,8 +943,11 @@ public class Panel
 					}
 
 					if (t1 != null)
-                        text += " O: " + (t1.obstacle != null ? t1.obstacle.name : "none") + " SO: " + (t1.surfaceObstacle != null ? t1.surfaceObstacle.name : "none");
-					Game.game.window.fontRenderer.drawString(mx + 10, my + 30, Drawing.drawing.fontSize, Drawing.drawing.fontSize, "H: " + (int) t1.height + " GH: " + (int) t1.groundHeight);
+					{
+						text += " O: " + (t1.obstacle != null ? t1.obstacle.name : "none") + " SO: " + (t1.surfaceObstacle != null ? t1.surfaceObstacle.name : "none");
+						Game.game.window.fontRenderer.drawString(mx + 10, my + 30, Drawing.drawing.fontSize, Drawing.drawing.fontSize,
+								"H: " + (int) t1.height + " GH+D: " + (int) (t1.groundHeight + t1.depth) + " E: " + (int) TerrainRenderer.getExtra(posX, posY, t1.obstacle));
+					}
 				}
 			}
 

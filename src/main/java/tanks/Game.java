@@ -104,13 +104,10 @@ public class Game
     public static int tileOffsetX = 0;
     public static int tileOffsetY = 0;
     public static double bgResMultiplier = 1;
-    public static Obstacle[][] obstacleGrid = new Obstacle[28][18];
-    public static Obstacle[][] surfaceTileGrid = new Obstacle[28][18];
     public static boolean debug = false;
     public static boolean traceAllRays = false;
     public static boolean showTankIDs = false;
 	public static boolean showHitboxes = false;
-	public static boolean showObstacleHitboxes = false;
 	public static boolean showUPFMeter = false;
 	public static boolean showPathfinding = false;
 	public static boolean allowAllNumbers = false;
@@ -556,7 +553,7 @@ public class Game
         registerTank(TankLightPink.class, "lightpink", 1.0 / 10);
         registerTank(TankBoss.class, "boss", 1.0 / 40, true);
         registerTank(TankTrain.class, "train", 0);
-//        registerTank(TankShoe.class, "shoe", 0);
+        registerTank(TankShoe.class, "shoe", 0);
 
         registerBullet(Bullet.class, Bullet.bullet_name, "bullet_normal.png");
         registerBullet(BulletFlame.class, BulletFlame.bullet_name, "bullet_flame.png");
@@ -1090,9 +1087,6 @@ public class Game
 
 		Chunk.reset();
 
-        Game.obstacleGrid = new Obstacle[28][18];
-        Game.surfaceTileGrid = new Obstacle[28][18];
-
 		Level.currentColorR = 235;
 		Level.currentColorG = 207;
 		Level.currentColorB = 166;
@@ -1133,7 +1127,14 @@ public class Game
     public static <T extends GameObject> ArrayList<T> getInRange(double x1, double y1, double x2, double y2, Function<Chunk, Collection<T>> func)
 	{
 		ArrayList<T> out = new ArrayList<>();
-		Chunk.getChunksInRange(x1, y1, x2, y2).forEach(c -> out.addAll(func.apply(c)));
+		Chunk.getChunksInRange(x1, y1, x2, y2).forEach(c ->
+		{
+			for (T o : func.apply(c))
+			{
+				if (Game.lessThan(true, x1, o.posX, x2) && Game.lessThan(true, x2, o.posY, y2))
+					out.add(o);
+			}
+		});
 		return out;
 	}
 

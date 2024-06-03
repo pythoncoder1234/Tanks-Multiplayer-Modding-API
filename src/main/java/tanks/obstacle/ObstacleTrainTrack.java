@@ -4,6 +4,7 @@ package tanks.obstacle;
 import basewindow.Model;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.rendering.ShaderTrainTrack;
 import tanks.tank.IAvoidObject;
 import tanks.tank.TankTrain;
 
@@ -40,12 +41,11 @@ public class ObstacleTrainTrack extends Obstacle
         this.destructible = false;
         this.enableStacking = false;
 
-        for (int i = 0; i < 5; i++)
-        {
-            this.stackColorR[i] = 176 - Math.random() * 5;
-            this.stackColorG[i] = 111 - Math.random() * 5;
-            this.stackColorB[i] = 14 - Math.random() * 5;
-        }
+        this.colorR = 176;
+        this.colorG = 111;
+        this.colorB = 14;
+
+        this.renderer = ShaderTrainTrack.class;
 
         this.description = descriptions[(int) (Math.random() * descriptions.length)];
     }
@@ -57,11 +57,13 @@ public class ObstacleTrainTrack extends Obstacle
 
         if (turn > 0)
         {
-            Drawing.drawing.setColor(176, 111, 14);
-            Drawing.drawing.drawModel(turnTrackWood, this.posX, this.posY, 5 + startHeight * 50, 50, 50, 40, Math.PI / 2 * (turn - 1));
+            double z = -3 * (1 - Obstacle.draw_size / Game.tile_size);
+
+            Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
+            Drawing.drawing.drawModel(turnTrackWood, this.posX, this.posY, 5 + startHeight * 50 + z, 50, 50, 40, Math.PI / 2 * (turn - 1));
 
             Drawing.drawing.setColor(192, 192, 192);
-            Drawing.drawing.drawModel(turnTrackRail, this.posX, this.posY, 10 + startHeight * 50, 50, 50, 50, Math.PI / 2 * (turn - 1));
+            Drawing.drawing.drawModel(turnTrackRail, this.posX, this.posY, 10 + startHeight * 50 + z, 50, 50, 50, Math.PI / 2 * (turn - 1));
         }
         else if (!Game.enable3d)
         {
@@ -70,7 +72,7 @@ public class ObstacleTrainTrack extends Obstacle
 
             for (int i = -1; i <= 1; i++)
             {
-                Drawing.drawing.setColor(this.stackColorR[i + 1], this.stackColorG[i + 1], this.stackColorB[i + 1]);
+                Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
                 Drawing.drawing.fillRect(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, offX * 2.86 + 7, offY * 2.86 + 7);
             }
 
@@ -91,7 +93,7 @@ public class ObstacleTrainTrack extends Obstacle
 
             for (int i = -1; i <= 1; i++)
             {
-                Drawing.drawing.setColor(this.stackColorR[i + 1], this.stackColorG[i + 1], this.stackColorB[i + 1]);
+                Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
                 Drawing.drawing.fillBox(this, this.posX + offY * 1.1 * i, this.posY + offX * 1.1 * i, d + startHeight * 50, offX * 2.86 + 7, offY * 2.86 + 7, 6);
             }
         }
@@ -129,7 +131,7 @@ public class ObstacleTrainTrack extends Obstacle
 
         for (int i = -2; i <= 2; i++)
         {
-            Drawing.drawing.setColor(this.stackColorR[i + 2], this.stackColorG[i + 2], this.stackColorB[i + 2]);
+            Drawing.drawing.setColor(colorR, colorG, colorB);
             Drawing.drawing.fillInterfaceRect(x + 15 * i * sizeMult, y, 7 * sizeMult, 50 * sizeMult);
         }
 
@@ -216,10 +218,10 @@ public class ObstacleTrainTrack extends Obstacle
             int x = (int) (posX / 50) + dirX[i];
             int y = (int) (posY / 50) + dirY[i];
 
-            if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY || !(Game.obstacleGrid[x][y] instanceof ObstacleTrainTrack))
+            if (x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY || !(Game.getObstacle(x, y) instanceof ObstacleTrainTrack))
                 continue;
 
-            setObstacleOrientation(((ObstacleTrainTrack) Game.obstacleGrid[x][y]), dirX[i], dirY[i]);
+            setObstacleOrientation(((ObstacleTrainTrack) Game.getObstacle(x, y)), dirX[i], dirY[i]);
         }
 
         this.updateTurn();

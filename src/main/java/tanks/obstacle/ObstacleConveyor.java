@@ -51,7 +51,7 @@ public class ObstacleConveyor extends Obstacle
             return false;
 
         return x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY
-                && Game.obstacleGrid[x][y] instanceof ObstacleConveyor && Game.obstacleGrid[x][y].rotation == rotation;
+                && Game.getObstacle(x, y) instanceof ObstacleConveyor && Game.getObstacle(x, y).rotation == rotation;
     }
 
     @Override

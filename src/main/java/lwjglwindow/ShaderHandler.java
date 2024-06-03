@@ -77,7 +77,6 @@ public class ShaderHandler
         }
 
         this.window.setShader(this.window.shaderDefault.shaderShadowMap);
-
         this.window.loadPerspective();
 
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);

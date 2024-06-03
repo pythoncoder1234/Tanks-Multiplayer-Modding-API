@@ -61,23 +61,6 @@ public class ScreenPreviewUploadLevel extends Screen implements ILevelPreviewScr
     {
         this.back.update();
         this.upload.update();
-
-        if (Game.enable3d)
-            for (int i = 0; i < Game.obstacles.size(); i++)
-            {
-                Obstacle o = Game.obstacles.get(i);
-
-                o.postOverride();
-
-                if (o.startHeight > 1)
-                    continue;
-
-                int x = (int) (o.posX / Game.tile_size);
-                int y = (int) (o.posY / Game.tile_size);
-
-                if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-                    Chunk.getTile(x, y).updateHeight(o.getTileHeight());
-            }
     }
 
     public void drawLevel()

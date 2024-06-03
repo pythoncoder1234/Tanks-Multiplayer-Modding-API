@@ -403,6 +403,7 @@ public class Level
 
 			Chunk c = Chunk.getChunk(o.posX, o.posY);
 			c.addObstacle(o);
+			o.afterAdd();
         }
 
 		boolean[][] tankGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
@@ -739,8 +740,6 @@ t = customTanksMap.get(type).instantiate(type, x, y, angle);
 
         currentLightIntensity = light;
         currentShadowIntensity = shadow;
-        Game.obstacleGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
-        Game.surfaceTileGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
 		Drawing.drawing.setScreenBounds(Game.tile_size * sizeX, Game.tile_size * sizeY);
 		Chunk.populateChunks(Game.currentLevel);

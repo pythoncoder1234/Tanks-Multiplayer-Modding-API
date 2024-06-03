@@ -10,7 +10,9 @@ import tanks.tank.Turret;
 
 public class Effect extends Movable implements IDrawableWithGlow, IDrawableLightSource, IBatchRenderableObject
 {
-    public enum EffectType {fire, smokeTrail, trail, ray, explosion, laser, piece, obstaclePiece, obstaclePiece3d, charge, tread, darkFire, electric, healing, stun, bushBurn, glow, teleporterLight, teleporterPiece, interfacePiece, interfacePieceSparkle, snow, splash, shield, boostLight, exclamation, chain, tutorialProgress}
+    public enum EffectType {fire, smokeTrail, trail, ray, explosion, laser, piece, obstaclePiece, obstaclePiece3d, charge,
+        tread, darkFire, electric, healing, stun, bushBurn, glow, teleporterLight, teleporterPiece, interfacePiece,
+        interfacePieceSparkle, snow, splash, shield, boostLight, exclamation, chain, tutorialProgress}
 
     public enum State {live, removed, recycle}
 

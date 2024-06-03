@@ -416,7 +416,7 @@ public class TerrainRenderer
             this.outsideShader.set();
 
             float size = (float) (Obstacle.draw_size / Game.tile_size);
-            if (!(Game.screen instanceof ScreenGame))
+            if (!(Game.screen instanceof ScreenGame || Game.screen instanceof ScreenOptionsOverlay))
                 size = 0;
 
             this.outsideShader.setSize(size);
@@ -488,27 +488,15 @@ public class TerrainRenderer
         if (Game.enable3d)
         {
             Obstacle o = t.obstacle;
+            double extra = getExtra(i, j, o);
             if (o != null && o.replaceTiles && !o.removed)
-            {
-                double extra = 15;
-
-                for (int dir = 0; dir < 4; dir++)
-                {
-                    Chunk.Tile neighbor = Chunk.getTile(i + Game.dirX[dir], j + Game.dirY[dir]);
-                    if (neighbor != null)
-                        extra = Math.max(extra, -neighbor.height);
-                }
-
                 o.drawTile(t, r, g, b, depth, extra);
-            }
             else
-            {
                 this.addBox(t,
                         i * Game.tile_size,
                         j * Game.tile_size,
-                        -Game.tile_size, Game.tile_size, Game.tile_size,
-                        Game.tile_size + depth, BaseShapeRenderer.hide_behind_face, false);
-            }
+                        -extra, Game.tile_size, Game.tile_size,
+                        extra + depth, BaseShapeRenderer.hide_behind_face, false);
         }
         else
         {
@@ -534,6 +522,23 @@ public class TerrainRenderer
                         0, Game.tile_size, Game.tile_size,
                         0, (byte) ~(BaseShapeRenderer.hide_front_face), true);
         }
+    }
+
+    public static double getExtra(int x, int y, Obstacle o)
+    {
+        double extra = 0;
+
+        for (int dir = 0; dir < 4; dir++)
+        {
+            Chunk.Tile neighbor = Chunk.getTile(x + Game.dirX[dir], y + Game.dirY[dir]);
+            if (neighbor != null)
+                extra = Math.max(extra, -neighbor.groundHeight);
+        }
+
+        if (o != null)
+            extra += Math.min(0, o.getGroundHeight() > -1000 ? o.getGroundHeight() : 0);
+
+        return extra;
     }
 
     public float getShrubHeight()

@@ -16,13 +16,12 @@ This is done by sending the objects through the network.
 How to use
 ---
 
-To play with others as a client, only the JAR file is needed.
-To create a custom game or level, the source code is needed.
+Only the JAR is needed if playing with others or making an extension.
 
 Installation
 ---
 
-You can download the JAR file [here](https://onedrive.live.com/download?resid=1E1C6A69D73A57B9%21291&authkey=!ADnrRb8wNzdDHy8).
+You can download the JAR file [here](https://1drv.ms/u/c/1e1c6a69d73a57b9/IQMC8RGNAAneSZw_hNmUpGU3ATOWYRwNB1c363Fp10eVpMI).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
@@ -31,12 +30,13 @@ New Features:
 
 - Chunk loading system
 - Huge optimizations
+- Lots of bug fixes
+- Removed `Game.obstacleGrid` and `Game.surfaceTileGrid` (use `Game.getObstacle` and `Game.getSurfaceObstacle` instead
 - Freecam control player (`F7` to toggle)
 - Added `Obstacle.afterAdd` and `Obstacle.onNeighborUpdate`
 - `F3`+`F8` turns on Record mode, which hides the info bar and speedrun timer
+- Target type tank property - choices are allies or enemies, but maybe more in the future
 - Removed update skipping for now
 - Renamed `Game.sampleTerrainGroundHeight` to `Game.sampleDefaultGroundHeight`
-- Fixed many bugs
-- Target type tank property - choices are allies or enemies, but maybe more in the future
 
 [Older Changelogs](changelog.md)

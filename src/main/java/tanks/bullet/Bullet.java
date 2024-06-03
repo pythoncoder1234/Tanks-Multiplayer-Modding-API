@@ -506,8 +506,8 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
             {
                 for (int y = y1; y <= y2; y++)
                 {
-                    output = output | checkCollisionObstacle(Game.obstacleGrid[x][y]);
-                    output = output | checkCollisionObstacle(Game.surfaceTileGrid[x][y]);
+                    output = output | checkCollisionObstacle(Game.getObstacle(x, y));
+                    output = output | checkCollisionObstacle(Game.getSurfaceObstacle(x, y));
                 }
             }
 
@@ -569,54 +569,58 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 
 		this.inside.clear();
 
-		for (int i = 0; i < Game.movables.size(); i++)
+		Chunk.getChunksInRadius(posX, posY, size + 10).forEach(c ->
 		{
-			Movable m = Game.movables.get(i);
-
-			if (m instanceof Tank t && !m.destroy)
+			for (Movable m : c.movables)
 			{
-				double horizontalDist = Math.abs(this.posX - m.posX);
-				double verticalDist = Math.abs(this.posY - m.posY);
+				if (Math.abs(this.posZ - m.posZ) > Game.tile_size)
+					continue;
 
-				double bound = this.size / 2 + t.size * t.hitboxSize / 2;
-
-				if (horizontalDist < bound && verticalDist < bound && t.size > 0)
+				if (m instanceof Tank t && !m.destroy)
 				{
-					this.collisionX = this.posX;
-					this.collisionY = this.posY;
+					double horizontalDist = Math.abs(this.posX - m.posX);
+					double verticalDist = Math.abs(this.posY - m.posY);
 
-					if (!this.insideOld.contains(t))
+					double bound = this.size / 2 + t.size * t.hitboxSize / 2;
+
+					if (horizontalDist < bound && verticalDist < bound && t.size > 0)
 					{
-						this.collided();
-						this.collidedWithTank(t);
-					}
+						this.collisionX = this.posX;
+						this.collisionY = this.posY;
 
-					this.inside.add(t);
+						if (!this.insideOld.contains(t))
+						{
+							this.collided();
+							this.collidedWithTank(t);
+						}
+
+						this.inside.add(t);
+					}
+				}
+				else if (((m instanceof Bullet && ((Bullet) m).enableCollision && (((Bullet) m).bulletCollision && ((Bullet) m).externalBulletCollision && this.bulletCollision)) || m instanceof Mine) && m != this && !m.destroy)
+				{
+					double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
+
+					double s = m.size;
+
+					double bound = this.size / 2 + s / 2;
+
+					if (distSq <= bound * bound)
+					{
+						this.collisionX = this.posX;
+						this.collisionY = this.posY;
+
+						if (!this.insideOld.contains(m))
+						{
+							this.collided();
+							this.collidedWithObject(m);
+						}
+
+						this.inside.add(m);
+					}
 				}
 			}
-			else if (((m instanceof Bullet && ((Bullet) m).enableCollision && (((Bullet) m).bulletCollision && ((Bullet) m).externalBulletCollision && this.bulletCollision)) || m instanceof Mine) && m != this && !m.destroy)
-			{
-				double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
-
-				double s = m.size;
-
-				double bound = this.size / 2 + s / 2;
-
-				if (distSq <= bound * bound)
-				{
-					this.collisionX = this.posX;
-					this.collisionY = this.posY;
-
-					if (!this.insideOld.contains(m))
-					{
-						this.collided();
-						this.collidedWithObject(m);
-					}
-
-					this.inside.add(m);
-				}
-			}
-		}
+		});
 
 		if (collided)
 		{

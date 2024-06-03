@@ -39,7 +39,7 @@ public class Minimap extends FixedMenu
     @Override
     public void draw()
     {
-        if ((!enabled && age - lastToggleTime > 10) || Game.obstacleGrid == null)
+        if (!enabled && age - lastToggleTime > 10)
             return;
 
         focusedTank = ScreenGame.focusedTank();
@@ -75,10 +75,8 @@ public class Minimap extends FixedMenu
                     y = (posY + 110 - panOffsetY) + gridY * 50. / 13 * scale;
                 }
 
-                Obstacle o = null;
                 boolean inside = gridX >= 0 && gridX < Game.currentSizeX && gridY >= 0 && gridY < Game.currentSizeY;
-                if (inside)
-                    o = Game.obstacleGrid[gridX][gridY];
+                Obstacle o = Game.getObstacle(gridX, gridY);
 
                 double cx = posX + size / 2.;
                 double cy = posY + size / 2.;

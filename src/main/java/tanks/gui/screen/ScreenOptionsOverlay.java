@@ -6,7 +6,7 @@ import tanks.Game;
 import tanks.Level;
 import tanks.gui.SpeedrunTimer;
 
-public abstract class ScreenOptionsOverlay extends Screen implements IHiddenChatboxScreen, IPartyGameScreen
+public abstract class ScreenOptionsOverlay extends Screen implements IPartyGameScreen
 {
     public ScreenGame game;
     public Screen prevScreen;

@@ -1429,7 +1429,7 @@ public class TankAIControlled extends Tank
 
 			if (newX < 0 || newX >= Game.currentSizeX || newY < 0 || newY >= Game.currentSizeY) continue;
 
-			Obstacle o = Game.obstacleGrid[newX][newY];
+			Obstacle o = Game.getObstacle(newX, newY);
 			if (o != null)
 			{
 				checkCollisionWith(o);
@@ -3377,7 +3377,7 @@ public class TankAIControlled extends Tank
 
             this.parent = parent;
 
-			Obstacle o = Game.obstacleGrid[x][y];
+			Obstacle o = Game.getObstacle(x, y);
 			t.setPathfindingTileProperties(this, o);
 
 			for (int i = 0; i < 4; i++)

@@ -96,8 +96,6 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
                 Game.currentLevel = new Level("{28,18||2-8-player}");
                 Game.currentSizeX = 28;
                 Game.currentSizeY = 18;
-                Game.obstacleGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
-                Game.surfaceTileGrid = new Obstacle[Game.currentSizeX][Game.currentSizeY];
 
 				Chunk.reset();
             }

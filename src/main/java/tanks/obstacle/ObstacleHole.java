@@ -56,9 +56,9 @@ public class ObstacleHole extends Obstacle
 
 			double mul = 0.4 + 0.6 * (1 - draw_size / Game.tile_size);
 			Drawing.drawing.setColor(r * mul, g * mul, b * mul);
-			Drawing.drawing.fillBox(tile, this.posX, this.posY, -draw_size / 2 + d, Game.tile_size, Game.tile_size, 0, (byte) 61);
+			Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, 0, (byte) 61);
 			Drawing.drawing.setColor(r, g, b);
-			Drawing.drawing.fillBox(tile, this.posX, this.posY, -draw_size / 2 + d, Game.tile_size, Game.tile_size, draw_size / 2, (byte) 3);
+			Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d, (byte) 3);
 			
 			Drawing.drawing.fillBox(tile, this.posX - Game.tile_size * (0.5 - (1 - s) / 4), this.posY, -Game.tile_size / 2 + d, Game.tile_size / 2 * (1 - s), Game.tile_size, Game.tile_size / 2, (byte) 17);
 			Drawing.drawing.fillBox(tile, this.posX + Game.tile_size * (0.5 - (1 - s) / 4), this.posY, -Game.tile_size / 2 + d, Game.tile_size / 2 * (1 - s), Game.tile_size, Game.tile_size / 2, (byte) 33);

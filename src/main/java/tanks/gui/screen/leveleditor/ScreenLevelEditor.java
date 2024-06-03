@@ -532,7 +532,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		zoomDown = false;
 		validZoomFingers = 0;
 
-		if (!Game.game.window.touchscreen && Game.obstacleGrid != null)
+		if (!Game.game.window.touchscreen)
 		{
 			double mx = Drawing.drawing.getMouseX();
 			double my = Drawing.drawing.getMouseY();
@@ -540,10 +540,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			int x = (int) (mx / 50);
 			int y = (int) (my / 50);
 
-			if (x >= 0 && y >= 0 && x < Game.obstacleGrid.length && y < Game.obstacleGrid[0].length)
-				hoverObstacle = Game.obstacleGrid[x][y];
-			else
-				hoverObstacle = null;
+			hoverObstacle = Game.getObstacle(x, y);
 
 			boolean[] handled = checkMouse(mx, my,
 					Game.game.input.editorUse.isPressed(),
@@ -684,9 +681,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			{
 				if (Game.enable3d)
 					Game.redrawGroundTiles.add(new int[]{x, y});
-
-				Game.obstacleGrid[x][y] = null;
-				Game.surfaceTileGrid[x][y] = null;
 
 				if (o.bulletCollision)
 				{
@@ -1342,8 +1336,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					{
 						if (mouseObstacleStartHeight == 0 || currentPlaceable != Placeable.obstacle)
 						{
-							Obstacle o = Game.obstacleGrid[(int) (mx / Game.tile_size)][(int) (my / Game.tile_size)];
-							Obstacle s = Game.surfaceTileGrid[(int) (mx / Game.tile_size)][(int) (my / Game.tile_size)];
+							Obstacle o = Game.getObstacle(mx, my);
+							Obstacle s = Game.getSurfaceObstacle(mx, my);
 
 							if (o != null || s != null)
 							{
@@ -1878,26 +1872,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 		windowTitle = (allowClose ? "" : "*");
 
-		if (Game.enable3d)
-		{
-			for (Obstacle o : Game.obstacles)
-			{
-				o.postOverride();
-
-				if (o.startHeight > 1)
-					continue;
-
-				int x = (int) (o.posX / Game.tile_size);
-				int y = (int) (o.posY / Game.tile_size);
-
-				if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-					Chunk.getTile(x, y).updateHeight(o.getTileHeight());
-			}
-		}
-
-		for (Obstacle o : Game.obstacles)
-			o.baseGroundHeight = Game.sampleGroundHeight(o.posX, o.posY);
-
 		Drawing.drawing.setColor(174, 92, 16);
 
 		double mul = 1;
@@ -2005,15 +1979,15 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				int y = (int) (mouseObstacle.posY / Game.tile_size);
 
 				if (x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY &&
-						(Game.obstacleGrid[x][y] == null || (Game.surfaceTileGrid[x][y] == null &&
-								Game.obstacleGrid[x][y].isSurfaceTile != mouseObstacle.isSurfaceTile && !mouseObstacle.tankCollision)))
+						(Game.getObstacle(x, y) == null || (Game.getSurfaceObstacle(x, y) == null &&
+								Game.getObstacle(x, y).isSurfaceTile != mouseObstacle.isSurfaceTile && !mouseObstacle.tankCollision)))
 				{
 					mouseObstacle.startHeight = mouseObstacleStartHeight;
 
 					if (Game.enable3d)
 					{
 						if (Game.lessThan(-1, x, Game.currentSizeX) && Game.lessThan(-1, y, Game.currentSizeY) &&
-								(Game.obstacleGrid[x][y] == null || !Game.lessThan(Game.obstacleGrid[x][y].startHeight, mouseObstacle.stackHeight + mouseObstacleStartHeight, Game.obstacleGrid[x][y].stackHeight)))
+								(Game.getObstacle(x, y) == null || !Game.lessThan(Game.getObstacle(x, y).startHeight, mouseObstacle.stackHeight + mouseObstacleStartHeight, Game.getObstacle(x, y).stackHeight)))
 							mouseObstacle.draw3dOutline(mouseObstacle.colorR, mouseObstacle.colorG, mouseObstacle.colorB, 100);
 					}
 
@@ -2040,16 +2014,16 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					{
 						if (Game.enable3d)
 						{
-							if (!(x < Game.currentSizeX && y < Game.currentSizeY && Game.obstacleGrid[x][y] != null && Game.surfaceTileGrid[x][y] == null))
+							if (!(x < Game.currentSizeX && y < Game.currentSizeY && Game.getObstacle(x, y) != null && Game.getSurfaceObstacle(x, y) == null))
 							{
 								Drawing.drawing.setColor(230 + extra, 230 + extra, 230 + extra, 128, 0.5);
 								Drawing.drawing.fillBox((x + 0.5) * Game.tile_size, (y + 0.5) * Game.tile_size, 15,
 										Game.tile_size, Game.tile_size, 1);
 							}
-							else if (Game.surfaceTileGrid[x][y] != null)
-								Game.surfaceTileGrid[x][y].draw3dOutline(230 + extra, 230 + extra, 230 + extra, 128);
+							else if (Game.getSurfaceObstacle(x, y) != null)
+								Game.getSurfaceObstacle(x, y).draw3dOutline(230 + extra, 230 + extra, 230 + extra, 128);
 							else
-								Game.obstacleGrid[x][y].draw3dOutline(230 + extra, 230 + extra, 230 + extra, 128);
+								Game.getObstacle(x, y).draw3dOutline(230 + extra, 230 + extra, 230 + extra, 128);
 						}
 						else
 							Drawing.drawing.fillRect((x + 0.5) * Game.tile_size, (y + 0.5) * Game.tile_size, Game.tile_size, Game.tile_size);
@@ -2141,8 +2115,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						if (!selectedTiles[x][y])
 							continue;
 
-						Obstacle o = Game.obstacleGrid[x][y];
-						if (o == null) o = Game.surfaceTileGrid[x][y];
+						Obstacle o = Game.getObstacle(x, y);
+						if (o == null) o = Game.getSurfaceObstacle(x, y);
 						if (o == null || o.selectorCount() == 0 || !(o.selectors.get(0) instanceof StackHeightSelector)) continue;
 
 						o.selectors.get(0).changeMeta(add);
@@ -2188,8 +2162,10 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 					if (Game.enable3d)
 					{
-						if (Game.obstacleGrid[gridX][gridY] != null)
-							Game.obstacleGrid[gridX][gridY].draw3dOutline(230 + extra, 230 + extra, 230 + extra, 128);
+						if (Game.getObstacle(gridX, gridY) != null)
+						{
+							Game.getObstacle(gridX, gridY).draw3dOutline(230 + extra, 230 + extra, 230 + extra, 128);
+						}
 						else
 						{
 							if (!selectInverted)
@@ -2217,8 +2193,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 	public void magicSelect(int x, int y)
 	{
-		boolean obs = Game.obstacleGrid[x][y] != null;
-		Obstacle o = obs ? Game.obstacleGrid[x][y] : Game.surfaceTileGrid[x][y];
+		boolean obs = Game.getObstacle(x, y) != null;
+		Obstacle o = obs ? Game.getObstacle(x, y) : Game.getSurfaceObstacle(x, y);
 		if (o == null)
 			return;
 
@@ -2245,7 +2221,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			if (newX < 0 || newX >= Game.currentSizeX || newY < 0 || newY >= Game.currentSizeY || visited[newX][newY])
 				continue;
 
-			Obstacle o = obs ? Game.obstacleGrid[newX][newY] : Game.surfaceTileGrid[newX][newY];
+			Obstacle o = obs ? Game.getObstacle(newX, newY) : Game.getSurfaceObstacle(newX, newY);
 			if (o == null || !o.getClass().equals(cls))
 				continue;
 

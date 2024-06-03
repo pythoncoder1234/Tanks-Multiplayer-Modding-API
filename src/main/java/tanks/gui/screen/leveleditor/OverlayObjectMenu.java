@@ -95,6 +95,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
     public ButtonObject playerSpawnsButton = new ButtonObject(new TankSpawnMarker("player", 0, 0, 0), this.centerX + 50, this.centerY, 75, 75, () -> editor.movePlayer = false, "Add multiple player spawn points");
 
     public ButtonObject movePlayerButton;
+    private boolean drawSHButton;
 
     public OverlayObjectMenu(Screen previous, ScreenLevelEditor editor)
     {
@@ -379,7 +380,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
                 this.editStartingHeight.update();
         }
 
-        if (leftButton != null)
+        if (leftButton != null && !drawSHButton)
             leftButton.update();
 
         if (rightButton != null)
@@ -418,6 +419,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
         if (Game.screen != this)
             return;
 
+        drawSHButton = !editor.mouseObstacle.isSurfaceTile && Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT);
         Drawing.drawing.setColor(this.editor.fontBrightness, this.editor.fontBrightness, this.editor.fontBrightness);
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 240, "Object menu");
@@ -511,7 +513,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
                     this.obstacleButtons.get(i).draw();
             }
 
-            if (!editor.mouseObstacle.isSurfaceTile && Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
+            if (drawSHButton)
             {
                 this.editStartingHeight.setText("Starting height: %.1f", editor.mouseObstacleStartHeight);
                 this.editStartingHeight.draw();
@@ -520,7 +522,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
             this.drawMobileTooltip(this.obstacleButtons.get(this.editor.obstacleNum).hoverTextRawTranslated);
         }
 
-        if (leftButton != null)
+        if (leftButton != null && !drawSHButton)
             leftButton.draw();
 
         if (rightButton != null)

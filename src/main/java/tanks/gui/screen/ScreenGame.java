@@ -1853,12 +1853,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 					t.unbreakable = false;
 				}
 
-				if (o == Game.obstacleGrid[x][y])
-					Game.obstacleGrid[x][y] = null;
-
-				if (o == Game.surfaceTileGrid[x][y])
-					Game.surfaceTileGrid[x][y] = null;
-
 				Game.removeObstacle(o);
 				Game.removeSurfaceObstacle(o);
 			}
@@ -1977,7 +1971,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 	public void setPerspective()
 	{
-		if (Game.followingCam && Game.framework == Game.Framework.lwjgl && !Game.game.window.drawingShadow)
+		if (Game.followingCam && Game.framework == Game.Framework.lwjgl)
         {
             double frac = Panel.panel.zoomTimer;
 
@@ -2017,13 +2011,10 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
         }
         else if (Game.angledView && Game.framework == Game.Framework.lwjgl)
         {
-            if (!Game.game.window.drawingShadow)
-            {
-                if (this.playing && (!this.paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && !ScreenGame.finished)
-                    slant = Math.min(1, slant + 0.01 * Panel.frameFrequency);
-                else if (ScreenGame.finished)
-                    slant = Math.max(0, slant - 0.01 * Panel.frameFrequency);
-            }
+			if (this.playing && (!this.paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && !ScreenGame.finished)
+				slant = Math.min(1, slant + 0.01 * Panel.frameFrequency);
+			else if (ScreenGame.finished)
+				slant = Math.max(0, slant - 0.01 * Panel.frameFrequency);
 
             this.slantRotation.pitch = this.slant * -Math.PI / 16;
             this.slantTranslation.y = -this.slant * 0.05;
@@ -2198,7 +2189,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			if (Chunk.debug)
 			{
 				Drawing.drawing.setColor(255, 255, 255);
-				Drawing.drawing.drawText(m.posX, m.posY, Game.tile_size, count + "");
+				Drawing.drawing.drawText(m.posX, m.posY, m.size, count + "");
 			}
 		}
 
