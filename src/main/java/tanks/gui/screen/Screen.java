@@ -2,6 +2,7 @@ package tanks.gui.screen;
 
 import basewindow.IBatchRenderableObject;
 import tanks.*;
+import tanks.gui.ScreenIntro;
 import tanks.obstacle.Obstacle;
 import tanks.rendering.StaticTerrainRenderer;
 
@@ -85,29 +86,26 @@ public abstract class Screen implements IBatchRenderableObject
 		this.drawDefaultBackground(1);
 	}
 
-	public void drawDefaultBackground(double size)
+	public void 	drawDefaultBackground(double size)
 	{
-		if (Game.screen instanceof ScreenIntro && !(this instanceof ScreenIntro))
+		if ((Game.screen instanceof ScreenIntro && !(this instanceof ScreenIntro)))
 			return;
 
-		if (!drawn)
-			this.drawn = true;
+		this.drawn = true;
 
 		if (!(Game.screen instanceof IDarkScreen))
 			Panel.darkness = Math.max(Panel.darkness - Panel.frameFrequency * 3, 0);
 
-		for (int i = 0; i < Game.currentSizeX; i++)
-		{
-			for (int j = 0; j < Game.currentSizeY; j++)
-			{
-				Chunk.Tile t = Chunk.getTile(i, j);
-				if (t.height <= -1000)
-					t.height = 0;
+		for (Chunk c : Chunk.chunkList)
+			for (Chunk.Tile[] arr : c.tileGrid)
+				for (Chunk.Tile t : arr)
+				{
+					if (t.height <= -1000)
+						t.height = 0;
 
-				if (t.groundHeight <= -1000)
-					t.groundHeight = 0;
-			}
-		}
+					if (t.groundHeight <= -1000)
+						t.groundHeight = 0;
+				}
 
 		double frac = 0;
 

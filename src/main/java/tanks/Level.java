@@ -51,8 +51,8 @@ public class Level
     public boolean timed = false;
     public double timer;
 
-    public int sizeX;
-    public int sizeY;
+	public int startX, startY;
+	public int sizeX, sizeY;
 
     public int colorR = 235;
     public int colorG = 207;
@@ -89,6 +89,7 @@ public class Level
 	public double startTime = 400;
 	public boolean disableFriendlyFire = false;
 	public boolean updateModify = true;
+	public boolean mapLoad = false;
 
 	/**
 	 * A level string is structured like this:
@@ -319,8 +320,10 @@ public class Level
 			s.teams = this.teamsList;
 		}
 
-		Chunk.populateChunks(this);
-		this.reloadTiles();
+		if (!mapLoad)
+			this.reloadTiles();
+		else
+			Chunk.populateChunks(this);
 
 		boolean[][] solidGrid = new boolean[Game.currentSizeX][Game.currentSizeY];
 
@@ -371,7 +374,7 @@ public class Level
 				{
 					for (int y = startY; y <= endY; y++)
 					{
-						Obstacle o = Game.registryObstacle.getEntry(name).getObstacle(x, y);
+						Obstacle o = Game.registryObstacle.getEntry(name).getObstacle(x + this.startX, y + this.startY);
 						o.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 
 						if (meta != null)
@@ -427,8 +430,8 @@ public class Level
             for (String s : tanks)
             {
                 String[] tank = s.split("-");
-                double x = Game.tile_size * (0.5 + Double.parseDouble(tank[0]));
-                double y = Game.tile_size * (0.5 + Double.parseDouble(tank[1]));
+                double x = Game.tile_size * (0.5 + Double.parseDouble(tank[0]) + startX);
+                double y = Game.tile_size * (0.5 + Double.parseDouble(tank[1]) + startY);
                 String type = tank[2].toLowerCase();
                 double angle = 0;
 
@@ -479,7 +482,7 @@ public class Level
 					continue;
 				}
                 if (customTanksMap.get(type) != null)
-t = customTanksMap.get(type).instantiate(type, x, y, angle);
+					t = customTanksMap.get(type).instantiate(type, x, y, angle);
                 else
                     t = Game.registryTank.getEntry(type).getTank(x, y, angle);
 
@@ -693,7 +696,8 @@ t = customTanksMap.get(type).instantiate(type, x, y, angle);
 			}
 		}
 
-		addLevelBorders();
+		if (!mapLoad)
+			addLevelBorders();
 
 		if (!remote && sc == null || (sc instanceof ScreenLevelEditor))
 			Game.eventsOut.add(new EventEnterLevel());
@@ -701,14 +705,10 @@ t = customTanksMap.get(type).instantiate(type, x, y, angle);
 
 	public void addLevelBorders()
 	{
-		Chunk.getChunksInRange(0, 0, sizeX, 0).forEach(chunk ->
-				chunk.staticFaces.bottomFaces.add(chunk.borderFaces[0]));
-		Chunk.getChunksInRange(sizeX, 0, sizeX, sizeY).forEach(chunk ->
-				chunk.staticFaces.leftFaces.add(chunk.borderFaces[1]));
-		Chunk.getChunksInRange(0, sizeY, sizeX, sizeY).forEach(chunk ->
-				chunk.staticFaces.topFaces.add(chunk.borderFaces[2]));
-		Chunk.getChunksInRange(0, 0, 0, sizeY).forEach(chunk ->
-				chunk.staticFaces.rightFaces.add(chunk.borderFaces[3]));
+		Chunk.getChunksInRange(0, 0, sizeX, 0).forEach(chunk -> chunk.addBorderFace(0, this));
+		Chunk.getChunksInRange(sizeX, 0, sizeX, sizeY).forEach(chunk -> chunk.addBorderFace(1, this));
+		Chunk.getChunksInRange(0, sizeY, sizeX, sizeY).forEach(chunk -> chunk.addBorderFace(2, this));
+		Chunk.getChunksInRange(0, 0, 0, sizeY).forEach(chunk -> chunk.addBorderFace(3, this));
 	}
 
 	public void updateModify()
@@ -743,6 +743,8 @@ t = customTanksMap.get(type).instantiate(type, x, y, angle);
 
 		Drawing.drawing.setScreenBounds(Game.tile_size * sizeX, Game.tile_size * sizeY);
 		Chunk.populateChunks(Game.currentLevel);
+		if (!mapLoad)
+			addLevelBorders();
 
 		for (Obstacle o: Game.obstacles)
         {
@@ -805,16 +807,11 @@ t = customTanksMap.get(type).instantiate(type, x, y, angle);
 
 	public static boolean isDark()
 	{
-		return isDark(true);
+		return isDark(false);
 	}
 
 	public static boolean isDark(boolean forText)
 	{
-		double sum = Level.currentColorR + Level.currentColorVarR / 2 + Level.currentColorG + Level.currentColorVarG / 2
-				+ Level.currentColorB + Level.currentColorVarB / 2;
-		if (Game.framework == Game.Framework.lwjgl)
-			sum *= currentLightIntensity;
-
-		return sum <= (forText ? 110 : 75) * 3;
+		return Level.currentColorR * 0.2126 + Level.currentColorG * 0.7152 + Level.currentColorB * 0.0722 <= (forText ? 127 : 92) || currentLightIntensity <= 0.5;
 	}
 }

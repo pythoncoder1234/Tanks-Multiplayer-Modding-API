@@ -22,11 +22,9 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
 
         this.draggable = false;
         this.destructible = true;
-        this.allowBounce = false;
         this.colorR = 255;
         this.colorG = Math.random() * 40 + 80;
         this.colorB = 0;
-        this.glow = 0.5;
 
         if (!Game.fancyTerrain)
             this.colorG = 100;
@@ -41,12 +39,12 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
                 this.stackColorG[i] = 100;
         }
 
-        this.renderer = ShaderExplosive.class;
-
         this.destroyEffectAmount = 0;
         this.checkForObjects = true;
         this.shouldShootThrough = true;
         this.description = "A block which explodes upon contact";
+
+        this.renderer = ShaderExplosive.class;
     }
 
     @Override
@@ -55,7 +53,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
         if (this.trigger != Game.dummyTank)
             return;
 
-        if ((m instanceof Bullet b && b.explodeMines) || m instanceof Tank)
+        if (m instanceof Bullet || m instanceof Tank)
         {
             if (m instanceof Bullet)
             {
@@ -115,7 +113,7 @@ public class ObstacleExplosive extends Obstacle implements IAvoidObject
     @Override
     public double getRadius()
     {
-        return Math.min(Mine.mine_radius * 1.5, Mine.mine_radius * ((this.stackHeight - 1) / 2 + 1));
+        return Mine.mine_radius * ((this.stackHeight - 1) / 2 + 1);
     }
 
     @Override

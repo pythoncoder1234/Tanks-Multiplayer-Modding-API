@@ -5,6 +5,7 @@ import tanks.Chunk;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Panel;
+import tanks.gui.ScreenIntro;
 import tanks.gui.screen.*;
 import tanks.obstacle.Obstacle;
 
@@ -400,7 +401,7 @@ public class TerrainRenderer
         if (Game.screen instanceof ScreenIntro || Game.screen instanceof ScreenExit)
         {
             this.introShader.set();
-            this.introShader.obstacleSizeFrac.set((float) Obstacle.draw_size);
+            this.introShader.setSize((float) (Obstacle.draw_size / Game.tile_size));
             this.introShader.d3.set(Game.enable3d);
 
             for (int x = xStart; x <= xEnd; x++)
@@ -504,7 +505,7 @@ public class TerrainRenderer
                     i * Game.tile_size,
                     j * Game.tile_size,
                     0, Game.tile_size, Game.tile_size,
-                    0, (byte) ~(BaseShapeRenderer.hide_front_face), false);
+                    0, (byte) ~BaseShapeRenderer.hide_front_face, false);
         }
 
         if (!this.staged)
@@ -520,7 +521,7 @@ public class TerrainRenderer
                         i * Game.tile_size,
                         j * Game.tile_size,
                         0, Game.tile_size, Game.tile_size,
-                        0, (byte) ~(BaseShapeRenderer.hide_front_face), true);
+                        0, (byte) ~BaseShapeRenderer.hide_front_face, true);
         }
     }
 
@@ -532,7 +533,7 @@ public class TerrainRenderer
         {
             Chunk.Tile neighbor = Chunk.getTile(x + Game.dirX[dir], y + Game.dirY[dir]);
             if (neighbor != null)
-                extra = Math.max(extra, -neighbor.groundHeight);
+                extra = Math.max(extra, -neighbor.height);
         }
 
         if (o != null)
@@ -571,6 +572,9 @@ public class TerrainRenderer
         for (int x = 0; x < Game.currentSizeX; x++)
             for (int y = 0; y < Game.currentSizeY; y++)
                 drawTile(x, y);
+
+        if (Game.screen instanceof ScreenGame g)
+            g.drawBorders();
 
         Obstacle.draw_size = s;
     }

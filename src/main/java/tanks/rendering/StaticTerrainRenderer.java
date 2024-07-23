@@ -1,6 +1,7 @@
 package tanks.rendering;
 
-import basewindow.BaseStaticBatchRenderer;
+import basewindow.BaseShapeBatchRenderer;
+import basewindow.BaseWindow;
 import basewindow.IBatchRenderableObject;
 import basewindow.ShaderGroup;
 import tanks.Chunk;
@@ -22,9 +23,6 @@ public class StaticTerrainRenderer extends TerrainRenderer
 
     protected float[] currentColor = new float[3];
     protected double currentDepth;
-
-    public double offX;
-    public double offY;
 
     public boolean asPreview = false;
     public int previewWidth = 0;
@@ -52,6 +50,28 @@ public class StaticTerrainRenderer extends TerrainRenderer
         }
     }
 
+    public ShaderGroup getShader(Class<? extends ShaderGroup> shaderClass)
+    {
+        ShaderGroup s = Game.game.shaderInstances.get(shaderClass);
+        if (s != null)
+            return s;
+        else
+        {
+            try
+            {
+                s = shaderClass.getConstructor(BaseWindow.class).newInstance(Game.game.window);
+                s.initialize();
+                Game.game.shaderInstances.put(shaderClass, s);
+                return s;
+            }
+            catch (Exception e)
+            {
+                Game.exitToCrash(e);
+                return null;
+            }
+        }
+    }
+
     public RegionRenderer getRenderer(Class<? extends ShaderGroup> s)
     {
         return renderers.get(s);
@@ -59,7 +79,7 @@ public class StaticTerrainRenderer extends TerrainRenderer
 
     public static class RegionRenderer
     {
-        public BaseStaticBatchRenderer renderer;
+        public BaseShapeBatchRenderer renderer;
         public ShaderGroup shader;
 
         public RegionRenderer(ShaderGroup s)
@@ -76,10 +96,10 @@ public class StaticTerrainRenderer extends TerrainRenderer
 
         Class<? extends ShaderGroup> sg = ShaderGroup.class;
 
-        if (o instanceof Obstacle)
-            sg = ((Obstacle) o).renderer;
-        else if (o instanceof Chunk.Tile && ((Chunk.Tile) o).obstacle != null)
-            sg = ((Chunk.Tile) o).obstacle.tileRenderer;
+        if (o instanceof Obstacle o1)
+            sg = o1.renderer;
+        else if (o instanceof Chunk.Tile t && t.obstacle != null)
+            sg = t.obstacle.tileRenderer;
 
         if (!outOfBounds)
             s = this.getRenderer(sg);
@@ -93,19 +113,13 @@ public class StaticTerrainRenderer extends TerrainRenderer
         return s;
     }
 
-    public void addVertexCoord(BaseStaticBatchRenderer s, ShaderGroup shader, float f)
-    {
-        if (shader instanceof IObstacleVertexCoordShader)
-            s.setAttribute(((IObstacleVertexCoordShader) shader).getVertexCoord(), f);
-    }
-
     public void addBox(IBatchRenderableObject o, double x, double y, double z, double sX, double sY, double sZ, byte options, boolean out)
     {
         if (this.freed)
             Game.exitToCrash(new RuntimeException("Renderer was freed"));
 
         RegionRenderer r = this.getRenderer(o, out);
-        BaseStaticBatchRenderer s = r.renderer;
+        BaseShapeBatchRenderer s = r.renderer;
         ShaderGroup shader = r.shader;
 
         float x0 = (float) x;
@@ -258,7 +272,6 @@ public class StaticTerrainRenderer extends TerrainRenderer
         this.freed = true;
     }
 
-    public static int count = 0;
     public void drawMap(RegionRenderer s, int xOffset, int yOffset)
     {
         double sX = asPreview ? previewWidth : Game.currentSizeX;

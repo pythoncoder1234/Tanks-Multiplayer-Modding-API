@@ -127,8 +127,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 			this.stackColorB[i] = col2[2];
 		}
 
-		this.baseGroundHeight = Game.sampleGroundHeight(this.posX, this.posY);
-
+		this.baseGroundHeight = Game.sampleDefaultGroundHeight(this.posX, this.posY);
 		this.description = "A solid block which can be destroyed by mines";
 	}
 

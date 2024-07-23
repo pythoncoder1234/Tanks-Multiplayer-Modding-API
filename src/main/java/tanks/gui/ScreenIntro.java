@@ -1,4 +1,4 @@
-package tanks.gui.screen;
+package tanks.gui;
 
 import basewindow.BaseFile;
 import basewindow.transformation.Translation;
@@ -6,6 +6,7 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.Level;
 import tanks.Panel;
+import tanks.gui.screen.*;
 import tanks.obstacle.Obstacle;
 
 public class ScreenIntro extends Screen
@@ -23,6 +24,7 @@ public class ScreenIntro extends Screen
     public ScreenIntro()
     {
         this.musicID = "menu";
+        this.music = "menu_1.ogg";
 
         zoomTranslation.window = Game.game.window;
         zoomTranslation.applyAsShadow = true;
@@ -44,6 +46,7 @@ public class ScreenIntro extends Screen
 
                 ScreenChangelog s = new ScreenChangelog();
                 s.setup();
+                s.prev = nextScreen;
 
                 if (!s.pages.isEmpty())
                     nextScreen = s;
@@ -89,6 +92,8 @@ public class ScreenIntro extends Screen
     public void draw()
     {
         Game.game.window.clipMultiplier = 2;
+        Game.game.window.clipDistMultiplier = 50;
+
         double frac = Math.min(1, ((lastTime - startTime - introTime) / introAnimationTime));
 
         if (Game.enable3d && Game.fancyTerrain)
@@ -103,7 +108,7 @@ public class ScreenIntro extends Screen
 
         if (lastTime - startTime >= introTime && Game.fancyTerrain)
         {
-            Obstacle.draw_size = frac;
+            Obstacle.draw_size = frac * Game.tile_size;
             Game.screen.drawDefaultBackground(frac);
         }
 
@@ -122,5 +127,6 @@ public class ScreenIntro extends Screen
         Panel.panel.drawBar((1 - frac) * 40);
 
         Game.game.window.clipMultiplier = 100;
+        Game.game.window.clipDistMultiplier = 0.5;
     }
 }

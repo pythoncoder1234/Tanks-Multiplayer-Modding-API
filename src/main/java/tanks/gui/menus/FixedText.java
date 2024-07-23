@@ -111,10 +111,10 @@ public class FixedText extends FixedMenu
         {
             firstFrame = false;
             this.prevText = this.styling.text;
-            this.fadeOutEffect = !this.fadeOutEffect;
+            this.fadeOutEffect = !this.fadeOutEffect && duration < fadeDuration;
             this.hasItems = Game.player.hotbar.enabledItemBar;
 
-            if (this.fadeInEffect)
+            if (this.fadeInEffect && duration > fadeDuration)
                 this.animations.add(new Animation.FadeIn(fadeDuration));
         }
 

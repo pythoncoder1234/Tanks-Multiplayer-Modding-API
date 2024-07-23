@@ -9,10 +9,10 @@ import tanks.gui.Button;
 import tanks.gui.ChatMessage;
 import tanks.gui.ScreenElement.CenterMessage;
 import tanks.gui.ScreenElement.Notification;
+import tanks.gui.ScreenIntro;
 import tanks.gui.TextBox;
 import tanks.gui.screen.*;
 import tanks.gui.screen.leveleditor.ScreenLevelEditor;
-import tanks.hotbar.Hotbar;
 import tanks.network.Client;
 import tanks.network.MessageReader;
 import tanks.network.NetworkEventMap;
@@ -24,7 +24,10 @@ import tanks.obstacle.Obstacle;
 import tanks.rendering.*;
 import tanks.tank.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class Panel
 {
@@ -33,6 +36,7 @@ public class Panel
 	public static long lastNotifTime = 0;
 	public static CenterMessage currentMessage;
 	public static String lastWindowTitle = "";
+	public static boolean autoPan = false;
 
 	public double zoomTimer = 0;
 	public static double zoomTarget = -1;
@@ -171,9 +175,6 @@ public class Panel
 		TankPlayer.setShootStick(TankPlayer.shootStickEnabled);
 		TankPlayer.controlStick.mobile = TankPlayer.controlStickMobile;
 		TankPlayer.controlStick.snap = TankPlayer.controlStickSnap;
-
-		Hotbar.toggle.posX = Drawing.drawing.interfaceSizeX / 2;
-		Hotbar.toggle.posY = Drawing.drawing.interfaceSizeY - 20;
 
 		Game.createModels();
 
@@ -497,7 +498,7 @@ public class Panel
 			double accel = 0.0003 * Drawing.drawing.unzoomedScale;
 			double distDampen = 2;
 
-			if (Panel.autoZoom && !Panel.forceCenter)
+			if (Panel.autoPan)
 			{
 				double dispX = Panel.panTargetX - panX;
 				double dispY = Panel.panTargetY - panY;
@@ -524,40 +525,33 @@ public class Panel
 				}
 
 				speed /= 4;
-
-				if (speed - Panel.lastAutoZoomSpeed > accel * Panel.frameFrequency)
-					speed = Panel.lastAutoZoomSpeed + accel * Panel.frameFrequency;
-
-				if (-speed + Panel.lastAutoZoomSpeed > accel * Panel.frameFrequency)
-					speed = Panel.lastAutoZoomSpeed - accel * Panel.frameFrequency;
-
-				double zoomDist = Math.abs(this.zoomTimer - Panel.zoomTarget) / Drawing.drawing.unzoomedScale;
-				if (zoomDist < distDampen)
-					speed *= Math.pow(zoomDist / distDampen, Panel.frameFrequency / 20);
-
-				Panel.lastAutoZoomSpeed = speed;
-
-				if (Math.abs(Panel.zoomTarget - this.zoomTimer) < speed)
-				{
-					this.zoomTimer = Panel.zoomTarget;
-				}
-				else
-				{
-					speed *= Math.signum(Panel.zoomTarget - this.zoomTimer);
-					this.zoomTimer += speed * Panel.frameFrequency;
-				}
 			}
 			else
 			{
-				double nzt = this.zoomTimer + 0.02 * Math.signum(Panel.zoomTarget - this.zoomTimer) * Panel.frameFrequency;
-
-				if (this.zoomTimer > Panel.zoomTarget)
-					this.zoomTimer = Math.max(nzt, Panel.zoomTarget);
-				else
-					this.zoomTimer = Math.min(nzt, Panel.zoomTarget);
-
 				this.panX /= d;
 				this.panY /= d;
+			}
+
+			if (speed - Panel.lastAutoZoomSpeed > accel * Panel.frameFrequency)
+				speed = Panel.lastAutoZoomSpeed + accel * Panel.frameFrequency;
+
+			if (-speed + Panel.lastAutoZoomSpeed > accel * Panel.frameFrequency)
+				speed = Panel.lastAutoZoomSpeed - accel * Panel.frameFrequency;
+
+			double zoomDist = Math.abs(this.zoomTimer - Panel.zoomTarget) / Drawing.drawing.unzoomedScale;
+			if (zoomDist < distDampen)
+				speed *= Math.pow(zoomDist / distDampen, Panel.frameFrequency / 20);
+
+			Panel.lastAutoZoomSpeed = speed;
+
+			if (Math.abs(Panel.zoomTarget - this.zoomTimer) < speed)
+			{
+				this.zoomTimer = Panel.zoomTarget;
+			}
+			else
+			{
+				speed *= Math.signum(Panel.zoomTarget - this.zoomTimer);
+				this.zoomTimer += speed * Panel.frameFrequency;
 			}
 		}
 		else
@@ -764,8 +758,6 @@ public class Panel
         else
             Game.screen.draw();
 
-		Chunk.drawDebugStuff();
-
 		if (Game.enableExtensions)
             for (Extension e : Game.extensionRegistry.extensions)
                 e.draw();
@@ -865,8 +857,14 @@ public class Panel
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_A))
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_A);
-				Drawing.drawing.terrainRenderer.reset();
-				notifs.add(new Notification("Terrain reloaded!").setColor(255, 255, 128));
+
+				if (!(Game.screen instanceof ScreenCrusadeDetails))
+				{
+					Drawing.drawing.terrainRenderer.reset();
+					notifs.add(new Notification("Terrain reloaded!").setColor(255, 255, 128));
+				}
+				else
+					notifs.add(new Notification("F3+A doesn't work here!").setColor(255, 200, 128));
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_T))
@@ -918,7 +916,7 @@ public class Panel
 				text = "(" + (int) Game.game.window.absoluteWidth + ", " + (int) Game.game.window.absoluteHeight + ")";
 
 			else if (Game.game.window.pressedKeys.contains(InputCodes.KEY_S))
-				text = "(" + (int) mx + ", " + (int) my + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
+				text = "(" + (int) (mx - Game.screen.getOffsetX()) + ", " + (int) (my - Game.screen.getOffsetY()) + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
 
 			else {
 				int posX = (int) (((Math.round(Drawing.drawing.getMouseX() / Game.tile_size + 0.5) * Game.tile_size - Game.tile_size / 2) - 25) / 50);
@@ -933,20 +931,25 @@ public class Panel
 
 				if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
 				{
+					Chunk c = Chunk.getChunk(posX, posY, true);
 					Chunk.Tile t1 = Chunk.getTile(posX, posY);
-
-					if (Game.glowEnabled && Level.isDark() && t1.obstacle != null)
-					{
-						Obstacle o = t1.obstacle;
-						if ((o.colorR + o.colorG + o.colorB + o.colorA / 2) / 4 > 200)
-                            Drawing.drawing.setColor(0, 0, 0, 128);
-					}
 
 					if (t1 != null)
 					{
+						if (Level.isDark() && t1.obstacle != null)
+						{
+							Obstacle o = t1.obstacle;
+							if ((o.colorR + o.colorG + o.colorB + o.colorA / 2) / 4 > 200)
+								Drawing.drawing.setColor(0, 0, 0, 128);
+						}
+
 						text += " O: " + (t1.obstacle != null ? t1.obstacle.name : "none") + " SO: " + (t1.surfaceObstacle != null ? t1.surfaceObstacle.name : "none");
 						Game.game.window.fontRenderer.drawString(mx + 10, my + 30, Drawing.drawing.fontSize, Drawing.drawing.fontSize,
 								"H: " + (int) t1.height + " GH+D: " + (int) (t1.groundHeight + t1.depth) + " E: " + (int) TerrainRenderer.getExtra(posX, posY, t1.obstacle));
+
+						if (c != null)
+							Game.game.window.fontRenderer.drawString(mx + 10, my + 50, Drawing.drawing.fontSize, Drawing.drawing.fontSize,
+									"(" + c.chunkX + ", " + c.chunkY + ")");
 					}
 				}
 			}
@@ -986,7 +989,7 @@ public class Panel
 				{
 					double v = 1;
 					if (Game.screen instanceof ScreenIntro)
-						v = Obstacle.draw_size;
+						v = Obstacle.draw_size / Game.tile_size;
 
 					if (v > 0.05)
 					{

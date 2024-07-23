@@ -8,6 +8,8 @@ import java.util.Random;
 
 public class LevelGeneratorRandom extends LevelGenerator
 {
+	public static boolean largeLevels = true;
+
 	public static String generateLevelString()
 	{
 		return generateLevelString(-1);
@@ -23,11 +25,11 @@ public class LevelGeneratorRandom extends LevelGenerator
 			random = new Random();
 
 		double size = Game.levelSize;
-
 		double randomNum = random.nextDouble();
 
-		if (random.nextDouble() < 0.3)
+		if (random.nextDouble() < 0.3 && largeLevels)
 			size *= 2;
+		largeLevels = false;
 
 		int height = (int)(18 * size);
 		int width = (int)(28 * size);
@@ -523,7 +525,7 @@ public class LevelGeneratorRandom extends LevelGenerator
 			}
 		}
 
-		if (dark && Game.framework != Game.Framework.libgdx)
+		if (dark)
 		{
 			for (int j = 0; j < numLights; j++)
 			{

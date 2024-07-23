@@ -429,7 +429,7 @@ public class ScreenArcadeBonuses extends Screen implements IDarkScreen
         double posY = -((Game.game.window.absoluteHeight - Drawing.drawing.statsHeight) / Drawing.drawing.interfaceScale - Drawing.drawing.interfaceSizeY) / 2 + 50;
 
         posX = posX * (1 - heightFrac) + this.centerX * heightFrac;
-        posY = posY * (1 - heightFrac) + (this.objYSpace * 2) * heightFrac;
+        posY = posY * (1 - heightFrac) + (this.objYSpace * (2 / Drawing.drawing.interfaceScaleZoom)) * heightFrac;
 
         Drawing.drawing.setInterfaceFontSize(36 * (1 + 0.25 * frac));
         String s = Translation.translate("Score: %d", score);

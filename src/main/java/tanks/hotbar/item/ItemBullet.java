@@ -112,6 +112,9 @@ public class ItemBullet extends Item
 				b.heavy = heavy;
 				b.recoil = recoil;
 
+				if (i > 0)
+					b.itemSound = null;
+
 				if (this.cooldownBase <= 0)
 				{
 					b.frameDamageMultipler = Panel.frameFrequency;

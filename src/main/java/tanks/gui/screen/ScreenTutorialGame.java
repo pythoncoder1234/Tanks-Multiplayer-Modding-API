@@ -1,7 +1,6 @@
 package tanks.gui.screen;
 
 import basewindow.BaseFile;
-import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 
@@ -16,8 +15,8 @@ public class ScreenTutorialGame extends ScreenGame
 		Game.startTime = 0;
 		Game.playerTank.setBufferCooldown(50);
 	}
-	
-	public Button skip = new Button(Drawing.drawing.interfaceSizeX - 200, Drawing.drawing.interfaceSizeY - 25, 350, 40, "Skip Tutorial", () ->
+
+	public Button skip = new Button(this.centerX, this.centerY + this.objYSpace, this.objWidth, this.objHeight, "Skip tutorial", () ->
 	{
 		try
 		{
@@ -27,7 +26,7 @@ public class ScreenTutorialGame extends ScreenGame
 			f.startWriting();
 			f.println("Fake certificate of completion:");
 			f.println("Tanks: The Crusades tutorial");
-			f.println("Skipped " + new Date().toString());
+			f.println("Skipped " + new Date());
 			f.stopWriting();
 		}
 		catch (Exception e)
@@ -50,7 +49,7 @@ public class ScreenTutorialGame extends ScreenGame
 	@Override
 	public void update() 
 	{
-		if (!paused)
+		if (paused)
 			skip.update();
 
 		if (active)
@@ -62,7 +61,7 @@ public class ScreenTutorialGame extends ScreenGame
 	{
 		super.draw();
 
-		if (!paused)
+		if (paused)
 			skip.draw();
 	}
 }

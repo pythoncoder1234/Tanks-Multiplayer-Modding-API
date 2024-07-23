@@ -12,7 +12,7 @@ import tanks.translation.Translation;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ScreenCrusadeDetails extends Screen
+public class ScreenCrusadeDetails extends Screen implements ICrusadePreviewScreen
 {
     public Crusade crusade;
     public ScreenCrusadeLevels background;
@@ -72,7 +72,7 @@ public class ScreenCrusadeDetails extends Screen
 
     public Button edit = new Button(this.centerX, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Edit", () -> Game.screen = new ScreenCrusadeEditor(crusade));
 
-    public Button delete = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Delete crusade", () -> Game.screen = new ScreenConfirmDeleteCrusade(((ScreenCrusadeDetails) Game.screen), crusade));
+    public Button delete = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Delete crusade", () -> Game.screen = new ScreenConfirmDeleteCrusade((ScreenCrusadeDetails) Game.screen, crusade));
 
     public Button back = new Button(this.centerX, this.centerY + this.objYSpace * 3.5, this.objWidth, this.objHeight, "Back", () ->
     {
@@ -90,7 +90,7 @@ public class ScreenCrusadeDetails extends Screen
             Game.screen = new ScreenCrusades();
     });
 
-    Button showRecordButton = new Button(this.centerX + Drawing.drawing.interfaceSizeX * 0.35 - 30, this.centerY + this.objYSpace * 4, 30, 30, "i", () ->
+    Button showRecordButton = new Button(this.centerX + Drawing.drawing.baseInterfaceSizeX * 0.35 - 30, this.centerY + this.objYSpace * 4, 30, 30, "i", () ->
             Game.screen = new ScreenCrusadeStats(crusade, this), "View best run");
 
 
@@ -251,7 +251,7 @@ public class ScreenCrusadeDetails extends Screen
         if (Game.previewCrusades)
         {
             Drawing.drawing.setColor(0, 0, 0, 127);
-            Drawing.drawing.drawPopup(this.centerX, this.centerY, Drawing.drawing.interfaceSizeX * 0.7, this.objYSpace * sizeY, 20, 10);
+            Drawing.drawing.drawPopup(this.centerX, this.centerY, Drawing.drawing.baseInterfaceSizeX * 0.7, this.objYSpace * sizeY, 20, 10);
 
             Drawing.drawing.setColor(255, 255, 255);
         }
@@ -269,7 +269,7 @@ public class ScreenCrusadeDetails extends Screen
 
             if (Game.previewCrusades)
             {
-                Drawing.drawing.displayInterfaceText(this.centerX + Drawing.drawing.interfaceSizeX * 0.35 - 50, this.centerY + this.objYSpace * (sizeY / 2. - 0.5), true, "Best completion time: %s", SpeedrunTimer.getTime(this.bestTime));
+                Drawing.drawing.displayInterfaceText(this.centerX + Drawing.drawing.baseInterfaceSizeX * 0.35 - 50, this.centerY + this.objYSpace * (sizeY / 2. - 0.5), true, "Best completion time: %s", SpeedrunTimer.getTime(this.bestTime));
                 showRecordButton.posY = this.centerY + this.objYSpace * (sizeY / 2. - 0.5);
             }
             else

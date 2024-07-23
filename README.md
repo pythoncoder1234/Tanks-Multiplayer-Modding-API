@@ -21,22 +21,14 @@ Only the JAR is needed if playing with others or making an extension.
 Installation
 ---
 
-You can download the JAR file [here](https://1drv.ms/u/c/1e1c6a69d73a57b9/IQMC8RGNAAneSZw_hNmUpGU3ATOWYRwNB1c363Fp10eVpMI).
+You can download the JAR file [here](https://1drv.ms/u/c/1e1c6a69d73a57b9/EceFfSfbLr1Hv1GgiRrm1wUB-cQFbel_LrodoEPhLErVTw?e=ojDgiY).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
 New Features:
 ---
 
-- Chunk loading system
-- Huge optimizations
-- Lots of bug fixes
-- Removed `Game.obstacleGrid` and `Game.surfaceTileGrid` (use `Game.getObstacle` and `Game.getSurfaceObstacle` instead
-- Freecam control player (`F7` to toggle)
-- Added `Obstacle.afterAdd` and `Obstacle.onNeighborUpdate`
-- `F3`+`F8` turns on Record mode, which hides the info bar and speedrun timer
-- Target type tank property - choices are allies or enemies, but maybe more in the future
-- Removed update skipping for now
-- Renamed `Game.sampleTerrainGroundHeight` to `Game.sampleDefaultGroundHeight`
+- Update to Tanks v1.5.2
+- Bug fixes
 
 [Older Changelogs](changelog.md)

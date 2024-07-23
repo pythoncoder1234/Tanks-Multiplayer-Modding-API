@@ -332,14 +332,11 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 			this.collidedWithBullet((Bullet) o);
 	}
 
-	public void push(Movable m, double kb)
+	public void push(Movable m)
 	{
-		if (m.getSpeed() < this.maxKnockbackSpeed)
-		{
-			m.vX += this.vX * Math.pow(this.size, 2) / Math.max(1, Math.pow(m.size, 2)) * frameDamageMultipler * frameDamageMultipler * kb * Panel.frameFrequency;
-			m.vY += this.vY * Math.pow(this.size, 2) / Math.max(1, Math.pow(m.size, 2)) * frameDamageMultipler * frameDamageMultipler * kb * Panel.frameFrequency;
-		}
-
+		double kb = m instanceof Mine ? mineHitKnockback : bulletHitKnockback;
+		m.vX += this.vX * Math.pow(this.size, 2) / Math.max(1, Math.pow(m.size, 2)) * kb * Panel.frameFrequency;
+		m.vY += this.vY * Math.pow(this.size, 2) / Math.max(1, Math.pow(m.size, 2)) * kb * Panel.frameFrequency;
 		if (m instanceof Bullet b)
 			b.addTrail();
 	}
@@ -415,13 +412,13 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 			}
 			else if (this.bulletHitKnockback > 0 && b.bulletHitKnockback <= 0)
 			{
-				this.push(b, this.bulletHitKnockback);
+				this.push(b);
 				if (this.destroyBullets)
 					this.pop();
 			}
 			else if (this.bulletHitKnockback <= 0)
 			{
-				b.push(this, b.bulletHitKnockback);
+				b.push(this);
 				if (this.destroyBullets)
 					b.pop();
 			}
@@ -446,11 +443,12 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 				l = this;
 			}
 
-			if (this.playBounceSound)
-				Drawing.drawing.playGameSound("bump.ogg", this, soundRange, (float) (bullet_size / h.size), 1f);
-
 			if (h.bulletHitKnockback > 0)
-				h.push(l, h.bulletHitKnockback);
+			{
+				h.push(l);
+				if (this.playBounceSound)
+					Drawing.drawing.playSound("bump.ogg", (float) (bullet_size / h.size), 1f);
+			}
 			else if (this.destroyBullets)
 				l.pop();
 		}
@@ -463,7 +461,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 			if (this.explodeMines)
 				m.destroy = true;
 			else if (mineHitKnockback > 0)
-				push(m, mineHitKnockback);
+				push(m);
 
 			if (!this.externalMineCollision)
 				return;
@@ -569,58 +567,55 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 
 		this.inside.clear();
 
-		Chunk.getChunksInRadius(posX, posY, size + 10).forEach(c ->
+		for (Movable m : Game.getInRadius(posX, posY, size + 10, c -> c.movables))
 		{
-			for (Movable m : c.movables)
+			if (Math.abs(this.posZ - m.posZ) > Game.tile_size)
+				continue;
+
+			if (m instanceof Tank t && !m.destroy)
 			{
-				if (Math.abs(this.posZ - m.posZ) > Game.tile_size)
-					continue;
+				double horizontalDist = Math.abs(this.posX - m.posX);
+				double verticalDist = Math.abs(this.posY - m.posY);
 
-				if (m instanceof Tank t && !m.destroy)
+				double bound = this.size / 2 + t.size * t.hitboxSize / 2;
+
+				if (horizontalDist < bound && verticalDist < bound && t.size > 0)
 				{
-					double horizontalDist = Math.abs(this.posX - m.posX);
-					double verticalDist = Math.abs(this.posY - m.posY);
+					this.collisionX = this.posX;
+					this.collisionY = this.posY;
 
-					double bound = this.size / 2 + t.size * t.hitboxSize / 2;
-
-					if (horizontalDist < bound && verticalDist < bound && t.size > 0)
+					if (!this.insideOld.contains(t))
 					{
-						this.collisionX = this.posX;
-						this.collisionY = this.posY;
-
-						if (!this.insideOld.contains(t))
-						{
-							this.collided();
-							this.collidedWithTank(t);
-						}
-
-						this.inside.add(t);
+						this.collided();
+						this.collidedWithTank(t);
 					}
-				}
-				else if (((m instanceof Bullet && ((Bullet) m).enableCollision && (((Bullet) m).bulletCollision && ((Bullet) m).externalBulletCollision && this.bulletCollision)) || m instanceof Mine) && m != this && !m.destroy)
-				{
-					double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
 
-					double s = m.size;
-
-					double bound = this.size / 2 + s / 2;
-
-					if (distSq <= bound * bound)
-					{
-						this.collisionX = this.posX;
-						this.collisionY = this.posY;
-
-						if (!this.insideOld.contains(m))
-						{
-							this.collided();
-							this.collidedWithObject(m);
-						}
-
-						this.inside.add(m);
-					}
+					this.inside.add(t);
 				}
 			}
-		});
+			else if (((m instanceof Bullet && ((Bullet) m).enableCollision && (((Bullet) m).bulletCollision && ((Bullet) m).externalBulletCollision && this.bulletCollision)) || m instanceof Mine) && m != this && !m.destroy)
+			{
+				double distSq = Math.pow(this.posX - m.posX, 2) + Math.pow(this.posY - m.posY, 2);
+
+				double s = m.size;
+
+				double bound = this.size / 2 + s / 2;
+
+				if (distSq <= bound * bound)
+				{
+					this.collisionX = this.posX;
+					this.collisionY = this.posY;
+
+					if (!this.insideOld.contains(m))
+					{
+						this.collided();
+						this.collidedWithObject(m);
+					}
+
+					this.inside.add(m);
+				}
+			}
+		}
 
 		if (collided)
 		{
@@ -773,10 +768,11 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 			this.addTrail();
 		}
 
-		if (!this.destroy)
+		double actualSpeed = this.getSpeed();
+		if (!this.destroy && Math.abs(actualSpeed - this.speed) > 0.1)
 		{
 			double frac = Math.pow(0.999, Panel.frameFrequency);
-			this.setPolarMotion(this.getPolarDirection(), this.getSpeed() * frac + this.speed * (1 -frac));
+			this.setPolarMotion(this.getPolarDirection(), actualSpeed * frac + this.speed * (1 - frac));
 		}
 
 		boolean noTrails = true;

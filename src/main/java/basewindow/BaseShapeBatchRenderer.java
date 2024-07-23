@@ -29,6 +29,9 @@ public abstract class BaseShapeBatchRenderer
 
     public void setPosition(double x, double y, double z)
     {
+        if (Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z))
+            throw new RuntimeException("NaN renderer position!");
+
         this.posX = x;
         this.posY = y;
         this.posZ = z;
@@ -75,6 +78,8 @@ public abstract class BaseShapeBatchRenderer
     public abstract void stage();
 
     public abstract void draw();
+
+    public abstract void endModification();
 
     public abstract void free();
 

@@ -126,9 +126,8 @@ public class Extension
         {
             ArrayList<String> strings = new ArrayList<>();
             if (this.jarFile == null)
-            {
                 return Game.game.fileManager.getInternalFileContents("/" + file);
-            }
+
             InputStream i = this.jarFile.getInputStream(this.jarFile.getEntry(file));
             Scanner s = new Scanner(new InputStreamReader(i));
 

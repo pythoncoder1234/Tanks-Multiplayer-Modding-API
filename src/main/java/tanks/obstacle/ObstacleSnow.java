@@ -6,7 +6,6 @@ import tanks.gui.screen.*;
 import tanks.network.event.EventObstacleSnowMelt;
 import tanks.rendering.ShaderSnow;
 import tanks.tank.Tank;
-import tanks.tank.TankAIControlled;
 
 public class ObstacleSnow extends Obstacle
 {
@@ -50,9 +49,9 @@ public class ObstacleSnow extends Obstacle
         this.baseColorG = this.colorG;
         this.baseColorB = this.colorB;
 
-        this.renderer = ShaderSnow.class;
-
         this.description = "A thick, melting pile of snow that slows tanks and bullets down";
+
+        this.renderer = ShaderSnow.class;
     }
 
     @Override
@@ -65,7 +64,7 @@ public class ObstacleSnow extends Obstacle
 
             int amt = 5;
             int lastDepth = (int) Math.ceil(this.depth * amt);
-            this.depth -= Panel.frameFrequency * 0.005 * (m instanceof Bullet b && b.burnsBushes ? 5 : 1);
+            this.depth -= Panel.frameFrequency * 0.002 * (m instanceof Bullet b && b.burnsBushes ? 5 : 1);
             Game.redrawObstacles.add(this);
 
             if (this.depth <= 0)
@@ -90,9 +89,7 @@ public class ObstacleSnow extends Obstacle
             }
 
             double speed = Math.sqrt((Math.pow(m.vX, 2) + Math.pow(m.vY, 2)));
-
             double mul = 0.0625 / 4;
-
             double amt = speed * mul * Panel.frameFrequency * Game.effectMultiplier;
 
             if (amt < 1 && Math.random() < amt % 1)
@@ -118,12 +115,12 @@ public class ObstacleSnow extends Obstacle
     @Override
     public void draw()
     {
-        if (!Game.game.window.shapeRenderer.supportsBatching)
+        if (!Game.enable3d)
         {
             if (Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !((ScreenGame) Game.screen).paused))
                 this.visualDepth = Math.min(this.visualDepth + Panel.frameFrequency / 255, 1);
 
-            if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
+            if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof ICrusadePreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
                 this.visualDepth = 0.5;
 
             if (ScreenGame.finishedQuick && Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !((ScreenGame) Game.screen).paused))
@@ -141,13 +138,7 @@ public class ObstacleSnow extends Obstacle
         }
         else
         {
-            double mul = 1;
-
-            if (Game.game.window.shapeRenderer.supportsBatching && Obstacle.draw_size > 0 && Obstacle.draw_size < Game.tile_size)
-                mul = 2;
-
-            double base = this.baseGroundHeight;
-            double z = Math.max(this.depth * 0.8 * (Obstacle.draw_size - base * (mul - 1)), 0);
+            double z = Math.max(this.depth * 0.8 * Game.tile_size, 0);
 
             this.finalHeight = 0;
 
@@ -160,11 +151,6 @@ public class ObstacleSnow extends Obstacle
         }
     }
 
-    public byte getOptionsByte(double h)
-    {
-        return 0;
-    }
-
     public double getTileHeight()
     {
         double shrubScale = 0.25;
@@ -172,10 +158,5 @@ public class ObstacleSnow extends Obstacle
             shrubScale = ((ScreenGame) Game.screen).shrubberyScale;
 
         return shrubScale * (this.finalHeight + this.baseGroundHeight);
-    }
-
-    public int unfavorability(TankAIControlled t)
-    {
-        return 3;
     }
 }

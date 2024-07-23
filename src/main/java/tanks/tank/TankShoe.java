@@ -28,6 +28,8 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
 
         this.maxSpeed = 2.5;
         this.enableLookingAtTargetEnemy = false;
+        this.baseModel = TankModels.checkerboard.base;
+        this.colorModel = TankModels.checkerboard.color;
         this.enableMineLaying = false;
         this.enableMovement = false;
         this.customPosZBehavior = true;
@@ -113,7 +115,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
                         Game.effects.add(Effect.createNewEffect(posX, posY, posZ + i * 30, Effect.EffectType.stun)
                                 .setColor(colorR, colorG, colorB));
 
-                    Drawing.drawing.playGameSound("laser.ogg", this, Game.tile_size * 20, (float) (1 - slamCounter / 100) * 0.5f, 0.1f);
+                    Drawing.drawing.playGameSound("laser.ogg", this, Game.tile_size * 20, (float) (1 - slamCounter / 100) * 0.5f, 0.2f);
                 }
 
                 slamCounter -= Panel.frameFrequency;
@@ -126,14 +128,14 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
         {
             if (prevState.equals(State.inAir))
             {
-                Drawing.drawing.playGlobalSound("stomp.ogg", 1, 1.5f);
+                Drawing.drawing.playGameSound("stomp.ogg", this, Game.tile_size * 40, 1f);
 
                 double dist;
                 if (slam)
                 {
                     slamCooldown = 1200;
                     radius *= 1.5;
-                    Drawing.drawing.playGameSound("freeze.ogg", this, Game.tile_size * 80, 0.5f);
+                    Drawing.drawing.playGameSound("freeze.ogg", this, Game.tile_size * 80, 1f);
                     Game.effects.add(Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.explosion).setRadius(radius * 0.8));
                 }
 

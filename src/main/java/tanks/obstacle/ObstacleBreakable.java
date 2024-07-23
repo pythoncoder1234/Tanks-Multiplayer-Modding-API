@@ -1,6 +1,5 @@
 package tanks.obstacle;
 
-import basewindow.IBatchRenderableObject;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Movable;
@@ -158,14 +157,5 @@ public class ObstacleBreakable extends Obstacle
             return 0;
 
         return this.stackHeight * Game.tile_size - Math.pow(this.fallAnimation / 100, 2) * Game.tile_size;
-    }
-
-    public void drawTile(IBatchRenderableObject tile, double r, double g, double b, double d, double extra)
-    {
-        if (Obstacle.draw_size < Game.tile_size || extra != 0 || this.fallAnimation > 0)
-        {
-            Drawing.drawing.setColor(r, g, b);
-            Drawing.drawing.fillBox(tile, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, extra + d * (1 - Obstacle.draw_size / Game.tile_size));
-        }
     }
 }

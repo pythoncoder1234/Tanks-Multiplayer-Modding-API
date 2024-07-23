@@ -55,7 +55,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 	public double mouseY;
 
 	public static Model sunglassesModel;
-	public static boolean hi = true;
+	public static boolean hi = false;
 
 	public TankPlayer(double x, double y, double angle)
     {
@@ -84,7 +84,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 			this.nameTag.name.text = "Destroy cheat enabled!!!";
 		}
 
-		if (Game.alwaysShowName && ScreenPartyHost.isServer)
+		if (Game.nameInMultiplayer && ScreenPartyHost.isServer)
 		{
 			this.nameTag.name.text = Game.player.username;
 			this.showName = true;

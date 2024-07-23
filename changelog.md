@@ -1,6 +1,18 @@
 Changelog
 ---
 
+**Mod API 1.2.3**
+- Chunk loading system
+- Huge optimizations
+- Lots of bug fixes
+- Removed `Game.obstacleGrid` and `Game.surfaceTileGrid` (use `Game.getObstacle` and `Game.getSurfaceObstacle` instead
+- Freecam control player (`F7` to toggle)
+- Added `Obstacle.afterAdd` and `Obstacle.onNeighborUpdate`
+- `F3`+`F8` turns on Record mode, which hides the info bar and speedrun timer
+- Target type tank property - choices are allies or enemies, but maybe more in the future
+- Removed update skipping for now
+- Renamed `Game.sampleTerrainGroundHeight` to `Game.sampleDefaultGroundHeight`
+
 **Mod API 1.2.2**
 - New way to aim arc bullets when in third person
 - All movables implement `ISolidObject` now, you can override `rayCollision` to turn on ray collision

@@ -269,13 +269,17 @@ public abstract class BaseWindow
 
     public abstract void setMatrixModelview();
 
+    public abstract float[] getTransformedMouse();
+
+    public abstract float[] getTransformedMouse(double x, double y);
+
     public abstract ModelPart createModelPart();
 
     public abstract ModelPart createModelPart(Model model, ArrayList<ModelPart.Shape> shapes, Model.Material material);
 
     public abstract PosedModel createPosedModel(Model m);
 
-    public abstract BaseStaticBatchRenderer createStaticBatchRenderer(ShaderGroup shader, boolean color, String texture, boolean normal, int vertices);
+    public abstract BaseShapeBatchRenderer createStaticBatchRenderer(ShaderGroup shader, boolean color, String texture, boolean normal, int vertices);
 
     public abstract BaseShapeBatchRenderer createShapeBatchRenderer();
 
@@ -283,9 +287,40 @@ public abstract class BaseWindow
 
     public abstract BaseShaderUtil getShaderUtil(ShaderProgram p);
 
-    public abstract void setShader(ShaderBase s);
+    public void setShader(ShaderBase s)
+    {
+        ShaderBase old = null;
+        if (this.currentShaderGroup != null)
+            old = this.currentShaderGroup.shaderBase;
 
-    public abstract void setShader(ShaderShadowMap s);
+        try
+        {
+            s.set();
+            this.currentShaderGroup = s.group;
+            this.currentShader = s;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        if (old != null)
+            s.copyUniformsFrom(old, ShaderBase.class);
+    }
+
+    public void setShader(ShaderShadowMap s)
+    {
+        ShaderShadowMap old = null;
+        if (this.currentShaderGroup != null)
+            old = this.currentShaderGroup.shaderShadowMap;
+
+        s.set();
+        this.currentShaderGroup = s.group;
+        this.currentShader = s;
+
+        if (old != null)
+            s.copyUniformsFrom(old, ShaderShadowMap.class);
+    }
 
     public void setupKeyCodes()
     {

@@ -98,7 +98,7 @@ public class Game
 
 	public static int currentSizeX = 28;
     //Remember to change the version in android's build.gradle and ios's robovm.properties
-    public static final String version = "Tanks v1.5.2i";
+    public static final String version = "Tanks v1.5.2";
     public static final int network_protocol = 54;
     public static int currentSizeY = 18;
     public static int tileOffsetX = 0;
@@ -157,7 +157,7 @@ public class Game
 
 	public static boolean enableChatFilter = true;
 	public static boolean showSpeedrunTimer = false;
-	public static boolean alwaysShowName = true;
+	public static boolean nameInMultiplayer = true;
 
 	public static boolean previewCrusades = true;
 
@@ -267,6 +267,7 @@ public class Game
 
 	public static float soundVolume = 1f;
 	public static float musicVolume = 0.5f;
+	public static boolean enableLayeredMusic = true;
 
 	public static boolean isOnlineServer;
 	public static boolean connectedToOnline = false;
@@ -563,6 +564,7 @@ public class Game
         registerBullet(BulletHealing.class, BulletHealing.bullet_name, "bullet_healing.png");
         registerBullet(BulletArc.class, BulletArc.bullet_name, "bullet_arc.png");
         registerBullet(BulletExplosive.class, BulletExplosive.bullet_name, "bullet_explosive.png");
+        registerBullet(BulletWhistlingBird.class, "Whistling Bird", "bullet_homing.png");
         registerBullet(BulletBoost.class, BulletBoost.bullet_name, "bullet_boost.png");
 		registerBullet(BulletAir.class, BulletAir.bullet_name, "bullet_air.png");
 		registerBullet(BulletHoming.class, BulletHoming.bullet_name, "bullet_homing.png");
@@ -669,9 +671,7 @@ public class Game
 
 		BaseFile optionsFile = Game.game.fileManager.getFile(Game.homedir + Game.optionsPath);
 		if (!optionsFile.exists())
-		{
-			ScreenOptions.initOptions(Game.homedir);
-		}
+            ScreenOptions.initOptions(Game.homedir);
 
 		ScreenOptions.loadOptions(Game.homedir);
 

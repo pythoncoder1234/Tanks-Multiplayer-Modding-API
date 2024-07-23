@@ -16,28 +16,19 @@ import java.util.HashMap;
 
 public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
 {
-    public ScreenCrusadeLevels(Crusade c)
+    public static class ScreenLevel
     {
-        if (currentScreen != null)
-        {
-            for (ScreenLevel l: currentScreen.levels)
-            {
-                if (l.renderer != null)
-                    l.renderer.reset();
-            }
-        }
+        public ArrayList<Movable> movables = new ArrayList<>();
+        public ArrayList<Obstacle> obstacles = new ArrayList<>();
+        public ArrayList<TankAIControlled> tanks = new ArrayList<>();
+        public String levelString;
+        public Level level;
+        public StaticTerrainRenderer renderer;
+        public boolean isTransition = false;
 
-        currentScreen = this;
-
-        for (int i = 0; i < drawables.length; i++)
-        {
-            drawables[i] = new ArrayList<>();
-        }
-
-        this.crusade = c;
-        this.selfBatch = false;
-        this.forceInBounds = true;
-        this.minBgWidth = 100;
+        public int startIndex;
+        public int endIndex;
+        int width;
     }
 
     protected ArrayList<IDrawable>[] drawables = (ArrayList<IDrawable>[])(new ArrayList[10]);
@@ -45,7 +36,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
     protected Translation translation = new Translation(Game.game.window, 0, 0, 0);
 
     double shadowScaleNum = 0.2;
-    protected ScaleAboutPoint shadowScale = new ScaleAboutPoint(Game.game.window, shadowScaleNum, shadowScaleNum, shadowScaleNum, 0.5, 0.5, 0.5);
+    protected ScaleAboutPoint shadowScale = new ScaleAboutPoint(Game.game.window, shadowScaleNum, shadowScaleNum, 1.0, 0.5, 0.5, 0.5);
 
     protected ArrayList<ScreenLevel> levels = new ArrayList<>();
     protected HashMap<Integer, ScreenLevel> levelsPos = new HashMap<>();
@@ -66,6 +57,28 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
     public double lastDB = Level.currentColorVarB;
 
     protected static ScreenCrusadeLevels currentScreen;
+
+    public ScreenCrusadeLevels(Crusade c)
+    {
+        if (currentScreen != null)
+        {
+            for (ScreenLevel l: currentScreen.levels)
+            {
+                if (l.renderer != null)
+                    l.renderer.reset();
+            }
+        }
+
+        currentScreen = this;
+
+        for (int i = 0; i < drawables.length; i++)
+            drawables[i] = new ArrayList<>();
+
+        this.crusade = c;
+        this.selfBatch = false;
+        this.forceInBounds = true;
+        this.minBgWidth = 100;
+    }
 
     public void initialize(ScreenLevel l)
     {
@@ -100,39 +113,6 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         TerrainRenderer r = Drawing.drawing.terrainRenderer;
         Drawing.drawing.terrainRenderer = l.renderer;
 
-        Chunk.fillHeightGrid();
-
-        if (Game.enable3d)
-        {
-            for (Obstacle o : Game.obstacles)
-            {
-                o.postOverride();
-
-                if (o.startHeight > 1)
-                    continue;
-
-                int x = (int) (o.posX / Game.tile_size);
-                int y = (int) (o.posY / Game.tile_size);
-
-                if (!(!Game.fancyTerrain || !Game.enable3d || x < 0 || x >= Game.currentSizeX || y < 0 || y >= Game.currentSizeY))
-                    Chunk.getTile(x, y).updateHeight(o.getTileHeight()).updateGroundHeight(o.getGroundHeight());
-            }
-        }
-
-        if (Game.enable3d && /*(Obstacle.draw_size <= 0 || Obstacle.draw_size >= Game.tile_size) && */Game.game.window.shapeRenderer.supportsBatching)
-        {
-            for (Obstacle o : Game.obstacles)
-            {
-                if (!o.batchDraw)
-                    drawables[o.drawLevel].add(o);
-            }
-        }
-        else
-        {
-            for (Obstacle o : Game.obstacles)
-                drawables[o.drawLevel].add(o);
-        }
-
         this.drawBgRect = false;
         this.stageOnly = true;
         this.drawDefaultBackground();
@@ -145,6 +125,12 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         Game.obstacles = obstacles;
 
         Game.cleanUp();
+    }
+
+    @Override
+    public void update()
+    {
+
     }
 
     public void addTransitionLevels(ScreenLevel l)
@@ -175,10 +161,12 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         this.lastDB = l.level.colorVarB;
     }
 
-    @Override
-    public void update()
+    public double getLevelPos(double i)
     {
-
+        if (allLoaded)
+            return (i + index * 10) % index;
+        else
+            return i;
     }
 
     public void draw()
@@ -188,9 +176,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         Game.game.window.lightBaseTransformation[0] = this.shadowScale;
 
         if (Game.enable3d)
-        {
             Game.game.window.transformations.add(this.transform);
-        }
 
         Game.game.window.loadPerspective();
 
@@ -266,7 +252,7 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
                 Game.movables = l.movables;
                 Game.obstacles = l.obstacles;
 
-                l.renderer.offX = Drawing.drawing.interfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size;
+                l.renderer.offX = Drawing.drawing.baseInterfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size;
                 l.renderer.offY = Game.tile_size * -(i - rem);
                 l.renderer.draw();
 
@@ -278,15 +264,12 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
                         drawables[m.nameTag.drawLevel].add(m.nameTag);
                 }
 
-                if (Game.enable3d && Game.game.window.shapeRenderer.supportsBatching)
+                if (Game.enable3d)
                 {
-                    for (int n = 0; n < drawables.length; n++)
+                    for (Obstacle o : Game.obstacles)
                     {
-                        for (Obstacle o : Game.obstacles)
-                        {
-                            if (o.drawLevel == n && !o.batchDraw)
-                                drawables[n].add(o);
-                        }
+                        if (!o.batchDraw)
+                            drawables[o.drawLevel].add(o);
                     }
                 }
                 else
@@ -295,11 +278,12 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
                         drawables[o.drawLevel].add(o);
                 }
 
-                translation.x = (Drawing.drawing.interfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size) / Game.game.window.absoluteWidth * Drawing.drawing.interfaceScale;
+                translation.x = (Drawing.drawing.baseInterfaceSizeX / 2 - (l.width / 2.0) * Game.tile_size) / Game.game.window.absoluteWidth * Drawing.drawing.interfaceScale;
                 translation.y = Game.tile_size * -(i - rem) / Game.game.window.absoluteHeight * Drawing.drawing.scale;
                 translation.applyAsShadow = true;
                 Game.game.window.addMatrix();
                 translation.apply();
+                Chunk.drawDebugStuff();
 
                 if (Game.game.window.drawingShadow)
                 {
@@ -343,28 +327,6 @@ public class ScreenCrusadeLevels extends Screen implements ILevelPreviewScreen
         Game.game.window.transformations.remove(this.translation);
         Game.game.window.loadPerspective();
         Game.game.window.lightBaseTransformation[0] = prevShadow;
-    }
-
-    public double getLevelPos(double i)
-    {
-        if (allLoaded)
-            return (i + index * 10) % index;
-        return i;
-    }
-
-    public static class ScreenLevel
-    {
-        public ArrayList<Movable> movables = new ArrayList<>();
-        public ArrayList<Obstacle> obstacles = new ArrayList<>();
-        public ArrayList<TankAIControlled> tanks = new ArrayList<>();
-        public String levelString;
-        public Level level;
-        public StaticTerrainRenderer renderer;
-        public boolean isTransition = false;
-
-        public int startIndex;
-        public int endIndex;
-        int width;
     }
 
     @Override

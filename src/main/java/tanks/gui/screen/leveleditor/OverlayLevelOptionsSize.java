@@ -19,7 +19,7 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
 
         sizeX = new TextBox(this.centerX, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "Width", () ->
         {
-            if (sizeX.inputText.length() <= 0)
+            if (sizeX.inputText.isEmpty())
                 sizeX.inputText = screenLevelEditor.level.sizeX + "";
             else
             {
@@ -42,7 +42,7 @@ public class OverlayLevelOptionsSize extends ScreenLevelEditorOverlay
 
         sizeY = new TextBox(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Height", () ->
         {
-            if (sizeY.inputText.length() <= 0)
+            if (sizeY.inputText.isEmpty())
                 sizeY.inputText = screenLevelEditor.level.sizeY + "";
             else
             {

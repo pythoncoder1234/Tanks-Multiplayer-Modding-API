@@ -10,6 +10,7 @@ public class Crate extends Movable
 {
     public Tank tank;
     public double size;
+    public double age = 0;
 
     public Crate(Tank tank)
     {
@@ -23,7 +24,10 @@ public class Crate extends Movable
     @Override
     public void draw()
     {
-        double size = this.size * Obstacle.draw_size / Game.tile_size;
+        if (Game.game.window.drawingShadow || !Game.shadowsEnabled)
+            this.age += Panel.frameFrequency;
+
+        double size = this.size * Obstacle.draw_size / Game.tile_size * Math.min(1, this.age / (Game.tile_size * 1.5));
 
         if (Game.enable3d)
         {
@@ -104,9 +108,11 @@ public class Crate extends Movable
 
         if (this.posZ <= 0 && !this.destroy)
         {
+            this.posZ = 0;
             this.destroy = true;
             Drawing.drawing.playSound("open.ogg");
 
+            tank.droppedFromCrate = true;
             tank.drawAge = 50;
             if (!tank.isRemote)
             {

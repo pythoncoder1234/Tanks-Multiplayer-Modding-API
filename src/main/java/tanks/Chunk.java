@@ -20,6 +20,7 @@ public class Chunk implements Comparable<Chunk>
     public static ArrayList<Chunk> chunkList = new ArrayList<>();
     public static int chunkSize = 8;
 
+    public final Level level;
     public final int chunkX, chunkY;
     public Face[] borderFaces = new Face[4];
     public final HashSet<Obstacle> obstacles = new HashSet<>();
@@ -38,6 +39,7 @@ public class Chunk implements Comparable<Chunk>
     {
         this.chunkX = x;
         this.chunkY = y;
+        this.level = l;
 
         for (int i = 0; i < chunkSize; i++)
         {
@@ -47,34 +49,31 @@ public class Chunk implements Comparable<Chunk>
                     tileGrid[i][j] = setTileColor(l, r, new Tile());
             }
         }
-
-        for (int i = 1; i <= 4; i++)
-            this.borderFaces[i-1] = getBorderFace(this, i, l.sizeX, l.sizeY);
     }
 
     private Chunk()
     {
+        this.level = null;
         this.chunkX = 0;
         this.chunkY = 0;
     }
 
-    int[] x1 = {0, 1, 0, 0}, x2 = {1, 1, 1, 0};
-    int[] y1 = {0, 0, 1, 0}, y2 = {0, 1, 1, 1};
+    static int[] x1 = {0, 1, 0, 0}, x2 = {1, 1, 1, 0};
+    static int[] y1 = {0, 0, 1, 0}, y2 = {0, 1, 1, 1};
 
     /**
-     * @param side Integer from 1-4, indicating top, right, bottom, or left face
+     * @param side Integer from 0-3, indicating top, right, bottom, or left face
      */
-    public Face getBorderFace(Chunk c, int side, int sizeX, int sizeY)
+    public void addBorderFace(int side, Level l)
     {
-        side--;
         Face f = new Face(null,
-                Math.min(sizeX, (c.chunkX + x1[side]) * Chunk.chunkSize) * Game.tile_size,
-                Math.min(sizeY, (c.chunkY + y1[side]) * Chunk.chunkSize) * Game.tile_size,
-                Math.min(sizeX, (c.chunkX + x2[side]) * Chunk.chunkSize) * Game.tile_size,
-                Math.min(sizeY, (c.chunkY + y2[side]) * Chunk.chunkSize) * Game.tile_size,
-                side % 2 == 0, side <= 2, true, true);
-        c.borderFaces[side] = f;
-        return f;
+                Math.max(l.startX, Math.min(l.sizeX, (chunkX + x1[side]) * Chunk.chunkSize)) * Game.tile_size,
+                Math.max(l.startY, Math.min(l.sizeY, (chunkY + y1[side]) * Chunk.chunkSize)) * Game.tile_size,
+                Math.max(l.startX, Math.min(l.sizeX, (chunkX + x2[side]) * Chunk.chunkSize)) * Game.tile_size,
+                Math.max(l.startY, Math.min(l.sizeY, (chunkY + y2[side]) * Chunk.chunkSize)) * Game.tile_size,
+                side % 2 == 0, side < 2, true, true);
+        borderFaces[side] = f;
+        staticFaces.getSide(side).add(f);
     }
 
     public static ArrayList<Chunk> iterateOutwards(double posX, double posY, int radius)
@@ -251,7 +250,7 @@ public class Chunk implements Comparable<Chunk>
     /** Automatically converts to tile coordinates and then chunk coordinates. */
     public Tile getChunkTile(double posX, double posY)
     {
-        if (posX < 0 || posX >= Game.currentSizeX * Game.tile_size || posY < 0 || posY >= Game.currentSizeY * Game.tile_size)
+        if (!Game.currentLevel.mapLoad && (posX < 0 || posX >= Game.currentSizeX * Game.tile_size || posY < 0 || posY >= Game.currentSizeY * Game.tile_size))
             return null;
 
         return tileGrid[toChunkTileCoords(posX)][toChunkTileCoords(posY)];
@@ -388,6 +387,17 @@ public class Chunk implements Comparable<Chunk>
             }
         }
 
+        public TreeSet<Face> getSide(int side)
+        {
+            return switch (side)
+            {
+                case 0 -> bottomFaces;
+                case 1 -> leftFaces;
+                case 2 -> topFaces;
+                default -> rightFaces;
+            };
+        }
+
         public void clear()
         {
             topFaces.clear();
@@ -423,16 +433,25 @@ public class Chunk implements Comparable<Chunk>
 
     public static void populateChunks(Level l)
     {
-        chunks.clear();
-        chunkList.clear();
-        prevChunk = null;
+        populateChunks(l, true);
+    }
 
+    public static void populateChunks(Level l, boolean clear)
+    {
+        if (clear)
+        {
+            chunks.clear();
+            chunkList.clear();
+            prevChunk = null;
+        }
+
+        int startX = l.startX / chunkSize, startY = l.startY / chunkSize;
         int sX = l.sizeX / chunkSize + 1, sY = l.sizeY / chunkSize + 1;
         Random r = new Random(l.tilesRandomSeed);
 
         for (int x = 0; x < sX; x++)
             for (int y = 0; y < sY; y++)
-                addChunk(x, y, new Chunk(l, r, x, y));
+                addChunk(x + startX, y + startY, new Chunk(l, r, x, y));
     }
 
     public static Chunk getChunk(double posX, double posY)

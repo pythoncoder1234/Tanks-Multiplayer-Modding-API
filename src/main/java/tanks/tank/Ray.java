@@ -1,6 +1,9 @@
 package tanks.tank;
 
-import tanks.*;
+import tanks.Chunk;
+import tanks.Effect;
+import tanks.Game;
+import tanks.Movable;
 import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenGame;
 import tanks.obstacle.Face;

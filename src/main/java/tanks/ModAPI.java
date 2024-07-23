@@ -7,6 +7,7 @@ import tanks.gui.menus.FixedText;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
+import tanks.minigames.GameMap;
 import tanks.minigames.TeamDeathmatch;
 import tanks.network.EventMinigameStart;
 import tanks.network.NetworkEventMap;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ModAPI
 {
-    public static String version = "Mod API v1.2.3";
+    public static String version = "Mod API v1.2.4";
     public static boolean autoLoadExtensions = false;
     public static boolean sendEvents = true;
     static ArrayList<Runnable> resetFunc = new ArrayList<>();
@@ -42,7 +43,7 @@ public class ModAPI
     public static void registerGames()
     {
         Game.registerMinigame(TeamDeathmatch.class);
-//        Game.registerMinigame(GameMap.class);
+        Game.registerMinigame(GameMap.class);
     }
 
     public static void setUp()

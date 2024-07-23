@@ -2,12 +2,11 @@ package tanks.obstacle;
 
 import tanks.*;
 import tanks.bullet.Bullet;
-import tanks.bullet.BulletAir;
 import tanks.bullet.BulletInstant;
+import tanks.gui.screen.ICrusadePreviewScreen;
 import tanks.gui.screen.ILevelPreviewScreen;
 import tanks.gui.screen.IOverlayScreen;
 import tanks.gui.screen.ScreenGame;
-import tanks.gui.screen.ScreenOptionsOverlay;
 import tanks.network.event.EventObstacleShrubberyBurn;
 import tanks.rendering.ShaderShrubbery;
 import tanks.tank.Tank;
@@ -47,21 +46,20 @@ public class ObstacleShrubbery extends Obstacle
 		}
 
 		this.update = true;
-		this.renderer = ShaderShrubbery.class;
 		this.description = "A destructible bush in which you can hide by standing still";
+		this.renderer = ShaderShrubbery.class;
 	}
 
 	@Override
 	public void update()
 	{
 		this.previousFinalHeight = this.finalHeight;
-
 		this.height = Math.min(this.height + Panel.frameFrequency, 255);
 
-		if (ScreenGame.finishedQuick && !Game.game.window.shapeRenderer.supportsBatching)
-			this.height = Math.max(127, this.height - Panel.frameFrequency * 2);
+		if (ScreenGame.finishedQuick)
+            this.height = Math.max(127, this.height - Panel.frameFrequency * 2);
 
-		this.finalHeight = this.baseGroundHeight + draw_size * (0.2 + this.heightMultiplier * (1 - (255 - this.height) / 128));
+		this.finalHeight = this.baseGroundHeight + Game.tile_size * (0.2 + this.heightMultiplier * (1 - (255 - this.height) / 128));
 
 		if (this.finalHeight != this.previousFinalHeight)
             Game.redrawObstacles.add(this);
@@ -70,18 +68,18 @@ public class ObstacleShrubbery extends Obstacle
 	@Override
 	public void draw()
 	{
-		this.finalHeight = this.baseGroundHeight + draw_size * (0.2 + this.heightMultiplier * (1 - (255 - this.height) / 128));
+		this.finalHeight = this.baseGroundHeight + Game.tile_size * (0.2 + this.heightMultiplier * (1 - (255 - this.height) / 128));
 
-		if (!Game.game.window.shapeRenderer.supportsBatching)
+		if (!Game.enable3d)
 		{
-			if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof IOverlayScreen || (Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).playing))
+			if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof ICrusadePreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
                 this.height = 127;
 		}
 
 		if (Game.enable3d)
 		{
 			Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
-			Drawing.drawing.fillBox(this, this.posX, this.posY, this.startHeight * 50, draw_size, draw_size, this.finalHeight, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
+			Drawing.drawing.fillBox(this, this.posX, this.posY, 0, Game.tile_size, Game.tile_size, this.finalHeight, (byte) (this.getOptionsByte(this.getTileHeight()) + 1));
 		}
 		else
 		{
@@ -89,7 +87,7 @@ public class ObstacleShrubbery extends Obstacle
 			Drawing.drawing.fillRect(this, this.posX, this.posY, draw_size, draw_size);
 		}
 	}
-
+	
 	@Override
 	public void drawForInterface(double x, double y)
 	{
@@ -110,23 +108,18 @@ public class ObstacleShrubbery extends Obstacle
 	{
 		if (m instanceof Tank t)
 		{
-			t.hiddenStatusChanged = true;
-
 			for (int x = -1; x <= 1; x++)
 			{
 				for (int y = -1; y <= 1; y++)
 				{
-                    t.canHidePoints[x + 1][y + 1] = t.canHidePoints[x + 1][y + 1] ||
-                            this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x);
+					t.canHidePoints[x + 1][y + 1] = t.canHidePoints[x + 1][y + 1] ||
+							this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x);
 
-                    t.hiddenPoints[x + 1][y + 1] = t.hiddenPoints[x + 1][y + 1] ||
-                            (this.height >= 255 && this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x));
+					t.hiddenPoints[x + 1][y + 1] = t.hiddenPoints[x + 1][y + 1] ||
+							(this.height >= 255 && this.isInside(m.posX + m.size * 0.5 * x, m.posY + m.size * 0.5 * x));
 				}
 			}
 		}
-
-		//m.hiddenTimer = Math.min(100, m.hiddenTimer + (this.opacity - 127) / 255);
-		//m.canHide = true;
 
 		if (m instanceof Bullet && ((Bullet) m).burnsBushes)
 		{
@@ -155,7 +148,7 @@ public class ObstacleShrubbery extends Obstacle
 	@Override
 	public void onObjectEntryLocal(Movable m)
 	{
-		if (m instanceof BulletAir)
+		if (m instanceof Bullet && !((Bullet) m).lowersBushes)
 		{
 			if (Math.random() < Panel.frameFrequency / Math.pow(m.size, 2) * 20 * Game.effectMultiplier)
 			{
@@ -195,16 +188,9 @@ public class ObstacleShrubbery extends Obstacle
 			return 0;
 
 		double shrubScale = 0.25;
-		if (Game.screen instanceof ScreenGame g)
-			shrubScale = g.shrubberyScale;
-		else if (Game.screen instanceof ScreenOptionsOverlay o && o.game != null)
-			shrubScale = o.game.shrubberyScale;
+		if (Game.screen instanceof ScreenGame)
+			shrubScale = ((ScreenGame) Game.screen).shrubberyScale;
 
 		return this.finalHeight * shrubScale;
-	}
-
-	public byte getOptionsByte(double h)
-	{
-		return 0;
 	}
 }

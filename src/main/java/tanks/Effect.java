@@ -679,7 +679,7 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         }
         else
         {
-            throw new RuntimeException("Invalid effect type!");
+            throw new RuntimeException("Invalid effect type: " + this.type);
         }
     }
 

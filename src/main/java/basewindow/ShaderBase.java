@@ -6,6 +6,7 @@ public class ShaderBase extends ShaderProgram implements IBaseShader
     public Uniform1i depthTexture;
     public UniformMatrix4 biasMatrix;
     public UniformMatrix4 lightViewProjectionMatrix;
+    //    public Uniform3f lightVec;
     public Uniform1b depthtest;
     public Uniform1f glow;
     public Uniform1i shadowres;
@@ -13,7 +14,7 @@ public class ShaderBase extends ShaderProgram implements IBaseShader
     public Uniform1f glowLight;
     public Uniform1f shade;
     public Uniform1f glowShade;
-//    public Uniform1f edgeLight;
+    //    public Uniform1f edgeLight;
 //    public Uniform1f edgeCutoff;
 //    public Uniform1f minBrightness;
 //    public Uniform1f maxBrightness;
@@ -37,6 +38,8 @@ public class ShaderBase extends ShaderProgram implements IBaseShader
     public Uniform1i lightsTexSize;
     public Uniform1i lightsTexture;
 
+    public Uniform1i tex;
+
 //    public Uniform1b useNormal;
 
     public BaseWindow window;
@@ -57,6 +60,7 @@ public class ShaderBase extends ShaderProgram implements IBaseShader
     @Override
     public void initializeUniforms()
     {
+        this.tex.set(0);
         this.depthTexture.set(1);
         this.lightsTexture.set(2);
     }

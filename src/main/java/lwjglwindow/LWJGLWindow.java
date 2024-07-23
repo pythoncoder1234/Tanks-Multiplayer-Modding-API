@@ -745,7 +745,12 @@ public class LWJGLWindow extends BaseWindow
 		if (this.drawingShadow)
 			glOrtho(0, absoluteWidth, absoluteHeight, 0, -absoluteDepth, absoluteDepth);
 		else
-			glFrustum(-absoluteWidth / (absoluteDepth * 2.0) * m, absoluteWidth / (absoluteDepth * 2.0) * m, absoluteHeight / (absoluteDepth * 2.0) * m, -absoluteHeight / (absoluteDepth * 2.0) * m, m, absoluteDepth * m * clipDistMultiplier);
+			glFrustum(
+					-absoluteWidth / (absoluteDepth * 2.0) * m,
+					absoluteWidth / (absoluteDepth * 2.0) * m,
+					absoluteHeight / (absoluteDepth * 2.0) * m,
+					-absoluteHeight / (absoluteDepth * 2.0) * m,
+					m, absoluteDepth * m * clipDistMultiplier);
 
 		this.angled = false;
 
@@ -1143,6 +1148,18 @@ public class LWJGLWindow extends BaseWindow
 	}
 
 	@Override
+	public float[] getTransformedMouse()
+	{
+		return new float[0];
+	}
+
+	@Override
+	public float[] getTransformedMouse(double x, double y)
+	{
+		return new float[0];
+	}
+
+	@Override
 	public ModelPart createModelPart()
 	{
 		return new ImmediateModeModelPart(this);
@@ -1267,7 +1284,7 @@ public class LWJGLWindow extends BaseWindow
 	}
 
 	@Override
-	public BaseStaticBatchRenderer createStaticBatchRenderer(ShaderGroup shader, boolean color, String texture, boolean normal, int vertices)
+	public BaseShapeBatchRenderer createStaticBatchRenderer(ShaderGroup shader, boolean color, String texture, boolean normal, int vertices)
 	{
 		return new VBOStaticBatchRenderer(this, shader, color, texture, normal, vertices);
 	}
@@ -1276,35 +1293,5 @@ public class LWJGLWindow extends BaseWindow
 	public BaseShaderUtil getShaderUtil(ShaderProgram p)
 	{
 		return new ShaderUtil(this, p);
-	}
-
-	@Override
-	public void setShader(ShaderBase s)
-	{
-		ShaderBase old = null;
-		if (this.currentShaderGroup != null)
-			old = this.currentShaderGroup.shaderBase;
-
-		this.currentShaderGroup = s.group;
-		this.currentShader = s;
-		s.set();
-
-		if (old != null)
-			s.copyUniformsFrom(old, ShaderBase.class);
-	}
-
-	@Override
-	public void setShader(ShaderShadowMap s)
-	{
-		ShaderShadowMap old = null;
-		if (this.currentShaderGroup != null)
-			old = this.currentShaderGroup.shaderShadowMap;
-
-		this.currentShaderGroup = s.group;
-		this.currentShader = s;
-		s.set();
-
-		if (old != null)
-			s.copyUniformsFrom(old, ShaderShadowMap.class);
 	}
 }

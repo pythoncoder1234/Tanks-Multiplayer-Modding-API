@@ -34,6 +34,9 @@ public class Hotbar
 
 	public void update()
 	{
+		Hotbar.toggle.posX = Drawing.drawing.interfaceSizeX / 2;
+		Hotbar.toggle.posY = (int) (Drawing.drawing.getInterfaceEdgeY(true) - 12);
+
 		if (Game.game.window.touchscreen)
 		{
 			this.verticalOffset = 20;
@@ -44,6 +47,9 @@ public class Hotbar
 
 		if (this.persistent)
 			this.hidden = false;
+
+		if (ScreenGame.finished)
+			this.hidden = true;
 
 		this.hideTimer = Math.max(0, this.hideTimer - Panel.frameFrequency);
 
@@ -82,10 +88,10 @@ public class Hotbar
         if (this.enabledItemBar)
             this.itemBar.draw();
 
-        if (this.enabledHealthBar)
-        {
-            int x = (int) ((Drawing.drawing.interfaceSizeX / 2));
-            int y = (int) (Drawing.drawing.interfaceSizeY - 25 + percentHidden - verticalOffset);
+		if (this.enabledHealthBar)
+		{
+			int x = (int) ((Drawing.drawing.interfaceSizeX / 2));
+			int y = (int) (Drawing.drawing.getInterfaceEdgeY(true) - 25 + percentHidden - verticalOffset);
 
             Drawing.drawing.setColor(0, 0, 0, 128 * (100 - this.percentHidden) / 100.0);
 
@@ -131,7 +137,7 @@ public class Hotbar
 		if (this.enabledAmmunitionBar)
 		{
 			int x = (int) ((Drawing.drawing.interfaceSizeX / 2));
-			int y = (int) (Drawing.drawing.interfaceSizeY - 10 + percentHidden - verticalOffset);
+			int y = (int) (Drawing.drawing.getInterfaceEdgeY(true) - 10 + percentHidden - verticalOffset);
 
 			Drawing.drawing.setColor(0, 0, 0, 128 * (100 - this.percentHidden) / 100.0);
 
@@ -290,7 +296,7 @@ public class Hotbar
 			}
 
 			int x = (int) ((Drawing.drawing.interfaceSizeX / 2) - 210);
-			int y = (int) (Drawing.drawing.interfaceSizeY - 17.5 + percentHidden - verticalOffset);
+			int y = (int) (Drawing.drawing.getInterfaceEdgeY(true) - 17.5 + percentHidden - verticalOffset);
 
             Drawing.drawing.setColor(159, 32, 32, a);
             Drawing.drawing.drawInterfaceModel(TankModels.tank.base, x, y, Game.tile_size / 2, Game.tile_size / 2, 0);

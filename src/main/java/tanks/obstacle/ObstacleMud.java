@@ -3,9 +3,7 @@ package tanks.obstacle;
 import tanks.*;
 import tanks.gui.screen.ScreenGame;
 import tanks.rendering.ShaderMud;
-import tanks.tank.Mine;
 import tanks.tank.Tank;
-import tanks.tank.TankAIControlled;
 
 public class ObstacleMud extends Obstacle
 {
@@ -28,15 +26,16 @@ public class ObstacleMud extends Obstacle
         this.colorB = 0;
 
         this.replaceTiles = true;
-        this.tileRenderer = ShaderMud.class;
 
         this.description = "A thick puddle of mud that slows tanks down";
+
+        this.tileRenderer = ShaderMud.class;
     }
 
     @Override
     public void onObjectEntry(Movable m)
     {
-        if (m instanceof Tank || m instanceof Mine)
+        if (m instanceof Tank)
             m.addStatusEffect(StatusEffect.mud, 0, 20, 30);
 
         this.onObjectEntryLocal(m);
@@ -45,8 +44,9 @@ public class ObstacleMud extends Obstacle
     @Override
     public void onObjectEntryLocal(Movable m)
     {
-        if (Game.effectsEnabled && m instanceof Tank t && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.1 * Game.effectMultiplier)
+        if (Game.effectsEnabled && m instanceof Tank && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.1 * Game.effectMultiplier)
         {
+            Tank t = (Tank) m;
             double a = m.getPolarDirection();
             Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
             Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
@@ -111,7 +111,7 @@ public class ObstacleMud extends Obstacle
             if (distsq <= radius && Math.random() < Panel.frameFrequency * 0.05 && speed > 0 && Game.playerTank != null && !Game.playerTank.destroy)
             {
                 int sound = (int) (Math.random() * 8 + 1);
-                Drawing.drawing.playGameSound("mud" + sound + ".ogg", m, Game.tile_size * 10, (float) ((speed / 3.0f) + 0.5f) * 1.25f, (float) (speed * 0.025 * (radius - distsq) / radius));
+                Drawing.drawing.playSound("mud" + sound + ".ogg", (float) ((speed / 3.0f) + 0.5f) * 1.25f, (float) (speed * 0.025 * (radius - distsq) / radius));
             }
         }
     }
@@ -126,6 +126,23 @@ public class ObstacleMud extends Obstacle
         }
     }
 
+//    @Override
+//    public void drawTile(IBatchRenderableObject o, double r, double g, double b, double d, double extra)
+//    {
+//        double frac = Obstacle.draw_size / Game.tile_size;
+//
+//        if (frac < 1 || extra != 0)
+//        {
+//            Drawing.drawing.setColor(this.colorR * frac + r * (1 - frac), this.colorG * frac + g * (1 - frac), this.colorB * frac + b * (1 - frac));
+//            Drawing.drawing.fillBox(o, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * (1 - frac) + extra);
+//        }
+//        else
+//        {
+//            Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB);
+//            Drawing.drawing.fillBox(o, this.posX, this.posY, -extra, Game.tile_size, Game.tile_size, d * (1 - frac) + extra, (byte) 61);
+//        }
+//    }
+
     public double getTileHeight()
     {
         return 0;
@@ -134,10 +151,5 @@ public class ObstacleMud extends Obstacle
     public double getGroundHeight()
     {
         return 0;
-    }
-
-    public int unfavorability(TankAIControlled t)
-    {
-        return 3;
     }
 }

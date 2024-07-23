@@ -14,6 +14,7 @@ import tanks.tank.TankPlayer;
 import tanks.tank.TankPlayerRemote;
 
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * The base class you extend to create modded minigames.<br><br>
@@ -66,10 +67,10 @@ public abstract class Minigame
 
     public Minigame()
     {
-        for (String s: Game.registryMinigame.minigames.keySet())
+        for (Map.Entry<String, Class<? extends Minigame>> entry : Game.registryMinigame.minigames.entrySet())
         {
-            if (Game.registryMinigame.minigames.get(s).equals(this.getClass()))
-                this.name = s;
+            if (entry.getValue().isInstance(this))
+                this.name = entry.getKey();
         }
     }
 

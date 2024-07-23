@@ -1821,7 +1821,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			Obstacle o = grid[endX][y].get(layer);
 
-			if (o == null || o.getClass() != compare.getClass() || !Objects.equals(o.getMetadata(), metadata))
+			if (o == null || o.removed || o.getClass() != compare.getClass() || !Objects.equals(o.getMetadata(), metadata))
 				break;
 
 			compX.add(o);
@@ -1835,7 +1835,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			Obstacle o = grid[x][endY].get(layer);
 
-			if (o == null || o.getClass() != compare.getClass() || !Objects.equals(o.getMetadata(), compare.getMetadata()))
+			if (o == null || o.removed || o.getClass() != compare.getClass() || !Objects.equals(o.getMetadata(), compare.getMetadata()))
 				break;
 
 			compY.add(o);
@@ -2277,6 +2277,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			int y = (int) (o.posY / Game.tile_size);
 
 			o.postOverride();
+			o.removed = false;
 
 			if (o.startHeight > 1)
 				continue;

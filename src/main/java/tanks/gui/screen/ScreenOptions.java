@@ -64,11 +64,16 @@ public class ScreenOptions extends ScreenOptionsOverlay
 			Game.screen = ScreenOverlayControls.lastControlsScreen;
 	});
 
-	Button personalize = new Button(this.centerX, this.centerY - this.objYSpace * 2.4, this.objWidth * 1.5, this.objHeight * 2, "", () -> Game.screen = new ScreenOptionsPersonalize());
+    Button personalize = new Button(this.centerX, this.centerY - this.objYSpace * 2.4, this.objWidth * 1.5, this.objHeight * 2, "", () ->
+    {
+        if (ScreenPartyHost.isServer || ScreenPartyLobby.isClient)
+            Game.screen = new ScreenOptionsPlayerColor();
+        else
+            Game.screen = new ScreenOptionsPersonalize();
+    });
 
 	Button windowOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY, this.objWidth, this.objHeight, "Window options", () -> Game.screen = new ScreenOptionsWindow());
-
-	Button extensionOptions = new Button(this.centerX, this.centerY + this.objYSpace * 2.5, this.objWidth, this.objHeight, "Extension options", () -> Game.screen = new ScreenOptionsExtensions());
+	Button interfaceOptionsMobile = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 0, this.objWidth, this.objHeight, "Interface options", () -> Game.screen = new ScreenOptionsWindowMobile());
 
 	public static void saveOptions(String homedir)
     {
@@ -81,117 +86,75 @@ public class ScreenOptions extends ScreenOptionsOverlay
             if (Game.game.window != null)
                 fullscreen = Game.game.window.fullscreen;
 
-            BaseFile f = Game.game.fileManager.getFile(path);
-            f.startWriting();
-            f.println("# This file stores game settings that you have set");
-            f.println("username=" + Game.player.username);
-            f.println("fancy_terrain=" + Game.fancyTerrain);
-            f.println("effects=" + Game.effectsEnabled);
-            f.println("effect_multiplier=" + (int) Math.round(Game.effectMultiplier * 100));
-            f.println("bullet_trails=" + Game.bulletTrails);
-            f.println("fancy_bullet_trails=" + Game.fancyBulletTrails);
-            f.println("glow=" + Game.glowEnabled);
-            f.println("3d=" + Game.enable3d);
-            f.println("3d_ground=" + Game.enable3dBg);
-            f.println("shadows_enabled=" + Game.shadowsEnabled);
-            f.println("shadow_quality=" + Game.shadowQuality);
-            f.println("vsync=" + Game.vsync);
-            f.println("max_fps=" + Game.maxFPS);
-            f.println("antialiasing=" + Game.antialiasing);
-            f.println("perspective=" + ScreenOptionsGraphics.viewNum);
-            f.println("bullet_indicator=" + Game.xrayBullets);
-            f.println("preview_crusades=" + Game.previewCrusades);
-            f.println("tank_textures=" + Game.tankTextures);
-            f.println("mouse_target=" + Panel.showMouseTarget);
-            f.println("mouse_target_height=" + Panel.showMouseTargetHeight);
-            f.println("pause_on_lost_focus=" + Panel.pauseOnDefocus);
-            f.println("constrain_mouse=" + Game.constrainMouse);
-            f.println("fullscreen=" + fullscreen);
-            f.println("vibrations=" + Game.enableVibrations);
-            f.println("mobile_joystick=" + TankPlayer.controlStickMobile);
-            f.println("snap_joystick=" + TankPlayer.controlStickSnap);
-            f.println("dual_joystick=" + TankPlayer.shootStickEnabled);
-            f.println("sound=" + Game.soundsEnabled);
-            f.println("sound_volume=" + Game.soundVolume);
-            f.println("music=" + Game.musicEnabled);
-            f.println("music_volume=" + Game.musicVolume);
-            f.println("auto_start=" + Game.autostart);
-            f.println("full_stats=" + Game.fullStats);
-            f.println("timer=" + Game.showSpeedrunTimer);
-            f.println("deterministic=" + Game.deterministicMode);
-            f.println("warn_before_closing=" + Game.warnBeforeClosing);
-            f.println("info_bar=" + Drawing.drawing.enableStats);
-            f.println("port=" + Game.port);
-            f.println("last_party=" + Game.lastParty);
-            f.println("last_online_server=" + Game.lastOnlineServer);
-            f.println("show_ip=" + Game.showIP);
-            f.println("chat_filter=" + Game.enableChatFilter);
-            f.println("auto_ready=" + Game.autoReady);
-            f.println("tps=" + Tank.updatesPerSecond);
-            f.println("anticheat=" + TankPlayerRemote.checkMotion);
-            f.println("anticheat_weak=" + TankPlayerRemote.weakTimeCheck);
-            f.println("disable_party_friendly_fire=" + Game.disablePartyFriendlyFire);
-            f.println("party_countdown=" + Game.partyStartTime);
-            f.println("tank_secondary_color=" + Game.player.enableSecondaryColor);
-            f.println("tank_red=" + Game.player.colorR);
-            f.println("tank_green=" + Game.player.colorG);
-            f.println("tank_blue=" + Game.player.colorB);
-            f.println("tank_red_2=" + Game.player.turretColorR);
-            f.println("tank_green_2=" + Game.player.turretColorG);
-            f.println("tank_blue_2=" + Game.player.turretColorB);
-
-            if (Game.player.chromaaa)
-                f.println("cHrOmA=true");
-
-            f.println("translation=" + (Translation.currentTranslation == null ? "null" : Translation.currentTranslation.fileName));
-            f.println("last_version=" + Game.lastVersion);
-            f.println("enable_extensions=" + Game.enableExtensions);
-            f.println("auto_load_extensions=" + Game.autoLoadExtensions);
-			f.println("modapi_auto_load=" + ModAPI.autoLoadExtensions);
-
-            for (String s : extraOptions)
-                f.println(s);
-
-            f.stopWriting();
-        }
-        catch (FileNotFoundException e)
-        {
-            Game.exitToCrash(e);
-        }
-
-        if (ScreenOptionsExtensions.modified)
-            saveExtensions();
-    }
-
-    public static void saveExtensions()
-    {
-        ScreenOptionsExtensions.modified = false;
-        ArrayList<String> arr = new ArrayList<>();
-        for (int i = 0; i < ScreenOptionsExtensions.extensionNames.size(); i++)
-        {
-            if (ScreenOptionsExtensions.selectedExtensions[i])
-                arr.add(ScreenOptionsExtensions.extensionNames.get(i));
-        }
-
-        Game.extensionRegistry.saveRegistry(arr);
-    }
-
-	public static void initOptions(String homedir)
-	{
-		String path = homedir + Game.optionsPath;
-
-		try
-		{
-			Game.game.fileManager.getFile(path).create();
+			BaseFile f = Game.game.fileManager.getFile(path);
+			f.startWriting();
+			f.println("# This file stores game settings that you have set");
+			f.println("username=" + Game.player.username);
+			f.println("fancy_terrain=" + Game.fancyTerrain);
+			f.println("effects=" + Game.effectsEnabled);
+			f.println("effect_multiplier=" + (int) Math.round(Game.effectMultiplier * 100));
+			f.println("bullet_trails=" + Game.bulletTrails);
+			f.println("fancy_bullet_trails=" + Game.fancyBulletTrails);
+			f.println("glow=" + Game.glowEnabled);
+			f.println("3d=" + Game.enable3d);
+			f.println("3d_ground=" + Game.enable3dBg);
+			f.println("shadows_enabled=" + Game.shadowsEnabled);
+			f.println("shadow_quality=" + Game.shadowQuality);
+			f.println("vsync=" + Game.vsync);
+			f.println("max_fps=" + Game.maxFPS);
+			f.println("antialiasing=" + Game.antialiasing);
+			f.println("perspective=" + ScreenOptionsGraphics.viewNum);
+			f.println("preview_crusades=" + Game.previewCrusades);
+			f.println("tank_textures=" + Game.tankTextures);
+			f.println("xray_bullets=" + Game.xrayBullets);
+			f.println("mouse_target=" + Panel.showMouseTarget);
+			f.println("mouse_target_height=" + Panel.showMouseTargetHeight);
+			f.println("constrain_mouse=" + Game.constrainMouse);
+			f.println("fullscreen=" + fullscreen);
+			f.println("vibrations=" + Game.enableVibrations);
+			f.println("mobile_joystick=" + TankPlayer.controlStickMobile);
+			f.println("snap_joystick=" + TankPlayer.controlStickSnap);
+			f.println("dual_joystick=" + TankPlayer.shootStickEnabled);
+			f.println("sound=" + Game.soundsEnabled);
+			f.println("sound_volume=" + Game.soundVolume);
+			f.println("music=" + Game.musicEnabled);
+			f.println("music_volume=" + Game.musicVolume);
+			f.println("layered_music=" + Game.enableLayeredMusic);
+			f.println("auto_start=" + Game.autostart);
+			f.println("full_stats=" + Game.fullStats);
+			f.println("timer=" + Game.showSpeedrunTimer);
+			f.println("deterministic=" + Game.deterministicMode);
+			f.println("deterministic_30fps=" + Game.deterministic30Fps);
+			f.println("warn_before_closing=" + Game.warnBeforeClosing);
+			f.println("info_bar=" + Drawing.drawing.enableStats);
+			f.println("port=" + Game.port);
+			f.println("last_party=" + Game.lastParty);
+			f.println("last_online_server=" + Game.lastOnlineServer);
+			f.println("show_ip=" + Game.showIP);
+			f.println("chat_filter=" + Game.enableChatFilter);
+			f.println("auto_ready=" + Game.autoReady);
+			f.println("anticheat=" + TankPlayerRemote.checkMotion);
+			f.println("anticheat_weak=" + TankPlayerRemote.weakTimeCheck);
+			f.println("disable_party_friendly_fire=" + Game.disablePartyFriendlyFire);
+			f.println("party_countdown=" + Game.partyStartTime);
+			f.println("tank_secondary_color=" + Game.player.enableSecondaryColor);
+			f.println("tank_red=" + Game.player.colorR);
+			f.println("tank_green=" + Game.player.colorG);
+			f.println("tank_blue=" + Game.player.colorB);
+			f.println("tank_red_2=" + Game.player.turretColorR);
+			f.println("tank_green_2=" + Game.player.turretColorG);
+			f.println("tank_blue_2=" + Game.player.turretColorB);
+			f.println("translation=" + (Translation.currentTranslation == null ? "null" : Translation.currentTranslation.fileName));
+			f.println("last_version=" + Game.lastVersion);
+			f.println("enable_extensions=" + Game.enableExtensions);
+			f.println("auto_load_extensions=" + Game.autoLoadExtensions);
+			f.stopWriting();
 		}
-		catch (IOException e)
+		catch (FileNotFoundException e)
 		{
-			Game.logger.println (new Date() + " (syserr) file permissions are broken! cannot initialize options file.");
-			System.exit(1);
+			Game.exitToCrash(e);
 		}
-
-		saveOptions(homedir);
-	}
+    }
 
     public static void loadOptions(String homedir)
     {
@@ -285,6 +248,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
                         if (optionLine.length >= 2)
                             Game.lastParty = optionLine[1];
                     }
+                    case "layered_music" -> Game.enableLayeredMusic = Boolean.parseBoolean(optionLine[1]);
                     case "last_online_server" ->
                     {
                         if (optionLine.length >= 2)
@@ -319,12 +283,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
 			f.stopReading();
 
 			if (Game.framework == Game.Framework.libgdx)
-			{
-				Game.angledView = false;
 				Panel.showMouseTarget = false;
-				Game.vsync = true;
-				Game.previewCrusades = false;
-			}
 
 			if (!Game.soundsEnabled)
 				Game.soundVolume = 0;
@@ -339,7 +298,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
 		}
 		catch (Exception e)
 		{
-			Game.logger.println (new Date().toString() + " (syswarn) options file is nonexistent or broken, using default:");
+			Game.logger.println (new Date() + " (syswarn) options file is nonexistent or broken, using default:");
 			e.printStackTrace(Game.logger);
 		}
 	}
@@ -349,7 +308,11 @@ public class ScreenOptions extends ScreenOptionsOverlay
     {
         soundOptions.update();
         miscOptions.update();
-        windowOptions.update();
+
+		if (Game.framework == Game.Framework.libgdx)
+			interfaceOptionsMobile.update();
+		else
+			windowOptions.update();
 
         graphicsOptions.update();
         inputOptions.update();
@@ -370,7 +333,12 @@ public class ScreenOptions extends ScreenOptionsOverlay
 		multiplayerOptions.draw();
 		inputOptions.draw();
 		graphicsOptions.draw();
-		windowOptions.draw();
+
+		if (Game.framework == Game.Framework.libgdx)
+			interfaceOptionsMobile.draw();
+		else
+			windowOptions.draw();
+
 		miscOptions.draw();
 		soundOptions.draw();
 		personalize.draw();
@@ -408,5 +376,35 @@ public class ScreenOptions extends ScreenOptionsOverlay
 		Drawing.drawing.setInterfaceFontSize(this.titleSize * 0.65);
 		Drawing.drawing.setColor(80, 80, 80);
 		Drawing.drawing.displayInterfaceText(personalize.posX, personalize.posY - personalize.sizeY * 0.3, "My profile");
+	}
+
+	public static void initOptions(String homedir)
+	{
+		String path = homedir + Game.optionsPath;
+
+		try
+		{
+			Game.game.fileManager.getFile(path).create();
+		}
+		catch (IOException e)
+		{
+			Game.logger.println (new Date() + " (syserr) file permissions are broken! cannot initialize options file.");
+			System.exit(1);
+		}
+
+		saveOptions(homedir);
+	}
+
+	public static void saveExtensions()
+	{
+		ScreenOptionsExtensions.modified = false;
+		ArrayList<String> arr = new ArrayList<>();
+		for (int i = 0; i < ScreenOptionsExtensions.extensionNames.size(); i++)
+		{
+			if (ScreenOptionsExtensions.selectedExtensions[i])
+				arr.add(ScreenOptionsExtensions.extensionNames.get(i));
+		}
+
+		Game.extensionRegistry.saveRegistry(arr);
 	}
 }

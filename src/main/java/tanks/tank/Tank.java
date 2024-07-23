@@ -206,6 +206,8 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	@TankProperty(category = general, id = "explode_on_destroy", name = "Explosive", desc="If set, the tank will explode when destroyed")
 	public boolean explodeOnDestroy = false;
 
+	public boolean droppedFromCrate = false;
+
 	/** Whether this tank needs to be destroyed before the level ends. */
 	@TankProperty(category = general, id = "mandatory_kill", name = "Must be destroyed", desc="Whether the tank needs to be destroyed to clear the level")
 	public boolean mandatoryKill = true;
@@ -360,6 +362,9 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 	public static boolean checkBorderCollision(Movable m)
 	{
+		if (Game.currentLevel.mapLoad)
+			return false;
+
 		boolean hasCollided = false;
 
 		if (m.posX + m.size / 2 > Drawing.drawing.sizeX)
@@ -1108,8 +1113,8 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		if (this instanceof IAvoidObject a)
 			IAvoidObject.avoidances.remove(a);
 
-		if (this.explodeOnDestroy && this.age >= 250)
-            new Explosion(this.posX, this.posY, Mine.mine_radius, 2, true, this).explode();
+		if (this.explodeOnDestroy && !(this.droppedFromCrate && this.age < 250))
+            new Explosion(this.posX, this.posY, this.mine.radius, this.mine.damage, this.mine.destroysObstacles, this).explode();
 	}
 
 	public boolean damage(double amount, GameObject source)
@@ -1254,6 +1259,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	{
 		this.addPolarMotion(angle, power * explosion.tankKnockback * Math.pow(Game.tile_size, 2) / Math.max(1, Math.pow(this.size, 2)));
 		this.recoilSpeed = this.getSpeed();
+
 		if (this.recoilSpeed > this.maxSpeed)
 		{
 			this.inControlOfMotion = false;
