@@ -126,6 +126,12 @@ public class ScreenSavedLevels extends Screen
 			this.sort.image = "icons/sort_alphabetical.png";
 
 		this.sort.update();
+
+		if (Game.game.input.editorCopy.isValid() && Game.game.window.shift)
+		{
+			Game.game.input.editorCopy.invalidate();
+			Game.game.fileManager.openFileManager(Game.homedir + "/" + Game.levelDir);
+		}
 	}
 
 	@Override

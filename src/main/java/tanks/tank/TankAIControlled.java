@@ -13,6 +13,7 @@ import tanks.registry.RegistryTank;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static tanks.TankReferenceSolver.*;
 import static tanks.tank.TankProperty.Category.*;
 
 /** This class is the 'skeleton' tank class.
@@ -20,16 +21,14 @@ import static tanks.tank.TankProperty.Category.*;
  *  Also, the behavior is split into many methods which are intended to be overridden easily.*/
 public class TankAIControlled extends Tank
 {
-	public static boolean useTankReferences = true;
-
 	public static int maxReachableCheckChunks = 3;
 	public static double maxReachableCheckDist = maxReachableCheckChunks * Chunk.chunkSize * Game.tile_size;
 
 	public static int[] dirX = {1, -1, 0, 0, 1, -1, 1, -1};
 	public static int[] dirY = {0, 0, 1, -1, -1, 1, 1, -1};
 	protected static TankAIControlled compare;
-	public static HashMap<String, ArrayList<TankAIControlled>> references = new HashMap<>();
-	public static final HashMap<String, Integer> solvedRefs = new HashMap<>();
+
+	public boolean solved;
 
 	/** The type which shows what direction the tank is moving. Clockwise and Counter Clockwise are for idle, while Aiming is for when the tank aims.*/
 	protected enum RotationPhase {clockwise, counter_clockwise, aiming}
@@ -152,6 +151,13 @@ public class TankAIControlled extends Tank
 	/** Health threshold to transform */
 	@TankProperty(category = transformationOnHealth, id = "transform_health_threshold", name = "Hitpoint threshold", desc = "Amount of health this tank must have equal to or less than to transform")
 	public double transformHealthThreshold = 0;
+
+	@TankProperty(category = transformationOnTime, id = "time_transform_tank", name = "Transformation tank", desc = "When set, the tank will transform into this tank after a certian amount of time")
+	public TankAIControlled timeTransformTank = null;
+
+	@TankProperty(category = transformationOnTime, id = "transformation_time", name = "Time before transform", desc = "The tank will transform after this amount of time")
+	public double transformTimerBase = 200;
+
 	/** If set, the tank will seek and transform into other tanks in line of sight */
 	@TankProperty(category = transformationMimic, id = "transform_mimic", name = "Mimic", desc = "When enabled, the tank will mimic other nearby tanks it sees")
 	public boolean transformMimic = false;
@@ -259,10 +265,6 @@ public class TankAIControlled extends Tank
 	/** Spread of a round*/
 	@TankProperty(category = firingPattern, id = "shot_round_spread", name = "Round spread", desc = "Total angle of spread of a round")
 	public double shotRoundSpread = 36;
-
-	/** 0 is old tank AI, 1 is new tank AI */
-	@TankProperty(category = movementIdle, id = "aggressiveness", name = "Aggressiveness", desc = "How big brain your tank is. 0 is old tank AI, 1 is new tank AI")
-	public double smartness = 0;
 
 	public static class SpawnedTankEntry
 	{
@@ -391,6 +393,11 @@ public class TankAIControlled extends Tank
 
 	/** Time until reverting transformation */
 	protected double transformRevertTimer = 0;
+
+	/**
+	 * Time until transforming
+	 */
+	protected double transformTimer = 0;
 
 	/** Set if the tank will eventually turn back into the original tank it was */
 	protected boolean willRevertTransformation = true;
@@ -529,9 +536,6 @@ public class TankAIControlled extends Tank
 
 	protected double lastCooldown = this.cooldown;
 
-	public boolean isUnsolvedReference = false;
-	public HashSet<Field> referenceFields = new HashSet<>();
-
 	public TankAIControlled(String name, double x, double y, double size, double r, double g, double b, double angle, ShootAI ai)
 	{
 		super(name, x, y, size, r, g, b);
@@ -607,6 +611,7 @@ public class TankAIControlled extends Tank
 				this.targetEnemySightBehavior = TargetEnemySightBehavior.sidewind;
 			}
 
+			this.transformTimer = this.transformTimerBase;
 			this.baseMaxSpeed = this.maxSpeed;
 			this.dealsDamage = !this.isSupportTank();
 			this.baseColorR = this.colorR;
@@ -622,6 +627,8 @@ public class TankAIControlled extends Tank
 
 			if (this.random.nextDouble() < 0.5)
 				this.strafeDirection = -this.strafeDirection;
+
+			this.spawnedTankEntries.removeIf(entry -> !entry.tank.solved);
 		}
 
 		Tank.updatesPerFrame++;
@@ -685,6 +692,9 @@ public class TankAIControlled extends Tank
 
 			if (this.healthTransformTank != null && this.health <= this.transformHealthThreshold && !ScreenGame.finishedQuick)
 				this.handleHealthTransformation();
+
+			if (this.timeTransformTank != null)
+				this.handleTimeTransformation();
 
 			this.postUpdate();
 		}
@@ -963,7 +973,7 @@ public class TankAIControlled extends Tank
 			if (m.destroy)
 				continue;
 
-			boolean correctTeam = (this.isSupportTank() && Team.isAllied(this, m) && m instanceof Tank t && t.canBeHealed()) || (!this.isSupportTank() && !Team.isAllied(this, m));
+			boolean correctTeam = isSupportTank() ? Team.isAllied(this, m) && m instanceof Tank t && t.canBeHealed() : !Team.isAllied(this, m);
 			if ((m instanceof Tank t && correctTeam && !t.hidden && t.targetable && m != this) ||
 					(m instanceof Mine && !BulletAir.class.isAssignableFrom(this.bullet.bulletClass) && !this.isSupportTank() && isTargetSafe(m.posX, m.posY, m)))
 			{
@@ -1072,28 +1082,6 @@ public class TankAIControlled extends Tank
 		}
 	}
 
-	public void setIQ()
-	{
-		if (Game.grandpaMode)
-		{
-			smartness = 1;
-			return;
-		}
-
-		double sm = Math.min(this.maxSpeed, 2) / 6;
-
-		if (this.enablePathfinding)
-			sm += 0.3;
-
-		if (this.enablePredictiveFiring)
-			sm += 0.1;
-
-		if (this.targetEnemySightBehavior == TargetEnemySightBehavior.strafe)
-			sm += 0.1;
-
-		this.smartness = Math.max(this.smartness, sm);
-	}
-
 	public void reactToTargetEnemySight()
 	{
 		if (this.targetEnemy == null)
@@ -1155,8 +1143,24 @@ public class TankAIControlled extends Tank
 		this.transform(this.healthTransformTank);
 	}
 
+	public void handleTimeTransformation()
+	{
+		this.transformTimer -= Panel.frameFrequency;
+		if (this.transformTimer >= 0 || this.justTransformed)
+			return;
+
+		this.willRevertTransformation = false;
+		this.transformTimer = this.transformTimerBase;
+		Game.eventsOut.add(new EventTankTransformPreset(this, false, false));
+		this.transform(this.timeTransformTank);
+    }
+
 	public void transform(TankAIControlled t)
 	{
+		t.solve();
+		if (!t.solved)
+			return;
+
 		this.justTransformed = true;
 		this.transformTank = t;
 		this.possessingTank = t;
@@ -2521,9 +2525,6 @@ public class TankAIControlled extends Tank
 
 				if (selected <= 0)
 				{
-					if (s.tank.isUnsolvedReference)
-						return;
-
 					if (s.tank.getClass().equals(TankAIControlled.class))
 					{
 						t2 = new TankAIControlled("", this.posX + x, this.posY + y, 0, 0, 0, 0, this.angle, ShootAI.none);
@@ -2994,75 +2995,27 @@ public class TankAIControlled extends Tank
 		}
 	}
 
-	public static void solveReferences(ArrayList<TankAIControlled> customTanks)
+	public static TankAIControlled fromString(String s, Level l, String[] remainder)
 	{
-		HashMap<String, TankAIControlled> tankMap = new HashMap<>();
-		for (TankAIControlled t : customTanks)
-			tankMap.put(t.name, t);
-
-		solvedRefs.clear();
-		while (!references.isEmpty())
+		if (fieldMap == null)
 		{
-			HashMap<String, ArrayList<TankAIControlled>> newRef = new HashMap<>();
-			for (Map.Entry<String, ArrayList<TankAIControlled>> entry : references.entrySet())
+			fieldMap = new HashMap<>();
+
+			for (Field f : TankAIControlled.class.getFields())
 			{
-				TankAIControlled solved = tankMap.get(entry.getKey());
-				if (solved != null)
-					solveReference(solved, entry.getValue(), newRef);
+				TankProperty a = f.getAnnotation(TankProperty.class);
+				if (a == null)
+					continue;
+
+				fieldMap.put(a.id(), f);
+				if (a.id().equals("spawned_tanks"))
+					fieldMap.put("spawned_tank", f);
+
+				if (Tank.class.isAssignableFrom(f.getType()))
+					referenceFields.add(f);
 			}
-			references = newRef;
 		}
-	}
 
-	public static void solveReference(TankAIControlled solved, ArrayList<TankAIControlled> entries, HashMap<String, ArrayList<TankAIControlled>> newRefs)
-	{
-		int appeared = solvedRefs.getOrDefault(solved.name, 0);
-		if (appeared > 10)
-			return;
-
-		solvedRefs.put(solved.name, appeared + 1);
-
-		try
-		{
-			boolean unsolved = false;
-
-			if (entries.isEmpty())
-				return;
-
-			for (Field f : solved.referenceFields)
-			{
-				if (f.get(solved) instanceof TankAIControlled t1 && t1.isUnsolvedReference)
-				{
-					unsolved = true;
-					solved.isUnsolvedReference = true;
-					putAdd(newRefs, t1.name, t1);
-				}
-			}
-
-            if (!unsolved)
-            {
-				for (TankAIControlled t : entries)
-				{
-					t.isUnsolvedReference = false;
-					solved.cloneProperties(t);
-				}
-
-				solved.isUnsolvedReference = false;
-            }
-            else
-			{
-				putAdd(newRefs, solved.name, solved);
-				putAddAll(newRefs, solved.name, entries);
-			}
-        }
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static TankAIControlled fromString(String s, String[] remainder, boolean saveReferences)
-	{
 		s = s.strip();
 		String original = s;
 		String[] r = new String[1];
@@ -3082,10 +3035,6 @@ public class TankAIControlled extends Tank
 					i = k;
 
 				t.name = s.substring(0, i);
-				t.isUnsolvedReference = true;
-
-				if (saveReferences)
-					putAdd(references, t.name, t);
 
 				if (remainder != null)
 					remainder[0] = "]" + s.substring(i);
@@ -3099,150 +3048,146 @@ public class TankAIControlled extends Tank
 				String value = s.substring(equals + 1, s.indexOf(";"));
 				String propname = s.substring(0, equals);
 
-				for (Field f : TankAIControlled.class.getFields())
+				Field f = fieldMap.get(propname);
+
+				if (f == null)
 				{
-					boolean found = true;
-
-					TankProperty a = f.getAnnotation(TankProperty.class);
-					if (a != null && (a.id().equals(propname) || (a.id().equals("spawned_tanks") && propname.equals("spawned_tank"))))
-					{
-						if (f.getType().equals(int.class))
-							f.set(t, Integer.parseInt(value));
-						else if (f.getType().equals(double.class))
-							f.set(t, Double.parseDouble(value));
-						else if (f.getType().equals(boolean.class))
-							f.set(t, Boolean.parseBoolean(value));
-						else if (f.getType().equals(String.class))
-						{
-							if (value.equals("*"))
-								f.set(t, null);
-							else if (value.startsWith("\u00A7"))
-							{
-								s = s.substring(equals + 2);
-								int end = s.indexOf("\u00A7");
-								value = s.substring(0, end);
-								s = s.substring(end + 1);
-								f.set(t, value);
-							}
-							else if (value.startsWith("<"))
-							{
-								s = s.substring(equals + 2);
-								int end = s.indexOf(">");
-								int length = Integer.parseInt(s.substring(0, end));
-								value = s.substring(end + 1, end + 1 + length);
-								s = s.substring(end + 1 + length);
-								f.set(t, value);
-							}
-							else
-								f.set(t, value);
-						}
-						else if (a.miscType() == TankProperty.MiscType.music)
-						{
-							int end = s.indexOf("]");
-							String[] csv = s.substring(s.indexOf("[") + 1, end).split(", ");
-							HashSet<String> hashSet;
-							if (csv[0].isEmpty())
-								hashSet = new HashSet<>();
-							else
-								hashSet = new HashSet<>(Arrays.asList(csv));
-
-							f.set(t, hashSet);
-						}
-						else if (a.miscType() == TankProperty.MiscType.spawnedTanks && !propname.equals("spawned_tank"))
-						{
-							s = s.substring(s.indexOf("[") + 1);
-							ArrayList<SpawnedTankEntry> entries = (ArrayList<SpawnedTankEntry>) f.get(t);
-
-							TankAIControlled target;
-							while (!s.startsWith("]"))
-							{
-								int x = s.indexOf("x");
-								String s1 = s.substring(0, x);
-								s = s.substring(x + 1);
-								if (s.equals("*"))
-									target = null;
-								else if (s.startsWith("<"))
-								{
-									String tank = s.substring(s.indexOf("<") + 1, s.indexOf(">"));
-									s = s.substring(s.indexOf(">") + 1);
-									target = (TankAIControlled) Game.registryTank.getEntry(tank).getTank(0, 0, 0);
-								}
-								else
-								{
- 									TankAIControlled t2 = TankAIControlled.fromString(s, r, saveReferences);
-
-									s = r[0];
-									target = t2;
-									s = s.substring(s.indexOf("]") + 1);
-								}
-
-								if (s.startsWith(", "))
-									s = s.substring(2);
-								entries.add(new SpawnedTankEntry(target, Double.parseDouble(s1)));
-							}
-
-							s = s.substring(1);
-						}
-						else if (IModel.class.isAssignableFrom(f.getType()))
-						{
-							if (value.equals("*"))
-								f.set(t, null);
-							else
-								f.set(t, Drawing.drawing.createModel(value));
-						}
-						else if (f.getType().isEnum())
-						{
-							f.set(t, Enum.valueOf((Class<? extends Enum>) f.getType(), value));
-						}
-						else if (Item.class.isAssignableFrom(f.getType()))
-						{
-							Item i = Item.parseItem(null, s);
-							i.unlimitedStack = true;
-							f.set(t, i);
-							s = s.substring(s.indexOf("]") + 1);
-						}
-						else if (Tank.class.isAssignableFrom(f.getType()) || propname.equals("spawned_tank"))
-						{
-							TankAIControlled target;
-
-							if (value.equals("*"))
-								target = null;
-							else if (value.startsWith("<"))
-							{
-								String tank = s.substring(s.indexOf("<") + 1, s.indexOf(">"));
-								s = s.substring(s.indexOf(">") + 1);
-								target = (TankAIControlled) Game.registryTank.getEntry(tank).getTank(0, 0, 0);
-								target.fromRegistry = true;
-							}
-							else
-							{
-								s = s.substring(s.indexOf("=") + 1);
-								TankAIControlled t2 = TankAIControlled.fromString(s, r, saveReferences);
-								if (t2.isUnsolvedReference)
-									t.referenceFields.add(f);
-
-								s = r[0];
-								target = t2;
-								s = s.substring(s.indexOf("]") + 1);
-							}
-
-							if (propname.equals("spawned_tank"))
-							{
-								if (target != null)
-									t.spawnedTankEntries.add(new SpawnedTankEntry(target, 1));
-							}
-							else
-								f.set(t, target);
-						}
-					}
-					else
-						found = false;
-
-					if (found)
-						break;
+					System.err.println("Field " + propname + " not found");
+					s = s.substring(s.indexOf(";") + 1);
+					continue;
 				}
 
-				s = s.substring(s.indexOf(";") + 1);
+                TankProperty a = f.getAnnotation(TankProperty.class);
+                if (f.getType().equals(int.class))
+                    f.set(t, Integer.parseInt(value));
+                else if (f.getType().equals(double.class))
+                    f.set(t, Double.parseDouble(value));
+                else if (f.getType().equals(boolean.class))
+                    f.set(t, Boolean.parseBoolean(value));
+                else if (f.getType().equals(String.class))
+                {
+                    if (value.equals("*"))
+                        f.set(t, null);
+                    else if (value.startsWith("\u00A7"))
+                    {
+                        s = s.substring(equals + 2);
+                        int end = s.indexOf("\u00A7");
+                        value = s.substring(0, end);
+                        s = s.substring(end + 1);
+                        f.set(t, value);
+                    }
+                    else if (value.startsWith("<"))
+                    {
+                        s = s.substring(equals + 2);
+                        int end = s.indexOf(">");
+                        int length = Integer.parseInt(s.substring(0, end));
+                        value = s.substring(end + 1, end + 1 + length);
+                        s = s.substring(end + 1 + length);
+                        f.set(t, value);
+                    }
+                    else
+                        f.set(t, value);
+                }
+                else if (a.miscType() == TankProperty.MiscType.music)
+                {
+                    int end = s.indexOf("]");
+                    String[] csv = s.substring(s.indexOf("[") + 1, end).split(", ");
+                    HashSet<String> hashSet;
+                    if (csv[0].isEmpty())
+                        hashSet = new HashSet<>();
+                    else
+                        hashSet = new HashSet<>(Arrays.asList(csv));
+
+                    f.set(t, hashSet);
+                }
+                else if (a.miscType() == TankProperty.MiscType.spawnedTanks && !propname.equals("spawned_tank"))
+                {
+                    s = s.substring(s.indexOf("[") + 1);
+                    ArrayList<SpawnedTankEntry> entries = (ArrayList<SpawnedTankEntry>) f.get(t);
+
+                    TankAIControlled target;
+                    while (!s.startsWith("]"))
+                    {
+                        int x = s.indexOf("x");
+                        String s1 = s.substring(0, x);
+                        s = s.substring(x + 1);
+                        if (s.equals("*"))
+                            target = null;
+                        else if (s.startsWith("<"))
+                        {
+                            String tank = s.substring(s.indexOf("<") + 1, s.indexOf(">"));
+                            s = s.substring(s.indexOf(">") + 1);
+                            target = (TankAIControlled) Game.registryTank.getEntry(tank).getTank(0, 0, 0);
+                        }
+                        else
+                        {
+                            TankAIControlled t2 = TankAIControlled.fromString(s, l, r);
+							handleValueTank(l, t, t2);
+
+							s = r[0];
+                            target = t2;
+                            s = s.substring(s.indexOf("]") + 1);
+                        }
+
+                        if (s.startsWith(", "))
+                            s = s.substring(2);
+                        entries.add(new SpawnedTankEntry(target, Double.parseDouble(s1)));
+                    }
+
+                    s = s.substring(1);
+                }
+                else if (IModel.class.isAssignableFrom(f.getType()))
+                {
+                    if (value.equals("*"))
+                        f.set(t, null);
+                    else
+                        f.set(t, Drawing.drawing.createModel(value));
+                }
+                else if (f.getType().isEnum())
+                {
+                    f.set(t, Enum.valueOf((Class<? extends Enum>) f.getType(), value));
+                }
+                else if (Item.class.isAssignableFrom(f.getType()))
+                {
+                    Item i = Item.parseItem(null, s);
+                    i.unlimitedStack = true;
+                    f.set(t, i);
+                    s = s.substring(s.indexOf("]") + 1);
+                }
+                else if (Tank.class.isAssignableFrom(f.getType()) || propname.equals("spawned_tank"))
+                {
+                    TankAIControlled target;
+
+                    if (value.equals("*"))
+                        target = null;
+                    else if (value.startsWith("<"))
+                    {
+                        String tank = s.substring(s.indexOf("<") + 1, s.indexOf(">"));
+                        s = s.substring(s.indexOf(">") + 1);
+                        target = (TankAIControlled) Game.registryTank.getEntry(tank).getTank(0, 0, 0);
+                        target.fromRegistry = true;
+                    }
+                    else
+                    {
+                        s = s.substring(s.indexOf("=") + 1);
+                        TankAIControlled t2 = TankAIControlled.fromString(s, l, r);
+						handleValueTank(l, t, t2);
+
+                        s = r[0];
+                        target = t2;
+                        s = s.substring(s.indexOf("]") + 1);
+                    }
+
+                    if (propname.equals("spawned_tank"))
+                    {
+                        if (target != null)
+                            t.spawnedTankEntries.add(new SpawnedTankEntry(target, 1));
+                    }
+                    else
+                        f.set(t, target);
+                }
+
+                s = s.substring(s.indexOf(";") + 1);
 			}
 		}
 		catch (Exception e)
@@ -3258,18 +3203,32 @@ public class TankAIControlled extends Tank
 		return t;
 	}
 
+	private static void handleValueTank(Level level, TankAIControlled parent, TankAIControlled valueTank)
+	{
+		level.valueTanks.add(valueTank);
+		parent.addReference(valueTank, level);
+	}
+
+	/** Registers that this tank is used in tank <code>t</code>.
+	 * @param t The tank that this tank is referred in */
+	public void addReference(TankAIControlled t, Level l)
+	{
+		if (l == null)
+			return;
+		l.references.computeIfAbsent(t, k -> new ArrayList<>()).add(this);
+	}
+
+	/** Returns the name of the tank if tank references are enabled, otherwise returns {@link #tankString()}. */
 	@Override
 	public String toString()
 	{
-		if (useTankReferences)
-		{
-			if (fromRegistry)
-				return "<" + this.name + ">";
+		if (useTankReferences && !fromRegistry)
 			return this.name;
-		}
+
         return tankString();
     }
 
+	/** Returns the string representation of the tank. */
 	public String tankString()
 	{
 		if (compare == null)
@@ -3292,8 +3251,7 @@ public class TankAIControlled extends Tank
 				if (Objects.equals(obj, f.get(compare)))
 					continue;
 
-				s.append(a.id());
-				s.append("=");
+				s.append(a.id()).append("=");
 
 				if (obj != null)
 				{
@@ -3323,17 +3281,12 @@ public class TankAIControlled extends Tank
 
 	public static TankAIControlled fromString(String s)
 	{
-		return fromString(s, null, true);
+		return fromString(s, null, null);
 	}
 
-	public static TankAIControlled fromString(String s, boolean saveReferences)
+	public static TankAIControlled fromString(String s, Level l)
 	{
-		return fromString(s, null, saveReferences);
-	}
-
-	public static TankAIControlled fromString(String s, String[] remainder)
-	{
-		return fromString(s, remainder, true);
+		return fromString(s, l, null);
 	}
 
     public TankAIControlled instantiate(String name, double x, double y, double angle)
@@ -3434,6 +3387,19 @@ public class TankAIControlled extends Tank
 		}
 	}
 
+	public void solve()
+	{
+		if (Game.currentLevel == null)
+			return;
+
+		Game.currentLevel.customTanks.stream().filter(t1 -> name.equals(t1.name)).findAny().ifPresent(t1 ->
+        {
+            t1.cloneProperties(this);
+			solved = true;
+        });
+	}
+
+	/** Clones properties from this tank to the <code>t</code> parameter. */
 	public void cloneProperties(TankAIControlled t)
 	{
 		try
@@ -3488,23 +3454,5 @@ public class TankAIControlled extends Tank
 		}
 
 		t.health = t.baseHealth;
-	}
-
-	public static <T, V> void putAdd(HashMap<T, ArrayList<V>> map, T key, V value)
-	{
-		ArrayList<V> a = map.get(key);
-		if (a == null)
-			a = new ArrayList<>();
-		a.add(value);
-		map.put(key, a);
-	}
-
-	public static <T, V> void putAddAll(HashMap<T, ArrayList<V>> map, T key, Collection<? extends V> values)
-	{
-		ArrayList<V> a = map.get(key);
-		if (a == null)
-			a = new ArrayList<>();
-		a.addAll(values);
-		map.put(key, a);
 	}
 }

@@ -86,7 +86,7 @@ public abstract class Screen implements IBatchRenderableObject
 		this.drawDefaultBackground(1);
 	}
 
-	public void 	drawDefaultBackground(double size)
+	public void drawDefaultBackground(double size)
 	{
 		if ((Game.screen instanceof ScreenIntro && !(this instanceof ScreenIntro)))
 			return;

@@ -567,7 +567,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 
 		this.inside.clear();
 
-		for (Movable m : Game.getInRadius(posX, posY, size + 10, c -> c.movables))
+		for (Movable m : Game.getInRadius(posX, posY, size + 50, c -> c.movables))
 		{
 			if (Math.abs(this.posZ - m.posZ) > Game.tile_size)
 				continue;
@@ -584,7 +584,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 					this.collisionX = this.posX;
 					this.collisionY = this.posY;
 
-					if (!this.insideOld.contains(t))
+					if (!this.inside.contains(t))
 					{
 						this.collided();
 						this.collidedWithTank(t);
@@ -606,7 +606,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 					this.collisionX = this.posX;
 					this.collisionY = this.posY;
 
-					if (!this.insideOld.contains(m))
+					if (!this.inside.contains(m))
 					{
 						this.collided();
 						this.collidedWithObject(m);

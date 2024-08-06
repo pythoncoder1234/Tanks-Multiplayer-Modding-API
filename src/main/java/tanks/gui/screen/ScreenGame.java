@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGameScreen
 {
-    public static float sensitivity = 1f;
+    public static float sensitivity = 0.5f;
 
 	public boolean playing = false;
 	public boolean paused = false;
@@ -814,9 +814,6 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             }
         }
 
-		if (finishedQuick)
-			fcPitch = Math.max(0, fcPitch - Panel.frameFrequency * 0.004);
-
         showDefaultMouse = finishedQuick || paused || !playing || shopScreen || npcShopScreen ||
 				(!Game.followingCam && !Game.angledView) || focusedTank() == null || focusedTank().destroy;
         Game.game.window.moveMouseToOtherSide = !showDefaultMouse;
@@ -880,6 +877,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				Panel.panTargetY = z.panY();
 			}
 		}
+
+		if ((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null) || finishedQuick)
+			fcPitch = Math.max(0, fcPitch - 0.02 * Panel.frameFrequency);
 
 		if (Game.game.input.perspective.isValid())
 		{
@@ -1478,7 +1478,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
             ItemBar b = Game.player.hotbar.itemBar;
             this.selectedArcBullet = b.selected > -1 && b.slots[b.selected] instanceof ItemBullet && BulletArc.class.isAssignableFrom(((ItemBullet) b.slots[b.selected]).bulletClass);
 
-			if ((!freecam || controlPlayer) && Game.followingCam)
+			if ((!freecam || controlPlayer) && Game.followingCam && focusedTank() != null && !focusedTank().destroy)
 				updateFollowingCam();
 
             Obstacle.draw_size = Math.min(Game.tile_size, Obstacle.draw_size);
@@ -2820,10 +2820,10 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
     public void updateFollowingCam()
     {
         Panel.autoZoom = false;
-        Game.playerTank.angle += (Drawing.drawing.getInterfaceMouseX() - prevCursorX) / 130 * (Game.firstPerson ? 1 - fcZoom : 1);
+        Game.playerTank.angle += (Drawing.drawing.getInterfaceMouseX() - prevCursorX) / 130 * (Game.firstPerson ? 1 - fcZoom : 1) * sensitivity;
 
         if (Game.game.input.tilt.isPressed())
-            fcPitch += (Drawing.drawing.getInterfaceMouseY() - this.prevCursorY) / (sensitivity * 500);
+            fcPitch += (Drawing.drawing.getInterfaceMouseY() - this.prevCursorY) * sensitivity * 0.005;
         else if (selectedArcBullet)
             fcArcAim += (this.prevCursorY - Drawing.drawing.getInterfaceMouseY()) * (sensitivity * 3);
 

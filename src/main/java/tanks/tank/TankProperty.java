@@ -34,6 +34,7 @@ public @interface TankProperty
             transformationOnProximity,
             transformationOnAlone,
             transformationMimic,
+            transformationOnTime,
         lastStand
     }
 

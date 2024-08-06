@@ -471,9 +471,9 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
 
     public void save()
     {
-        boolean prev = TankAIControlled.useTankReferences;
+        boolean prev = TankReferenceSolver.useTankReferences;
         if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
-            TankAIControlled.useTankReferences = false;
+            TankReferenceSolver.useTankReferences = false;
 
         for (Item i: this.crusade.crusadeItems)
             i.exportProperties();
@@ -530,7 +530,7 @@ public class ScreenCrusadeEditor extends Screen implements IItemScreen
             Game.exitToCrash(e);
         }
 
-        TankAIControlled.useTankReferences = prev;
+        TankReferenceSolver.useTankReferences = prev;
     }
 
     public Button reorderLevels = new Button(this.centerX - 380, this.centerY + 300, this.objWidth, this.objHeight, "Reorder levels", new Runnable()

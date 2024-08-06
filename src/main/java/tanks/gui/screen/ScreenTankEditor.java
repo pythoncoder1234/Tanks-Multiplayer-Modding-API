@@ -5,8 +5,10 @@ import basewindow.IModel;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Level;
+import tanks.TankReferenceSolver;
 import tanks.gui.*;
 import tanks.gui.screen.leveleditor.OverlayObjectMenu;
+import tanks.gui.screen.leveleditor.ScreenConfirmDeleteTank;
 import tanks.gui.screen.leveleditor.ScreenLevelEditorOverlay;
 import tanks.hotbar.item.Item;
 import tanks.hotbar.item.ItemBullet;
@@ -20,7 +22,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @SuppressWarnings({"unused", "SuspiciousNameCombination"})
-public class ScreenTankEditor extends Screen implements IItemScreen
+public class ScreenTankEditor extends Screen implements IItemScreen, IBlankBackgroundScreen
 {
     public Tab currentTab;
     public ArrayList<Tab> topLevelMenus = new ArrayList<>();
@@ -42,14 +44,15 @@ public class ScreenTankEditor extends Screen implements IItemScreen
     public HashSet<String> tankMusics = new HashSet<>();
 
     public Button delete = new Button(this.centerX - this.objXSpace, this.centerY + this.objYSpace * 6.5, this.objWidth, this.objHeight, "Delete tank", () ->
-    {
-        this.resetLayout();
-        Game.screen = (Screen) this.tankScreen;
-        this.tankScreen.removeTank(this.tank);
-        this.tankScreen.refreshTanks(this.tank);
-        for (String m : this.tankMusics)
-            Drawing.drawing.removeSyncedMusic(m, 500);
-    }
+            ScreenConfirmDeleteTank.confirmDelete(tank, () ->
+            {
+                this.resetLayout();
+                Game.screen = (Screen) this.tankScreen;
+                this.tankScreen.removeTank(this.tank);
+                this.tankScreen.refreshTanks(this.tank);
+                for (String m : this.tankMusics)
+                    Drawing.drawing.removeSyncedMusic(m, 500);
+            })
     );
 
     public ITrigger getUIElementForField(Field f, TankProperty p, TankAIControlled tank)
@@ -61,6 +64,9 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
                 t.function = () ->
                 {
+                    if (invalid(f, p, tank, t))
+                        return;
+
                     try
                     {
                         if (t.inputText.isEmpty())
@@ -74,7 +80,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     }
                 };
 
-                t.hoverText = formatDescription(p);
+                t.hoverText = formatDescription(p.desc());
                 t.enableHover = !p.desc().isEmpty();
                 t.maxChars = 9;
                 t.allowLetters = false;
@@ -87,6 +93,9 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
                 t.function = () ->
                 {
+                    if (invalid(f, p, tank, t))
+                        return;
+
                     try
                     {
                         if (t.inputText.isEmpty())
@@ -100,7 +109,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     }
                 };
 
-                t.hoverText = formatDescription(p);
+                t.hoverText = formatDescription(p.desc());
                 t.enableHover = !p.desc().isEmpty();
                 t.allowDoubles = true;
                 t.allowLetters = false;
@@ -141,7 +150,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 };
 
                 t.enableHover = !p.desc().isEmpty();
-                t.hoverText = formatDescription(p);
+                t.hoverText = formatDescription(p.desc());
                 t.images = emblems;
                 t.imageR = 127;
                 t.imageG = 180;
@@ -153,6 +162,9 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 TextBox t = new TextBox(0, 0, this.objWidth, this.objHeight, p.name(), () -> {}, f.get(tank) + "", "");
                 t.function = () ->
                 {
+                    if (invalid(f, p, tank, t))
+                        return;
+
                     try
                     {
                         if (t.inputText.isEmpty() && p.miscType() != TankProperty.MiscType.description)
@@ -166,7 +178,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     }
                 };
 
-                t.hoverText = formatDescription(p);
+                t.hoverText = formatDescription(p.desc());
                 t.enableHover = !p.desc().isEmpty();
                 t.lowerCase = true;
                 t.allowSpaces = true;
@@ -196,7 +208,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 };
 
                 t.enableHover = !p.desc().isEmpty();
-                t.hoverText = formatDescription(p);
+                t.hoverText = formatDescription(p.desc());
                 return t;
             }
             if (f.getType().isEnum())
@@ -226,7 +238,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 };
 
                 t.enableHover = !p.desc().isEmpty();
-                t.hoverText = formatDescription(p);
+                t.hoverText = formatDescription(p.desc());
                 return t;
             }
             if (Item.class.isAssignableFrom(f.getType()))
@@ -246,7 +258,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     this.lastItemButton = b;
                 };
                 b.enableHover = !p.desc().isEmpty();
-                b.hoverText = formatDescription(p);
+                b.hoverText = formatDescription(p.desc());
                 b.image = i.icon;
                 b.imageXOffset = - b.sizeX / 2 + b.sizeY / 2 + 10;
                 b.imageSizeX = b.sizeY;
@@ -296,7 +308,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                     b.optionText = "\u00A7127000000255none";
 
                 b.enableHover = !p.desc().isEmpty();
-                b.hoverText = formatDescription(p);
+                b.hoverText = formatDescription(p.desc());
 
                 return b;
             }
@@ -342,7 +354,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 };
 
                 t.enableHover = !p.desc().isEmpty();
-                t.hoverText = formatDescription(p);
+                t.hoverText = formatDescription(p.desc());
                 t.models = models;
 
                 return t;
@@ -438,7 +450,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 }
 
                 s.enableHover = !p.desc().isEmpty();
-                s.hoverText = formatDescription(p);
+                s.hoverText = formatDescription(p.desc());
 
                 return s;
             }
@@ -449,6 +461,23 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         }
 
         return new Button(0, 0, 350, 40, p.name(), "This option is not available yet");
+    }
+
+    private boolean invalid(Field f, TankProperty p, TankAIControlled tank, TextBox t)
+    {
+        TankReferenceSolver.Message m = TankReferenceSolver.testInput(f, p, tank, t, tankScreen.getEditor());
+        if (!m.isValid())
+        {
+            t.inputText = t.previousInputText;
+            if (t.previousHoverText == null)
+                t.previousHoverText = t.hoverText;
+            t.hoverText = m.formatMessage();
+        }
+        else if (t.previousHoverText != null)
+            t.hoverText = t.previousHoverText;
+
+        t.enableHover = t.hoverText.length > 0 && !t.hoverText[0].isBlank();
+        return !m.isValid();
     }
 
     public Button save = new Button(this.centerX + this.objXSpace, this.centerY + this.objYSpace * 6.5, this.objWidth, this.objHeight, "Save to template", new Runnable()
@@ -464,10 +493,10 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 {
                     f.create();
                     f.startWriting();
-                    boolean prev = TankAIControlled.useTankReferences;
-                    TankAIControlled.useTankReferences = false;
+                    boolean prev = TankReferenceSolver.useTankReferences;
+                    TankReferenceSolver.useTankReferences = false;
                     f.println(tank.tankString());
-                    TankAIControlled.useTankReferences = prev;
+                    TankReferenceSolver.useTankReferences = prev;
                     f.stopWriting();
 
                     save.setText("Done!");
@@ -532,8 +561,8 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         this.tankScreen = screen;
         this.tank = t;
 
-        this.music = ((Screen)screen).music;
-        this.musicID = ((Screen)screen).musicID;
+        this.music = ((Screen) screen).music;
+        this.musicID = ((Screen) screen).musicID;
 
         t.bullet.className = ItemBullet.classMap2.get(t.bullet.bulletClass);
 
@@ -587,6 +616,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
         new Tab(this, transformation, "On line of sight", TankProperty.Category.transformationOnSight);
         new Tab(this, transformation, "On low hitpoints", TankProperty.Category.transformationOnHealth);
+        new Tab(this, transformation, "After cooldown time", TankProperty.Category.transformationOnTime);
         new Tab(this, transformation, "Mimic", TankProperty.Category.transformationMimic);
 
         this.currentTab = general;
@@ -1031,7 +1061,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
             if (this.colorIndex == 2)
             {
                 Drawing.drawing.setInterfaceFontSize(24);
-                if (Level.isDark())
+                if (Level.isDark(true))
                     Drawing.drawing.setColor(255, 255, 255);
                 else
                     Drawing.drawing.setColor(0, 0, 0);
@@ -1189,20 +1219,16 @@ public class ScreenTankEditor extends Screen implements IItemScreen
 
             Drawing.drawing.setColor(0, 0, 0, 64);
             for (int i = 0; i < 3; i++)
-            {
                 for (int j = 0; j < 2; j++)
-                {
                     Drawing.drawing.fillInterfaceRect(margin + (i - 1) * s * this.screen.tank.trackSpacing, screen.centerY + 60 + space * 3 + (j - 0.5) * s * 0.6, s / 5, s / 5);
-                }
-            }
         }
     }
 
-    public String[] formatDescription(TankProperty p)
+    public static String[] formatDescription(String s)
     {
-        ArrayList<String> text = Drawing.drawing.wrapText(p.desc(), 300, 12);
-        String[] s = new String[text.size()];
-        return text.toArray(s);
+        ArrayList<String> text = Drawing.drawing.wrapText(s, 300, 12);
+        String[] lines = new String[text.size()];
+        return text.toArray(lines);
     }
 
     @Override
@@ -1260,7 +1286,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
         Drawing.drawing.setColor(255, 255, 255);
         Drawing.drawing.displayInterfaceText(this.centerX, 30, "Edit tank");
 
-        if (Level.isDark())
+        if (Level.isDark(true))
             Drawing.drawing.setColor(255, 255, 255);
         else
             Drawing.drawing.setColor(0, 0, 0);
@@ -1494,7 +1520,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 previous.draw();
                 next.draw();
 
-                if (Level.isDark())
+                if (Level.isDark(true))
                     Drawing.drawing.setColor(255, 255, 255);
                 else
                     Drawing.drawing.setColor(0, 0, 0);
@@ -1527,8 +1553,6 @@ public class ScreenTankEditor extends Screen implements IItemScreen
                 Drawing.drawing.addSyncedMusic(m, Game.musicVolume * 0.5f, true, 500);
         }
     }
-
-
 
     @Override
     public void onAttemptClose()

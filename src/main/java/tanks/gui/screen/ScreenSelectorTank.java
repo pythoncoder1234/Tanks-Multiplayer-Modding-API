@@ -76,16 +76,19 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
             nt = 0;
 
         int count = Game.registryTank.tankEntries.size() + customTanks.size() + 1;
+        int offset = 0;
+
         for (int i = nt; i < count; i++)
         {
-            int index = (i - nt) % (rows * cols);
+            int index = (i - nt - offset) % (rows * cols);
             double x = this.centerX - 450 + 100 * (index % cols);
             double y = this.centerY - 100 + 100 * ((index / cols) % rows);
 
             TankAIControlled t;
 
-            if (i <= 0)
+            if (i == 0)
                 t = null;
+
             else if (i <= Game.registryTank.tankEntries.size())
             {
                 Tank tt = Game.registryTank.tankEntries.get(i - 1).getTank(x, y, 0);
@@ -103,7 +106,10 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
                     }
                 }
                 else
+                {
+                    offset++;
                     continue;
+                }
             }
             else
             {
@@ -145,7 +151,7 @@ public class ScreenSelectorTank extends Screen implements IConditionalOverlayScr
                 b = new Button(x, y, 50, 50, "x", () ->
                 {
                     quit.function.run();
-                    function.accept(tt);
+                    function.accept(null);
                 }, "None");
 
                 b.fullInfo = true;

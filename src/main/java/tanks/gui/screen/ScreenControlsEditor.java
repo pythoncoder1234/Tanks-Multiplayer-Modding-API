@@ -43,6 +43,7 @@ public class ScreenControlsEditor extends ScreenOptionsOverlay
     InputSelector holdSquare = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 45, 700, 40, "Square selection", Game.game.input.editorHoldSquare);
     InputSelector lockSquare = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 45, 700, 40, "Toggle square selection", Game.game.input.editorLockSquare);
     InputSelector toggleAdd = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 135, 700, 40, "Toggle remove from selection", Game.game.input.editorSelectAddToggle);
+    InputSelector pickBlock = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 + 225, 700, 40, "Pick block", Game.game.input.editorPickBlock);
 
     InputSelector copy = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 225, 700, 40, "Copy", Game.game.input.editorCopy);
     InputSelector cut = new InputSelector(Drawing.drawing.interfaceSizeX * 2 / 3, Drawing.drawing.interfaceSizeY / 2 - 135, 700, 40, "Cut", Game.game.input.editorCut);
@@ -116,6 +117,7 @@ public class ScreenControlsEditor extends ScreenOptionsOverlay
             holdSquare.update();
             lockSquare.update();
             toggleAdd.update();
+            pickBlock.update();
         }
         else if (page == 5)
         {
@@ -178,6 +180,7 @@ public class ScreenControlsEditor extends ScreenOptionsOverlay
         }
         else if (page == 4)
         {
+            pickBlock.draw();
             toggleAdd.draw();
             lockSquare.draw();
             holdSquare.draw();

@@ -287,7 +287,10 @@ public class Chunk implements Comparable<Chunk>
     /** Expects pixel coordinates. */
     public static Tile getTile(double posX, double posY)
     {
-        return getChunk(posX, posY).getChunkTile(posX, posY);
+        Chunk c = getChunk(posX, posY);
+        if (c == null)
+            return null;
+        return c.getChunkTile(posX, posY);
     }
 
     public static int toChunkTileCoords(double a)

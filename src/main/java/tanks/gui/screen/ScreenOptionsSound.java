@@ -37,6 +37,8 @@ public class ScreenOptionsSound extends Screen
         soundVolume.g1 = 210;
         soundVolume.b1 = 210;
 
+        musicVolume.scrollValue = soundVolume.scrollValue = 2;
+
         if (Game.enableLayeredMusic)
             layeredMusic.setText(layeredMusicText, ScreenOptions.onText);
         else
@@ -52,7 +54,6 @@ public class ScreenOptionsSound extends Screen
                 musicVolume.inputText = musicVolume.previousInputText;
 
             Game.musicVolume = Integer.parseInt(musicVolume.inputText) / 100f;
-
             Game.musicEnabled = Game.musicVolume > 0;
 
             if (Game.musicEnabled)

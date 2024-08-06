@@ -269,7 +269,7 @@ public class Hotbar
             if (rcMax > 0)
             {
                 Drawing.drawing.setInterfaceFontSize(12);
-                Drawing.drawing.setColor(uses > 0 ? 0 : 255, 0, 0, a);
+                Drawing.drawing.setColor(0, 0, 0, a);
                 Drawing.drawing.drawInterfaceText(x + 175, y, Math.max(0, uses) + "");
             }
         }

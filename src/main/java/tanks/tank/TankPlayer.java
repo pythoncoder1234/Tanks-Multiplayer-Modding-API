@@ -143,7 +143,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
         boolean trace = Game.game.input.aim.isPressed();
 		ray = null;
 
-        boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
+		boolean destroy = Game.game.window.pressedKeys.contains(InputCodes.KEY_BACKSPACE);
 
 		if ((Game.game.window.validPressedKeys.contains(InputCodes.KEY_G) || age == 0) && Level.currentLightIntensity < 0.5)
 		{

@@ -3,15 +3,17 @@ package tanks.gui.screen.leveleditor;
 import basewindow.BaseFile;
 import basewindow.InputCodes;
 import basewindow.InputPoint;
+import tanks.Panel;
 import tanks.*;
 import tanks.editor.EditorAction;
-import tanks.editor.EditorClipboard;
 import tanks.editor.EditorButtons;
 import tanks.editor.EditorButtons.EditorButton;
+import tanks.editor.EditorClipboard;
 import tanks.editor.selector.LevelEditorSelector;
 import tanks.editor.selector.StackHeightSelector;
 import tanks.gui.Button;
 import tanks.gui.ButtonList;
+import tanks.gui.ScreenElement;
 import tanks.gui.screen.*;
 import tanks.hotbar.item.Item;
 import tanks.obstacle.Obstacle;
@@ -22,6 +24,7 @@ import tanks.tank.TankAIControlled;
 import tanks.tank.TankPlayer;
 import tanks.tank.TankSpawnMarker;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -372,6 +375,35 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			offsetY = 0;
 
 			Game.game.input.editorRevertCamera.invalidate();
+		}
+
+		if (Game.game.input.editorPickBlock.isValid())
+		{
+			Obstacle o = Game.getObstacle(mouseObstacle.posX, mouseObstacle.posY);
+			if (o == null)
+				o = Game.getSurfaceObstacle(mouseObstacle.posX, mouseObstacle.posY);
+
+			if (o != null)
+			{
+				int i = 0;
+				for (RegistryObstacle.ObstacleEntry entry : Game.registryObstacle.obstacleEntries)
+				{
+					if (entry.obstacle.equals(o.getClass()))
+						break;
+					i++;
+				}
+
+				obstacleNum = i;
+				mouseObstacle = Game.registryObstacle.getEntry(i).getObstacle(0, 0);
+				mouseObstacle.initSelectors(this);
+				mouseObstacle.updateSelectors();
+				mouseObstacle.stackHeight = o.stackHeight;
+				mouseObstacle.startHeight = o.startHeight;
+				mouseObstacle.updateSelectors();
+				cloneSelectorProperties(false);
+			}
+
+			Game.game.input.editorPickBlock.invalidate();
 		}
 
 		if (changeCameraMode || Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_ALT))
@@ -1273,12 +1305,12 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 					{
 						for (int i = 0; i < Game.obstacles.size(); i++)
 						{
-							Obstacle m = Game.obstacles.get(i);
-							if (Movable.withinRange(m, mouseTank, 50))
+							Obstacle o = Game.obstacles.get(i);
+							if (Movable.withinRange(o, mouseTank, 50))
 							{
 								skip = true;
-								this.undoActions.add(new EditorAction.ActionObstacle(m, false));
-								Game.removeObstacles.add(m);
+								this.undoActions.add(new EditorAction.ActionObstacle(o, false));
+								Game.removeObstacles.add(o);
 
 								if (!batch)
 									Drawing.drawing.playVibration("click");
@@ -1511,14 +1543,20 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		if (undoActions.isEmpty() && redoActions.isEmpty() && !modified)
 			return;
 
-		boolean prev = TankAIControlled.useTankReferences;
+		boolean prev = TankReferenceSolver.useTankReferences;
 		if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
-			TankAIControlled.useTankReferences = false;
+		{
+			TankReferenceSolver.useTankReferences = false;
+			Panel.notifs.add(new ScreenElement.Notification("Level saved without tank references"));
+		}
 
 		StringBuilder level = new StringBuilder("{");
 
-		level.append(this.level.sizeX).append(",").append(this.level.sizeY).append(",").append(this.level.colorR).append(",").append(this.level.colorG).append(",").append(this.level.colorB).append(",").append(this.level.colorVarR).append(",").append(this.level.colorVarG).append(",").append(this.level.colorVarB)
-				.append(",").append((int) (this.level.timer / 100)).append(",").append((int) Math.round(this.level.light * 100)).append(",").append((int) Math.round(this.level.shadow * 100)).append("|");
+		level.append(this.level.sizeX).append(",").append(this.level.sizeY).append(",")
+				.append(this.level.colorR).append(",").append(this.level.colorG).append(",").append(this.level.colorB).append(",")
+				.append(this.level.colorVarR).append(",").append(this.level.colorVarG).append(",").append(this.level.colorVarB).append(",")
+				.append((int) (this.level.timer / 100)).append(",").append((int) Math.round(this.level.light * 100)).append(",")
+				.append((int) Math.round(this.level.shadow * 100)).append("|");
 
 		grid = new HashMap[Game.currentSizeX][Game.currentSizeY];
 
@@ -1710,7 +1748,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			Game.exitToCrash(e);
 		}
 
-		TankAIControlled.useTankReferences = prev;
+		TankReferenceSolver.useTankReferences = prev;
 	}
 
 	public void paste()
@@ -2193,42 +2231,47 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 	public void magicSelect(int x, int y)
 	{
-		boolean obs = Game.getObstacle(x, y) != null;
+		boolean obs = Game.getObstacle(x, y) != null || Game.getSurfaceObstacle(x, y) == null;
 		Obstacle o = obs ? Game.getObstacle(x, y) : Game.getSurfaceObstacle(x, y);
-		if (o == null)
-			return;
-
-		ArrayList<Integer> xs = new ArrayList<>();
-		ArrayList<Integer> ys = new ArrayList<>();
-		magicSelect(x, y, 0, o.getClass(), obs, xs, ys, new boolean[Game.currentSizeX][Game.currentSizeY]);
-		this.undoActions.add(new EditorAction.ActionSelectTiles(this, true, xs, ys));
-	}
-
-	public void magicSelect(int x, int y, int steps, Class<? extends Obstacle> cls, boolean obs, ArrayList<Integer> xs, ArrayList<Integer> ys, boolean[][] visited)
-	{
-		if (steps >= 50)
-			return;
+		Class<? extends Obstacle> cls = o != null ? o.getClass() : null;
+		ArrayList<Integer> xs = new ArrayList<>(), ys = new ArrayList<>();
+		ArrayDeque<Point> deque = new ArrayDeque<>();
+		deque.add(new Point(x, y));
 
 		selection = true;
-		selectedTiles[x][y] = true;
-		visited[x][y] = true;
 
-		for (int i = 0; i < 4; i++)
+		while (!deque.isEmpty())
 		{
-			int newX = x + Game.dirX[i];
-			int newY = y + Game.dirY[i];
+			Point p = deque.pop();
+			for (int i = 0; i < 4; i++)
+			{
+				int newX = p.x + Game.dirX[i];
+				int newY = p.y + Game.dirY[i];
 
-			if (newX < 0 || newX >= Game.currentSizeX || newY < 0 || newY >= Game.currentSizeY || visited[newX][newY])
-				continue;
+				if (newX < 0 || newX >= Game.currentSizeX || newY < 0 || newY >= Game.currentSizeY || selectedTiles[newX][newY] ||
+						Math.abs(newX - x) + Math.abs(newY - y) > 50)
+					continue;
 
-			Obstacle o = obs ? Game.getObstacle(newX, newY) : Game.getSurfaceObstacle(newX, newY);
-			if (o == null || !o.getClass().equals(cls))
-				continue;
+				Obstacle o1 = obs ? Game.getObstacle(newX, newY) : Game.getSurfaceObstacle(newX, newY);
+				if (cls == null)
+				{
+					if (o1 != null)
+						continue;
+				}
+				else
+				{
+					if (o1 == null || !o1.getClass().equals(cls))
+						continue;
+				}
 
-			xs.add(newX);
-			ys.add(newY);
-			magicSelect(newX, newY, steps + 1, cls, obs, xs, ys, visited);
+				xs.add(newX);
+				ys.add(newY);
+				selectedTiles[newX][newY] = true;
+				deque.add(new Point(newX, newY));
+			}
 		}
+
+		this.undoActions.add(new EditorAction.ActionSelectTiles(this, true, xs, ys));
 	}
 
 	public void previewShape(double lowX, double highX, double lowY, double highY)
@@ -2251,7 +2294,13 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		return !selectMode && !changeCameraMode && !eraseMode && !pasteMode && buildTool != BuildTool.normal && currentPlaceable != Placeable.playerTank;
 	}
 
+
 	public void cloneSelectorProperties()
+	{
+		cloneSelectorProperties(true);
+	}
+
+	public void cloneSelectorProperties(boolean forward)
 	{
 		GameObject o = (currentPlaceable == Placeable.obstacle ? mouseObstacle : mouseTank);
 		o.initSelectors(this);
@@ -2260,7 +2309,12 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		{
 			LevelEditorSelector<?> s1 = ScreenLevelEditor.selectors.get(s.id);
 			if (s1 != null)
-				s.cloneProperties(s1);
+			{
+				if (forward)
+					s.cloneProperties(s1);
+				else
+					s1.cloneProperties(s);
+			}
 			else if (s.modified())
 				ScreenLevelEditor.selectors.put(s.id, s);
 		});
@@ -2485,7 +2539,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			undoActions.add(new EditorAction.ActionCut(tanks, obstacles, (EditorAction.ActionSelectTiles) this.undoActions.remove(this.undoActions.size() - 1)));
 
 		if (!clipboard.isEmpty())
+		{
 			this.pasteMode = true;
+			if (selectTool != SelectTool.normal)
+				selectMode = false;
+		}
 
 		clipboards[selectedNum] = clipboard;
 	}

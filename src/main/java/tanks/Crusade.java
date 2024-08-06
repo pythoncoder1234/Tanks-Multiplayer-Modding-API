@@ -210,7 +210,6 @@ public class Crusade
 		}
 		
 		this.name = name;
-		TankAIControlled.solveReferences(customTanks);
 
 		for (TankAIControlled t: tankOccurrences.keySet())
 		{

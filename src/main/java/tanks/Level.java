@@ -20,11 +20,9 @@ public class Level
 {
 	public String levelString;
 
-	public String[] preset;
-	public String[] screen;
-	public String[] obstaclesPos;
-	public String[] tanks;
-	public String[] teams;
+	public String[] preset, screen, obstaclesPos, tanks, teams;
+	public TreeMap<TankAIControlled, ArrayList<TankAIControlled>> references = new TreeMap<>(Comparator.comparing(t -> t.name));
+	public ArrayList<TankAIControlled> valueTanks = new ArrayList<>();
 
 	public Team[] tankTeams;
 	public boolean enableTeams = false;
@@ -142,7 +140,7 @@ public class Level
                     }
                     else if (parsing == 4)
                     {
-                        TankAIControlled t = TankAIControlled.fromString(s);
+                        TankAIControlled t = TankAIControlled.fromString(s, this);
                         this.customTanks.add(t);
                     }
                     else if (parsing == 5)
@@ -162,7 +160,7 @@ public class Level
             }
 		}
 
-		TankAIControlled.solveReferences(customTanks);
+//		TankReferenceSolver.solveReferences(customTanks);
 
 		if (ScreenPartyHost.isServer && Game.disablePartyFriendlyFire)
 			this.disableFriendlyFire = true;
@@ -238,6 +236,8 @@ public class Level
 
 		ScreenGame.finished = false;
 		ScreenGame.finishTimer = ScreenGame.finishTimerMax;
+
+		TankReferenceSolver.solveAllReferences(this, customTanksMap);
 
 		if (enableTeams)
 		{
@@ -405,7 +405,8 @@ public class Level
                 continue;
 
 			Chunk c = Chunk.getChunk(o.posX, o.posY);
-			c.addObstacle(o);
+			if (c != null)
+				c.addObstacle(o);
 			o.afterAdd();
         }
 

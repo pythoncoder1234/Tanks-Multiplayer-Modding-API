@@ -282,10 +282,6 @@ public class Arcade extends Minigame
     {
         age += Panel.frameFrequency;
 
-        for (Movable m : Game.movables)
-            if (m instanceof TankAIControlled t)
-                t.smartness = 0;
-
         if (chain > 0)
             chainOpacity = Math.min(1, chainOpacity + Panel.frameFrequency / 20);
         else

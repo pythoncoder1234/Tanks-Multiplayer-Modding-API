@@ -3,9 +3,7 @@ package tanks.gui.screen.leveleditor;
 import basewindow.BaseFile;
 import tanks.Drawing;
 import tanks.Game;
-import tanks.Panel;
 import tanks.gui.Button;
-import tanks.gui.ScreenElement;
 import tanks.gui.TextBox;
 import tanks.gui.screen.Screen;
 
@@ -76,13 +74,6 @@ public class OverlayLevelOptions extends ScreenLevelEditorOverlay
         this.teamsOptions.update();
         this.itemOptions.update();
         this.timerOptions.update();
-
-        if (Game.game.input.editorCopy.isValid() && Game.game.window.shift)
-        {
-            Game.game.input.editorCopy.invalidate();
-            Game.game.window.setClipboard(this.editor.level.levelString);
-            Panel.notifs.add(new ScreenElement.Notification("Level string copied to clipboard!"));
-        }
 
         super.update();
     }

@@ -184,6 +184,7 @@ public abstract class LevelEditorSelector<T extends GameObject> implements Clone
 
     public void load() {}
 
+    /** Sets this selector's metadata to <code>s</code>'s metadata. */
     public void cloneProperties(LevelEditorSelector<T> s)
     {
         if (this == s)

@@ -55,7 +55,7 @@ public class BulletWhistlingBird extends BulletHoming
 
     private double getMotionMultiplier()
     {
-        return moveTowardsPlayer() && !Movable.withinRange(this, tank, tank.size + Game.tile_size * 0.25) ? 0.4 : 0.55;
+        return moveTowardsPlayer() && !Movable.withinRange(this, tank, tank.size + Game.tile_size * 0.25) ? 0.3 : 0.55;
     }
 
     public boolean moveTowardsPlayer()

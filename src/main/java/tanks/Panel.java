@@ -78,6 +78,7 @@ public class Panel
 	public long startTime = System.currentTimeMillis();
 
 	public long lastFrameNano = 0;
+	public static boolean tickSprint;
 
 	public int lastFPS = 0;
 	public int lastWorstFPS = 0;
@@ -300,7 +301,9 @@ public class Panel
 		Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Panel.windowWidth / 28, (Panel.windowHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
 		Game.game.window.absoluteDepth = Drawing.drawing.interfaceScale * Game.absoluteDepthBase;
 
-		if (Game.deterministicMode && Game.deterministic30Fps)
+		if (tickSprint)
+			Panel.frameFrequency = 2;
+		else if (Game.deterministicMode && Game.deterministic30Fps)
 			Panel.frameFrequency = 100.0 / 30;
 		else if (Game.deterministicMode)
 			Panel.frameFrequency = 100.0 / 60;
@@ -308,8 +311,6 @@ public class Panel
 			Panel.frameFrequency = Game.game.window.frameFrequency;
 
 		Game.game.window.showKeyboard = false;
-
-//		Panel.frameFrequency *= 5;
 
 		synchronized (Game.eventsIn)
 		{
@@ -832,6 +833,26 @@ public class Panel
 				Chunk.debug = !Chunk.debug;
 				notifs.add(new Notification("Chunk borders: \u00a7255200000255"
 						+ (Chunk.debug ? "shown" : "hidden"), 200).setColor(255, 255, 128));
+			}
+
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_BRACKET))
+			{
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_LEFT_BRACKET);
+				tickSprint = !tickSprint;
+
+				if (tickSprint)
+				{
+					Game.vsync = false;
+					Game.maxFPS = 0;
+					Game.game.window.setVsync(Game.vsync);
+					Panel.currentMessage = new CenterMessage("Game sprinting");
+				}
+				else
+				{
+					ScreenOptions.loadOptions(Game.homedir);
+					Game.game.window.setVsync(Game.vsync);
+					Panel.currentMessage = new CenterMessage("Sprinting stopped");
+				}
 			}
 
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_D))

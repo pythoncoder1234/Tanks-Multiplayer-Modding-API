@@ -89,6 +89,7 @@ public class InputBindings
     public InputBindingGroup editorHoldSquare = new InputBindingGroup("editor.holdSquare", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_LEFT_SHIFT), new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_RIGHT_SHIFT));
     public InputBindingGroup editorLockSquare = new InputBindingGroup("editor.lockSquare", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_L));
     public InputBindingGroup editorSelectAddToggle = new InputBindingGroup("editor.selectToggle", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_A));
+    public InputBindingGroup editorPickBlock = new InputBindingGroup("editor.pickBlock", new InputBinding(InputBinding.InputType.mouse, InputCodes.MOUSE_BUTTON_3));
 
     public InputBindingGroup editorCopy = new InputBindingGroup("editor.copy", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_C));
     public InputBindingGroup editorCut = new InputBindingGroup("editor.cut", new InputBinding(InputBinding.InputType.keyboard, InputCodes.KEY_X));

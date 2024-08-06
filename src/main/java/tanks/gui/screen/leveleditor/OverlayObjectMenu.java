@@ -6,10 +6,7 @@ import tanks.editor.EditorAction;
 import tanks.editor.selector.LevelEditorSelector;
 import tanks.gui.Button;
 import tanks.gui.ButtonObject;
-import tanks.gui.screen.ITankScreen;
-import tanks.gui.screen.Screen;
-import tanks.gui.screen.ScreenAddSavedTank;
-import tanks.gui.screen.ScreenTankEditor;
+import tanks.gui.screen.*;
 import tanks.registry.RegistryObstacle;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
@@ -77,11 +74,16 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
     public Button editTank = new Button(0, 0, 40, 40, "", () ->
     {
         int ind = editor.tankNum - Game.registryTank.tankEntries.size();
+        TankAIControlled tank = editor.level.customTanks.get(ind);
 
         if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT))
-            this.refreshTanks(editor.level.customTanks.remove(ind));
+            ScreenConfirmDeleteTank.confirmDelete(tank, () ->
+            {
+                this.removeTank(tank);
+                this.refreshTanks(tank);
+            });
         else
-            Game.screen = new ScreenTankEditor(editor.level.customTanks.get(ind), this);
+            Game.screen = new ScreenTankEditor(tank, this);
 
         editor.modified = true;
     }, "Edit custom tank");
@@ -419,7 +421,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
         if (Game.screen != this)
             return;
 
-        drawSHButton = !editor.mouseObstacle.isSurfaceTile && Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT);
+        drawSHButton = !editor.mouseObstacle.isSurfaceTile && Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_SHIFT) && ScreenLevelEditor.currentPlaceable == ScreenLevelEditor.Placeable.obstacle;
         Drawing.drawing.setColor(this.editor.fontBrightness, this.editor.fontBrightness, this.editor.fontBrightness);
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - 240, "Object menu");
@@ -555,6 +557,12 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
             editor.mouseObstacle.forAllSelectors(LevelEditorSelector::load);
         else
             editor.mouseTank.forAllSelectors(LevelEditorSelector::load);
+    }
+
+    @Override
+    public ScreenLevelEditor getEditor()
+    {
+        return editor;
     }
 
     @Override

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ModAPI
 {
-    public static String version = "Mod API v1.2.4";
+    public static String version = "Mod API v1.2.5";
     public static boolean autoLoadExtensions = false;
     public static boolean sendEvents = true;
     static ArrayList<Runnable> resetFunc = new ArrayList<>();

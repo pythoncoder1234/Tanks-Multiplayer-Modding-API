@@ -27,7 +27,7 @@ public class TextBox implements IDrawable, ITrigger
 	public String inputText;
 
 	public boolean enableHover = false;
-	public String[] hoverText;
+	public String[] hoverText, previousHoverText;
 	public String hoverTextRaw = "";
 
 	public boolean hover = false;
@@ -56,25 +56,14 @@ public class TextBox implements IDrawable, ITrigger
 	public int maxChars = 40;
 	public double maxValue = Integer.MAX_VALUE;
 	public double minValue = Integer.MIN_VALUE;
+	public double scrollValue = 1;
 
-	public double colorR = 255;
-	public double colorG = 255;
-	public double colorB = 255;
-	public double bgColorR = 200;
-	public double bgColorG = 200;
-	public double bgColorB = 200;
-	public double hoverColorR = 240;
-	public double hoverColorG = 240;
-	public double hoverColorB = 255;
-	public double selectedColorR = 220;
-	public double selectedColorG = 255;
-	public double selectedColorB = 220;
-	public double selectedFullColorR = 255;
-	public double selectedFullColorG = 255;
-	public double selectedFullColorB = 220;
-	public double selectedFullFlashColorR = 255;
-	public double selectedFullFlashColorG = 200;
-	public double selectedFullFlashColorB = 200;
+	public double colorR = 255, colorG = 255, colorB = 255;
+	public double bgColorR = 200, bgColorG = 200, bgColorB = 200;
+	public double hoverColorR = 240, hoverColorG = 240, hoverColorB = 255;
+	public double selectedColorR = 220, selectedColorG = 255, selectedColorB = 220;
+	public double selectedFullColorR = 255, selectedFullColorG = 255, selectedFullColorB = 220;
+	public double selectedFullFlashColorR = 255, selectedFullFlashColorG = 200, selectedFullFlashColorB = 200;
 	public double flashAnimation = 0;
 
 	public long lastFrame;
@@ -313,6 +302,23 @@ public class TextBox implements IDrawable, ITrigger
 			Game.game.window.keyboardOffset = Math.min(frac, Game.game.window.keyboardOffset + 0.04 * Panel.frameFrequency * frac);
 			Game.game.window.showKeyboard = true;
 			this.checkKeys();
+
+			if (allowNumbers && !allowLetters && !allowAll)
+			{
+				if (Game.game.window.validScrollUp || Game.game.window.textPressedKeys.contains(InputCodes.KEY_UP))
+				{
+					scrollValueChange(1);
+					Game.game.window.validScrollUp = false;
+					Game.game.window.textPressedKeys.remove((Integer) InputCodes.KEY_UP);
+				}
+
+				if (Game.game.window.validScrollDown || Game.game.window.textPressedKeys.contains(InputCodes.KEY_DOWN))
+				{
+					scrollValueChange(-1);
+					Game.game.window.validScrollDown = false;
+					Game.game.window.textPressedKeys.remove((Integer) InputCodes.KEY_DOWN);
+				}
+			}
 		}
 
 		if (Game.glowEnabled && !Game.game.window.drawingShadow)
@@ -344,6 +350,32 @@ public class TextBox implements IDrawable, ITrigger
 			Panel.selectedTextBox = this;
 
 		this.flashAnimation = Math.max(0, this.flashAnimation - Panel.frameFrequency / 25);
+	}
+
+	public void scrollValueChange(double mult)
+	{
+		if (!allowNegatives)
+			minValue = Math.max(minValue, 0);
+
+		ArrayList<Integer> pk = Game.game.window.textPressedKeys;
+		boolean shift = pk.contains(InputCodes.KEY_LEFT_SHIFT) || pk.contains(InputCodes.KEY_RIGHT_SHIFT);
+		boolean alt = pk.contains(InputCodes.KEY_LEFT_ALT) || pk.contains(InputCodes.KEY_RIGHT_ALT);
+
+		if (shift && alt)
+			mult *= 100;
+		else if (shift && allowDoubles && !(this instanceof TextBoxSlider s && s.integer))
+			mult *= 0.1;
+		else if (alt)
+			mult *= 10;
+
+		double num = Double.parseDouble(inputText) + scrollValue * mult;
+		num = Math.round(num * 1e6) / 1e6;
+
+		if (this instanceof TextBoxSlider s)
+			s.value = num;
+
+		inputText = String.format(num % 1 == 0 ? "%.0f" : "%s",
+				Math.max(minValue, Math.min(maxValue, num)));
 	}
 
 	public void addEffect()

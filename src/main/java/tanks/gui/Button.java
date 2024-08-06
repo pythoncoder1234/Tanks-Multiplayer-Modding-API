@@ -302,6 +302,8 @@ public class Button implements IDrawable, ITrigger
 	@Override
 	public void onClick()
 	{
+		if (Panel.draggedButton != null)
+			Panel.draggedButton.finishDrag.accept(Panel.draggedButton, true);
 		this.function.run();
 	}
 

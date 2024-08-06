@@ -91,7 +91,7 @@ public abstract class ScreenElement
         {
             int brightness = (Game.screen instanceof ScreenGame && Level.isDark()) ? 255 : 0;
             this.styling = new TextWithStyling(message, brightness, brightness, brightness, 80 - Math.max(8, message.length() * 2));
-            this.styling.colorA = Game.screen instanceof ScreenGame ? 200 : 255;
+            this.styling.colorA = 128;
             this.duration = duration;
             this.previous = Panel.currentMessage != null;
         }
