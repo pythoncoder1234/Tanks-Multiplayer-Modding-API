@@ -21,7 +21,7 @@ Only the JAR is needed if playing with others or making an extension.
 Installation
 ---
 
-You can download the JAR file [here](https://1drv.ms/u/c/1e1c6a69d73a57b9/EceFfSfbLr1Hv1GgiRrm1wUB-cQFbel_LrodoEPhLErVTw?e=ojDgiY).
+You can download the JAR file [here](https://github.com/pythoncoder1234/Tanks-Multiplayer-Modding-API/releases/download/v1.2.5/TanksModAPI_v1.2.5.jar).
 
 To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
 
