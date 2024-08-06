@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 public class FontRenderer extends BaseFontRenderer
 {
+	public static boolean showColorChar = false;
+
 	public String chars;
 	public int[] charSizes;
 	public String image;
@@ -27,7 +29,7 @@ public class FontRenderer extends BaseFontRenderer
 				"'abcdefghijklmno" +
 				"pqrstuvwxyz{|}~`" +
 				"âăîşţàçæèéêëïôœù" +
-				"úûüÿáíóñ¡¿äöå";
+				"úûüÿáíóñ¡¿äöå§";
 		this.charSizes = new int[]
 				{
 						3, 2, 4, 5, 5, 6, 5, 2, 3, 3, 4, 5, 1, 5, 1, 5,
@@ -37,7 +39,7 @@ public class FontRenderer extends BaseFontRenderer
 						2, 5, 5, 5, 5, 5, 4, 5, 5, 1, 5, 4, 2, 5, 5, 5,
 						5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 4, 1, 4, 6, 2,
 						5, 5, 5, 5, 3, 5, 5, 7, 5, 5, 5, 5, 3, 5, 7, 5,
-						5, 5, 5, 5, 5, 3, 5, 5, 3, 5, 5, 5, 5
+						5, 5, 5, 5, 5, 3, 5, 5, 3, 5, 5, 5, 5, 5
 				};
 
 		this.image = fontFile;
@@ -75,6 +77,8 @@ public class FontRenderer extends BaseFontRenderer
 		return width;
 	}
 
+	Pattern color = Pattern.compile("§\\d{12}");
+
 	public void drawString(double x, double y, double z, double sX, double sY, String s)
 	{
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -86,7 +90,7 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-            if (c[i] == '\u00A7')
+            if (c[i] == '\u00A7' && validColorCode(i, s))
             {
                 int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + c[i + 3]);
                 int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + c[i + 6]);
@@ -94,7 +98,7 @@ public class FontRenderer extends BaseFontRenderer
                 int a = Integer.parseInt(c[i + 10] + "" + c[i + 11] + c[i + 12]);
                 this.window.setColor(r, g, b, a);
 
-                i += 12;
+				i += 12;
             }
             else
                 curX += (drawChar(curX, y, z, sX, sY, c[i], true) + 1) * sX * 4;
@@ -102,8 +106,6 @@ public class FontRenderer extends BaseFontRenderer
 
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 	}
-
-	Pattern color = Pattern.compile("§\\d{12}");
 
 	public void drawString(double x, double y, double sX, double sY, String s)
 	{
@@ -115,7 +117,7 @@ public class FontRenderer extends BaseFontRenderer
 			if (c[i] == '\u00C2')
 				continue;
 
-			if (c[i] == '\u00A7' && s.length() >= i + 13 && color.matcher(s.substring(i, i+13)).matches())
+			if (c[i] == '\u00A7' && validColorCode(i, s))
 			{
 				int r = Integer.parseInt(c[i + 1] + "" + c[i + 2] + c[i + 3]);
 				int g = Integer.parseInt(c[i + 4] + "" + c[i + 5] + c[i + 6]);
@@ -124,10 +126,18 @@ public class FontRenderer extends BaseFontRenderer
 				this.window.setColor(r, g, b, a);
 
 				i += 12;
+
+				if (showColorChar)
+					curX += (drawChar(curX, y, 0, sX, sY, '§', false) + 1) * sX * 4;
 			}
 			else
 				curX += (drawChar(curX, y, 0, sX, sY, c[i], false) + 1) * sX * 4;
 		}
+	}
+
+	private boolean validColorCode(int i, String s)
+	{
+		return s.length() >= i + 13 && color.matcher(s.substring(i, i + 13)).matches();
 	}
 
 	public double getStringSizeX(double sX, String s)
@@ -139,7 +149,7 @@ public class FontRenderer extends BaseFontRenderer
 		{
 			if (c[i] == '\u00C2')
 				continue;
-            if (c[i] == '\u00A7')
+            if (c[i] == '\u00A7' && validColorCode(i, s))
                 i += 12;
             else if (this.chars.indexOf(c[i]) == -1)
                 c[i] = '?';

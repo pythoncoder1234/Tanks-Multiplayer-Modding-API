@@ -222,9 +222,7 @@ public class Level
 		if (!remote && sc == null || (sc instanceof ScreenLevelEditor))
 			Game.eventsOut.add(new EventLoadLevel(this));
 
-		LinkedHashMap<String, TankAIControlled> customTanksMap = new LinkedHashMap<>();
-		for (TankAIControlled t: this.customTanks)
-			customTanksMap.put(t.name, t);
+		LinkedHashMap<String, TankAIControlled> customTanksMap = getTankMap();
 
 		Tank.currentID = 0;
 		Tank.freeIDs.clear();
@@ -702,6 +700,14 @@ public class Level
 
 		if (!remote && sc == null || (sc instanceof ScreenLevelEditor))
 			Game.eventsOut.add(new EventEnterLevel());
+	}
+
+	public LinkedHashMap<String, TankAIControlled> getTankMap()
+	{
+		LinkedHashMap<String, TankAIControlled> customTanksMap = new LinkedHashMap<>();
+		for (TankAIControlled t: this.customTanks)
+			customTanksMap.put(t.name, t);
+		return customTanksMap;
 	}
 
 	public void addLevelBorders()

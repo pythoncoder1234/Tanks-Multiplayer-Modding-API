@@ -130,9 +130,7 @@ public class Crusade
 			}
 
 			this.contents = c.toString();
-			
 			this.initialize(list, name);
-			
 			f.stopReading();
 		}
 		catch (Exception e)
@@ -148,6 +146,7 @@ public class Crusade
 		
 		int i = 0;
 
+		Level dummyLevel = new Level("{28,18|,|,}");
 		HashMap<TankAIControlled, String> tankOccurrences = new HashMap<>();
 
 		while (i < levelArray.size())
@@ -198,7 +197,7 @@ public class Crusade
                             int divider = s.indexOf("]") + 1;
                             String first = s.substring(0, divider);
                             String second = s.substring(divider);
-                            TankAIControlled t = TankAIControlled.fromString(second);
+                            TankAIControlled t = TankAIControlled.fromString(second, dummyLevel);
                             tankOccurrences.put(t, first);
                             this.customTanks.add(t);
                         }
@@ -208,7 +207,8 @@ public class Crusade
 
 			i++;
 		}
-		
+
+		TankReferenceSolver.solveAllReferences(dummyLevel, dummyLevel.getTankMap());
 		this.name = name;
 
 		for (TankAIControlled t: tankOccurrences.keySet())

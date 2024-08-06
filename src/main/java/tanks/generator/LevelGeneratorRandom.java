@@ -29,7 +29,6 @@ public class LevelGeneratorRandom extends LevelGenerator
 
 		if (random.nextDouble() < 0.3 && largeLevels)
 			size *= 2;
-		largeLevels = false;
 
 		int height = (int)(18 * size);
 		int width = (int)(28 * size);

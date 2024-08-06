@@ -6,7 +6,11 @@ import tanks.editor.EditorAction;
 import tanks.editor.selector.LevelEditorSelector;
 import tanks.gui.Button;
 import tanks.gui.ButtonObject;
-import tanks.gui.screen.*;
+import tanks.gui.screen.ITankScreen;
+import tanks.gui.screen.Screen;
+import tanks.gui.screen.ScreenAddSavedTank;
+import tanks.gui.screen.ScreenTankEditor;
+import tanks.obstacle.Obstacle;
 import tanks.registry.RegistryObstacle;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
@@ -20,6 +24,7 @@ import static tanks.editor.selector.LevelEditorSelector.Position;
 public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITankScreen
 {
     public static Button leftButton, rightButton;
+    private static final int[] hiddenArr = new int[Game.registryObstacle.obstacleEntries.size()];
 
     public int draggedIndex = -1;
     public int objectButtonRows = 3;
@@ -201,11 +206,13 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
         int hidden = 0;
         for (int i = 0; i < Game.registryObstacle.obstacleEntries.size(); i++)
         {
-            int index = (i-hidden) % (rows * cols);
+            int index = (i- hidden) % (rows * cols);
             double x = this.centerX - 450 + 100 * (index % cols);
             double y = this.centerY - 100 + 100 * ((index / cols) % rows);
 
-            final int j = i-hidden;
+            final int j = i;
+
+            hiddenArr[i] = i-hidden;
 
             RegistryObstacle.ObstacleEntry entry = Game.registryObstacle.obstacleEntries.get(i);
             if (!Game.debug && entry.hidden)
@@ -214,7 +221,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
                 continue;
             }
 
-            tanks.obstacle.Obstacle o = entry.getObstacle(x, y);
+            Obstacle o = entry.getObstacle(x, y);
 
             ButtonObject b = new ButtonObject(o, x, y, 75, 75, () ->
             {
@@ -521,7 +528,7 @@ public class OverlayObjectMenu extends ScreenLevelEditorOverlay implements ITank
                 this.editStartingHeight.draw();
             }
 
-            this.drawMobileTooltip(this.obstacleButtons.get(this.editor.obstacleNum).hoverTextRawTranslated);
+            this.drawMobileTooltip(this.obstacleButtons.get(hiddenArr[editor.obstacleNum]).hoverTextRawTranslated);
         }
 
         if (leftButton != null && !drawSHButton)

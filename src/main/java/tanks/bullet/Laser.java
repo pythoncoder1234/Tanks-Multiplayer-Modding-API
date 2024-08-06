@@ -60,7 +60,7 @@ public class Laser extends Movable implements IDrawableWithGlow
     {
         if (Game.movables.contains(this))
         {
-            if (this.tank1 == null || this.tank2 == null || this.tank1.destroy || this.tank2.destroy || ScreenGame.finishedQuick)
+            if (expired || this.tank1 == null || this.tank2 == null || this.tank1.destroy || this.tank2.destroy || ScreenGame.finishedQuick)
                 Game.removeMovables.add(this);
         }
 
@@ -68,7 +68,6 @@ public class Laser extends Movable implements IDrawableWithGlow
         double oy = Math.sin(this.angle + Math.PI / 2);
 
         double frac = this.age / this.maxAge;
-
         boolean depth = Game.enable3d;
 
         if (!expired)
@@ -116,6 +115,12 @@ public class Laser extends Movable implements IDrawableWithGlow
 
         if (Game.glowEnabled)
             drawGlow();
+    }
+
+    @Override
+    public void update()
+    {
+        super.update();
     }
 
     public void drawGlow()

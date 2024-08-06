@@ -161,8 +161,8 @@ public abstract class BulletInstant extends Bullet
 			if (s.age > s.maxAge)
 				s.expired = true;
 
-			if (!s.expired)
-				finished = false;
+            if (!s.expired)
+                finished = false;
 		}
 
 		if (finished)

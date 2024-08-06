@@ -1,5 +1,6 @@
 package tanks.gui.screen;
 
+import lwjglwindow.FontRenderer;
 import tanks.Game;
 import tanks.gui.Button;
 import tanks.gui.TextBox;
@@ -124,7 +125,9 @@ public class ScreenInputColor extends Screen
         colorGreen.draw();
         colorBlue.draw();
 
+        FontRenderer.showColorChar = true;
         textBox.draw();
+        FontRenderer.showColorChar = false;
 
         add.draw();
         back.draw();

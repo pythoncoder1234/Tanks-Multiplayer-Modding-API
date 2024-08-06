@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ModAPI
 {
-    public static String version = "Mod API v1.2.5";
+    public static String version = "Mod API v1.2.6";
     public static boolean autoLoadExtensions = false;
     public static boolean sendEvents = true;
     static ArrayList<Runnable> resetFunc = new ArrayList<>();
@@ -36,8 +36,8 @@ public class ModAPI
     public static final double right = Math.toRadians(0);
 
     /**
-     * To add a new mod, add {@code Game.registerMinigame(yourMod.class)} to this function. Of course, type the name of your mod instead of "yourMod".<br><br>
-     * You can also use other functions here, like the {@code ModAPI.printLevelString(levelPath)) function.<br><br>
+     * To add a new mod, add {@code Game.registerMinigame(yourMod.class)} to this function.<br><br>
+     * You can also use other functions here, like the {@code ModAPI.printLevelString(levelPath)) function.}<br><br>
      * However, keep in mind that this will only be called on the first frame of the game launch.
      */
     public static void registerGames()

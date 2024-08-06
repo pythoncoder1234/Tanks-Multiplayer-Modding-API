@@ -512,7 +512,7 @@ public class Game
         registerObstacle(ObstacleHill.class, "hill", true);
         registerObstacle(ObstaclePath.class, "path", true);
         registerObstacle(ObstacleMud.class, "mud");
-        registerObstacle(ObstacleTrainTrack.class, "track", true);
+        registerObstacle(ObstacleTrainTrack.class, "track");
         registerObstacle(ObstacleWater.class, "water", true);
         registerObstacle(ObstacleSand.class, "sand", true);
         registerObstacle(ObstacleLava.class, "lava", true);
@@ -523,7 +523,6 @@ public class Game
         registerObstacle(ObstacleBoostPanel.class, "boostpanel");
         registerObstacle(ObstacleTeleporter.class, "teleporter");
 		registerObstacle(ObstacleText.class, "text");
-
 //		printObstacleProperties();
 
         registerTank(TankDummy.class, "dummy", 0);

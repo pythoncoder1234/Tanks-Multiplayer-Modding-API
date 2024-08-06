@@ -28,7 +28,7 @@ public class TankAIControlled extends Tank
 	public static int[] dirY = {0, 0, 1, -1, -1, 1, 1, -1};
 	protected static TankAIControlled compare;
 
-	public boolean solved;
+	private boolean propsCloned;
 
 	/** The type which shows what direction the tank is moving. Clockwise and Counter Clockwise are for idle, while Aiming is for when the tank aims.*/
 	protected enum RotationPhase {clockwise, counter_clockwise, aiming}
@@ -514,6 +514,9 @@ public class TankAIControlled extends Tank
 	/** Time until mimicking ends */
 	protected double mimicRevertCounter = this.mimicRevertTime;
 
+	/** Mimic target tank */
+	protected Movable mimicTarget;
+
 	/** Mimic laser effect*/
 	protected Laser laser;
 
@@ -557,6 +560,8 @@ public class TankAIControlled extends Tank
 
 		for (int i = 0; i < fleeDirections.length; i++)
             fleeDirections[i] = Math.PI / 4 + (i * 2 / fleeDirections.length) * Math.PI / 2 + i * Math.PI / fleeDirections.length;
+
+		this.propsCloned = true;
 	}
 
 	protected TankAIControlled()
@@ -628,7 +633,7 @@ public class TankAIControlled extends Tank
 			if (this.random.nextDouble() < 0.5)
 				this.strafeDirection = -this.strafeDirection;
 
-			this.spawnedTankEntries.removeIf(entry -> !entry.tank.solved);
+			this.spawnedTankEntries.removeIf(entry -> !entry.tank.solved());
 		}
 
 		Tank.updatesPerFrame++;
@@ -1158,7 +1163,7 @@ public class TankAIControlled extends Tank
 	public void transform(TankAIControlled t)
 	{
 		t.solve();
-		if (!t.solved)
+		if (!t.propsCloned)
 			return;
 
 		this.justTransformed = true;
@@ -2690,28 +2695,31 @@ public class TankAIControlled extends Tank
 
 		Class<? extends Movable> c = null;
 
-		Movable m = null;
-
 		this.posX = this.possessingTank.posX;
 		this.posY = this.possessingTank.posY;
 		this.vX = this.possessingTank.vX;
 		this.vY = this.possessingTank.vY;
 		this.angle = this.possessingTank.angle;
 
-		if (this.targetEnemy != null && (Panel.panel.ageFrames % 5 == 0 || mimicRevertTime < 10))
+		Tank t = this.possessingTank.getBottomLevelPossessing();
+
+		if (this.targetEnemy != null)
 		{
-			Ray r = new Ray(this.possessingTank.posX, this.possessingTank.posY, 0, 0, this);
-			r.vX = this.targetEnemy.posX - this.possessingTank.posX;
-			r.vY = this.targetEnemy.posY - this.possessingTank.posY;
+			if (Panel.panel.ageFrames % 5 == 0 || mimicRevertCounter < 15)
+			{
+				Ray r = new Ray(this.possessingTank.posX, this.possessingTank.posY, 0, 0, this);
+				r.vX = this.targetEnemy.posX - this.possessingTank.posX;
+				r.vY = this.targetEnemy.posY - this.possessingTank.posY;
 
-			double ma = Math.sqrt(r.vX * r.vX + r.vY * r.vY) / r.speed;
-			r.vX /= ma;
-			r.vY /= ma;
+				double ma = Math.sqrt(r.vX * r.vX + r.vY * r.vY) / r.speed;
+				r.vX /= ma;
+				r.vY /= ma;
 
-			r.angle = Movable.getPolarDirection(r.vX, r.vY);
-			r.setMaxDistance(mimicRange).moveOut(5);
+				r.angle = Movable.getPolarDirection(r.vX, r.vY);
+				r.setMaxDistance(mimicRange).moveOut(5);
 
-			m = r.getTarget(2, (Tank) this.targetEnemy);
+				mimicTarget = r.getTarget(2, (Tank) this.targetEnemy);
+			}
 
 			if (((Tank) this.targetEnemy).possessor != null)
 				c = ((Tank) this.targetEnemy).getTopLevelPossessor().getClass();
@@ -2722,12 +2730,24 @@ public class TankAIControlled extends Tank
 				c = TankPurple.class;
 		}
 
-		if (this.targetEnemy == null || m != this.targetEnemy || this.targetEnemy.destroy || c != this.possessingTank.getClass() || Movable.distanceBetween(this, this.targetEnemy) > this.mimicRange)
+		boolean targetInvalid = this.targetEnemy == null || mimicTarget != this.targetEnemy || this.targetEnemy.destroy ||
+				c != this.possessingTank.getClass() || Movable.distanceBetween(this, this.targetEnemy) > this.mimicRange;
+		if (targetInvalid)
 			this.mimicRevertCounter -= updateFrequency;
 		else
 			this.mimicRevertCounter = this.mimicRevertTime;
 
-		Tank t = this.possessingTank.getBottomLevelPossessing();
+		if (!targetInvalid)
+		{
+			this.laser = new Laser(t.posX, t.posY, t.size / 2, this.targetEnemy.posX, this.targetEnemy.posY, this.targetEnemy.size / 2,
+					(this.mimicRange - Movable.distanceBetween(t, this.targetEnemy)) / this.mimicRange * 10, this.targetEnemy.getAngleInDirection(t.posX, t.posY),
+					((Tank) this.targetEnemy).colorR, ((Tank) this.targetEnemy).colorG, ((Tank) this.targetEnemy).colorB);
+			Game.movables.add(this.laser);
+			Game.eventsOut.add(new EventTankMimicLaser(t, (Tank) this.targetEnemy, this.mimicRange));
+		}
+		else
+			Game.eventsOut.add(new EventTankMimicLaser(t, null, this.mimicRange));
+
 		if (this.mimicRevertCounter <= 0 && this.targetable && !this.hidden && !this.disabled)
 		{
 			Tank.idMap.put(this.networkID, this);
@@ -2751,17 +2771,6 @@ public class TankAIControlled extends Tank
 
 			this.tryPossess();
 		}
-
-		if (this.targetEnemy != null && !this.targetEnemy.destroy && !t.destroy && this.canCurrentlyMimic && !this.positionLock)
-		{
-			this.laser = new Laser(t.posX, t.posY, t.size / 2, this.targetEnemy.posX, this.targetEnemy.posY, this.targetEnemy.size / 2,
-					(this.mimicRange - Movable.distanceBetween(t, this.targetEnemy)) / this.mimicRange * 10, this.targetEnemy.getAngleInDirection(t.posX, t.posY),
-					((Tank) this.targetEnemy).colorR, ((Tank) this.targetEnemy).colorG, ((Tank) this.targetEnemy).colorB);
-			Game.movables.add(this.laser);
-			Game.eventsOut.add(new EventTankMimicLaser(t, (Tank) this.targetEnemy, this.mimicRange));
-		}
-		else
-			Game.eventsOut.add(new EventTankMimicLaser(t, null, this.mimicRange));
 	}
 
 	public void tryPossess()
@@ -3281,7 +3290,7 @@ public class TankAIControlled extends Tank
 
 	public static TankAIControlled fromString(String s)
 	{
-		return fromString(s, null, null);
+		return fromString(s, Game.currentLevel, null);
 	}
 
 	public static TankAIControlled fromString(String s, Level l)
@@ -3395,8 +3404,13 @@ public class TankAIControlled extends Tank
 		Game.currentLevel.customTanks.stream().filter(t1 -> name.equals(t1.name)).findAny().ifPresent(t1 ->
         {
             t1.cloneProperties(this);
-			solved = true;
+			propsCloned = true;
         });
+	}
+
+	public boolean solved()
+	{
+		return propsCloned || fromRegistry;
 	}
 
 	/** Clones properties from this tank to the <code>t</code> parameter. */

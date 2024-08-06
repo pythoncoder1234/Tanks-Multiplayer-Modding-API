@@ -22,7 +22,7 @@ public class Minimap extends FixedMenu
 
     public Tank focusedTank;
 
-    public double lastToggleTime;
+    public double lastToggleTime = -99999;
     public boolean draggable = false;
     public Level level = Game.currentLevel;
     public int posX = (int) (Panel.windowWidth - size);

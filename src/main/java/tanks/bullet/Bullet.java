@@ -567,9 +567,10 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 
 		this.inside.clear();
 
+		double posZLimit = Game.tile_size + 10;
 		for (Movable m : Game.getInRadius(posX, posY, size + 50, c -> c.movables))
 		{
-			if (Math.abs(this.posZ - m.posZ) > Game.tile_size)
+			if (!(m.posZ < 0 && m.posZ > -posZLimit) && Math.abs(this.posZ - m.posZ) > posZLimit)
 				continue;
 
 			if (m instanceof Tank t && !m.destroy)

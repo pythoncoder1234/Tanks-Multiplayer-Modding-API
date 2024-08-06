@@ -27,7 +27,7 @@ public class ObstaclePath extends Obstacle
 
         updateColor();
 
-        this.description = "A dusty, worn out brown path";
+        this.description = "A dusty, worn out dirt path";
     }
 
 

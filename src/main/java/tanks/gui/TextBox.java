@@ -253,8 +253,9 @@ public class TextBox implements IDrawable, ITrigger
 	public void drawInput()
 	{
 		double size = this.sizeY * 0.6;
-		if (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale > this.sizeX - 80)
-			Drawing.drawing.setInterfaceFontSize(size * (this.sizeX - 80) / (Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText) / Drawing.drawing.interfaceScale));
+		double strWidth = Game.game.window.fontRenderer.getStringSizeX(Drawing.drawing.fontSize, inputText);
+		if (strWidth / Drawing.drawing.interfaceScale > this.sizeX - 80)
+			Drawing.drawing.setInterfaceFontSize(size * (this.sizeX - 80) / (strWidth / Drawing.drawing.interfaceScale));
 
 		if (selected)
 			Drawing.drawing.drawInterfaceText(posX, posY, inputText + "\u00a7127127127255_");
@@ -600,7 +601,10 @@ public class TextBox implements IDrawable, ITrigger
 	public void inputKey(char key)
 	{
 		if (key == '\b')
-			inputText = inputText.substring(0, Math.max(0, inputText.length() - 1));
+		{
+			boolean colorChar = inputText.length() >= 13 && inputText.charAt(inputText.length() - 13) == '§';
+			inputText = inputText.substring(0, Math.max(0, inputText.length() - (colorChar ? 13 : 1)));
+		}
 		else if (this.inputText.length() < this.maxChars)
 		{
 			if (key == ' ')
@@ -652,12 +656,10 @@ public class TextBox implements IDrawable, ITrigger
 
 				if (allowLetters)
 				{
-					if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".contains(key + ""))
+					if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz§".contains(key + ""))
 					{
 						if (enableCaps)
-						{
-							inputText += key;
-						}
+                            inputText += key;
 						else if (lowerCase)
 							inputText += Character.toLowerCase(key);
 						else

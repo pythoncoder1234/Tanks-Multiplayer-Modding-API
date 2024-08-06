@@ -75,7 +75,7 @@ public class TankReferenceSolver
         {
             t.solve();
 
-            if (t.solved && !tankMap.containsKey(t.name))
+            if (t.solved() && !tankMap.containsKey(t.name))
             {
                 l.customTanks.add(t);
                 tankMap.put(t.name, t);
