@@ -7,7 +7,7 @@ import tanks.gui.menus.FixedText;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
-import tanks.minigames.GameMap;
+//import tanks.minigames.GameMap;
 import tanks.minigames.TeamDeathmatch;
 import tanks.network.EventMinigameStart;
 import tanks.network.NetworkEventMap;
@@ -43,7 +43,7 @@ public class ModAPI
     public static void registerGames()
     {
         Game.registerMinigame(TeamDeathmatch.class);
-        Game.registerMinigame(GameMap.class);
+//        Game.registerMinigame(GameMap.class);
     }
 
     public static void setUp()
