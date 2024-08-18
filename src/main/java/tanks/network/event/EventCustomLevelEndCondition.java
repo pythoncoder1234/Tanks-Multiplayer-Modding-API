@@ -2,7 +2,6 @@ package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.EndCondition;
-import tanks.Game;
 import tanks.gui.screen.ScreenGame;
 
 public class EventCustomLevelEndCondition extends PersonalEvent
@@ -13,8 +12,9 @@ public class EventCustomLevelEndCondition extends PersonalEvent
         if (this.clientID != null)
             return;
 
-        if (Game.screen instanceof ScreenGame)
-            ((ScreenGame) Game.screen).endCondition = EndCondition.neverEnd;
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null)
+            g.endCondition = EndCondition.neverEnd;
     }
 
     @Override

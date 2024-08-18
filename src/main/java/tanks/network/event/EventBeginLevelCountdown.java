@@ -14,10 +14,11 @@ public class EventBeginLevelCountdown extends PersonalEvent
 	@Override
 	public void execute() 
 	{
-		if (Game.screen instanceof ScreenGame && this.clientID == null)
+		ScreenGame g = ScreenGame.getInstance();
+		if (g != null && this.clientID == null)
 		{
-			((ScreenGame) Game.screen).shopScreen = false;
-			((ScreenGame) Game.screen).cancelCountdown = false;
+			g.shopScreen = false;
+			g.cancelCountdown = false;
 		}
 	}
 

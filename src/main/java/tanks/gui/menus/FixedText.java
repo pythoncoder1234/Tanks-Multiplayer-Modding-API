@@ -161,7 +161,8 @@ public class FixedText extends FixedMenu
     {
         if (afterGameStarted)
         {
-            if (Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).playing)
+            ScreenGame g = ScreenGame.getInstance();
+            if (g != null && !g.playing)
                 return;
         }
 
@@ -218,7 +219,7 @@ public class FixedText extends FixedMenu
                 this.posX = pos[0];
                 this.posY = pos[1];
 
-                if (Game.showSpeedrunTimer && !(Game.screen instanceof ScreenGame && Game.screen.hideSpeedrunTimer))
+                if (Game.showSpeedrunTimer && !(ScreenGame.getInstance() != null && Game.screen.hideSpeedrunTimer))
                     this.posY += this.styling.fontSize;
                 break;
             case topRight:

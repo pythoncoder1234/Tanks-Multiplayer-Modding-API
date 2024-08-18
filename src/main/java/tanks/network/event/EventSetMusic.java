@@ -9,7 +9,7 @@ import tanks.network.NetworkUtils;
 
 public class EventSetMusic extends PersonalEvent
 {
-    public boolean forGame = Game.screen instanceof ScreenGame;
+    public boolean forGame = ScreenGame.getInstance() != null;
     public String music;
     public String musicID = "battle";
     public String introMusic = "";
@@ -65,15 +65,16 @@ public class EventSetMusic extends PersonalEvent
     @Override
     public void execute()
     {
-        if (Game.screen instanceof ScreenGame s)
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null)
         {
-            s.introMusic = introMusic;
-            s.mainMusic = music;
-            s.endMusic = endMusic;
+            g.introMusic = introMusic;
+            g.mainMusic = music;
+            g.endMusic = endMusic;
         }
         else
         {
-            if (!introMusic.equals(""))
+            if (!introMusic.isEmpty())
                 System.err.println("WARNING (MusicState.applyMusic): Game.screen was not an instance of ScreenGame when called!");
 
             Game.screen.music = music;

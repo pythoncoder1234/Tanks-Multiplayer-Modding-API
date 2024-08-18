@@ -257,10 +257,7 @@ public class LWJGLWindow extends BaseWindow
 				}
 				catch (Exception exc)
 				{
-					if (innerExc == null)
-						innerExc = exc;
-					else
-						exc.printStackTrace();
+                    innerExc = exc;
 				}
 			}
 

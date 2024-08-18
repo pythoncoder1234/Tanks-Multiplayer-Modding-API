@@ -34,7 +34,7 @@ public class ScreenOptionWarning extends ScreenOptionsOverlay
 		Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 2.5, "Notice!");
 
         Drawing.drawing.setInterfaceFontSize(this.textSize);
-        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace / 2, text, objects);
+        Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace / 2, text, (Object) objects);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY, "the next time you start the game.");
 	}
 }

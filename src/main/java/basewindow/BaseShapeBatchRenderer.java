@@ -1,5 +1,7 @@
 package basewindow;
 
+import tanks.Game;
+
 public abstract class BaseShapeBatchRenderer
 {
     public boolean hidden = false;
@@ -30,7 +32,7 @@ public abstract class BaseShapeBatchRenderer
     public void setPosition(double x, double y, double z)
     {
         if (Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z))
-            throw new RuntimeException("NaN renderer position!");
+            throw new RuntimeException("NaN renderer position! x=" + x + ", y=" + y + ", z=" + z + ", current screen: " + Game.screen);
 
         this.posX = x;
         this.posY = y;

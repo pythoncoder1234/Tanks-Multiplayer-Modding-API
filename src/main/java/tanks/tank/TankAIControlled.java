@@ -532,7 +532,6 @@ public class TankAIControlled extends Tank
 	protected double baseMaxSpeed;
 
 	protected double spaceFrac = 0;
-	protected boolean[][] visited = new boolean[10][10];
 
 	/** Set if tank transformed in the last frame */
 	public boolean justTransformed = false;
@@ -1403,59 +1402,6 @@ public class TankAIControlled extends Tank
 		}
 	}
 
-	@Override
-	public void checkObstacleCollision()
-	{
-		int x = (int) (this.posX / Game.tile_size);
-		int y = (int) (this.posY / Game.tile_size);
-
-		int s = (int) Math.max(5, size / Game.tile_size + 10);
-		if (visited.length == s)
-		{
-			for (int i = 0; i < s; i++)
-				Arrays.fill(visited[i], false);
-		}
-		else
-			visited = new boolean[s][s];
-
-		spaceFrac = getSpace(x, y, x, y, 0, s) / ((double) s*(s-1)/2);
-	}
-
-	public int getSpace(int x, int y, int cx, int cy, int steps, int maxSteps)
-	{
-		int space = 0;
-		if (steps >= maxSteps)
-			return 0;
-
-		for (int i = 0; i < 4; i++)
-		{
-			int d = visited.length;
-
-			int newX = x + dirX[i];
-			int newY = y + dirY[i];
-			int rx = newX - cx + d/2;
-			int ry = newY - cy + d/2;
-
-			if (newX < 0 || newX >= Game.currentSizeX || newY < 0 || newY >= Game.currentSizeY) continue;
-
-			Obstacle o = Game.getObstacle(newX, newY);
-			if (o != null)
-			{
-				checkCollisionWith(o);
-				continue;
-			}
-
-			if (rx < 0 || rx >= d || ry < 0 || ry >= d || Math.abs(rx - d/2) + Math.abs(ry - d/2) >= d / 2 || visited[rx][ry])
-				continue;
-
-			visited[rx][ry] = true;
-//			Game.effects.add(Effect.createNewEffect(newX * 50 + 25, newY * 50 + 25, 25, Effect.EffectType.laser));
-			space += getSpace(newX, newY, cx, cy, steps+1, maxSteps) + 1;
-		}
-
-		return space;
-	}
-
 	public void followPath()
 	{
 		this.seekTimer -= updateFrequency;
@@ -1467,7 +1413,6 @@ public class TankAIControlled extends Tank
 			for (Tile t : this.path)
 			{
 				Game.effects.add(Effect.createNewEffect(t.shiftedX, t.shiftedY, 25, Effect.EffectType.laser));
-
 				Drawing.drawing.drawText(t.posX, t.posY, 50, t.surrounded + "");
 			}
 		}

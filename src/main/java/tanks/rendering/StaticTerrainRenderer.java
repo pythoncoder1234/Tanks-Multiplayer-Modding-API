@@ -1,7 +1,6 @@
 package tanks.rendering;
 
 import basewindow.BaseShapeBatchRenderer;
-import basewindow.BaseWindow;
 import basewindow.IBatchRenderableObject;
 import basewindow.ShaderGroup;
 import tanks.Chunk;
@@ -47,28 +46,6 @@ public class StaticTerrainRenderer extends TerrainRenderer
         {
             e.printStackTrace();
             Game.exitToCrash(e);
-        }
-    }
-
-    public ShaderGroup getShader(Class<? extends ShaderGroup> shaderClass)
-    {
-        ShaderGroup s = Game.game.shaderInstances.get(shaderClass);
-        if (s != null)
-            return s;
-        else
-        {
-            try
-            {
-                s = shaderClass.getConstructor(BaseWindow.class).newInstance(Game.game.window);
-                s.initialize();
-                Game.game.shaderInstances.put(shaderClass, s);
-                return s;
-            }
-            catch (Exception e)
-            {
-                Game.exitToCrash(e);
-                return null;
-            }
         }
     }
 
@@ -338,7 +315,7 @@ public class StaticTerrainRenderer extends TerrainRenderer
             this.outsideShader.set();
 
             float size = (float) (Obstacle.draw_size / Game.tile_size);
-            if (!(Game.screen instanceof ScreenGame))
+            if (ScreenGame.getInstance() == null)
                 size = 0;
 
             this.outsideShader.setSize(size);

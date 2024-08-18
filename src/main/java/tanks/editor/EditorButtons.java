@@ -197,7 +197,9 @@ public class EditorButtons
         public Runnable resetFunc;
 
         public ArrayList<EditorButton> subMenuButtons = new ArrayList<>();
+        public double keyHoldTime = 0;
         public double menuOpenAge = -9999;
+        public int option = 0;
         public boolean showSubButtons = false;
 
         public String secondaryImage;
@@ -299,12 +301,13 @@ public class EditorButtons
 
             super.draw();
 
-            if (secondaryImage != null)
+            if (secondaryImage != null && option > 0 && option <= subMenuButtons.size())
             {
+                EditorButton b = subMenuButtons.get(option - 1);
                 imageXOffset = imageSizeX * -0.15;
                 imageYOffset = imageSizeY * -0.1;
                 Drawing.drawing.setColor(255, 255, 255);
-                Drawing.drawing.drawInterfaceImage(secondaryImage, posX + imageSizeX * 0.25, posY + imageSizeY * 0.25, imageSizeX * 0.75, imageSizeY * 0.75);
+                Drawing.drawing.drawInterfaceImage(secondaryImage, posX + imageSizeX * 0.25, posY + imageSizeY * 0.25, b.imageSizeX * 0.75, b.imageSizeY * 0.75);
             }
             else
             {
@@ -336,6 +339,23 @@ public class EditorButtons
                     resetFunc.run();
             }
 
+            if (showSubButtons && (keybind != null && keybind.isPressed()))
+            {
+                if (Game.game.window.validScrollUp)
+                {
+                    Game.game.window.validScrollUp = false;
+                    option--;
+                    setOption();
+                }
+
+                if (Game.game.window.validScrollDown)
+                {
+                    Game.game.window.validScrollDown = false;
+                    option++;
+                    setOption();
+                }
+            }
+
             for (EditorButton b : subMenuButtons)
             {
                 b.enabled = !b.disabledFunc.apply();
@@ -347,13 +367,20 @@ public class EditorButtons
             }
         }
 
-        @Override
-        public void doubleClick()
+        private void setOption()
         {
-            menuOpenAge = age;
-            showSubButtons = !showSubButtons;
+            int len = subMenuButtons.size() + 1;
+            option = (option + len) % len;
+            if (option == 0)
+            {
+                if (resetFunc != null)
+                    resetFunc.run();
+                secondaryImage = null;
+                return;
+            }
 
-            super.doubleClick();
+            subMenuButtons.get(option - 1).onClick();
+            keyHoldTime = 60;
         }
 
         @Override
@@ -361,6 +388,24 @@ public class EditorButtons
         {
             super.onClick();
             Game.game.window.pressedButtons.remove((Integer) InputCodes.MOUSE_BUTTON_1);
+        }
+
+        @Override
+        public void updateKeybind()
+        {
+            super.updateKeybind();
+            if (keybind == null)
+                return;
+
+            if (keybind.isPressed())
+                keyHoldTime = Math.min(60, keyHoldTime + Panel.frameFrequency);
+            else
+                keyHoldTime = Math.max(0, keyHoldTime - Panel.frameFrequency * 0.1);
+
+            boolean prev = showSubButtons;
+            showSubButtons = keyHoldTime >= 50;
+            if (showSubButtons != prev)
+                menuOpenAge = age;
         }
 
         public void setUpSubButtons()
@@ -384,11 +429,7 @@ public class EditorButtons
                 b.function = () ->
                 {
                     secondaryImage = b.image;
-
-                    if (showSubButtons)
-                        menuOpenAge = age;
-                    showSubButtons = false;
-
+                    option = subMenuButtons.indexOf(b) + 1;
                     r.run();
                 };
             }

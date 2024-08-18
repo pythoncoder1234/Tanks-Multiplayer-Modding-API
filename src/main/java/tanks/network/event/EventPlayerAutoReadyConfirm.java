@@ -1,7 +1,6 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
-import tanks.Game;
 import tanks.gui.screen.ScreenGame;
 import tanks.network.NetworkUtils;
 
@@ -26,8 +25,9 @@ public class EventPlayerAutoReadyConfirm extends PersonalEvent
     {
         if (this.clientID == null)
         {
-            if (Game.screen instanceof ScreenGame)
-                ((ScreenGame) Game.screen).ready = true;
+            ScreenGame g = ScreenGame.getInstance();
+            if (g != null)
+                g.ready = true;
         }
     }
 

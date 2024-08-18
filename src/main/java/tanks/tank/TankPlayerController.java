@@ -132,11 +132,11 @@ public class TankPlayerController extends Tank implements ILocalPlayerTank
                 a = 3 * Math.PI / 4;
             else if (x == -1 && y == 0)
                 a = Math.PI;
-            else if (x == -1 && y == -1)
+            else if (x == -1)
                 a = 5 * Math.PI / 4;
             else if (x == 0 && y == -1)
                 a = 3 * Math.PI / 2;
-            else if (x == 1 && y == -1)
+            else if (x == 1)
                 a = 7 * Math.PI / 4;
 
             double intensity = 1;
@@ -149,7 +149,7 @@ public class TankPlayerController extends Tank implements ILocalPlayerTank
                     a = TankPlayer.controlStick.inputAngle;
             }
 
-            if (a >= 0 && intensity >= 0.2)
+            if (a >= 0)
             {
                 if (Game.followingCam)
                     a += this.angle + Math.PI / 2;
@@ -294,7 +294,7 @@ public class TankPlayerController extends Tank implements ILocalPlayerTank
         this.action1 = shoot;
         this.action2 = mine;
 
-        if ((trace || TankPlayer.lockTrace) && !Game.bulletLocked && !this.disabled && Game.screen instanceof ScreenGame)
+        if ((trace || TankPlayer.lockTrace) && !Game.bulletLocked && !this.disabled && ScreenGame.getInstance() != null)
         {
             double range = -1;
 

@@ -14,7 +14,7 @@ public class SpeedrunTimer
 
         double alpha = 127;
 
-        if (!(Game.screen instanceof ScreenGame || Game.screen instanceof ScreenOptionsOverlay) || ScreenGame.finishedQuick)
+        if (!(ScreenGame.getInstance() != null || Game.screen instanceof ScreenOptionsOverlay) || ScreenGame.finishedQuick)
             alpha += 64 + 64 * Math.sin(System.currentTimeMillis() / 1000.0 * Math.PI * 4);
 
         if (Level.isDark() || (Game.screen instanceof IDarkScreen && Panel.win && Game.effectsEnabled))

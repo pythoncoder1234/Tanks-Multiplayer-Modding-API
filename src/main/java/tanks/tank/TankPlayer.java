@@ -421,7 +421,8 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
             this.angle = this.getAngleInDirection(this.mouseX, this.mouseY);
         }
 
-        if (!(Game.screen instanceof ScreenGame g && g.freecam && !ScreenGame.controlPlayer))
+		ScreenGame g = ScreenGame.getInstance();
+        if (!(g != null && g.freecam && !ScreenGame.controlPlayer))
         {
             if (shoot && this.getItem(false).cooldown <= 0 && !this.disabled)
                 this.shoot();
@@ -430,7 +431,7 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
                 this.layMine();
         }
 
-        if ((trace || lockTrace) && !Game.bulletLocked && !this.disabled && (Game.screen instanceof ScreenGame || Game.screen instanceof ScreenTitle))
+        if ((trace || lockTrace) && !Game.bulletLocked && !this.disabled && (g != null || Game.screen instanceof ScreenTitle))
         {
             double range = -1;
 
@@ -555,9 +556,10 @@ public class TankPlayer extends Tank implements ILocalPlayerTank, IServerPlayerT
 		if (b.moveOut)
 			b.moveOut(50 * this.size / Game.tile_size);
 
+		ScreenGame g;
 		if (!Game.followingCam)
 			b.setTargetLocation(this.mouseX, this.mouseY);
-		else if (Game.screen instanceof ScreenGame g)
+		else if ((g = ScreenGame.getInstance()) != null)
 			b.setTargetLocation(posX + Math.cos(angle) * g.fcArcAim, posY + Math.sin(angle) * g.fcArcAim);
 
 		Game.eventsOut.add(new EventShootBullet(b));

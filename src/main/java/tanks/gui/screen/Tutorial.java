@@ -57,8 +57,6 @@ public class Tutorial extends Minigame
         ModAPI.loadLevel("{50,18,235,207,166,20,20,20|27-10...14,37-7...11,12-0...13-hard,13...22-7-hard,27-0" +
                 "...9-hard,27-15...17-hard,37-0...6-hard,37-12...17-hard,23...26-7-hole|5-7-player-1}");
 
-        ((ScreenGame) Game.screen).endCondition = EndCondition.neverEnd;
-
         this.touchscreen = touchscreen;
 
         Drawing.drawing.movingCamera = true;
@@ -86,7 +84,7 @@ public class Tutorial extends Minigame
 
     public void update()
     {
-        ((ScreenGame) Game.screen).endCondition = step <= 8 && !Game.playerTank.destroy ? EndCondition.neverEnd : EndCondition.normal;
+        endCondition = step <= 8 && !Game.playerTank.destroy ? EndCondition.neverEnd : EndCondition.normal;
 
         if (Game.playerTank.destroy)
             return;

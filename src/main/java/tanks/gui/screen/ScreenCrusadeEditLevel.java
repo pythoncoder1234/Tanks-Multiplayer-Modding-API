@@ -210,7 +210,7 @@ public class ScreenCrusadeEditLevel extends Screen implements ILevelPreviewScree
 
         index = new TextBox(Drawing.drawing.interfaceSizeX - 200, Drawing.drawing.interfaceSizeY - 110, this.objWidth, this.objHeight, "Level position", () ->
         {
-            if (index.inputText.length() <= 0)
+            if (index.inputText.isEmpty())
                 index.inputText = index.previousInputText;
 
             insertionIndex = Integer.parseInt(index.inputText) - 1;

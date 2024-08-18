@@ -920,7 +920,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen, IBlankBackg
 
             colorRed = new TextBoxSlider(0, 0, this.screen.objWidth, this.screen.objHeight, "Red", () ->
             {
-                if (colorRed.inputText.length() <= 0)
+                if (colorRed.inputText.isEmpty())
                     colorRed.inputText = colorRed.previousInputText;
 
                 int red = Integer.parseInt(colorRed.inputText);
@@ -945,7 +945,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen, IBlankBackg
 
             colorGreen = new TextBoxSlider(0, 0, this.screen.objWidth, this.screen.objHeight,"Green", () ->
             {
-                if (colorGreen.inputText.length() <= 0)
+                if (colorGreen.inputText.isEmpty())
                     colorGreen.inputText = colorGreen.previousInputText;
 
                 int green = Integer.parseInt(colorGreen.inputText);
@@ -970,7 +970,7 @@ public class ScreenTankEditor extends Screen implements IItemScreen, IBlankBackg
 
             colorBlue = new TextBoxSlider(0, 0, this.screen.objWidth, this.screen.objHeight, "Blue", () ->
             {
-                if (colorBlue.inputText.length() <= 0)
+                if (colorBlue.inputText.isEmpty())
                     colorBlue.inputText = colorBlue.previousInputText;
 
                 int blue = Integer.parseInt(colorBlue.inputText);

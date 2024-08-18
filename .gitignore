@@ -3,8 +3,8 @@
 .classpath
 .settings
 .DS_Store
+*.log
 /.vscode
 /libs/
 /out/
 /.idea/
-/src/main/java/tanks/minigames/GameMap.java

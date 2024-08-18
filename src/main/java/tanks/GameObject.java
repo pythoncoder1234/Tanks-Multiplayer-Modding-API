@@ -10,6 +10,7 @@ import tanks.tank.Tank;
 import tanks.tank.TankPlayer;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class GameObject implements Cloneable
 {
@@ -87,6 +88,15 @@ public abstract class GameObject implements Cloneable
 
     }
 
+    public void cloneAllSelectors(GameObject cloneFrom)
+    {
+        if (!cloneFrom.hasCustomSelectors())
+            return;
+
+        AtomicInteger i = new AtomicInteger();
+        forAllSelectors(c -> c.cloneProperties(cloneFrom.selectors.get(i.getAndIncrement())));
+    }
+
     /** Warning: Shallow copy. */
     @Override
     public GameObject clone()
@@ -131,6 +141,9 @@ public abstract class GameObject implements Cloneable
             s.accept(this);
 
         ScreenLevelEditor editor1 = editor;
+
+        if (!hasCustomSelectors())
+            registerSelectors();
 
         this.forAllSelectors(s ->
         {

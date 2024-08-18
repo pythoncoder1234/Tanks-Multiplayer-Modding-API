@@ -97,7 +97,7 @@ public class PosedModelAnimation implements IPosedModelFrame
 
         public void applyRotation(basewindow.PosedModel.PoseBone b, double time, double frac)
         {
-            if (this.rotationFrames.size() <= 0)
+            if (this.rotationFrames.isEmpty())
                 return;
 
             int index = 0;
@@ -160,7 +160,7 @@ public class PosedModelAnimation implements IPosedModelFrame
 
         public void applyTranslation(basewindow.PosedModel.PoseBone b, double time, double frac)
         {
-            if (this.translationFrames.size() <= 0)
+            if (this.translationFrames.isEmpty())
                 return;
 
             int index = 0;

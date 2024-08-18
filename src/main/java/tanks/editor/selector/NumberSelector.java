@@ -4,6 +4,8 @@ import tanks.Game;
 import tanks.GameObject;
 import tanks.gui.screen.leveleditor.OverlaySelectNumber;
 
+import java.util.Locale;
+
 public class NumberSelector<T extends GameObject> extends LevelEditorSelector<T>
 {
     public String format = "%.1f";
@@ -42,9 +44,11 @@ public class NumberSelector<T extends GameObject> extends LevelEditorSelector<T>
         Game.screen = new OverlaySelectNumber(Game.screen, editor, this);
     }
 
+    public static final Locale US_LOCALE = new Locale("en", "US");
+
     public String numberString()
     {
-        return String.format(format, number);
+        return String.format(US_LOCALE, format, number);   // bruh
     }
 
     public void changeMetadata(int add)

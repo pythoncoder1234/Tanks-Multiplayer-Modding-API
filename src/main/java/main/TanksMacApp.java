@@ -28,8 +28,7 @@ public class TanksMacApp
 
         if (!Game.isOnlineServer)
         {
-            if (Game.framework == Game.Framework.lwjgl)
-                Game.game.fileManager = new ComputerFileManager();
+            Game.game.fileManager = new ComputerFileManager();
 
             Game.initScript();
 

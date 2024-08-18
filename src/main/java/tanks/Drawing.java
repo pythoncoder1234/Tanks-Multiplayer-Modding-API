@@ -18,6 +18,7 @@ import tanks.translation.Translation;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@SuppressWarnings("unused")
 public class Drawing
 {
 	protected static boolean initialized = false;
@@ -946,17 +947,29 @@ public class Drawing
 
 	public void drawInterfaceImage(String img, double x, double y, double sizeX, double sizeY)
 	{
-		double drawX = (interfaceScale * (x - sizeX / 2) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
-		double drawY = (interfaceScale * (y - sizeY / 2) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
+		boolean text = img.startsWith("text:");
+
 		double drawSizeX = (sizeX * interfaceScale);
 		double drawSizeY = (sizeY * interfaceScale);
 
-		if (!img.startsWith("text:"))
+		if (text)
+		{
+			img = img.substring(5);
+			sizeX = Game.game.window.fontRenderer.getStringSizeX(drawSizeX / 36, img);
+			sizeY = Game.game.window.fontRenderer.getStringSizeY(drawSizeY / 36, img);
+		}
+
+		double drawX = (interfaceScale * (x - sizeX / 2) + Math.max(0, Panel.windowWidth - interfaceSizeX * interfaceScale) / 2);
+		double drawY = (interfaceScale * (y - sizeY / 2) + Math.max(0, Panel.windowHeight - statsHeight - interfaceSizeY * interfaceScale) / 2);
+
+		if (!text)
+		{
 			Game.game.window.shapeRenderer.drawImage(drawX, drawY, drawSizeX, drawSizeY, "/images/" + img, false);
+		}
 		else
 		{
 			Drawing.drawing.setColor(0, 0, 0);
-			Game.game.window.fontRenderer.drawString(drawX, drawY, drawSizeX / 36, drawSizeY / 36, img.substring(5));
+			Game.game.window.fontRenderer.drawString(drawX, drawY, drawSizeX / 36, drawSizeY / 36, img);
 		}
 	}
 
@@ -1140,7 +1153,8 @@ public class Drawing
 
 	public void addFacingVertex(double x, double y, double z, double sX, double sY, double sZ)
 	{
-		if (Game.enable3d && Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).slant != 0)
+		ScreenGame g = ScreenGame.getInstance();
+		if (Game.enable3d && g != null && g.slant != 0)
 		{
 			double angle = ((ScreenGame) Game.screen).slantRotation.pitch;
 
@@ -1292,21 +1306,30 @@ public class Drawing
 	{
 		float newVolume = volume;
 		Tank t = ScreenGame.focusedTank();
-		if (t != null)
+		double posX, posY;
+		if (t != null && !t.destroy)
 		{
-			double dist = Movable.distanceBetween(t.posX, t.posY, x, y);
-			double fade = 0.55;
-
-			if (dist > radius * fade)
-			{
-				double relativeDist = dist - radius * fade;
-				double relativeRadius = radius * (1-fade);
-				newVolume *= (float) ((-(relativeDist * relativeDist) / (relativeRadius * relativeRadius) + 1) * volume);
-			}
-
-			if (newVolume <= 0)
-				return;
+			posX = t.posX;
+			posY = t.posY;
 		}
+		else
+		{
+			posX = Drawing.drawing.getMouseX();
+			posY = Drawing.drawing.getMouseY();
+		}
+
+		double dist = Movable.distanceBetween(posX, posY, x, y);
+		double fade = 0.55;
+
+		if (dist > radius * fade)
+		{
+			double relativeDist = dist - radius * fade;
+			double relativeRadius = radius * (1 - fade);
+			newVolume *= (float) ((-(relativeDist * relativeDist) / (relativeRadius * relativeRadius) + 1) * volume);
+		}
+
+		if (newVolume <= 0)
+			return;
 
 		playSound(sound, pitch, newVolume);
 	}
@@ -1459,6 +1482,12 @@ public class Drawing
 			x = Panel.panel.pastPlayerX.get(0) * (1 - frac) + Panel.panel.pastPlayerX.get(1) * frac;
 		}
 
+		if (Double.isNaN(x))
+		{
+			Panel.panel.pastPlayerTime.clear();
+			return playerX;
+		}
+
 		double result = (x - (Panel.windowWidth / scale / 2));
 
 		if (Panel.forceCenter)
@@ -1503,6 +1532,12 @@ public class Drawing
 		{
 			double frac = (Panel.panel.age - getTrackOffset() - Panel.panel.pastPlayerTime.get(0)) / (Panel.panel.pastPlayerTime.get(1) - Panel.panel.pastPlayerTime.get(0));
 			y = Panel.panel.pastPlayerY.get(0) * (1 - frac) + Panel.panel.pastPlayerY.get(1) * frac;
+		}
+
+		if (Double.isNaN(y))
+		{
+			Panel.panel.pastPlayerTime.clear();
+			return playerY;
 		}
 
 		double result = (y - (Panel.windowHeight - statsHeight) / scale / 2);
@@ -1644,7 +1679,7 @@ public class Drawing
 		if (Game.angledView)
 			dist = 300;
 
-		if (!Game.followingCam || !(Game.screen instanceof ScreenGame))
+		if (!Game.followingCam || ScreenGame.getInstance() == null)
 			return drawX - dist * scale > Panel.windowWidth || drawX + dist * scale < 0 || drawY - dist * scale > Panel.windowHeight || drawY + dist * scale < 0;
         return false;
     }
@@ -1696,7 +1731,7 @@ public class Drawing
 
 			if (s.endsWith("\n"))
 			{
-				l.append(s.substring(0, s.length() - 1));
+				l.append(s, 0, s.length() - 1);
 				lines.add(l.toString());
 				l = new StringBuilder();
 			}

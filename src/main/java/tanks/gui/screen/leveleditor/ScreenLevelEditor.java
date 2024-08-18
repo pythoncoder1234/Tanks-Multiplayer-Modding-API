@@ -27,7 +27,6 @@ import tanks.tank.TankSpawnMarker;
 import java.awt.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings({"unchecked", "unused"})
 public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
@@ -147,12 +146,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	);
 
 	EditorButton place = new EditorButton(buttons.topLeft, "pencil.png", 40, 40, () ->
-	{
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
-		selectMode = changeCameraMode = eraseMode = pasteMode = false;
-	},
+            selectMode = changeCameraMode = eraseMode = pasteMode = false,
 			() -> !selectMode && !changeCameraMode && !eraseMode && !pasteMode,
 			"Build (%s)", Game.game.input.editorBuild
 	)
@@ -165,9 +159,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 	EditorButton erase = new EditorButton(buttons.topLeft, "eraser.png", 40, 40, () ->
 	{
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
 		selectMode = changeCameraMode = pasteMode = false;
 		eraseMode = true;
 	},
@@ -198,9 +189,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		if (undoActions.isEmpty())
 			return;
 
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
 		for (int i = 0; i < Math.min(undoActions.size(), undoCount); i++)
 		{
 			EditorAction a = undoActions.remove(undoActions.size() - 1);
@@ -224,9 +212,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 		if (redoActions.isEmpty())
 			return;
 
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
 		for (int i = 0; i < Math.min(redoCount, redoActions.size()); i++)
 		{
 			EditorAction a = redoActions.remove(redoActions.size() - 1);
@@ -240,8 +225,8 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 	}, () -> redoActions.isEmpty(), "Redo (%s)", Game.game.input.editorRedo
 	)
 			.addSubButtons(
-					new EditorButton("10x.png", 40, 40, () -> redoCount = 10, () -> redoCount == 10, "Redo 10x", null),
-					new EditorButton("50x.png", 40, 40, () -> redoCount = 50, () -> redoCount == 50, "Redo 50x", null)
+					new EditorButton("text:10x", 20, 20, () -> redoCount = 10, () -> redoCount == 10, "Redo 10x", null),
+					new EditorButton("text:50x", 20, 20, () -> redoCount = 50, () -> redoCount == 50, "Redo 50x", null)
 			).onReset(() -> redoCount = 1);
 
 	EditorButton copy = new EditorButton(buttons.topRight, "copy.png", 50, 50, () -> this.copy(false),
@@ -250,14 +235,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			() -> false, () -> selection, "Cut (%s)", Game.game.input.editorCut);
 	EditorButton paste = new EditorButton(buttons.topLeft, "paste.png", 50, 50, () ->
 	{
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
 		selectMode = false;
 		changeCameraMode = false;
 		eraseMode = false;
 		pasteMode = true;
-	}, () -> pasteMode, "Paste (%s)", Game.game.input.editorPaste
+	}, () -> pasteMode, () -> !clipboard.isEmpty(), "Paste (%s)", Game.game.input.editorPaste
 	);
 
 	EditorButton flipHoriz = new EditorButton(buttons.topRight, "flip_horizontal.png", 50, 50, () -> clipboard.flipHorizontal(),
@@ -268,30 +250,14 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			() -> false, () -> pasteMode, "Rotate clockwise (%s)", Game.game.input.editorRotateClockwise);
 
 	EditorButton selectSquareToggle = new EditorButton(buttons.bottomRight, "square_unlocked.png", 40, 40, () ->
-	{
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
-		lockSquare = !lockSquare;
-	}, () -> false, () -> selectMode && !changeCameraMode && !pasteMode, "", Game.game.input.editorLockSquare
+            lockSquare = !lockSquare, () -> false, () -> selectMode && !changeCameraMode && !pasteMode, "", Game.game.input.editorLockSquare
 	).setDescription("Lock square selecting (Hold: %s, Toggle: %s)", Game.game.input.editorHoldSquare.getInputs(), Game.game.input.editorLockSquare.getInputs());
 
 	EditorButton selectAddToggle = new EditorButton(buttons.bottomRight, "select_add.png", 40, 40, () ->
-	{
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
-		lockAdd = !lockAdd;
-	}, () -> false, () -> selectMode && !changeCameraMode && !pasteMode, "Toggle select/deselect (%s)", Game.game.input.editorSelectAddToggle
+            lockAdd = !lockAdd, () -> false, () -> selectMode && !changeCameraMode && !pasteMode, "Toggle select/deselect (%s)", Game.game.input.editorSelectAddToggle
 	);
 
-	EditorButton selectClear = new EditorButton(buttons.bottomRight, "select_clear.png", 40, 40, () ->
-	{
-		Game.game.window.pressedKeys.clear();
-		Game.game.window.pressedButtons.clear();
-
-		clearSelection();
-	}, () -> !selection, () -> selectMode || selection, "Clear selection (%s)", Game.game.input.editorDeselect
+	EditorButton selectClear = new EditorButton(buttons.bottomRight, "select_clear.png", 40, 40, this::clearSelection, () -> !selection, () -> selectMode || selection, "Clear selection (%s)", Game.game.input.editorDeselect
 	);
 
 	@Override
@@ -510,9 +476,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				{
 					currentPlaceable = Placeable.playerTank;
 					mouseTank = new TankPlayer(0, 0, 0);
-
-					if (!mouseTank.hasCustomSelectors())
-						mouseTank.registerSelectors();
 					mouseTank.initSelectors(this);
 
 					((TankPlayer) mouseTank).setDefaultColor();
@@ -539,9 +502,6 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 				{
 					currentPlaceable = Placeable.playerTank;
 					mouseTank = new TankPlayer(0, 0, 0);
-
-					if (!mouseTank.hasCustomSelectors())
-						mouseTank.registerSelectors();
 					mouseTank.initSelectors(this);
 
 					((TankPlayer) mouseTank).setDefaultColor();
@@ -1159,17 +1119,11 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			if (ScreenLevelEditor.currentPlaceable == ScreenLevelEditor.Placeable.obstacle)
 			{
-				if (this.mouseObstacle.selectors.isEmpty())
-					this.mouseObstacle.registerSelectors();
-
 				this.mouseObstacle.initSelectors(this);
 				this.mouseObstacle.forAllSelectors(LevelEditorSelector::addShortcutButton);
 			}
 			else
 			{
-				if (this.mouseTank.selectors.isEmpty())
-					this.mouseTank.registerSelectors();
-
 				this.mouseTank.initSelectors(this);
 				this.mouseTank.forAllSelectors(LevelEditorSelector::addShortcutButton);
 			}
@@ -1444,11 +1398,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 									t = ((TankAIControlled) mouseTank).instantiate(mouseTank.name, mouseTank.posX, mouseTank.posY, mouseTank.angle);
 							}
 
-							if (mouseTank.hasCustomSelectors())
-							{
-								AtomicInteger i = new AtomicInteger();
-								t.forAllSelectors(c -> c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement())));
-							}
+							t.cloneAllSelectors(mouseTank);
 
 							this.undoActions.add(new EditorAction.ActionTank(t, true));
 							Game.movables.add(t);
@@ -1467,12 +1417,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 							TankSpawnMarker t = new TankSpawnMarker("player", mouseTank.posX, mouseTank.posY, mouseTank.angle);
 							t.registerSelectors();
-
-							if (mouseTank.hasCustomSelectors())
-							{
-								AtomicInteger i = new AtomicInteger();
-								t.forAllSelectors(c -> c.cloneProperties(mouseTank.selectors.get(i.getAndIncrement())));
-							}
+							t.cloneAllSelectors(mouseTank);
 
 							this.spawns.add(t);
 
@@ -1492,15 +1437,12 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 						else if (currentPlaceable == Placeable.obstacle)
 						{
 							Obstacle o = !paste ? Game.registryObstacle.getEntry(obstacleNum)
-									.getObstacle(mouseObstacle.posX / Game.tile_size - 0.5, mouseObstacle.posY / Game.tile_size - 0.5) : mouseObstacle;
+									.getObstacle(mouseObstacle.posX / Game.tile_size - 0.5, mouseObstacle.posY / Game.tile_size - 0.5)
+									: mouseObstacle;
 							o.startHeight = mouseObstacleStartHeight;
 							o.initSelectors(this);
 
-							if (mouseObstacle.hasCustomSelectors())
-							{
-								AtomicInteger i = new AtomicInteger();
-								o.forAllSelectors(s -> s.cloneProperties(mouseObstacle.selectors.get(i.getAndIncrement())));
-							}
+							o.cloneAllSelectors(mouseObstacle);
 
 							if (o.enableStacking)
 							{
@@ -1515,6 +1457,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 							}
 
 							this.undoActions.add(new EditorAction.ActionObstacle(o, true));
+							double x = o.posX;
 							Game.addObstacle(o);
 
 							if (!batch)
@@ -1775,17 +1718,21 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 			try
 			{
-				Obstacle n = o.getClass().getConstructor(String.class, double.class, double.class).newInstance(o.name, (o.posX + mx) / 50 - 0.5, (o.posY + my) / 50 - 0.5);
+				Obstacle n = o.getClass().getConstructor(String.class, double.class, double.class).newInstance(o.name, (o.posX + mx) / Game.tile_size - 0.5, (o.posY + my) / Game.tile_size - 0.5);
 				n.selectors = o.selectors;
+				n.groupID = o.groupID;
 				n.stackHeight = o.stackHeight;
 				n.startHeight = o.startHeight;
 				mouseObstacle = n;
 				mouseObstacle.stackHeight = n.stackHeight;
-				mouseObstacleStartHeight = n.startHeight;
+                mouseObstacleStartHeight = n.startHeight;
 				mouseTank.posX = mouseObstacle.posX;
 				mouseTank.posY = mouseObstacle.posY;
 
 				handlePlace(handled, true, false, true, false, true, true);
+
+				mouseTank.posX = mouseObstacle.posX;
+				mouseTank.posY = mouseObstacle.posY;
 			}
 			catch (Exception e)
 			{
@@ -1793,7 +1740,9 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			}
 		}
 
-		for (Tank o : clipboard.tanks)
+		mouseObstacle = prevMouseObstacle;    	// this line is important! debugging this took at least 1.5 hrs
+												// tanks code is so janky
+		for (Tank t : clipboard.tanks)
 		{
 			currentPlaceable = Placeable.enemyTank;
 
@@ -1801,23 +1750,22 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 			{
 				Tank n;
 
-				if (o.getClass().equals(TankAIControlled.class))
+				if (t.getClass().equals(TankAIControlled.class))
 				{
-					n = new TankAIControlled(o.name, o.posX + mx, o.posY + my, o.size, o.colorR, o.colorG, o.colorB, o.angle, ((TankAIControlled) o).shootAIType);
-					((TankAIControlled) o).cloneProperties((TankAIControlled) n);
+					n = new TankAIControlled(t.name, t.posX + mx, t.posY + my, t.size, t.colorR, t.colorG, t.colorB, t.angle, ((TankAIControlled) t).shootAIType);
+					((TankAIControlled) t).cloneProperties((TankAIControlled) n);
 				}
 				else
-					n = o.getClass().getConstructor(String.class, double.class, double.class, double.class).newInstance(o.name, o.posX + mx, o.posY + my, o.angle);
+					n = t.getClass().getConstructor(String.class, double.class, double.class, double.class).newInstance(t.name, t.posX + mx, t.posY + my, t.angle);
 
-				n.team = o.team;
-				n.destroy = o.destroy;
+				n.team = t.team;
+				n.destroy = t.destroy;
 				mouseTank = n;
 
 				if (n instanceof TankSpawnMarker || n instanceof TankPlayer)
 					currentPlaceable = Placeable.playerTank;
 
 				handlePlace(handled, true, false, true, false, true, true);
-				//Game.movables.add(n);
 			}
 			catch (Exception e)
 			{

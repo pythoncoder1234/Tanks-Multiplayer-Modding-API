@@ -66,7 +66,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
         colorRed = new TextBoxSlider(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "Primary red", () ->
         {
-            if (colorRed.inputText.length() <= 0)
+            if (colorRed.inputText.isEmpty())
                 colorRed.inputText = colorRed.previousInputText;
 
             Game.player.colorR = Integer.parseInt(colorRed.inputText);
@@ -83,7 +83,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
         colorGreen = new TextBoxSlider(this.centerX - this.objXSpace / 2, this.centerY, this.objWidth, this.objHeight, "Primary green", () ->
         {
-            if (colorGreen.inputText.length() <= 0)
+            if (colorGreen.inputText.isEmpty())
                 colorGreen.inputText = colorGreen.previousInputText;
 
             Game.player.colorG = Integer.parseInt(colorGreen.inputText);
@@ -100,7 +100,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
         colorBlue = new TextBoxSlider(this.centerX - this.objXSpace / 2, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Primary blue", () ->
         {
-            if (colorBlue.inputText.length() <= 0)
+            if (colorBlue.inputText.isEmpty())
                 colorBlue.inputText = colorBlue.previousInputText;
 
             Game.player.colorB = Integer.parseInt(colorBlue.inputText);
@@ -117,7 +117,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
         colorRed2 = new TextBoxSlider(this.centerX + this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "Secondary red", () ->
         {
-            if (colorRed2.inputText.length() <= 0)
+            if (colorRed2.inputText.isEmpty())
                 colorRed2.inputText = colorRed2.previousInputText;
 
             Game.player.turretColorR = Integer.parseInt(colorRed2.inputText);
@@ -134,7 +134,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
         colorGreen2 = new TextBoxSlider(this.centerX + this.objXSpace / 2, this.centerY + 0, this.objWidth, this.objHeight, "Secondary green", () ->
         {
-            if (colorGreen2.inputText.length() <= 0)
+            if (colorGreen2.inputText.isEmpty())
                 colorGreen2.inputText = colorGreen2.previousInputText;
 
             Game.player.turretColorG = Integer.parseInt(colorGreen2.inputText);
@@ -151,7 +151,7 @@ public class ScreenOptionsPlayerColor extends ScreenOptionsOverlay
 
         colorBlue2 = new TextBoxSlider(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 1.5, this.objWidth, this.objHeight, "Secondary blue", () ->
         {
-            if (colorBlue2.inputText.length() <= 0)
+            if (colorBlue2.inputText.isEmpty())
                 colorBlue2.inputText = colorBlue2.previousInputText;
 
             Game.player.turretColorB = Integer.parseInt(colorBlue2.inputText);

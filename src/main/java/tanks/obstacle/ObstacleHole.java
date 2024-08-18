@@ -74,8 +74,10 @@ public class ObstacleHole extends Obstacle
 		}
 		else
 		{
+			Drawing.drawing.setColor(r, g, b);
+			Drawing.drawing.fillBox(this, posX, posY, 0, Game.tile_size, Game.tile_size, 0, (byte) 61);
 			Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, this.colorA);
-			Drawing.drawing.fillRect(this, this.posX, this.posY, draw_size * size, draw_size * size);
+			Drawing.drawing.fillBox(this, this.posX, this.posY, 0,draw_size * size, draw_size * size, 0, (byte) 61);
 		}
 	}
 

@@ -882,15 +882,13 @@ public class Game
 
 	public static boolean usernameInvalid(String username)
 	{
-		if (username.length() > 20)
+		if (username.length() > 25)
 			return true;
 
 		for (int i = 0; i < username.length(); i++)
 		{
 			if (!"abcdefghijklmnopqrstuvwxyz1234567890_".contains(username.toLowerCase().substring(i, i+1)))
-			{
-				return true;
-			}
+                return true;
 		}
 
 		return false;
@@ -955,6 +953,7 @@ public class Game
             r.run();
 
         Game.currentGame = null;
+		Game.currentLevel = null;
 		ModAPI.sendEvents = true;
         ItemBar.overrideState = false;
         ScreenInterlevel.fromMinigames = false;
@@ -1039,7 +1038,7 @@ public class Game
 				f.create();
 
 				f.startWriting();
-				f.println("Tanks crash report: " + Game.version + " - " + new Date() + "\n");
+				f.println("Tanks crash report: " + Game.version + " - " + ModAPI.version + " - " + new Date() + "\n");
 
 				f.println(e.toString());
 				for (StackTraceElement el: e.getStackTrace())
@@ -1145,7 +1144,7 @@ public class Game
 		Chunk.getChunksInRadius(posX, posY, radius).forEach(c ->
 		{
 			for (T o : func.apply(c))
-				if (Movable.squaredDistanceBetween(o.posX, o.posY, posX, posY) < radius * radius)
+				if (Movable.sqDistBetw(o.posX, o.posY, posX, posY) < radius * radius)
 					out.add(o);
 		});
 		return out;
@@ -1247,17 +1246,6 @@ public class Game
 			r = Game.getTileHeight(px, py);
 
 		return r;
-	}
-
-	public static boolean stringsEqual(String a, String b)
-	{
-		if (a == null && b == null)
-			return true;
-
-		if (a == null || b == null)
-			return false;
-
-		return a.equals(b);
 	}
 
 	public static void loadTankMusic()

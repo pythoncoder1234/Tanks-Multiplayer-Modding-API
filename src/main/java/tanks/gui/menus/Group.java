@@ -35,7 +35,8 @@ public class Group extends FixedMenu
     @Override
     public void draw()
     {
-        if (this.isInterface && Game.screen instanceof ScreenGame)
+        ScreenGame g = ScreenGame.getInstance();
+        if (this.isInterface && g != null)
             for (FixedMenu m : menus)
                 ((ScreenGame) Game.screen).drawables[m.drawLevel].add(m);
 
@@ -45,7 +46,7 @@ public class Group extends FixedMenu
 
         else
         {
-            if (menus[menuNum].afterGameStarted && !(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
+            if (menus[menuNum].afterGameStarted && !(g != null && g.playing))
                 return;
 
             menus[menuNum].draw();
@@ -64,7 +65,8 @@ public class Group extends FixedMenu
 
         super.update();
 
-        if (menus[menuNum].afterGameStarted && !(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
+        ScreenGame g = ScreenGame.getInstance();
+        if (menus[menuNum].afterGameStarted && !(g != null && g.playing))
             defineTime = System.currentTimeMillis();
 
         if (System.currentTimeMillis() - defineTime > menus[menuNum].duration)

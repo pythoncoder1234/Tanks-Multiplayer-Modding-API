@@ -623,22 +623,22 @@ public abstract class Movable extends GameObject implements IDrawableForInterfac
 
 	public static double distanceBetween(double x1, double y1, double x2, double y2)
 	{
-		return Math.sqrt(squaredDistanceBetween(x1, y1, x2, y2));
+		return Math.sqrt(sqDistBetw(x1, y1, x2, y2));
 	}
 
-	public static double squaredDistanceBetween(double x1, double y1, double x2, double y2)
+	public static double sqDistBetw(double x1, double y1, double x2, double y2)
 	{
 		return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
 	}
 
-	public static double squaredDistanceBetween(final GameObject a, final GameObject b)
+	public static double sqDistBetw(final GameObject a, final GameObject b)
 	{
-		return squaredDistanceBetween(a.posX, a.posY, b.posX, b.posY);
+		return sqDistBetw(a.posX, a.posY, b.posX, b.posY);
 	}
 
 	public static boolean withinRange(final GameObject a, final GameObject b, double range)
 	{
-		return squaredDistanceBetween(a, b) < range * range;
+		return sqDistBetw(a, b) < range * range;
 	}
 
 	public static double distanceBetween(final GameObject a, final GameObject b)

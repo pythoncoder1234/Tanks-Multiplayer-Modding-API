@@ -7,9 +7,7 @@ import tanks.gui.menus.FixedText;
 import tanks.gui.screen.ScreenGame;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
-import tanks.minigames.GameMap;
 import tanks.minigames.TeamDeathmatch;
-import tanks.network.EventMinigameStart;
 import tanks.network.NetworkEventMap;
 import tanks.network.event.*;
 import tanks.tank.*;
@@ -20,7 +18,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ModAPI
 {
-    public static String version = "Mod API v1.2.6";
+    public static String version = "Mod API v1.2.7";
     public static boolean autoLoadExtensions = false;
     public static boolean sendEvents = true;
     static ArrayList<Runnable> resetFunc = new ArrayList<>();
@@ -43,7 +41,7 @@ public class ModAPI
     public static void registerGames()
     {
         Game.registerMinigame(TeamDeathmatch.class);
-        Game.registerMinigame(GameMap.class);
+//        Game.registerMinigame(GameMap.class);
     }
 
     public static void setUp()
@@ -70,8 +68,9 @@ public class ModAPI
         NetworkEventMap.register(EventSetHotbar.class);
         NetworkEventMap.register(EventSetObstacle.class);
         NetworkEventMap.register(EventSetMusic.class);
+        NetworkEventMap.register(EventServerChat.class);
         NetworkEventMap.register(EventSyncField.class);
-        NetworkEventMap.register(EventScoreboardUpdateScore.class);
+        NetworkEventMap.register(EventUpdateScoreboard.class);
         NetworkEventMap.register(EventSortNPCShopButtons.class);
         NetworkEventMap.register(EventSkipCountdown.class);
         NetworkEventMap.register(EventUpdateLevelTime.class);
@@ -92,7 +91,7 @@ public class ModAPI
      */
     public static void skipCountdown()
     {
-        if (!(Game.screen instanceof ScreenGame))
+        if (ScreenGame.getInstance() == null)
             return;
 
         EventSkipCountdown e = new EventSkipCountdown();
@@ -218,7 +217,8 @@ public class ModAPI
 
     public static void setScreenMusic(MusicState state)
     {
-        if (Objects.equals(state.music, Game.screen.music) && !(Game.screen instanceof ScreenGame && !Objects.equals(state.intro, ((ScreenGame) Game.screen).introMusic)))
+        ScreenGame g = ScreenGame.getInstance();
+        if (Objects.equals(state.music, Game.screen.music) && !(g != null && !Objects.equals(state.intro, g.introMusic)))
             return;
 
         EventSetMusic e = new EventSetMusic(state);

@@ -33,7 +33,7 @@ public class GameWindowHandler implements IWindowHandler
 
 		try
 		{
-			if (Crusade.currentCrusade != null && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient && Game.screen instanceof ScreenGame)
+			if (Crusade.currentCrusade != null && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient && ScreenGame.getInstance() != null)
                 Crusade.currentCrusade.quit();
         }
         catch (Exception e)

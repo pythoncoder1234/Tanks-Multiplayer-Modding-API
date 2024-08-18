@@ -158,7 +158,7 @@ public class SearchBox extends TextBox
 			Drawing.drawing.drawInterfaceText(posX, posY, inputText + "\u00a7127127127255_");
 		else
 		{
-			if (this.inputText.length() <= 0)
+			if (this.inputText.isEmpty())
 				Drawing.drawing.drawInterfaceText(posX, posY, "\u00a7127127127255Search");
 			else
 				Drawing.drawing.drawInterfaceText(posX, posY, inputText);

@@ -1,11 +1,11 @@
-package tanks.network;
+package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
 import tanks.Minigame;
 import tanks.Panel;
 import tanks.gui.ScreenElement.Notification;
-import tanks.network.event.PersonalEvent;
+import tanks.network.NetworkUtils;
 
 public class EventMinigameStart extends PersonalEvent
 {

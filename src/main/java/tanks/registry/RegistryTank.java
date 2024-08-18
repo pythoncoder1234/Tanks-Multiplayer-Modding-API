@@ -112,7 +112,7 @@ public class RegistryTank
 		if (rand != null)
 			d = rand.nextDouble();
 
-		if (this.tankEntries.size() <= 0)
+		if (this.tankEntries.isEmpty())
 			throw new RuntimeException("the tank registry file is empty. please register some tanks!");
 
 		double random = d * maxTankWeight;

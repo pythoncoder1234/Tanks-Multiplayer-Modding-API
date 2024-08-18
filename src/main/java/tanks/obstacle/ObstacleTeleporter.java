@@ -90,8 +90,9 @@ public class ObstacleTeleporter extends Obstacle
 				glow.posZ = height;
 				glow.size = this.brightness;
 
-				if (Game.screen instanceof ScreenGame)
-					((ScreenGame) Game.screen).drawables[9].add(glow);
+				ScreenGame g = ScreenGame.getInstance();
+				if (g != null)
+					g.drawables[9].add(glow);
 			}
 		}
 		else

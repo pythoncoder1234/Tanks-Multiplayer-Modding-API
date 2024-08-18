@@ -2,9 +2,7 @@ package tanks.gui.screen;
 
 import tanks.Drawing;
 import tanks.Game;
-import tanks.Panel;
 import tanks.gui.Button;
-import tanks.tank.TankPlayer;
 
 public class ScreenInfo extends Screen implements IConditionalOverlayScreen, IDarkScreen
 {
@@ -31,8 +29,9 @@ public class ScreenInfo extends Screen implements IConditionalOverlayScreen, IDa
         @Override
         public void run()
         {
-            if (Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient))
-                ((ScreenGame) Game.screen).overlay = null;
+            ScreenGame g = ScreenGame.getInstance();
+            if (g != null && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient))
+                g.overlay = null;
 
             if (previous != null)
                 Game.screen = previous;

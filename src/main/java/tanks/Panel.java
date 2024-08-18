@@ -24,10 +24,7 @@ import tanks.obstacle.Obstacle;
 import tanks.rendering.*;
 import tanks.tank.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class Panel
 {
@@ -103,6 +100,7 @@ public class Panel
 	public boolean settingUp = true;
 
 	protected boolean prevFocused = true;
+	public boolean redrawOnChange;
 	protected Screen lastDrawnScreen = null;
 
 	public ArrayList<double[]> lights = new ArrayList<>();
@@ -148,7 +146,7 @@ public class Panel
 		Chunk.initialize();
 
 		if (Game.game.fullscreen)
-			Game.game.window.setFullscreen(Game.game.fullscreen);
+			Game.game.window.setFullscreen(true);
 
 		Game.game.window.setIcon("/images/icon64.png");
 
@@ -278,7 +276,8 @@ public class Panel
 
 		lastFrameNano = System.nanoTime();
 
-		Game.game.window.constrainMouse = Game.constrainMouse && ((Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).paused && ((ScreenGame) Game.screen).playing && Game.playerTank != null && !Game.playerTank.destroy) || Game.screen instanceof ScreenLevelEditor);
+		ScreenGame g = ScreenGame.getInstance();
+		Game.game.window.constrainMouse = Game.constrainMouse && ((g != null && !g.paused && g.playing && Game.playerTank != null && !Game.playerTank.destroy));
 
 		if (!Game.shadowsEnabled)
 			Game.game.window.setShadowQuality(0);
@@ -297,6 +296,8 @@ public class Panel
 		Panel.windowHeight = Game.game.window.absoluteHeight;
 
 		Drawing.drawing.scale = Math.min(Panel.windowWidth / Game.currentSizeX, (Panel.windowHeight - Drawing.drawing.statsHeight) / Game.currentSizeY) / 50.0;
+		if (Double.isNaN(Drawing.drawing.scale))
+			Drawing.drawing.scale = 1;
 		Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
 		Drawing.drawing.interfaceScale = Drawing.drawing.interfaceScaleZoom * Math.min(Panel.windowWidth / 28, (Panel.windowHeight - Drawing.drawing.statsHeight) / 18) / 50.0;
 		Game.game.window.absoluteDepth = Drawing.drawing.interfaceScale * Game.absoluteDepthBase;
@@ -361,9 +362,8 @@ public class Panel
 			{
 				for (int i = 0; i < ScreenPartyHost.disconnectedPlayers.size(); i++)
 				{
-					for (int j = 0; j < Game.movables.size(); j++)
+					for (Movable m : Game.movables)
 					{
-						Movable m = Game.movables.get(j);
 						if (m instanceof TankPlayerRemote && ((TankPlayerRemote) m).player.clientID.equals(ScreenPartyHost.disconnectedPlayers.get(i)))
 							((TankPlayerRemote) m).health = 0;
 					}
@@ -390,10 +390,10 @@ public class Panel
 					Game.removePlayer(ScreenPartyHost.disconnectedPlayers.get(i));
 				}
 
-                if (ScreenPartyHost.readyPlayers.size() >= ScreenPartyHost.includedPlayers.size() && Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).cancelCountdown)
+                if (ScreenPartyHost.readyPlayers.size() >= ScreenPartyHost.includedPlayers.size() && g != null && g.cancelCountdown)
                 {
                     Game.eventsOut.add(new EventBeginLevelCountdown());
-                    ((ScreenGame) Game.screen).cancelCountdown = false;
+                    g.cancelCountdown = false;
                 }
 
                 ScreenPartyHost.disconnectedPlayers.clear();
@@ -431,21 +431,21 @@ public class Panel
 
         if (!(Game.screen instanceof ScreenInfo))
         {
-            if (!(Game.screen instanceof ScreenGame) || Panel.zoomTarget < 0 ||
-                    ((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null)) || !((ScreenGame) Game.screen).playing)
+            if (g == null || Panel.zoomTarget < 0 ||
+                    ((Game.playerTank == null || Game.playerTank.destroy) && (g.spectatingTank == null)) || !g.playing)
                 this.zoomTimer -= 0.02 * Panel.frameFrequency;
         }
 
-		if (((Game.playerTank != null && !Game.playerTank.destroy) || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).spectatingTank != null)) && !ScreenGame.finished
+		if (((Game.playerTank != null && !Game.playerTank.destroy) || (g != null && g.spectatingTank != null)) && !ScreenGame.finished
 				&& (Drawing.drawing.unzoomedScale < Drawing.drawing.interfaceScale || Game.followingCam)
-				&& Game.screen instanceof ScreenGame && (((ScreenGame) (Game.screen)).playing || ((ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && Game.startTime < Game.currentLevel.startTime)))
+				&& g != null && (g.playing || ((ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && Game.currentLevel != null && Game.startTime < Game.currentLevel.startTime)))
 		{
 			Drawing.drawing.enableMovingCamera = Drawing.drawing.unzoomedScale < Drawing.drawing.interfaceScale;
 
 			if (Game.playerTank == null || Game.playerTank.destroy)
 			{
-				Drawing.drawing.playerX = ((ScreenGame) Game.screen).spectatingTank.posX;
-				Drawing.drawing.playerY = ((ScreenGame) Game.screen).spectatingTank.posY;
+				Drawing.drawing.playerX = g.spectatingTank.posX;
+				Drawing.drawing.playerY = g.spectatingTank.posY;
 			}
 			else
 			{
@@ -472,9 +472,7 @@ public class Panel
 
 			if (Drawing.drawing.movingCamera)
 			{
-				if (!(Game.screen instanceof ScreenGame) || Panel.zoomTarget < 0 ||
-						((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null)) ||
-						!((ScreenGame) Game.screen).playing)
+				if (Panel.zoomTarget < 0 || (ScreenGame.focusedTank() == null || ScreenGame.focusedTank().destroy) || !g.playing)
 					this.zoomTimer += 0.04 * Panel.frameFrequency;
 
 				double mul = Panel.zoomTarget;
@@ -493,7 +491,7 @@ public class Panel
 		this.zoomTimer = Math.min(Math.max(this.zoomTimer, 0), 1);
 		double d = Math.pow(1.01, Panel.frameFrequency);
 
-		if (Game.screen instanceof ScreenGame && Drawing.drawing.enableMovingCamera && Panel.zoomTarget >= 0 && (((ScreenGame) Game.screen).spectatingTank != null || (Game.playerTank != null && !Game.playerTank.destroy)) && ((ScreenGame) Game.screen).playing)
+		if (g != null && Drawing.drawing.enableMovingCamera && Panel.zoomTarget >= 0 && (g.spectatingTank != null || (Game.playerTank != null && !Game.playerTank.destroy)) && g.playing)
 		{
 			double speed = 0.3 * Drawing.drawing.unzoomedScale;
 			double accel = 0.0003 * Drawing.drawing.unzoomedScale;
@@ -571,7 +569,6 @@ public class Panel
 			if (Game.game.window.validPressedKeys.contains(InputCodes.KEY_ESCAPE))
 			{
 				Game.game.window.validPressedKeys.remove((Integer) InputCodes.KEY_ESCAPE);
-
 				onlinePaused = !onlinePaused;
 			}
 		}
@@ -632,17 +629,20 @@ public class Panel
 			for (EventListener l : Game.eventListenerSet)
 				l.eventsThisFrame.clear();
 
-			for (INetworkEvent e : Game.eventsOut)
+			synchronized (Game.eventsOut)
 			{
-				ArrayList<EventListener> arr = Game.eventListeners.get(e.getClass());
-				if (arr != null)
+				for (INetworkEvent e : Game.eventsOut)
 				{
-					for (EventListener l : arr)
-					{
-						if (l != null)
-							l.eventsThisFrame.add(e);
-					}
-				}
+					ArrayList<EventListener> arr = Game.eventListeners.get(e.getClass());
+                    if (arr == null)
+                        continue;
+
+                    for (EventListener l : arr)
+                    {
+                        if (l != null)
+                            l.eventsThisFrame.add(e);
+                    }
+                }
 			}
 		}
 
@@ -663,9 +663,9 @@ public class Panel
 			Panel.draggedButton = null;
 		}
 
-		if (forceRefreshMusic || (prevScreen != null && prevScreen != Game.screen && Game.screen != null && !Game.stringsEqual(prevScreen.music, Game.screen.music) && !(Game.screen instanceof IOnlineScreen)))
+		if (forceRefreshMusic || (prevScreen != null && prevScreen != Game.screen && Game.screen != null && !Objects.equals(prevScreen.music, Game.screen.music) && !(Game.screen instanceof IOnlineScreen)))
 		{
-			if (Game.stringsEqual(prevScreen.musicID, Game.screen.musicID))
+			if (Objects.equals(prevScreen.musicID, Game.screen.musicID))
 				this.playScreenMusic(500);
 			else
 				this.playScreenMusic(0);
@@ -704,12 +704,18 @@ public class Panel
 
 		if (lastDrawnScreen != Game.screen)
 		{
+			if (redrawOnChange)
+			{
+				Drawing.drawing.trackRenderer.reset();
+				Drawing.drawing.terrainRenderer.reset();
+			}
+
 			lastDrawnScreen = Game.screen;
-			Drawing.drawing.trackRenderer.reset();
-			Drawing.drawing.terrainRenderer.reset();
+			redrawOnChange = true;
 		}
 
-		if (!(Game.screen instanceof ScreenGame))
+		ScreenGame g = ScreenGame.getInstance();
+		if (g == null)
 		{
 			Drawing.drawing.scale = Math.min(Panel.windowWidth / Game.currentSizeX, (Panel.windowHeight - Drawing.drawing.statsHeight) / Game.currentSizeY) / 50.0;
 			Drawing.drawing.unzoomedScale = Drawing.drawing.scale;
@@ -723,7 +729,7 @@ public class Panel
 
 		if (!(Game.screen instanceof ScreenExit))
 		{
-			if (Game.followingCam && Game.screen instanceof ScreenGame && Game.currentLevel != null)
+			if (Game.followingCam && g != null && Game.currentLevel != null)
 				Drawing.drawing.setColor(135 * skylight, 206 * skylight, 235 * skylight);
 			else
 				Drawing.drawing.setColor(174, 92, 16);
@@ -800,7 +806,7 @@ public class Panel
 		Drawing.drawing.setColor(255, 255, 255);
 		Game.screen.drawPostMouse();
 
-		if (!Game.game.window.drawingShadow && (Game.screen instanceof ScreenGame && !(((ScreenGame) Game.screen).paused && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient)))
+		if (!Game.game.window.drawingShadow && g != null && !(g.paused && !ScreenPartyHost.isServer && !ScreenPartyLobby.isClient))
 			this.age += Panel.frameFrequency;
 
 		if (Game.game.window.pressedKeys.contains(InputCodes.KEY_F3))
@@ -835,6 +841,16 @@ public class Panel
 						+ (Chunk.debug ? "shown" : "hidden"), 200).setColor(255, 255, 128));
 			}
 
+			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_K))
+			{
+				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_K);
+				Function<List<Integer>, List<String>> func = l -> l.stream().map(Game.game.window::getKeyText).toList();
+				System.out.println("pressedKeys: " + func.apply(Game.game.window.pressedKeys));
+				System.out.println("validPressedKeys: " + func.apply(Game.game.window.validPressedKeys));
+				System.out.println("textPressedKeys: " + func.apply(Game.game.window.textPressedKeys));
+				notifs.add(new Notification("Pressed keys have been logged to the console", 300).setColor(255, 255, 128));
+			}
+
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_LEFT_BRACKET))
 			{
 				Game.game.window.pressedKeys.remove((Integer) InputCodes.KEY_LEFT_BRACKET);
@@ -844,7 +860,7 @@ public class Panel
 				{
 					Game.vsync = false;
 					Game.maxFPS = 0;
-					Game.game.window.setVsync(Game.vsync);
+					Game.game.window.setVsync(false);
 					Panel.currentMessage = new CenterMessage("Game sprinting");
 				}
 				else
@@ -934,11 +950,16 @@ public class Panel
 
 			String text;
 			if (Game.game.window.pressedKeys.contains(InputCodes.KEY_P))
+			{
 				text = "(" + (int) Game.game.window.absoluteWidth + ", " + (int) Game.game.window.absoluteHeight + ")";
-
+			}
 			else if (Game.game.window.pressedKeys.contains(InputCodes.KEY_S))
-				text = "(" + (int) (mx - Game.screen.getOffsetX()) + ", " + (int) (my - Game.screen.getOffsetY()) + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
-
+			{
+				if (Game.game.window.shift)
+					text = "(" + (int) (mx - Game.screen.getOffsetX()) + ", " + (int) (my - Game.screen.getOffsetY()) + ")  " + Drawing.drawing.interfaceScale + ", " + Drawing.drawing.interfaceScaleZoom;
+				else
+					text = "(" + Math.round(Drawing.drawing.getMouseX()) + ", " + Math.round(Drawing.drawing.getMouseY()) + ")";
+			}
 			else {
 				int posX = (int) (((Math.round(Drawing.drawing.getMouseX() / Game.tile_size + 0.5) * Game.tile_size - Game.tile_size / 2) - 25) / 50);
 				int posY = (int) (((Math.round(Drawing.drawing.getMouseY() / Game.tile_size + 0.5) * Game.tile_size - Game.tile_size / 2) - 25) / 50);
@@ -1025,7 +1046,8 @@ public class Panel
 			Drawing.drawing.drawInterfaceImage("cursor.png", mx, my, 48, 48);
 		}
 
-		if (Game.enable3d && ((Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).paused && !((ScreenGame) Game.screen).shopScreen && Game.playerTank != null) || Game.screen instanceof ScreenLevelEditor) && Panel.showMouseTargetHeight)
+		ScreenGame g = ScreenGame.getInstance();
+		if (Game.enable3d && ((g != null && !g.paused && !g.shopScreen && Game.playerTank != null) || Game.screen instanceof ScreenLevelEditor) && Panel.showMouseTargetHeight)
 		{
 			double c = 127 * Obstacle.draw_size / Game.tile_size;
 

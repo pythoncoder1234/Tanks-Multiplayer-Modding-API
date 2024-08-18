@@ -4,6 +4,7 @@ import basewindow.InputCodes;
 import tanks.Drawing;
 import tanks.Game;
 import tanks.Level;
+import tanks.Panel;
 import tanks.gui.SpeedrunTimer;
 
 public abstract class ScreenOptionsOverlay extends Screen implements IPartyGameScreen
@@ -14,10 +15,7 @@ public abstract class ScreenOptionsOverlay extends Screen implements IPartyGameS
 
     public ScreenOptionsOverlay()
     {
-        if (Game.screen instanceof ScreenGame g)
-            game = g;
-        else if (Game.screen instanceof ScreenOptionsOverlay o)
-            game = o.game;
+        game = ScreenGame.getInstance();
 
         if (game != null)
         {
@@ -25,6 +23,7 @@ public abstract class ScreenOptionsOverlay extends Screen implements IPartyGameS
             this.musicID = game.musicID;
             this.brightness = Game.currentLevel != null && Level.isDark(true) ? 255 : 0;
             game.screenshotMode = true;
+            game.paused = true;
         }
         else
         {
@@ -43,17 +42,25 @@ public abstract class ScreenOptionsOverlay extends Screen implements IPartyGameS
             if (Game.game.input.pause.isValid())
             {
                 Game.game.input.pause.invalidate();
+                if (Game.game.window.shift && game != null)
+                    prevScreen = game;
+
                 Game.screen = prevScreen;
 
                 if (prevScreen == game)
+                {
                     game.screenshotMode = false;
+                    Panel.panel.redrawOnChange = false;
+                }
             }
 
-            game.paused = true;
             game.update();
+            this.music = game.music;
+            this.musicID = game.musicID;
         }
 
-        if (Game.game.window.textValidPressedKeys.contains(InputCodes.KEY_D) && Game.game.window.shift)
+        if (Panel.selectedTextBox == null && game != null &&
+                Game.game.window.textValidPressedKeys.contains(InputCodes.KEY_D) && Game.game.window.shift)
         {
             Game.game.window.textValidPressedKeys.remove((Integer) InputCodes.KEY_D);
             Game.screen = new ScreenDebug();

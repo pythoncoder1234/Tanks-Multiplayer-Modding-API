@@ -111,7 +111,7 @@ public class ScreenShareCrusade extends Screen
 		search.draw();
 		quit.draw();
 
-		if (crusades.buttons.size() <= 0)
+		if (crusades.buttons.isEmpty())
 		{
 			Drawing.drawing.setColor(0, 0, 0);
 			Drawing.drawing.setInterfaceFontSize(24);

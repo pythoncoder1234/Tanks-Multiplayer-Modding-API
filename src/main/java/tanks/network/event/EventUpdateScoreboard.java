@@ -6,7 +6,7 @@ import tanks.gui.menus.FixedMenu;
 import tanks.gui.menus.RemoteScoreboard;
 import tanks.network.NetworkUtils;
 
-public class EventScoreboardUpdateScore extends PersonalEvent
+public class EventUpdateScoreboard extends PersonalEvent
 {
     public double id;
     public int start;
@@ -14,11 +14,11 @@ public class EventScoreboardUpdateScore extends PersonalEvent
     public String name;
     public double value;
 
-    public EventScoreboardUpdateScore()
+    public EventUpdateScoreboard()
     {
     }
 
-    public EventScoreboardUpdateScore(double id, int start, int end, String name, double value)
+    public EventUpdateScoreboard(double id, int start, int end, String name, double value)
     {
         this.id = id;
         this.start = start;

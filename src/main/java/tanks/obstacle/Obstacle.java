@@ -185,7 +185,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 					byte o = (byte) (option | this.getOptionsByte(((i + 1) + stackHeight % 1.0) * Game.tile_size));
 
 					if (Game.game.window.drawingShadow || !Game.shadowsEnabled)
-						options[i] = o;
+						options[in] = o;
 
 					drawing.fillBox(this, this.posX, this.posY, i * Game.tile_size + this.startHeight * Game.tile_size, draw_size, draw_size, draw_size, o);
 				}

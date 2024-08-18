@@ -1,8 +1,14 @@
 Changelog
 ---
 
-**Mod API 1.2.6**
+**Mod API 1.2.7**
+- Fixed a LOT of bugs
+- Hold editor button keybind and scroll to access sub-tools (e.g. b + scroll for more building tools)
+  - You can still press 0 to use the default tool
 - Textboxes allow the § character now
+- Renamed `Movable.squaredDistanceBetween` to `Movable.sqDistBetw`
+
+**Mod API 1.2.6**
 - Critical bug fixes
 
 **Mod API 1.2.5**

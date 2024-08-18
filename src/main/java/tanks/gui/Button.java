@@ -412,8 +412,9 @@ public class Button implements IDrawable, ITrigger
 				//Drawing.drawing.playSound(this.sound, 1f, 1f);
 				Drawing.drawing.playVibration("click");
 
-				if (Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient))
-					((ScreenGame) Game.screen).overlay = new ScreenInfo(null, this.translatedText, this.hoverText);
+				ScreenGame g = ScreenGame.getInstance();
+				if (g != null && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient))
+					g.overlay = new ScreenInfo(null, this.translatedText, this.hoverText);
 				else
 					Game.screen = new ScreenInfo(Game.screen, this.translatedText, this.hoverText);
 			}

@@ -207,7 +207,7 @@ public class ScreenCrusades extends Screen
 
 		search.draw();
 
-		if (crusadesList.buttons.size() <= 0)
+		if (crusadesList.buttons.isEmpty())
 		{
 			Drawing.drawing.setColor(0, 0, 0);
 			Drawing.drawing.setInterfaceFontSize(24);

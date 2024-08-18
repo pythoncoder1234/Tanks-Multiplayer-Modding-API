@@ -91,9 +91,7 @@ public class ShaderUtil extends BaseShaderUtil
             if (headers != null)
             {
                 for (String h: headers)
-                {
                     header.append(this.window.readFileAsString(h));
-                }
             }
 
             ARBShaderObjects.glShaderSourceARB(shader, header + this.window.readFileAsString(filename));

@@ -81,7 +81,7 @@ public class TankTrain extends Tank implements IAvoidObject
             this.orientation = Math.toRadians(o.horizontal ? 180 : 90);
         }
 
-        if (Game.prevScreen != Game.screen && Game.screen instanceof ScreenGame)
+        if (Game.prevScreen != Game.screen && ScreenGame.getInstance() != null)
             copyCustomTank();
     }
 

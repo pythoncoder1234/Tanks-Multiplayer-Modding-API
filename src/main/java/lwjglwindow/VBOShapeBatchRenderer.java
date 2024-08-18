@@ -69,9 +69,7 @@ public class VBOShapeBatchRenderer extends BaseShapeBatchRenderer
         this.shader = s;
 
         for (ShaderGroup.Attribute a: s.attributes)
-        {
             this.addAttribute(a);
-        }
     }
 
     public void settings(boolean depth)

@@ -123,7 +123,8 @@ public class CrusadePlayer
     {
         try
         {
-            if (Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).savedRemainingTanks)
+            ScreenGame g = ScreenGame.getInstance();
+            if (g != null && !g.savedRemainingTanks)
             {
                 Crusade.currentCrusade.livingTankIDs.clear();
 
@@ -154,7 +155,7 @@ public class CrusadePlayer
             f.println(Crusade.currentCrusade.internal + "");
             f.println(Crusade.currentCrusade.saveLevel + "");
 
-            /*if (Game.screen instanceof ScreenGame && !win && !Game.playerTank.destroy)
+            /*if (g != null && !win && !Game.playerTank.destroy)
             {
                 Crusade.currentCrusade.recordPerformance(ScreenGame.lastTimePassed, win);
                 this.coins = player.hotbar.coins;

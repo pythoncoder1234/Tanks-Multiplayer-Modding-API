@@ -500,14 +500,9 @@ public class Level
 				Tank.idMap.put(t.networkID, t);
 
 				if (remote)
-				{
-					TankRemote t1 = new TankRemote(t);
-					Game.movables.add(t1);
-				}
+                    Game.movables.add(new TankRemote(t));
 				else
-				{
-					Game.movables.add(t);
-				}
+                    Game.movables.add(t);
 			}
 		}
 
@@ -638,9 +633,7 @@ public class Level
 				if (this.availablePlayerSpawns.isEmpty())
 				{
 					for (int j = 0; j < this.playerSpawnsTeam.size(); j++)
-					{
-						this.availablePlayerSpawns.add(j);
-					}
+                        this.availablePlayerSpawns.add(j);
 				}
 
 				int spawn = this.availablePlayerSpawns.remove((int) (Math.random() * this.availablePlayerSpawns.size()));
@@ -672,7 +665,6 @@ public class Level
 			{
 				TankSpawnMarker t = new TankSpawnMarker("player", this.playerSpawnsX.get(i), this.playerSpawnsY.get(i), this.playerSpawnsAngle.get(i));
 				t.team = this.playerSpawnsTeam.get(i);
-				t.registerSelectors();
 				t.initSelectors(sc instanceof ScreenLevelEditor ? (ScreenLevelEditor) sc : null);
 				t.refreshSelectorValue();
 				Game.movables.add(t);
@@ -759,6 +751,10 @@ public class Level
             int y = (int) (o.posY / Game.tile_size);
 
             o.postOverride();
+
+			Chunk c = Chunk.getChunk(o.posX, o.posY);
+			if (c != null)
+				c.addObstacle(o);
 
             if (o.startHeight > 1)
                 continue;

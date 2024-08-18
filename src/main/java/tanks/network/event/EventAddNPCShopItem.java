@@ -2,10 +2,10 @@ package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Game;
-import tanks.Movable;
 import tanks.gui.Button;
 import tanks.gui.screen.ScreenGame;
 import tanks.hotbar.item.ItemRemote;
+import tanks.tank.Tank;
 import tanks.tank.TankNPC;
 
 public class EventAddNPCShopItem extends EventAddShopItem
@@ -40,7 +40,7 @@ public class EventAddNPCShopItem extends EventAddShopItem
     @Override
     public void execute()
     {
-        if (clientID == null && Game.screen instanceof ScreenGame)
+        if (clientID == null && ScreenGame.getInstance() != null)
         {
             ItemRemote i = new ItemRemote();
             i.name = name;
@@ -53,14 +53,9 @@ public class EventAddNPCShopItem extends EventAddShopItem
             b.imageSizeX = 30;
             b.imageSizeY = 30;
 
-            for (Movable m : Game.movables)
-            {
-                if (m instanceof TankNPC && ((TankNPC) m).networkID == this.id)
-                {
-                    ((TankNPC) m).shopItems.add(i);
-                    break;
-                }
-            }
+            Tank t = Tank.idMap.get(id);
+            if (t instanceof TankNPC n)
+                n.shopItems.add(i);
         }
     }
 }

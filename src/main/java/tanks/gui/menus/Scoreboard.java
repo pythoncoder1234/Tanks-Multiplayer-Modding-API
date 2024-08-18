@@ -3,7 +3,7 @@ package tanks.gui.menus;
 import tanks.*;
 import tanks.gui.TextWithStyling;
 import tanks.network.event.EventCreateScoreboard;
-import tanks.network.event.EventScoreboardUpdateScore;
+import tanks.network.event.EventUpdateScoreboard;
 import tanks.tank.Tank;
 
 import java.util.*;
@@ -229,7 +229,7 @@ public class Scoreboard extends FixedMenu
         }
 
         if (changed != null)
-            Game.eventsOut.add(new EventScoreboardUpdateScore(this.id, start, end, changed, value));
+            Game.eventsOut.add(new EventUpdateScoreboard(this.id, start, end, changed, value));
     }
 
     @Override

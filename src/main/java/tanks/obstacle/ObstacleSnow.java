@@ -115,15 +115,16 @@ public class ObstacleSnow extends Obstacle
     @Override
     public void draw()
     {
+        ScreenGame g = ScreenGame.getInstance();
         if (!Game.enable3d)
         {
-            if (Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !((ScreenGame) Game.screen).paused))
+            if (g != null && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !g.paused))
                 this.visualDepth = Math.min(this.visualDepth + Panel.frameFrequency / 255, 1);
 
-            if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof ICrusadePreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
+            if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof ICrusadePreviewScreen || Game.screen instanceof IOverlayScreen || g != null && (!g.playing))
                 this.visualDepth = 0.5;
 
-            if (ScreenGame.finishedQuick && Game.screen instanceof ScreenGame && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !((ScreenGame) Game.screen).paused))
+            if (ScreenGame.finishedQuick && g != null && (ScreenPartyHost.isServer || ScreenPartyLobby.isClient || !g.paused))
                 this.visualDepth = Math.max(0.5, this.visualDepth - Panel.frameFrequency / 127);
         }
 
@@ -153,10 +154,6 @@ public class ObstacleSnow extends Obstacle
 
     public double getTileHeight()
     {
-        double shrubScale = 0.25;
-        if (Game.screen instanceof ScreenGame)
-            shrubScale = ((ScreenGame) Game.screen).shrubberyScale;
-
-        return shrubScale * (this.finalHeight + this.baseGroundHeight);
+        return (this.finalHeight + this.baseGroundHeight) * Drawing.drawing.terrainRenderer.getShrubHeight();
     }
 }

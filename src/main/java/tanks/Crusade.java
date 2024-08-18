@@ -376,7 +376,8 @@ public class Crusade
 				this.crusadePlayers.get(Game.player).saveCrusade();
 			else
 			{
-				if (Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).savedRemainingTanks)
+				ScreenGame g = ScreenGame.getInstance();
+				if (g != null && !g.savedRemainingTanks)
 				{
 					Crusade.currentCrusade.livingTankIDs.clear();
 
@@ -512,7 +513,8 @@ public class Crusade
 	{
 		boolean win = ScreenGame.finishedQuick && Panel.win;
 
-		if (!win && (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
+		ScreenGame g = ScreenGame.getInstance();
+		if (!win && (g != null && g.playing))
 		{
 			for (int i = 0; i < Game.movables.size(); i++)
 			{
@@ -525,7 +527,7 @@ public class Crusade
 
 		this.saveHotbars();
 
-		if (Game.screen instanceof ScreenGame && !ScreenGame.finishedQuick)
+		if (g != null && !ScreenGame.finishedQuick)
 			this.levelFinished(win);
 
 		if (saveLevel > currentLevel)

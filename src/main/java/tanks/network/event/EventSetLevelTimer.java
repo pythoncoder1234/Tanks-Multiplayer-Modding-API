@@ -25,8 +25,9 @@ public class EventSetLevelTimer extends PersonalEvent
             Game.currentLevel.timer = seconds * 100;
         }
 
-        if (Game.screen instanceof ScreenGame)
-            ((ScreenGame) Game.screen).timeRemaining = seconds * 100;
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null)
+            g.timeRemaining = seconds * 100;
     }
 
     @Override

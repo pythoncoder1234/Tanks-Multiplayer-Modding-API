@@ -40,7 +40,7 @@ public class EventPurchaseNPCItem extends EventPurchaseItem
     @Override
     public void execute()
     {
-        if (this.clientID != null && Game.screen instanceof ScreenGame)
+        if (this.clientID != null && ScreenGame.getInstance() != null)
         {
             for (Player p : Game.players)
             {

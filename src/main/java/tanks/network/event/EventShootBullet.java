@@ -82,14 +82,14 @@ public class EventShootBullet extends PersonalEvent
 		bullet.name = this.name;
 		bullet.effect = Bullet.BulletEffect.valueOf(this.type);
 
-		if (!Game.vanillaMode && bullet.itemSound != null)
-			Drawing.drawing.playGameSound(bullet.itemSound, bullet, bullet.soundRange, (float) ((Bullet.bullet_size / bullet.size) * (1 - (Math.random() * 0.5) * bullet.pitchVariation)));
-
 		bullet.bounces = this.bounces;
 		bullet.damage = this.damage;
 		bullet.size = this.size;
 		bullet.heavy = this.heavy;
 		bullet.speed = Math.sqrt(this.vX * this.vX + this.vY * this.vY);
+
+		if (!Game.vanillaMode && bullet.itemSound != null)
+			Drawing.drawing.playGameSound(bullet.itemSound, bullet, bullet.soundRange, (float) ((Bullet.bullet_size / bullet.size) * (1 - (Math.random() * 0.5) * bullet.pitchVariation)));
 
 		bullet.networkID = this.id;
 		Bullet.idMap.put(this.id, bullet);

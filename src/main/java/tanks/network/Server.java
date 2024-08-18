@@ -76,11 +76,8 @@ public class Server
 	{    	
 		synchronized(this.connections)
 		{
-			for (int i = 0; i < this.connections.size(); i++)
-			{
-				ServerHandler c = this.connections.get(i);
-				c.sendEventAndClose(new EventKick(reason));
-			}
+            for (ServerHandler c : this.connections)
+                c.sendEventAndClose(new EventKick(reason));
 
 			workerGroup.shutdownGracefully();
 			bossGroup.shutdownGracefully();

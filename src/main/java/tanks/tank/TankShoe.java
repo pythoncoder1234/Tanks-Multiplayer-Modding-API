@@ -141,7 +141,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
 
                 for (Movable m : nearbyMovables)
                 {
-                    if (m == this || (dist = Movable.squaredDistanceBetween(this, m)) > radius * radius || Math.abs(m.posZ - this.posZ) > Game.tile_size)
+                    if (m == this || (dist = Movable.sqDistBetw(this, m)) > radius * radius || Math.abs(m.posZ - this.posZ) > Game.tile_size)
                         continue;
 
                     if (m instanceof Tank t && !(Team.isAllied(this, t) && !this.team.friendlyFire))

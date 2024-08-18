@@ -333,9 +333,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		this.size *= this.hitboxSize;
 
 		checkBorderCollision(this);
-
-        if (size > 1)
-			checkObstacleCollision();
+		checkObstacleCollision();
 
         this.size /= this.hitboxSize;
     }
@@ -683,63 +681,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 		inWater = false;
 
 		if (!customPosZBehavior)
-		{
-			double maxTouchingZ = -9999;
-			boolean allow = true;
-			double s = size / 2;
-
-			for (double x = posX - s; x <= posX + s; x += Game.tile_size)
-			{
-				for (double y = posY - s; y <= posY + s; y += Game.tile_size)
-				{
-					Obstacle o = Game.getObstacle(x, y);
-					if (!(o instanceof ObstacleLiquid))
-					{
-						if (o == null || !o.tankCollision)
-							maxTouchingZ = Math.max(0, maxTouchingZ);
-						continue;
-					}
-
-					double horizontalDist = Math.abs(posX - o.posX);
-					double verticalDist = Math.abs(posY - o.posY);
-					double bound = size * 0.9;
-
-					if ((horizontalDist <= bound || verticalDist <= bound) && maxTouchingZ < o.getTileHeight())
-					{
-						maxTouchingZ = o.getTileHeight();
-						allow = Math.abs(posZ - maxTouchingZ) < Game.tile_size;
-					}
-				}
-			}
-
-			double mult = 1;
-
-			if (posZ < maxTouchingZ)
-			{
-				if (tiltFirstFrame)
-					tiltDirection = (int) -Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
-
-				tiltFirstFrame = false;
-				maxSpeedModifier *= 1 / mult * (allow ? 1 : 0);
-				posZ += (allow ? 2 : 1) * mult * Panel.frameFrequency;
-				basePitch = Math.min(allow ? 0.3 : 0.6, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
-			}
-			else if (Math.abs(posZ - maxTouchingZ) < 1)
-			{
-				posZ = maxTouchingZ;
-				tiltFirstFrame = true;
-			}
-			else if (posZ > maxTouchingZ)
-			{
-				posZ -= size / 70;
-
-				if (tiltFirstFrame)
-					tiltDirection = (int) Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
-
-				tiltFirstFrame = false;
-				basePitch = Math.min(0.2, Math.abs(basePitch) + 0.04 / mult * Panel.frameFrequency) * tiltDirection;
-			}
-		}
+            updatePosZ();
 
 		super.update();
 
@@ -804,6 +746,65 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 		if (this.possessor != null)
 			this.possessor.updatePossessing();
+	}
+
+	public void updatePosZ()
+	{
+		double maxTouchingZ = -9999;
+		boolean allow = true;
+		double s = Math.max(Game.tile_size, size) / 2;
+
+		for (double x = posX - s; x <= posX + s; x += Game.tile_size)
+		{
+			for (double y = posY - s; y <= posY + s; y += Game.tile_size)
+			{
+				Obstacle o = Game.getObstacle(x, y);
+				if (!(o instanceof ObstacleLiquid))
+				{
+					if (o == null || !o.tankCollision)
+						maxTouchingZ = Math.max(0, maxTouchingZ);
+					continue;
+				}
+
+				double horizontalDist = Math.abs(posX - o.posX);
+				double verticalDist = Math.abs(posY - o.posY);
+				double bound = size * 0.9;
+
+				if ((horizontalDist <= bound || verticalDist <= bound) && maxTouchingZ < o.getTileHeight())
+				{
+					maxTouchingZ = o.getTileHeight();
+					allow = Math.abs(posZ - maxTouchingZ) < Game.tile_size;
+				}
+			}
+		}
+
+		double mult = 1;
+
+		if (posZ < maxTouchingZ)
+		{
+			if (tiltFirstFrame)
+				tiltDirection = (int) -Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
+
+			tiltFirstFrame = false;
+			maxSpeedModifier *= 1 / mult * (allow ? 1 : 0);
+			posZ += (allow ? 2 : 1) * mult * Panel.frameFrequency;
+			basePitch = Math.min(allow ? 0.3 : 0.6, Math.abs(basePitch) + 0.05 / mult * Panel.frameFrequency) * tiltDirection;
+		}
+		else if (Math.abs(posZ - maxTouchingZ) < 1)
+		{
+			posZ = maxTouchingZ;
+			tiltFirstFrame = true;
+		}
+		else if (posZ > maxTouchingZ)
+		{
+			posZ -= size / 70;
+
+			if (tiltFirstFrame)
+				tiltDirection = (int) Math.signum(Movable.angleBetween(orientation, getPolarDirection()) - Math.PI / 2);
+
+			tiltFirstFrame = false;
+			basePitch = Math.min(0.2, Math.abs(basePitch) + 0.04 / mult * Panel.frameFrequency) * tiltDirection;
+		}
 	}
 
 	public void drawTread()
@@ -1331,8 +1332,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 				double xDist = Math.abs(m.posX - boundedX);
 				double yDist = Math.abs(m.posY - boundedY);
-				double dist = Math.max(xDist / (Drawing.drawing.interfaceSizeX),
-						yDist / (Drawing.drawing.interfaceSizeY)) * 3;
+				double dist = Math.max(xDist / (Drawing.drawing.interfaceSizeX), yDist / (Drawing.drawing.interfaceSizeY)) * 2.2;
 
 				if (dist < nearest)
 				{
@@ -1397,6 +1397,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	/** Override this method if both the server and clients support a custom update event for your modded tank. */
 	public void sendUpdateEvent()
 	{
+		updatesPerFrame++;
 		Game.eventsOut.add(new EventTankUpdate(this));
 	}
 
@@ -1409,7 +1410,9 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	{
 		AutoZoom raw = getAutoZoomRaw();
 		double dist = Math.min(3, Math.max(1, raw.zoom));
-		return new AutoZoom(1 / dist, Math.min(AutoZoom.maxPanDist, raw.panX), Math.min(AutoZoom.maxPanDist, raw.panY));
+		double targetScale = Drawing.drawing.interfaceScale / dist;
+		double zoom = Math.max(Math.min((targetScale - Drawing.drawing.unzoomedScale) / (Drawing.drawing.interfaceScale - Drawing.drawing.unzoomedScale), 1), 0);
+		return new AutoZoom(zoom, Math.min(AutoZoom.maxPanDist, raw.panX), Math.min(AutoZoom.maxPanDist, raw.panY));
 	}
 
 	// java 16 :D

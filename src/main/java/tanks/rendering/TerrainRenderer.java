@@ -417,7 +417,7 @@ public class TerrainRenderer
             this.outsideShader.set();
 
             float size = (float) (Obstacle.draw_size / Game.tile_size);
-            if (!(Game.screen instanceof ScreenGame || Game.screen instanceof ScreenOptionsOverlay))
+            if (ScreenGame.getInstance() == null)
                 size = 0;
 
             this.outsideShader.setSize(size);
@@ -545,7 +545,8 @@ public class TerrainRenderer
     public float getShrubHeight()
     {
         float shrubMod = 0.25f;
-        if (Game.screen instanceof ScreenGame g)
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null)
             shrubMod = (float) g.shrubberyScale;
         else if (Game.screen instanceof ScreenOptionsOverlay o && o.game != null)
             shrubMod = (float) o.game.shrubberyScale;
@@ -573,7 +574,8 @@ public class TerrainRenderer
             for (int y = 0; y < Game.currentSizeY; y++)
                 drawTile(x, y);
 
-        if (Game.screen instanceof ScreenGame g)
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null)
             g.drawBorders();
 
         Obstacle.draw_size = s;

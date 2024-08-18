@@ -66,7 +66,8 @@ public class Joystick implements IDrawable
             this.activeInput = -1;
         }
 
-        if (!(Game.playerTank == null || (Game.playerTank.destroy && !(Game.currentGame instanceof Arcade)) || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).paused)))
+        ScreenGame g;
+        if (!(Game.playerTank == null || (Game.playerTank.destroy && !(Game.currentGame instanceof Arcade)) || ((g = ScreenGame.getInstance()) != null && g.paused)))
         {
             for (int i : Game.game.window.touchPoints.keySet())
             {

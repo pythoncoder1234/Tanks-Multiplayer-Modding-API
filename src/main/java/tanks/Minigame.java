@@ -7,7 +7,7 @@ import tanks.gui.menus.Scoreboard;
 import tanks.gui.screen.ScreenInterlevel;
 import tanks.gui.screen.ScreenPartyHost;
 import tanks.gui.screen.ScreenPartyLobby;
-import tanks.network.EventMinigameStart;
+import tanks.network.event.EventMinigameStart;
 import tanks.obstacle.ObstacleWater;
 import tanks.tank.Tank;
 import tanks.tank.TankPlayer;

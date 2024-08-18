@@ -1,7 +1,6 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
-import tanks.Game;
 import tanks.gui.screen.ScreenGame;
 
 public class EventSortShopButtons extends PersonalEvent
@@ -22,7 +21,8 @@ public class EventSortShopButtons extends PersonalEvent
     @Override
     public void execute()
     {
-        if (Game.screen instanceof ScreenGame s && this.clientID == null)
+        ScreenGame s = ScreenGame.getInstance();
+        if (s != null && this.clientID == null)
         {
             s.initializeShopList();
         }

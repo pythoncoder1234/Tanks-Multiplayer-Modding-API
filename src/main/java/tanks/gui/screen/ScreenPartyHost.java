@@ -102,7 +102,7 @@ public class ScreenPartyHost extends Screen
     {
         super(350, 40, 380, 60);
 
-        if (ScreenPartyHost.server == null || ScreenPartyHost.server.connections.size() <= 0)
+        if (ScreenPartyHost.server == null || ScreenPartyHost.server.connections.isEmpty())
             this.music = "menu_3.ogg";
         else
             this.music = "menu_4.ogg";
@@ -219,7 +219,7 @@ public class ScreenPartyHost extends Screen
 
         if (lastConnectionCount != c)
         {
-            if (c <= 0)
+            if (c == 0)
                 this.music = "menu_3.ogg";
             else
                 this.music = "menu_4.ogg";
@@ -271,11 +271,8 @@ public class ScreenPartyHost extends Screen
 
         Drawing.drawing.setColor(0, 0, 0);
         Drawing.drawing.setInterfaceFontSize(this.textSize);
-
         Drawing.drawing.displayInterfaceText(this.centerX + 190, this.centerY - 290, "Play:");
-
         Drawing.drawing.displayInterfaceText(this.centerX + 190, this.centerY + 40, "Level and crusade sharing:");
-
         Drawing.drawing.displayInterfaceText(this.centerX - 190, this.centerY - 280, "Players in this party:");
 
         if (server != null && server.connections != null)
@@ -296,10 +293,10 @@ public class ScreenPartyHost extends Screen
 
                 Drawing.drawing.setBoundedInterfaceFontSize(this.textSize, 250, Game.player.username);
                 Drawing.drawing.drawInterfaceText(this.centerX - 190, this.centerY + username_y_offset, n);
-                Tank.drawTank(this.centerX - Drawing.drawing.getStringWidth(n) / 2 - 300, this.centerY + username_y_offset, Game.player.colorR, Game.player.colorG, Game.player.colorB, Game.player.turretColorR, Game.player.turretColorG, Game.player.turretColorB);
+                Tank.drawTank(this.centerX - 380, this.centerY + username_y_offset, Game.player.colorR, Game.player.colorG, Game.player.colorB, Game.player.turretColorR, Game.player.turretColorG, Game.player.turretColorB);
             }
 
-            if (server.connections != null)
+            if (server != null && server.connections != null)
             {
                 for (int i = this.usernamePage * entries_per_page; i < Math.min(((this.usernamePage + 1) * entries_per_page), server.connections.size()); i++)
                 {
@@ -310,19 +307,18 @@ public class ScreenPartyHost extends Screen
                         {
                             double y = this.centerY + (1 + i - this.usernamePage * entries_per_page) * username_spacing + username_y_offset;
                             Drawing.drawing.setBoundedInterfaceFontSize(this.textSize, 250, server.connections.get(i).username);
-                            double w = Drawing.drawing.getStringWidth(h.username) / 2;
                             Drawing.drawing.setColor(0, 0, 0);
                             Drawing.drawing.drawInterfaceText(this.centerX - 190, y, server.connections.get(i).username);
 
-                            Tank.drawTank(this.centerX - w - 300, y, h.player.colorR, h.player.colorG, h.player.colorB, h.player.turretColorR, h.player.turretColorG, h.player.turretColorB);
+                            Tank.drawTank(this.centerX - 380, y, h.player.colorR, h.player.colorG, h.player.colorB, h.player.turretColorR, h.player.turretColorG, h.player.turretColorB);
 
                             this.kickButtons[i - this.usernamePage * entries_per_page].draw();
 
                             Drawing.drawing.setInterfaceFontSize(this.textSize / 2);
                             Drawing.drawing.setColor(0, 0, 0);
-                            Drawing.drawing.drawUncenteredInterfaceText(this.centerX - w - 260, y - Drawing.drawing.fontSize * 18, server.connections.get(i).lastLatency + "ms");
+                            Drawing.drawing.drawUncenteredInterfaceText(this.centerX - 340, y - Drawing.drawing.fontSize * 18, server.connections.get(i).lastLatency + "ms");
                         }
-                        catch (Exception e)
+                        catch (Exception ignored)
                         {
 
                         }

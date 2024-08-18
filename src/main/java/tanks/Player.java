@@ -171,7 +171,7 @@ public class Player
 
         for (String s: parts)
         {
-            if (s.length() <= 0)
+            if (s.isEmpty())
                 continue;
 
             String[] sec = s.split("=");
@@ -185,7 +185,7 @@ public class Player
 
         for (String s: parts)
         {
-            if (s.length() <= 0)
+            if (s.isEmpty())
                 continue;
 
             set.add(Integer.parseInt(s));
@@ -198,7 +198,7 @@ public class Player
 
         for (String s: parts)
         {
-            if (s.length() <= 0)
+            if (s.isEmpty())
                 continue;
 
             String[] sec = s.split("/");

@@ -82,7 +82,7 @@ public class Explosion extends Movable
                 if (!(m instanceof IExplodable m1))
                     continue;
 
-                double distSq = Movable.squaredDistanceBetween(this, m);
+                double distSq = Movable.sqDistBetw(this, m);
                 double kr2 = knockbackRadius * knockbackRadius;
 
                 if (distSq < kr2)
@@ -131,7 +131,7 @@ public class Explosion extends Movable
     public static boolean withinExplosionRange(Movable m, double mineX, double mineY, double radius)
     {
         double r = getAdjustedRadius(m, radius);
-        return Movable.squaredDistanceBetween(m.posX, m.posY, mineX, mineY) < r * r;
+        return Movable.sqDistBetw(m.posX, m.posY, mineX, mineY) < r * r;
     }
 
     @Override

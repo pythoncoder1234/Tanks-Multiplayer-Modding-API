@@ -47,7 +47,8 @@ public class ObstacleConveyor extends Obstacle
 
     protected static boolean valid(int x, int y, double rotation)
     {
-        if (!(Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing))
+        ScreenGame g = ScreenGame.getInstance();
+        if (!(g != null && g.playing))
             return false;
 
         return x >= 0 && x < Game.currentSizeX && y >= 0 && y < Game.currentSizeY
@@ -91,7 +92,7 @@ public class ObstacleConveyor extends Obstacle
                 s *= 1.25 - percent / 2;
         }
 
-        if (!(Game.screen instanceof ScreenGame))
+        if (ScreenGame.getInstance() == null)
             s *= 2;
 
         if (connectedBack || connectedFront || age % 100 < 50)

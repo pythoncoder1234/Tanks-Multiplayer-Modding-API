@@ -133,7 +133,8 @@ public abstract class Screen implements IBatchRenderableObject
 
 		Drawing.drawing.setColor(Level.currentColorR, Level.currentColorG, Level.currentColorB);
 
-		if (Game.enable3d && Game.screen instanceof ScreenGame g)
+		ScreenGame g = ScreenGame.getInstance();
+		if (Game.enable3d && g != null)
 		{
 			for (ArrayList<IDrawable> arr : g.drawBeforeTerrain)
 			{

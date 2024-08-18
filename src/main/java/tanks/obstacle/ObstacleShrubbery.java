@@ -72,7 +72,8 @@ public class ObstacleShrubbery extends Obstacle
 
 		if (!Game.enable3d)
 		{
-			if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof ICrusadePreviewScreen || Game.screen instanceof IOverlayScreen || Game.screen instanceof ScreenGame && (!((ScreenGame) Game.screen).playing))
+			ScreenGame g = ScreenGame.getInstance();
+			if (Game.screen instanceof ILevelPreviewScreen || Game.screen instanceof ICrusadePreviewScreen || Game.screen instanceof IOverlayScreen || (g != null && !g.playing))
                 this.height = 127;
 		}
 
@@ -187,10 +188,6 @@ public class ObstacleShrubbery extends Obstacle
 		if (Obstacle.draw_size < Game.tile_size)
 			return 0;
 
-		double shrubScale = 0.25;
-		if (Game.screen instanceof ScreenGame)
-			shrubScale = ((ScreenGame) Game.screen).shrubberyScale;
-
-		return this.finalHeight * shrubScale;
+		return this.finalHeight * Drawing.drawing.terrainRenderer.getShrubHeight();
 	}
 }

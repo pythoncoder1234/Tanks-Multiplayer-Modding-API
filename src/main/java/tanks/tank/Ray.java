@@ -17,13 +17,9 @@ public class Ray
 	public double size = 10;
 	public double tankHitSizeMul = 1;
 
-	public int bounces;
-	public int bouncyBounces = 100;
-	public double posX;
-	public double posY;
-	public double vX;
-	public double vY;
-	public double angle;
+	public int bounces, bouncyBounces = 100;
+	public double posX, posY, vX, vY, angle;
+	public double startX, startY;
 
 	public int maxChunkCheck = 12;
 
@@ -53,15 +49,7 @@ public class Ray
 
 	public Ray(double x, double y, double angle, int bounces, Tank tank)
 	{
-		this.vX = speed * Math.cos(angle);
-		this.vY = speed * Math.sin(angle);
-		this.angle = angle;
-
-		this.posX = x;
-		this.posY = y;
-		this.bounces = bounces;
-
-		this.tank = tank;
+		this(x, y, angle, bounces, tank, 10);
 	}
 
 	public Ray(double x, double y, double angle, int bounces, Tank tank, double speed)
@@ -70,8 +58,8 @@ public class Ray
 		this.vY = speed * Math.sin(angle);
 		this.angle = angle;
 
-		this.posX = x;
-		this.posY = y;
+		this.posX = this.startX = x;
+		this.posY = this.startY = y;
 		this.bounces = bounces;
 
 		this.tank = tank;
@@ -189,7 +177,7 @@ public class Ray
 						Game.effects.add(Effect.createNewEffect(
 								(chunk.chunkX + 0.5) * Chunk.chunkSize * Game.tile_size + (totalChunksChecked * 5),
 								(chunk.chunkY + 0.5) * Chunk.chunkSize * Game.tile_size,
-								150, Effect.EffectType.chain, 85
+								150, Effect.EffectType.chain, 90
 						).setRadius(totalChunksChecked));
 
 						Game.effects.add(Effect.createNewEffect(posX + moveX, posY + moveY, 20, Effect.EffectType.laser));
@@ -206,10 +194,8 @@ public class Ray
 
 					if (dynamic.collisionFace != null && stat.collisionFace != null)
 					{
-						boolean greater = dynamic.collisionFace.compareTo(stat.collisionFace) > 0;
-						if (dynamic.collisionFace.horizontal ? vY > 0 : vX > 0)
-							greater = !greater;
-						result = greater ? dynamic : stat;
+						result = Movable.sqDistBetw(dynamic.collisionX, dynamic.collisionY, startX, startY) <
+								Movable.sqDistBetw(stat.collisionX, stat.collisionY, startX, startY) ? dynamic : stat;
 					}
 					else
 						result = dynamic.collisionFace != null ? dynamic : stat;
@@ -251,7 +237,8 @@ public class Ray
 
 						double frac = 1 / (1 + this.traceAge / 100.0);
 						double z = this.tank.size / 2 + this.tank.turretSize / 2 * frac + (Game.tile_size / 4) * (1 - frac);
-						if (Game.screen instanceof ScreenGame && !ScreenGame.finished)
+
+						if (ScreenGame.getInstance() != null && !ScreenGame.finished)
 							Game.effects.add(Effect.createNewEffect(x, y, z, Effect.EffectType.ray));
 					}
 
@@ -260,6 +247,9 @@ public class Ray
 
 				this.posX = result.collisionX();
 				this.posY = result.collisionY();
+
+				if (Chunk.debug)
+					Game.effects.add(Effect.createNewEffect(posX, posY, 50, Effect.EffectType.piece).setColor(0, 150, 0));
 
 				if (result.collisionFace().owner instanceof Movable m)
 				{

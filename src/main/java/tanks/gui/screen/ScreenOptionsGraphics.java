@@ -186,7 +186,7 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
             update3dGroundButton();
 
             Drawing.drawing.terrainRenderer.reset();
-            Game.resetTiles();
+            resetTiles();
         }
     },
             "Fancy terrain enables varied block and---ground colors------May impact performance on large levels");
@@ -248,7 +248,7 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
             update3dGroundButton();
 
             Drawing.drawing.terrainRenderer.reset();
-            Game.resetTiles();
+            resetTiles();
         }
     },
             "3D graphics may impact performance");
@@ -266,7 +266,7 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
                 ground3d.setText(ground3dText, ScreenOptions.offText);
 
             Drawing.drawing.terrainRenderer.reset();
-            Game.resetTiles();
+            resetTiles();
         }
     },
             "Enabling 3D ground may impact---performance in large levels");
@@ -447,5 +447,13 @@ public class ScreenOptionsGraphics extends ScreenOptionsOverlay
         Drawing.drawing.setInterfaceFontSize(this.titleSize);
         Drawing.drawing.setColor(0, 0, 0);
         Drawing.drawing.displayInterfaceText(this.centerX, this.centerY - this.objYSpace * 4, "Graphics options");
+    }
+
+    public void resetTiles()
+    {
+        if (Game.currentLevel != null)
+            Game.currentLevel.reloadTiles();
+        else
+            Game.resetTiles();
     }
 }

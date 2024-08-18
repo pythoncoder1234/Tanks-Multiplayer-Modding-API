@@ -1,7 +1,6 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
-import tanks.Game;
 import tanks.gui.screen.ScreenGame;
 
 public class EventDisableMinimap extends PersonalEvent
@@ -21,7 +20,8 @@ public class EventDisableMinimap extends PersonalEvent
     @Override
     public void execute()
     {
-        if (Game.screen instanceof ScreenGame)
-            ((ScreenGame) Game.screen).minimap.forceDisabled = true;
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null)
+            g.minimap.forceDisabled = true;
     }
 }

@@ -258,7 +258,8 @@ public class ItemBar
                 t.pitch -= t.pitch * 0.05 * Panel.frameFrequency;
 		}*/
 
-		if (this.player.hotbar.persistent || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).shopScreen))
+		ScreenGame g = ScreenGame.getInstance();
+		if (this.player.hotbar.persistent || (g != null && g.shopScreen))
 		{
 			for (int i = 0; i < this.slotButtons.length; i++)
 			{
@@ -431,26 +432,27 @@ public class ItemBar
 			Drawing.drawing.drawInterfaceText(Drawing.drawing.interfaceSizeX / 2, y - 70, this.slots[selected].name);
 		}
 
-		if ((this.player.hotbar.persistent || (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).shopScreen)) && this.player.hotbar.percentHidden <= 0)
+		ScreenGame g = ScreenGame.getInstance();
+		if ((this.player.hotbar.persistent || (g != null && g.shopScreen)) && this.player.hotbar.percentHidden <= 0)
 		{
 			for (int i = 0; i < this.slotButtons.length; i++)
 			{
 				if (this.slotButtons[i].selected && !Game.game.window.touchscreen)
 				{
-					InputBindingGroup g = null;
+					InputBindingGroup ibg = null;
 
 					if (i == 0)
-						g = Game.game.input.hotbar1;
+						ibg = Game.game.input.hotbar1;
 					else if (i == 1)
-						g = Game.game.input.hotbar2;
+						ibg = Game.game.input.hotbar2;
 					else if (i == 2)
-						g = Game.game.input.hotbar3;
+						ibg = Game.game.input.hotbar3;
 					else if (i == 3)
-						g = Game.game.input.hotbar4;
+						ibg = Game.game.input.hotbar4;
 					else if (i == 4)
-						g = Game.game.input.hotbar5;
+						ibg = Game.game.input.hotbar5;
 
-					if (g == null)
+					if (ibg == null)
 						continue;
 
 					Drawing.drawing.setColor(255, 127, 0);
@@ -461,14 +463,14 @@ public class ItemBar
 					else
 						Drawing.drawing.setColor(255, 255, 255);
 
-					String s = g.getInputs();
+					String s = ibg.getInputs();
 
 					if (s.length() > 1)
 						Drawing.drawing.setInterfaceFontSize(24);
 					else
 						Drawing.drawing.setInterfaceFontSize(32);
 
-					Drawing.drawing.drawInterfaceText(this.slotButtons[i].posX, this.slotButtons[i].posY, g.getInputs());
+					Drawing.drawing.drawInterfaceText(this.slotButtons[i].posX, this.slotButtons[i].posY, ibg.getInputs());
 				}
 			}
 		}

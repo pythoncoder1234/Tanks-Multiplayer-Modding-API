@@ -30,7 +30,7 @@ public class ScreenOptionsEffects extends ScreenOptionsOverlay
         @Override
         public void run()
         {
-            if (effectMultiplier.inputText.length() <= 0)
+            if (effectMultiplier.inputText.isEmpty())
                 effectMultiplier.inputText = effectMultiplier.previousInputText;
 
             Game.effectMultiplier = Integer.parseInt(effectMultiplier.inputText) / 100.0;

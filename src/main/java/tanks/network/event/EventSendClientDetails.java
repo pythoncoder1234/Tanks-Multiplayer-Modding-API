@@ -72,7 +72,19 @@ public class EventSendClientDetails extends PersonalEvent implements IServerThre
 		if (this.clientID == null || Game.isOnlineServer || !ScreenPartyHost.isServer)
 			return;
 
-		if (Game.screen instanceof IPartyGameScreen)
+		if (this.version != Game.network_protocol)
+		{
+			s.sendEventAndClose(new EventKick("You must be using " + Game.version + " to join this party!"));
+			return;
+		}
+
+		if (Game.usernameInvalid(this.username) || this.username.isEmpty())
+		{
+			s.sendEventAndClose(new EventKick("Invalid username!"));
+			return;
+		}
+
+		if (Game.screen instanceof IPartyGameScreen p && !p.onEnter(username, clientID))
 		{
 			s.sendEventAndClose(new EventKick("Please wait for the current game to finish!"));
 
@@ -87,19 +99,6 @@ public class EventSendClientDetails extends PersonalEvent implements IServerThre
 			return;
 		}
 
-
-		if (this.version != Game.network_protocol)
-		{
-			s.sendEventAndClose(new EventKick("You must be using " + Game.version + " to join this party!"));
-			return;
-		}
-
-		if (Game.usernameInvalid(this.username) || this.username.isEmpty())
-		{
-			s.sendEventAndClose(new EventKick("Invalid username!"));
-			return;
-		}
-		
 		s.clientID = this.clientID;
 	
 		if (Game.enableChatFilter)

@@ -35,9 +35,13 @@ public class RemoteScoreboard extends FixedMenu
 
     public void updateScore(int start, int end, String name, double value)
     {
+        if (end < 0)
+            return;
+
+        end = Math.min(names.size(), end);
         if (start != end)
         {
-            if (start < end)
+            if (start >= 0 && start < end)
                 end--;
 
             if (start > -1)

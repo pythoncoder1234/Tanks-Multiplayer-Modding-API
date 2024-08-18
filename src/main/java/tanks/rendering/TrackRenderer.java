@@ -68,7 +68,8 @@ public class TrackRenderer
         float a = (float) Drawing.drawing.currentColorA;
         float g = (float) Drawing.drawing.currentGlow;
 
-        double age = Game.screen instanceof ScreenGame game ? game.timePassed : Game.screen.screenAge;
+        ScreenGame game = ScreenGame.getInstance();
+        double age = game != null ? game.timePassed : Game.screen.screenAge;
         s.setColor(r1, g1, b1, a, g);
         s.setAttribute(shader.addTime, (float) age);
 
@@ -134,7 +135,8 @@ public class TrackRenderer
     {
         this.shader.set();
 
-        double age = Game.screen instanceof ScreenGame g ? g.timePassed : Game.screen.screenAge;
+        ScreenGame g = ScreenGame.getInstance();
+        double age = g != null ? g.timePassed : Game.screen.screenAge;
         float max = (float) getMaxTrackAge();
         shader.time.set((float) (age + max * (1 - Obstacle.draw_size / Game.tile_size)));
         shader.maxAge.set(max);

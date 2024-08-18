@@ -22,7 +22,7 @@ public class OverlayLevelOptionsItems extends ScreenLevelEditorOverlay
 
         editCoins = new TextBox(this.centerX, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "Starting coins", () ->
         {
-            if (editCoins.inputText.length() <= 0)
+            if (editCoins.inputText.isEmpty())
                 editCoins.inputText = "0";
 
             screenLevelEditor.level.startingCoins = Integer.parseInt(editCoins.inputText);

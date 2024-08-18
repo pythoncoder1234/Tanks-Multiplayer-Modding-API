@@ -316,10 +316,11 @@ public class Hotbar
 			Drawing.drawing.drawInterfaceText(x - 20, y, "" + count, true);
 		}
 
-		if (Game.currentLevel != null && (Game.currentLevel.timed && Game.screen instanceof ScreenGame))
+		ScreenGame g = ScreenGame.getInstance();
+		if (Game.currentLevel != null && (Game.currentLevel.timed && g != null))
 		{
-			int secondsTotal = (int) (((ScreenGame) Game.screen).timeRemaining / 100 + 0.5);
-			double secondsFrac = (((ScreenGame) Game.screen).timeRemaining / 100 + 0.5) - secondsTotal;
+			int secondsTotal = (int) (g.timeRemaining / 100 + 0.5);
+			double secondsFrac = (g.timeRemaining / 100 + 0.5) - secondsTotal;
 
 			int seconds60 = secondsTotal % 60;
 			int minutes = secondsTotal / 60;
@@ -328,7 +329,7 @@ public class Hotbar
 			double alpha = 127;
 			double red = 0;
 
-			if (((ScreenGame) Game.screen).playing)
+			if (g.playing)
 			{
 				if (secondsTotal == 60 || secondsTotal == 30 || secondsTotal <= 10)
 				{
@@ -344,7 +345,7 @@ public class Hotbar
 						red = Math.max(0, secondsFrac * 2) * 255;
 				}
 				else if (secondsTotal == 59 || secondsTotal == 29)
-					sizeMul = 1.0 + Math.max(((((ScreenGame) Game.screen).timeRemaining / 100) - secondsTotal), 0);
+					sizeMul = 1.0 + Math.max(((g.timeRemaining / 100) - secondsTotal), 0);
 			}
 
 			String st = Translation.translate("Time: ");
@@ -370,7 +371,7 @@ public class Hotbar
 					Drawing.drawing.setColor(255, 255, 255, 127);
 			}
 
-			if (((ScreenGame) Game.screen).timeRemaining <= 0)
+			if (g.timeRemaining <= 0)
 			{
 				Drawing.drawing.setColor(255, 0, 0, 255 * Obstacle.draw_size / Game.tile_size);
 

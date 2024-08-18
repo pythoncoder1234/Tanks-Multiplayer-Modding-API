@@ -38,7 +38,7 @@ public class ObstaclePathfinding extends Obstacle
     @Override
     public void draw()
     {
-        if (Game.screen instanceof ScreenGame)
+        if (ScreenGame.getInstance() != null)
             return;
 
         Drawing.drawing.setColor(this.colorR, this.colorG, this.colorB, 150);

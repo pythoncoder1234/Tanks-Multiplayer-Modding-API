@@ -1,7 +1,6 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
-import tanks.Game;
 import tanks.gui.ButtonList;
 import tanks.gui.screen.ScreenGame;
 
@@ -29,13 +28,13 @@ public class EventClearShop extends PersonalEvent
     @Override
     public void execute()
     {
-        if (Game.screen instanceof ScreenGame)
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null)
         {
-            ((ScreenGame) Game.screen).npcShopList = new ButtonList(new ArrayList<>(), 0, 0, (int) ScreenGame.shopOffset, -30);
-
-            ((ScreenGame) Game.screen).shopList = new ButtonList(new ArrayList<>(), 0, 0, (int) ScreenGame.shopOffset, -30);
-            ((ScreenGame) Game.screen).shopItemButtons = new ArrayList<>();
-            ((ScreenGame) Game.screen).shop = new ArrayList<>();
+            g.npcShopList = new ButtonList(new ArrayList<>(), 0, 0, (int) ScreenGame.shopOffset, -30);
+            g.shopList = new ButtonList(new ArrayList<>(), 0, 0, (int) ScreenGame.shopOffset, -30);
+            g.shopItemButtons = new ArrayList<>();
+            g.shop = new ArrayList<>();
         }
     }
 }

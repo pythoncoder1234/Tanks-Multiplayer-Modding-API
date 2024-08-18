@@ -6,7 +6,6 @@ import tanks.Game;
 import tanks.Level;
 import tanks.gui.screen.ScreenFailedToLoadLevel;
 import tanks.gui.screen.ScreenPartyLobby;
-import tanks.network.EventMinigameStart;
 import tanks.network.NetworkUtils;
 import tanks.tank.TankAIControlled;
 

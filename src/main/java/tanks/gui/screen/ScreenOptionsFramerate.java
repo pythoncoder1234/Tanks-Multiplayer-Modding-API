@@ -27,7 +27,7 @@ public class ScreenOptionsFramerate extends ScreenOptionsOverlay
     {
         Game.vsync = true;
         Game.maxFPS = 0;
-        Game.game.window.setVsync(Game.vsync);
+        Game.game.window.setVsync(true);
     },
             "Limits framerate to your screen's refresh rate------May fix issues with screen tearing");
 
@@ -38,9 +38,9 @@ public class ScreenOptionsFramerate extends ScreenOptionsOverlay
         public void run()
         {
             Game.vsync = false;
-            Game.game.window.setVsync(Game.vsync);
+            Game.game.window.setVsync(false);
 
-            if (maxFPS.inputText.length() <= 0)
+            if (maxFPS.inputText.isEmpty())
                 maxFPS.inputText = maxFPS.previousInputText;
 
             Game.maxFPS = Integer.parseInt(maxFPS.inputText);
@@ -53,7 +53,7 @@ public class ScreenOptionsFramerate extends ScreenOptionsOverlay
     {
         Game.vsync = false;
         Game.maxFPS = 0;
-        Game.game.window.setVsync(Game.vsync);
+        Game.game.window.setVsync(false);
     },
             "Disables the framerate limit------May cause issues with inconsistent game speed");
 
@@ -63,7 +63,7 @@ public class ScreenOptionsFramerate extends ScreenOptionsOverlay
         Game.maxFPS = 60;
         maxFPS.inputText = Game.maxFPS + "";
         maxFPS.value = Game.maxFPS;
-        Game.game.window.setVsync(Game.vsync);
+        Game.game.window.setVsync(false);
     },
             "Set a manual framerate limit");
 

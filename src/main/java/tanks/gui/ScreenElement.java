@@ -1,7 +1,6 @@
 package tanks.gui;
 
 import tanks.Drawing;
-import tanks.Game;
 import tanks.Level;
 import tanks.Panel;
 import tanks.gui.screen.ScreenGame;
@@ -89,7 +88,7 @@ public abstract class ScreenElement
         }
         public CenterMessage(String message, int duration)
         {
-            int brightness = (Game.screen instanceof ScreenGame && Level.isDark()) ? 255 : 0;
+            int brightness = (ScreenGame.getInstance() != null && Level.isDark()) ? 255 : 0;
             this.styling = new TextWithStyling(message, brightness, brightness, brightness, 80 - Math.max(8, message.length() * 2));
             this.styling.colorA = 128;
             this.duration = duration;

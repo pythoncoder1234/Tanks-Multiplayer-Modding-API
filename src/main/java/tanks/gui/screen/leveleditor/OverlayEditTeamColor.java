@@ -44,7 +44,7 @@ public class OverlayEditTeamColor extends ScreenLevelEditorOverlay
 
         teamRed = new TextBoxSlider(this.centerX, this.centerY - this.objYSpace, this.objWidth, this.objHeight, "Red", () ->
         {
-            if (teamRed.inputText.length() <= 0)
+            if (teamRed.inputText.isEmpty())
                 teamRed.inputText = "0";
 
             team.teamColorR = Integer.parseInt(teamRed.inputText);
@@ -59,7 +59,7 @@ public class OverlayEditTeamColor extends ScreenLevelEditorOverlay
 
         teamGreen = new TextBoxSlider(this.centerX, this.centerY + this.objYSpace / 2, this.objWidth, this.objHeight, "Green", () ->
         {
-            if (teamGreen.inputText.length() <= 0)
+            if (teamGreen.inputText.isEmpty())
                 teamGreen.inputText = "0";
 
             team.teamColorG = Integer.parseInt(teamGreen.inputText);
@@ -74,7 +74,7 @@ public class OverlayEditTeamColor extends ScreenLevelEditorOverlay
 
         teamBlue = new TextBoxSlider(this.centerX, this.centerY + this.objYSpace * 2, this.objWidth, this.objHeight, "Blue", () ->
         {
-            if (teamBlue.inputText.length() <= 0)
+            if (teamBlue.inputText.isEmpty())
                 teamBlue.inputText = "0";
 
             team.teamColorB = Integer.parseInt(teamBlue.inputText);

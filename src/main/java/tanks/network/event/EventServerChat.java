@@ -3,6 +3,7 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.gui.ChatMessage;
 import tanks.gui.screen.ScreenPartyHost;
+import tanks.gui.screen.ScreenPartyLobby;
 import tanks.network.NetworkUtils;
 
 public class EventServerChat extends PersonalEvent
@@ -77,6 +78,9 @@ public class EventServerChat extends PersonalEvent
     @Override
     public void execute()
     {
+        if (this.clientID != null)
+            return;
+
         ChatMessage c = new ChatMessage(this.message);
         c.enableTankIcon = this.iconEnabled;
 
@@ -91,6 +95,9 @@ public class EventServerChat extends PersonalEvent
             c.b2 = this.b2;
         }
 
-        ScreenPartyHost.chat.add(0, c);
+        if (ScreenPartyHost.isServer)
+            ScreenPartyHost.chat.add(0, c);
+        else
+            ScreenPartyLobby.chat.add(0, c);
     }
 }

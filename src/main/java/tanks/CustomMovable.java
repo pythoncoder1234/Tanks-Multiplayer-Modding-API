@@ -49,8 +49,7 @@ public class CustomMovable extends Movable
                 if (!endedFuncName)
                     funcName.append(c);
 
-                else if (!endedParameters)
-                    parameters.append(c);
+                else parameters.append(c);
             }
         }
 

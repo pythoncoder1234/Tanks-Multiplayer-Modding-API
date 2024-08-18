@@ -28,7 +28,10 @@ To create a project with the source code, just set it up like a normal Tanks mod
 New Features:
 ---
 
+- Fixed a LOT of bugs
+- Hold editor button keybind and scroll to access sub-tools (e.g. b + scroll for more building tools)
+  - You can still press 0 to use the default tool
 - Textboxes allow the § character now
-- Critical bug fixes
+- Renamed `Movable.squaredDistanceBetween` to `Movable.sqDistBetw`
 
 [Older Changelogs](changelog.md)

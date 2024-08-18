@@ -85,7 +85,11 @@ public class EditorClipboard
             o.posX = -(o.posX - centerX) + centerX;
 
         for (Tank t : tanks)
+        {
             t.posX = -(t.posX - centerX) + centerX;
+            if (t.angle % Math.PI == 0)
+                t.angle = (t.angle + Math.PI) % (Math.PI * 2);
+        }
     }
 
     public void flipVertical()
@@ -94,7 +98,11 @@ public class EditorClipboard
             o.posY = -(o.posY - centerY) + centerY;
 
         for (Tank t : tanks)
+        {
             t.posY = -(t.posY - centerY) + centerY;
+            if (t.angle % Math.PI == Math.PI / 2)
+                t.angle = (t.angle + Math.PI) % (Math.PI * 2);
+        }
     }
 
     public void rotate()

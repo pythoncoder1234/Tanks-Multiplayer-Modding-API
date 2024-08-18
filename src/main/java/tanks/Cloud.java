@@ -20,7 +20,8 @@ public class Cloud implements IDrawable, IBatchRenderableObject
 
     public Cloud()
     {
-        if (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing)
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null && g.playing)
             this.posX = -1000;
         else
             this.posX = (Math.random() - 0.5) * (Game.currentSizeX + cloudRange) * Game.tile_size;

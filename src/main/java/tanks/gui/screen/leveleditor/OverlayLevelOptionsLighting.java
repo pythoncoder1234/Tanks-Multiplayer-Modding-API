@@ -20,7 +20,7 @@ public class OverlayLevelOptionsLighting extends ScreenLevelEditorOverlay
 
         light = new TextBoxSlider(this.centerX, this.centerY - this.objYSpace * 0.75, this.objWidth, this.objHeight, "Direct light", () ->
         {
-            if (light.inputText.length() <= 0)
+            if (light.inputText.isEmpty())
                 light.inputText = light.previousInputText;
 
             screenLevelEditor.level.light = Integer.parseInt(light.inputText) / 100.0;
@@ -40,7 +40,7 @@ public class OverlayLevelOptionsLighting extends ScreenLevelEditorOverlay
 
         shadow = new TextBoxSlider(this.centerX, this.centerY + this.objYSpace * 0.75, this.objWidth, this.objHeight, "Shadow light", () ->
         {
-            if (shadow.inputText.length() <= 0)
+            if (shadow.inputText.isEmpty())
                 shadow.inputText = shadow.previousInputText;
 
             screenLevelEditor.level.shadow = Integer.parseInt(shadow.inputText) / 100.0;

@@ -31,6 +31,7 @@ import tanks.tank.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGameScreen
@@ -357,8 +358,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 	{
 		Game.cleanUp();
 		ScreenLevelEditor s = new ScreenLevelEditor(name, Game.currentLevel);
-		Game.loadLevel(Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + name), s);
 		Game.screen = s;
+		Game.loadLevel(Game.game.fileManager.getFile(Game.homedir + Game.levelDir + "/" + name), s);
 	}
 	);
 
@@ -834,7 +835,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 //        windChangeTimer -= Panel.frameFrequency;
 
-        if (playing)
+		Tank tank = focusedTank();
+        if (playing && tank != null && !tank.destroy)
         {
             if (Game.game.input.zoomIn.isPressed())
             {
@@ -868,18 +870,17 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				Panel.zoomTarget = Panel.panel.zoomTimer = Math.max(0, Panel.zoomTarget - 0.02 * Panel.frameFrequency * Drawing.drawing.unzoomedScale);
 			}
 
-			Tank t = focusedTank();
-			if (Panel.autoZoom && t != null)
+			if (Panel.autoZoom)
 			{
-				Tank.AutoZoom z = t.getAutoZoom();
+				Tank.AutoZoom z = tank.getAutoZoom();
 				Panel.zoomTarget = z.zoom();
 				Panel.panTargetX = z.panX();
 				Panel.panTargetY = z.panY();
 			}
 		}
 
-		if ((Game.playerTank == null || Game.playerTank.destroy) && (((ScreenGame) Game.screen).spectatingTank == null) || finishedQuick)
-			fcPitch = Math.max(0, fcPitch - 0.02 * Panel.frameFrequency);
+		if (tank == null || tank.destroy || finishedQuick)
+            fcPitch = Math.max(0, fcPitch - 0.02 * Panel.frameFrequency);
 
 		if (Game.game.input.perspective.isValid())
 		{
@@ -1520,29 +1521,26 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				if (m instanceof Crate)
 					m = ((Crate) m).tank;
 
-				if (m instanceof Tank && ((Tank) m).mandatoryKill)
-				{
-					if (m.destroy)
-						continue;
+				if (!(m instanceof Tank tank1 && tank1.mandatoryKill && !tank1.destroy))
+					continue;
 
-					Team t;
+                Team t;
 
-					if (m.team == null)
-					{
-						if (m instanceof TankPlayer || m instanceof TankPlayerController)
-							t = new Team(Game.clientID.toString());
-						else if (m instanceof TankPlayerRemote)
-							t = new Team(((TankPlayerRemote) m).player.clientID.toString());
-						else
-							t = new Team("*");
-					}
-					else
-						t = m.team;
+                if (m.team == null)
+                {
+                    if (m instanceof TankPlayer || m instanceof TankPlayerController)
+                        t = new Team(Game.clientID.toString());
+                    else if (m instanceof TankPlayerRemote)
+                        t = new Team(((TankPlayerRemote) m).player.clientID.toString());
+                    else
+                        t = new Team("*");
+                }
+                else
+                    t = m.team;
 
-					aliveTeams.add(t);
-					fullyAliveTeams.add(t);
-				}
-			}
+                aliveTeams.add(t);
+                fullyAliveTeams.add(t);
+            }
 
 			for (Obstacle o : Game.obstacles)
 			{
@@ -1982,7 +1980,7 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 		double x = Drawing.drawing.toGameCoordsX(mx);
 		double y = Drawing.drawing.toGameCoordsY(my);
 
-		if ((Game.playerTank == null || Game.playerTank.destroy) && (spectatingTank == null || !Drawing.drawing.movingCamera) && Panel.panel.zoomTimer <= 0)
+		if (!finishedQuick && (Game.playerTank == null || Game.playerTank.destroy) && (spectatingTank == null || !Drawing.drawing.movingCamera) && Panel.panel.zoomTimer <= 0)
 		{
 			Chunk c = Chunk.getChunk(x, y);
 			if (c == null)
@@ -2153,8 +2151,9 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 				((ILocalPlayerTank) Game.playerTank).setDrawRange(-1);
 			}
 
+			ScreenGame g = ScreenGame.getInstance();
 			if (i == 9 && Game.playerTank != null && !Game.playerTank.destroy
-					&& Game.screen instanceof ScreenGame && !((ScreenGame) Game.screen).playing && Game.movables.contains(Game.playerTank))
+					&& g != null && !g.playing && Game.movables.contains(Game.playerTank))
 			{
 				double s = Game.startTime;
 
@@ -2759,7 +2758,8 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 
 	public static boolean isUpdatingGame()
 	{
-		return Game.screen instanceof ScreenGame g && (!g.paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient);
+		ScreenGame g = ScreenGame.getInstance();
+		return g != null && (!g.paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient);
 	}
 
     public void updateFreecam()
@@ -2941,6 +2941,19 @@ public class ScreenGame extends Screen implements IHiddenChatboxScreen, IPartyGa
 			return g.spectatingTank;
 
 		return Game.playerTank;
+	}
+
+	@Override
+	public boolean onEnter(String username, UUID clientID)
+	{
+		return false;
+
+		/*if (Game.currentLevel == null)
+			return true;
+
+		Game.eventsOut.add(new EventLoadLevel(Game.currentLevel).setTargetClient(clientID));
+		Game.eventsOut.add(new EventEnterLevel().setTargetClient(clientID));
+		return true;*/
 	}
 
 	public static ScreenGame getInstance()

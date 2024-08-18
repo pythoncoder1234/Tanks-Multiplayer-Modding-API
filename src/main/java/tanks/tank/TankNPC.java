@@ -216,10 +216,11 @@ public class TankNPC extends TankDummy implements ISyncable
             }
         }
 
-        if (((ScreenGame) Game.screen).npcShopScreen && !playerNear && (focusedNPC == null || focusedNPC == this))
-            ((ScreenGame) Game.screen).npcShopScreen = false;
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null && g.npcShopScreen && !playerNear && (focusedNPC == null || focusedNPC == this))
+            g.npcShopScreen = false;
 
-        if (this.draw && (!((ScreenGame) Game.screen).paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && this.messages != null && this.messages.get(messageNum) != null)
+        if (this.draw && (g != null && !g.paused || ScreenPartyHost.isServer || ScreenPartyLobby.isClient) && this.messages != null && this.messages.get(messageNum) != null)
         {
             if (this.counter <= 0)
             {
@@ -245,12 +246,16 @@ public class TankNPC extends TankDummy implements ISyncable
         b.writeInt(this.shopItems.size());
         for (Item i : this.shopItems)
             NetworkUtils.writeString(b, i.toString());
+
+        b.writeBoolean(this.showName);
+        if (this.showName && this.nameTag != null)
+            this.nameTag.writeTo(b);
     }
 
     /** Only reads the properties that are used in this NPC and isn't read already by {@link EventTankCreate}. */
     public static TankNPC readFrom(ByteBuf b, double posX, double posY, double angle)
     {
-        TankNPC t = new TankNPC("npc", (int) posX, (int) (posY / Game.tile_size), angle,
+        TankNPC t = new TankNPC("npc", (int) (posX / Game.tile_size), (int) (posY / Game.tile_size), angle,
                 new MessageList(Objects.requireNonNull(NetworkUtils.readString(b)).split("&#13;")),
                 b.readDouble(), b.readDouble(), b.readDouble());
 
@@ -259,6 +264,10 @@ public class TankNPC extends TankDummy implements ISyncable
         int size = b.readInt();
         for (int i = 0; i < size; i++)
             t.shopItems.add(Item.parseItem(null, Objects.requireNonNull(NetworkUtils.readString(b))));
+
+        t.showName = b.readBoolean();
+        if (t.showName)
+            t.nameTag = NameTag.readFrom(b, t);
 
         return t;
     }

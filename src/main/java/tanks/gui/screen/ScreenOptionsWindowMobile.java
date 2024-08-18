@@ -4,7 +4,7 @@ import tanks.Drawing;
 import tanks.Game;
 import tanks.gui.Button;
 
-public class ScreenOptionsWindowMobile extends Screen
+public class ScreenOptionsWindowMobile extends ScreenOptionsOverlay
 {
     public static final String infoBarText = "Info bar: ";
 
@@ -33,9 +33,6 @@ public class ScreenOptionsWindowMobile extends Screen
 
     public ScreenOptionsWindowMobile()
     {
-        this.music = "menu_options.ogg";
-        this.musicID = "menu";
-
         if (Drawing.drawing.enableStats)
             showStats.setText(infoBarText, ScreenOptions.onText);
         else
@@ -45,6 +42,7 @@ public class ScreenOptionsWindowMobile extends Screen
     @Override
     public void update()
     {
+        super.update();
         back.update();
         showStats.update();
     }

@@ -8,7 +8,7 @@ public interface ITrigger
 
     void draw();
 
-    default void onClick() {};
+    default void onClick() {}
 
     default void doubleClick() {}
 

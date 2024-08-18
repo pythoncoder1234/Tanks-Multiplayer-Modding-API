@@ -36,10 +36,11 @@ public class EventPlayerReady extends PersonalEvent
 
 			Game.eventsOut.add(new EventUpdateReadyPlayers(ScreenPartyHost.readyPlayers));
 
-			if (ScreenPartyHost.readyPlayers.size() >= ScreenPartyHost.includedPlayers.size() && Game.screen instanceof ScreenGame)
+			ScreenGame g = ScreenGame.getInstance();
+			if (ScreenPartyHost.readyPlayers.size() >= ScreenPartyHost.includedPlayers.size() && g != null)
 			{
 				Game.eventsOut.add(new EventBeginLevelCountdown());
-				((ScreenGame) Game.screen).cancelCountdown = false;
+				g.cancelCountdown = false;
 			}
 		}
 	}

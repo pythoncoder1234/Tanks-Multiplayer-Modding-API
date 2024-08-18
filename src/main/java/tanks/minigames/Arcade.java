@@ -348,7 +348,8 @@ public class Arcade extends Minigame
                 }
             }
 
-            if (alivePlayers.isEmpty() && Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).playing)
+            ScreenGame g = ScreenGame.getInstance();
+            if (alivePlayers.isEmpty() && g != null && g.playing)
             {
                 Game.eventsOut.add(new EventClearMovables());
 
@@ -453,7 +454,8 @@ public class Arcade extends Minigame
     @Override
     public void draw()
     {
-        if (Game.screen instanceof ScreenGame && ((ScreenGame) Game.screen).paused && ((ScreenGame) Game.screen).screenshotMode)
+        ScreenGame g = ScreenGame.getInstance();
+        if (g != null && g.paused && ((ScreenGame) Game.screen).screenshotMode)
             return;
 
         /*this.flashTimer -= Panel.frameFrequency;
@@ -572,7 +574,7 @@ public class Arcade extends Minigame
         double destX = 0;
         double destY = 0;
 
-        boolean found = false;
+        boolean found;
 
         boolean horizontal = this.random.nextDouble() < 0.5;
         boolean other = this.random.nextDouble() < 0.5;
