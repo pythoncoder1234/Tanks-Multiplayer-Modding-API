@@ -44,7 +44,7 @@ public class ObstaclePath extends Obstacle
             {
                 double angle = m.getPolarDirection() + Math.PI / 2;
 
-                Effect e = Effect.createNewEffect(m.posX, m.posY, m.posZ, Effect.EffectType.snow);
+                Effect e = Effect.createNewEffect(m.posX, m.posY, m.posZ, EffectType.snow);
                 e.colR = this.colorR;
                 e.colG = this.colorG;
                 e.colB = this.colorB;

@@ -263,6 +263,7 @@ public class StaticTerrainRenderer extends TerrainRenderer
             s.renderer.settings(true, false, true);
 
         s.renderer.setPosition(Drawing.drawing.gameToAbsoluteX(x, 0), Drawing.drawing.gameToAbsoluteY(y, 0), z * Drawing.drawing.scale);
+        s.renderer.setPosition(0, 0, 1);
         s.renderer.setScale(Drawing.drawing.scale * sc, Drawing.drawing.scale * sc, Drawing.drawing.scale * sc);
 
         if (s.shader instanceof IGlowShader)

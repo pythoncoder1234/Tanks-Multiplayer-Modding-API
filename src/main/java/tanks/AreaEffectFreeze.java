@@ -30,7 +30,7 @@ public class AreaEffectFreeze extends AreaEffect
 		{
 			for (int i = 0; i < 100 * Game.effectMultiplier; i++)
 			{
-				Effect e = Effect.createNewEffect(this.posX, this.posY, Effect.EffectType.piece);
+				Effect e = Effect.createNewEffect(this.posX, this.posY, EffectType.piece);
 				double var = 50;
 				e.fastRemoveOnExit = true;
 				e.colR = Math.min(255, Math.max(0, 255 + Math.random() * var - var / 2));

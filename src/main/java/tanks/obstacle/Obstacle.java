@@ -21,7 +21,7 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 {
 	public static final int default_max_height = 8;
 
-	public Effect.EffectType destroyEffect = Effect.EffectType.obstaclePiece;
+	public EffectType destroyEffect = EffectType.obstaclePiece;
 	public double destroyEffectAmount = 1;
 
 	public boolean destructible = true;
@@ -583,13 +583,13 @@ public class Obstacle extends GameObject implements IDrawableForInterface, ISoli
 	{
 		if (Game.effectsEnabled)
 		{
-			Effect.EffectType effect = this.destroyEffect;
+			EffectType effect = this.destroyEffect;
 			double freq = Math.min((Math.sqrt(Math.pow(posX - this.posX, 2) + Math.pow(posY - this.posY, 2)) + Game.tile_size * 2.5) / radius, 1);
 
 			if (Game.enable3d)
 			{
-				if (effect == Effect.EffectType.obstaclePiece)
-					effect = Effect.EffectType.obstaclePiece3d;
+				if (effect == EffectType.obstaclePiece)
+					effect = EffectType.obstaclePiece3d;
 
 				double s = 12.5;
 				for (double j = 0; j < Game.tile_size; j += s)

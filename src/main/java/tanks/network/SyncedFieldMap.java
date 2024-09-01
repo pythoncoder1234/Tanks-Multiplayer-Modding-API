@@ -133,9 +133,9 @@ public class SyncedFieldMap
         this.networkID = -1;
     }
 
-    EventSyncField update()
+    public EventSyncField update()
     {
-        if (object.skipSyncCheck())
+        if (object == null || object.skipSyncCheck())
             return null;
 
         try

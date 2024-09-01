@@ -4,6 +4,7 @@ package tanks.obstacle;
 import basewindow.Model;
 import tanks.Drawing;
 import tanks.Game;
+import tanks.rendering.ShaderObstacle;
 import tanks.rendering.ShaderTrainTrack;
 import tanks.tank.IAvoidObject;
 import tanks.tank.TankTrain;
@@ -45,7 +46,10 @@ public class ObstacleTrainTrack extends Obstacle
         this.colorG = 111;
         this.colorB = 14;
 
-        this.renderer = ShaderTrainTrack.class;
+        if (!Game.disableObstacleShaders)
+            this.renderer = ShaderTrainTrack.class;
+        else
+            this.renderer = ShaderObstacle.class;
 
         this.description = descriptions[(int) (Math.random() * descriptions.length)];
     }

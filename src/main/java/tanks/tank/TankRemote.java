@@ -195,7 +195,7 @@ public class TankRemote extends Tank
 				{
 					for (int i = 0; i < 50 * Game.effectMultiplier; i++)
 					{
-						Effect e = Effect.createNewEffect(this.posX, this.posY, Effect.EffectType.piece);
+						Effect e = Effect.createNewEffect(this.posX, this.posY, EffectType.piece);
 						double var = 50;
 						e.colR = Math.min(255, Math.max(0, this.colorR + Math.random() * var - var / 2));
 						e.colG = Math.min(255, Math.max(0, this.colorG + Math.random() * var - var / 2));

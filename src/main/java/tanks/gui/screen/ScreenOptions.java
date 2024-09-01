@@ -148,6 +148,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
 			f.println("last_version=" + Game.lastVersion);
 			f.println("enable_extensions=" + Game.enableExtensions);
 			f.println("auto_load_extensions=" + Game.autoLoadExtensions);
+			f.println("no_rail_shader=" + Game.disableObstacleShaders);
 			f.stopWriting();
 		}
 		catch (FileNotFoundException e)
@@ -277,6 +278,7 @@ public class ScreenOptions extends ScreenOptionsOverlay
                     case "enable_extensions" -> Game.enableExtensions = Boolean.parseBoolean(optionLine[1]);
                     case "auto_load_extensions" -> Game.autoLoadExtensions = Boolean.parseBoolean(optionLine[1]);
                     case "modapi_auto_load" -> ModAPI.autoLoadExtensions = Boolean.parseBoolean(optionLine[1]);
+					case "no_rail_shader" -> Game.disableObstacleShaders = Boolean.parseBoolean(optionLine[1]);
                     default -> extraOptions.add(line);
                 }
 			}

@@ -11,14 +11,15 @@ public class ScreenOptionsMisc extends ScreenOptionsOverlay
     public static final String fullStatsText = "Stats animations: ";
     public static final String pauseText = "Pause on defocus: ";
 
-    Button speedrunOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY - this.objYSpace * 1.25, this.objWidth, this.objHeight, "Speedrunning options", () -> Game.screen = new ScreenOptionsSpeedrun());
+    Button speedrunOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "Speedrunning options", () -> Game.screen = new ScreenOptionsSpeedrun());
 
-    Button extensionOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY - this.objYSpace * 0.25, this.objWidth, this.objHeight, "Extension options", () -> Game.screen = new ScreenOptionsExtensions());
+    Button extensionOptions = new Button(this.centerX + this.objXSpace / 2, this.centerY - this.objYSpace * 0.5, this.objWidth, this.objHeight, "Extension options", () -> Game.screen = new ScreenOptionsExtensions());
 
     @Override
     public void update()
     {
         back.update();
+        dos.update();
         speedrunOptions.update();
         extensionOptions.update();
         pauseOnDefocus.update();
@@ -27,6 +28,16 @@ public class ScreenOptionsMisc extends ScreenOptionsOverlay
 
         super.update();
     }
+
+    Button dos = new Button(this.centerX + this.objXSpace / 2, this.centerY + this.objYSpace * 0.5, this.objWidth, this.objHeight, "", new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            Game.disableObstacleShaders = !Game.disableObstacleShaders;
+            dos.setText("Disable obstacle shaders: ", Game.disableObstacleShaders ? ScreenOptions.onText : ScreenOptions.offText);
+        }
+    }, "Enable if obstacles like rails---are crashing your game");
 
     Button autostart = new Button(this.centerX - this.objXSpace / 2, this.centerY - this.objYSpace * 1.5, this.objWidth, this.objHeight, "", new Runnable()
     {
@@ -49,6 +60,7 @@ public class ScreenOptionsMisc extends ScreenOptionsOverlay
         this.drawDefaultBackground();
 
         back.draw();
+        dos.draw();
         speedrunOptions.draw();
         extensionOptions.draw();
         pauseOnDefocus.draw();
@@ -105,5 +117,7 @@ public class ScreenOptionsMisc extends ScreenOptionsOverlay
             pauseOnDefocus.setText(pauseText, ScreenOptions.onText);
         else
             pauseOnDefocus.setText(pauseText, ScreenOptions.offText);
+
+        dos.setText("Disable obstacle shaders: ", Game.disableObstacleShaders ? ScreenOptions.onText : ScreenOptions.offText);
     }
 }

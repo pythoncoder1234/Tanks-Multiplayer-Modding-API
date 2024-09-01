@@ -85,8 +85,8 @@ public class ObstacleWater extends ObstacleLiquid
         if (Game.effectsEnabled && m instanceof Tank t && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.1 * Game.effectMultiplier)
         {
             double a = m.getPolarDirection();
-            Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
-            Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
+            Effect e1 = Effect.createNewEffect(m.posX, m.posY, EffectType.piece);
+            Effect e2 = Effect.createNewEffect(m.posX, m.posY, EffectType.piece);
             e1.enableGlow = false;
             e1.posZ = m.posZ;
             e2.posZ = m.posZ;

@@ -128,9 +128,9 @@ public class ObstacleShrubbery extends Obstacle
 
 			Effect e;
 			if (Game.enable3d)
-				e = Effect.createNewEffect(this.posX, this.posY,this.baseGroundHeight + draw_size * (0.2 + this.heightMultiplier * (1 - (255 - this.height) / 128)), Effect.EffectType.bushBurn);
+				e = Effect.createNewEffect(this.posX, this.posY,this.baseGroundHeight + draw_size * (0.2 + this.heightMultiplier * (1 - (255 - this.height) / 128)), EffectType.bushBurn);
 			else
-				e = Effect.createNewEffect(this.posX, this.posY, this.height, Effect.EffectType.bushBurn);
+				e = Effect.createNewEffect(this.posX, this.posY, this.height, EffectType.bushBurn);
 
 			e.colR = this.colorR;
 			e.colG = this.colorG;
@@ -153,7 +153,7 @@ public class ObstacleShrubbery extends Obstacle
 		{
 			if (Math.random() < Panel.frameFrequency / Math.pow(m.size, 2) * 20 * Game.effectMultiplier)
 			{
-				Effect e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Obstacle.draw_size, this.posY + (Math.random() - 0.5) * Obstacle.draw_size, this.getTileHeight() * (Math.random() * 0.8 + 0.2), Effect.EffectType.piece);
+				Effect e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Obstacle.draw_size, this.posY + (Math.random() - 0.5) * Obstacle.draw_size, this.getTileHeight() * (Math.random() * 0.8 + 0.2), EffectType.piece);
 				e.vX = m.vX * (Math.random() * 0.5 + 0.5);
 				e.vY = m.vY * (Math.random() * 0.5 + 0.5);
 				e.vZ = Math.random() * m.getSpeed() / 8;

@@ -2,6 +2,7 @@ package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 import tanks.obstacle.Obstacle;
 import tanks.obstacle.ObstacleShrubbery;
@@ -53,9 +54,9 @@ public class EventObstacleShrubberyBurn extends PersonalEvent
                 if (Game.enable3d)
                     e = (Effect.createNewEffect(this.posX, this.posY,
                             Obstacle.draw_size * (0.25 + 0.75 * ((ObstacleShrubbery) o).heightMultiplier * (1 - (255 - ((ObstacleShrubbery) o).height) / 128)),
-                            Effect.EffectType.bushBurn));
+                            EffectType.bushBurn));
                 else
-                    e = (Effect.createNewEffect(this.posX, this.posY, ((ObstacleShrubbery) o).height, Effect.EffectType.bushBurn));
+                    e = (Effect.createNewEffect(this.posX, this.posY, ((ObstacleShrubbery) o).height, EffectType.bushBurn));
 
                 e.colR = o.colorR;
                 e.colG = o.colorG;

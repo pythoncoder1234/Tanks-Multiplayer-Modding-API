@@ -38,7 +38,9 @@ public interface ISyncable
                 }
                 else if (ISyncable.class.isAssignableFrom(f.getType()))
                 {
-                    ((ISyncable) f.get(this)).initSync();
+                    ISyncable obj = ((ISyncable) f.get(this));
+                    if (obj != null)
+                        obj.initSync();
                 }
             }
 

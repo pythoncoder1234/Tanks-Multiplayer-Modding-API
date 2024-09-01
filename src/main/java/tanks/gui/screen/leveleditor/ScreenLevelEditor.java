@@ -1234,7 +1234,7 @@ public class ScreenLevelEditor extends Screen implements ILevelPreviewScreen
 
 									for (int z = 0; z < 100 * Game.effectMultiplier; z++)
 									{
-										Effect e = Effect.createNewEffect(m.posX, m.posY, m.size / 2, Effect.EffectType.piece);
+										Effect e = Effect.createNewEffect(m.posX, m.posY, m.size / 2, EffectType.piece);
 										double var = 50;
 										e.colR = Math.min(255, Math.max(0, ((Tank) m).colorR + Math.random() * var - var / 2));
 										e.colG = Math.min(255, Math.max(0, ((Tank) m).colorG + Math.random() * var - var / 2));

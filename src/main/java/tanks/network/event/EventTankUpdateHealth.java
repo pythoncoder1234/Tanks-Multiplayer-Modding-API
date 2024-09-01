@@ -1,10 +1,7 @@
 package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
-import tanks.Drawing;
-import tanks.Effect;
-import tanks.Game;
-import tanks.GameObject;
+import tanks.*;
 import tanks.hotbar.item.ItemShield;
 import tanks.tank.Tank;
 
@@ -45,7 +42,7 @@ public class EventTankUpdateHealth extends PersonalEvent
 
 		if (tank.health > 6 && (int) before != (int) tank.health)
 		{
-			Effect e = Effect.createNewEffect(tank.posX, tank.posY, tank.posZ + tank.size * 0.75, Effect.EffectType.shield);
+			Effect e = Effect.createNewEffect(tank.posX, tank.posY, tank.posZ + tank.size * 0.75, EffectType.shield);
 			e.size = tank.size;
 			e.radius = tank.health - 1;
 			Game.effects.add(e);

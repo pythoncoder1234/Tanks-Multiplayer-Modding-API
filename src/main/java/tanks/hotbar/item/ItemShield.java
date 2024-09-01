@@ -52,7 +52,7 @@ public class ItemShield extends Item
 
         if (t.health > 6 && (int) (t.health - amount) != (int) (t.health))
         {
-            Effect e = Effect.createNewEffect(t.posX, t.posY, t.posZ + t.size * 0.75, Effect.EffectType.shield);
+            Effect e = Effect.createNewEffect(t.posX, t.posY, t.posZ + t.size * 0.75, EffectType.shield);
             e.size = t.size;
             e.radius = t.health - 1;
             Game.effects.add(e);

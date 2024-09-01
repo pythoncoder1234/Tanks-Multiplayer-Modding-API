@@ -106,6 +106,7 @@ public abstract class FixedMenu implements ISyncable, IBatchRenderableObject, ID
         if (age <= 0 && syncEnabled)
             initSync();
 
+        map.update();
         this.age += Panel.frameFrequency;
         this.updateAnimations();
     }

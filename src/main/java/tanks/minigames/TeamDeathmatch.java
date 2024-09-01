@@ -61,7 +61,7 @@ public class TeamDeathmatch extends Minigame
         for (Player p : Game.players)
             arr.add(p.tank);
 
-        scoreboard = new Scoreboard("Team Deathmatch", Scoreboard.objectiveTypes.kills, arr, true).add();
+        scoreboard = new Scoreboard("Team Deathmatch", Scoreboard.objectiveTypes.kills, arr, true).setSync(true).add();
         scoreboard.title.fontSize = 22;
         scoreboard.subtitle.text = "Leaderboard";
         shopNPC = new TankNPC("npc", 42, 13, Math.PI / 2, new TankNPC.MessageList("Use this shop at your own risk!", TankNPC.shopCommand), "Shop", 0, 255, 0);

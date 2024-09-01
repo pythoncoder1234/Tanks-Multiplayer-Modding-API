@@ -2,6 +2,7 @@ package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 import tanks.registry.RegistryTank;
 import tanks.tank.*;
@@ -72,7 +73,7 @@ public class EventTankMimicTransform extends PersonalEvent
                 {
                     for (int i = 0; i < 50 * Game.effectMultiplier; i++)
                     {
-                        Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 4, Effect.EffectType.piece);
+                        Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 4, EffectType.piece);
                         double var = 50;
                         e.colR = Math.min(255, Math.max(0, t.colorR + Math.random() * var - var / 2));
                         e.colG = Math.min(255, Math.max(0, t.colorG + Math.random() * var - var / 2));

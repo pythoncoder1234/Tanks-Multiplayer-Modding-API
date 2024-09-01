@@ -1,9 +1,6 @@
 package tanks.gui.screen;
 
-import tanks.Drawing;
-import tanks.Effect;
-import tanks.Game;
-import tanks.Panel;
+import tanks.*;
 import tanks.gui.Firework;
 import tanks.minigames.Arcade;
 import tanks.network.event.EventArcadeBonuses;
@@ -439,7 +436,7 @@ public class ScreenArcadeBonuses extends Screen implements IDarkScreen
 
     public static void addEffect(double posX, double posY, double sizeX, double sizeY, ArrayList<Effect> glowEffects, double velocity, double mul, double max, double r, double g, double b)
     {
-        Effect e = Effect.createNewEffect(posX, posY, Effect.EffectType.interfacePieceSparkle);
+        Effect e = Effect.createNewEffect(posX, posY, EffectType.interfacePieceSparkle);
         e.radius = Math.random() * 10 - 5;
 
         if (mul == -1)

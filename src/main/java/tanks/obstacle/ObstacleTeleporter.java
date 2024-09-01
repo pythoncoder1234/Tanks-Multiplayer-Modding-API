@@ -41,7 +41,7 @@ public class ObstacleTeleporter extends Obstacle
 
 		this.batchDraw = false;
 
-		glow = Effect.createNewEffect(this.posX, this.posY, 0, Effect.EffectType.teleporterLight);
+		glow = Effect.createNewEffect(this.posX, this.posY, 0, EffectType.teleporterLight);
 
 		this.description = "A teleporter which randomly transports you to another teleporter in the level";
 	}

@@ -57,7 +57,7 @@ public class Explosion extends Movable
             for (int j = 0; j < Math.min(800, 200 * this.radius / 125) * Game.effectMultiplier; j++)
             {
                 double random = Math.random();
-                Effect e = Effect.createNewEffect(this.posX, this.posY, Effect.EffectType.piece);
+                Effect e = Effect.createNewEffect(this.posX, this.posY, EffectType.piece);
                 e.maxAge /= 2;
                 e.colR = 255;
                 e.colG = (1 - random) * 155 + Math.random() * 100;
@@ -110,7 +110,7 @@ public class Explosion extends Movable
             }
         }
 
-        Effect e = Effect.createNewEffect(this.posX, this.posY, Effect.EffectType.explosion);
+        Effect e = Effect.createNewEffect(this.posX, this.posY, EffectType.explosion);
         e.radius = Math.max(this.radius - Game.tile_size * 0.5, 0);
         Game.effects.add(e);
     }

@@ -164,7 +164,7 @@ public class Tutorial extends Minigame
         for (Tank t: destroyedDummies)
         {
             i++;
-            Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 2, Effect.EffectType.tutorialProgress);
+            Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 2, EffectType.tutorialProgress);
             e.radius = i;
             Game.effects.add(e);
 

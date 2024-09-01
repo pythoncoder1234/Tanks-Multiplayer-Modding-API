@@ -109,6 +109,7 @@ public class Game
     public static boolean showTankIDs = false;
 	public static boolean showHitboxes = false;
 	public static boolean showUPFMeter = false;
+	public static boolean disableObstacleShaders = false;
 	public static boolean showPathfinding = false;
 	public static boolean allowAllNumbers = false;
 	public static final boolean cinematic = false;

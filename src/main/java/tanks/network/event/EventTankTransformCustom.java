@@ -3,6 +3,7 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Drawing;
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 import tanks.network.NetworkUtils;
 import tanks.tank.Tank;
@@ -158,7 +159,7 @@ public class EventTankTransformCustom extends PersonalEvent
 
             if (effect == exclamation)
             {
-                Effect e1 = Effect.createNewEffect(t.posX, t.posY, t.posZ + this.size * 0.75, Effect.EffectType.exclamation);
+                Effect e1 = Effect.createNewEffect(t.posX, t.posY, t.posZ + this.size * 0.75, EffectType.exclamation);
                 e1.size = this.size;
                 e1.colR = t.colorR;
                 e1.colG = t.colorG;
@@ -174,7 +175,7 @@ public class EventTankTransformCustom extends PersonalEvent
                 {
                     for (int i = 0; i < 50 * Game.effectMultiplier; i++)
                     {
-                        Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 4, Effect.EffectType.piece);
+                        Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 4, EffectType.piece);
                         double var = 50;
                         e.colR = Math.min(255, Math.max(0, t.colorR + Math.random() * var - var / 2));
                         e.colG = Math.min(255, Math.max(0, t.colorG + Math.random() * var - var / 2));

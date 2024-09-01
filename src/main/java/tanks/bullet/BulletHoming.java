@@ -84,7 +84,7 @@ public class BulletHoming extends Bullet
 
     public void createHomingEffect()
     {
-        Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+        Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.piece);
         double var = 50;
         e.maxAge /= 2;
 

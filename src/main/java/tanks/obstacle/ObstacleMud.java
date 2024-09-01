@@ -48,8 +48,8 @@ public class ObstacleMud extends Obstacle
         {
             Tank t = (Tank) m;
             double a = m.getPolarDirection();
-            Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
-            Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
+            Effect e1 = Effect.createNewEffect(m.posX, m.posY, EffectType.piece);
+            Effect e2 = Effect.createNewEffect(m.posX, m.posY, EffectType.piece);
             e1.drawLayer = 1;
             e2.drawLayer = 1;
             e1.setPolarMotion(a - Math.PI / 2, t.size * 0.25);

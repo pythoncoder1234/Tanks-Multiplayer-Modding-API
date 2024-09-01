@@ -33,7 +33,7 @@ public class ObstacleSnow extends Obstacle
         this.bulletCollision = false;
         this.checkForObjects = true;
         this.enableStacking = false;
-        this.destroyEffect = Effect.EffectType.snow;
+        this.destroyEffect = EffectType.snow;
         this.destroyEffectAmount = 0.25;
         this.replaceTiles = false;
 
@@ -97,7 +97,7 @@ public class ObstacleSnow extends Obstacle
 
             for (int i = 0; i < amt; i++)
             {
-                Effect e = Effect.createNewEffect(m.posX, m.posY, m.posZ, Effect.EffectType.snow);
+                Effect e = Effect.createNewEffect(m.posX, m.posY, m.posZ, EffectType.snow);
                 e.colR = this.colorR;
                 e.colG = this.colorG;
                 e.colB = this.colorB;

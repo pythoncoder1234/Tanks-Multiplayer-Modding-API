@@ -22,7 +22,7 @@ public class ObstacleSand extends Obstacle
         this.bulletCollision = false;
         this.isSurfaceTile = true;
         this.checkForObjects = true;
-        this.destroyEffect = Effect.EffectType.snow;
+        this.destroyEffect = EffectType.snow;
         this.destroyEffectAmount = 1.5;
 
         if (Game.fancyTerrain)
@@ -90,8 +90,8 @@ public class ObstacleSand extends Obstacle
         if (Game.effectsEnabled && m instanceof Tank t && !ScreenGame.finished && Math.random() * Panel.frameFrequency <= 0.3 * Game.effectMultiplier)
         {
             double a = m.getPolarDirection();
-            Effect e1 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
-            Effect e2 = Effect.createNewEffect(m.posX, m.posY, Effect.EffectType.piece);
+            Effect e1 = Effect.createNewEffect(m.posX, m.posY, EffectType.piece);
+            Effect e2 = Effect.createNewEffect(m.posX, m.posY, EffectType.piece);
             e1.posZ = m.posZ;
             e2.posZ = m.posZ;
             e1.enableGlow = false;

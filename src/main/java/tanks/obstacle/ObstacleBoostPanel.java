@@ -32,7 +32,7 @@ public class ObstacleBoostPanel extends Obstacle
         this.colorG = 180;
         this.colorB = 0;
 
-        glow = Effect.createNewEffect(this.posX, this.posY, 0, Effect.EffectType.boostLight);
+        glow = Effect.createNewEffect(this.posX, this.posY, 0, EffectType.boostLight);
 
         this.renderer = ShaderBoostPanel.class;
         this.description = "A panel which speeds up tanks and bullets";
@@ -123,7 +123,7 @@ public class ObstacleBoostPanel extends Obstacle
 
     public void addEffect(double x, double y, double extra)
     {
-        Effect e = Effect.createNewEffect(x, y, Game.tile_size / 2, Effect.EffectType.piece);
+        Effect e = Effect.createNewEffect(x, y, Game.tile_size / 2, EffectType.piece);
         double var = 50;
 
         e.colR = Math.min(255, Math.max(0, this.colorR + Math.random() * var - var / 2));

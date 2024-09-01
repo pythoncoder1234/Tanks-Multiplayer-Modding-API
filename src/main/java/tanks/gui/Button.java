@@ -536,7 +536,7 @@ public class Button implements IDrawable, ITrigger
 		if (!Game.effectsEnabled)
 			return;
 
-		Effect e = Effect.createNewEffect(posX, posY, Effect.EffectType.interfacePiece);
+		Effect e = Effect.createNewEffect(posX, posY, EffectType.interfacePiece);
 
 		if (mul == -1)
 			mul = 2 * Math.max(0, (sizeY / 2 - 20) / sizeY);

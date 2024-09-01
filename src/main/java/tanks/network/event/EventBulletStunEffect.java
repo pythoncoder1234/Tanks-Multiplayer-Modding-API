@@ -2,6 +2,7 @@ package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 
 public class EventBulletStunEffect extends PersonalEvent
@@ -31,7 +32,7 @@ public class EventBulletStunEffect extends PersonalEvent
         {
             for (int i = 0; i < 25 * Game.effectMultiplier; i++)
             {
-                Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.stun);
+                Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.stun);
                 double var = 50;
                 e.colR = Math.min(255, Math.max(0, 0 + Math.random() * var - var / 2));
                 e.colG = Math.min(255, Math.max(0, 255 + Math.random() * var - var / 2));

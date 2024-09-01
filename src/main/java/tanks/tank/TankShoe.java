@@ -112,7 +112,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
                 if (Panel.panel.ageFrames % 3 == 0)
                 {
                     for (int i = 0; i < 8; i++)
-                        Game.effects.add(Effect.createNewEffect(posX, posY, posZ + i * 30, Effect.EffectType.stun)
+                        Game.effects.add(Effect.createNewEffect(posX, posY, posZ + i * 30, EffectType.stun)
                                 .setColor(colorR, colorG, colorB));
 
                     Drawing.drawing.playGameSound("laser.ogg", this, Game.tile_size * 20, (float) (1 - slamCounter / 100) * 0.5f, 0.2f);
@@ -136,7 +136,7 @@ public class TankShoe extends TankAIControlled implements IAvoidObject
                     slamCooldown = 1200;
                     radius *= 1.5;
                     Drawing.drawing.playGameSound("freeze.ogg", this, Game.tile_size * 80, 1f);
-                    Game.effects.add(Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.explosion).setRadius(radius * 0.8));
+                    Game.effects.add(Effect.createNewEffect(posX, posY, posZ, EffectType.explosion).setRadius(radius * 0.8));
                 }
 
                 for (Movable m : nearbyMovables)

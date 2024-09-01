@@ -1,9 +1,6 @@
 package tanks.tank;
 
-import tanks.Chunk;
-import tanks.Effect;
-import tanks.Game;
-import tanks.Movable;
+import tanks.*;
 import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenGame;
 import tanks.obstacle.Face;
@@ -177,15 +174,15 @@ public class Ray
 						Game.effects.add(Effect.createNewEffect(
 								(chunk.chunkX + 0.5) * Chunk.chunkSize * Game.tile_size + (totalChunksChecked * 5),
 								(chunk.chunkY + 0.5) * Chunk.chunkSize * Game.tile_size,
-								150, Effect.EffectType.chain, 90
+								150, EffectType.chain, 90
 						).setRadius(totalChunksChecked));
 
-						Game.effects.add(Effect.createNewEffect(posX + moveX, posY + moveY, 20, Effect.EffectType.laser));
+						Game.effects.add(Effect.createNewEffect(posX + moveX, posY + moveY, 20, EffectType.laser));
 
 						if (mid == null || current.manhattanDist(mid) > 1)
 						{
-							Game.effects.add(Effect.createNewEffect(posX, posY + moveY, 20, Effect.EffectType.obstaclePiece));
-							Game.effects.add(Effect.createNewEffect(posX + moveX, posY, 20, Effect.EffectType.piece));
+							Game.effects.add(Effect.createNewEffect(posX, posY + moveY, 20, EffectType.obstaclePiece));
+							Game.effects.add(Effect.createNewEffect(posX + moveX, posY, 20, EffectType.piece));
 						}
 					}
 
@@ -239,7 +236,7 @@ public class Ray
 						double z = this.tank.size / 2 + this.tank.turretSize / 2 * frac + (Game.tile_size / 4) * (1 - frac);
 
 						if (ScreenGame.getInstance() != null && !ScreenGame.finished)
-							Game.effects.add(Effect.createNewEffect(x, y, z, Effect.EffectType.ray));
+							Game.effects.add(Effect.createNewEffect(x, y, z, EffectType.ray));
 					}
 
 					remainder = s - steps;
@@ -249,7 +246,7 @@ public class Ray
 				this.posY = result.collisionY();
 
 				if (Chunk.debug)
-					Game.effects.add(Effect.createNewEffect(posX, posY, 50, Effect.EffectType.piece).setColor(0, 150, 0));
+					Game.effects.add(Effect.createNewEffect(posX, posY, 50, EffectType.piece).setColor(0, 150, 0));
 
 				if (result.collisionFace().owner instanceof Movable m)
 				{

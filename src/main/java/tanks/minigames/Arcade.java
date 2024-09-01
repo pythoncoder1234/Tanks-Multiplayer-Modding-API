@@ -209,7 +209,7 @@ public class Arcade extends Minigame
 
             int power = Math.min(max_power, chain / 3);
 
-            Effect e = Effect.createNewEffect(target.posX, target.posY, target.size / 2, Effect.EffectType.chain);
+            Effect e = Effect.createNewEffect(target.posX, target.posY, target.size / 2, EffectType.chain);
             e.radius = chain;
             Game.effects.add(e);
 

@@ -846,7 +846,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 					boolean ice = this.effect.equals(BulletEffect.ice);
 					if (ice || ember)
 					{
-						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.piece);
 						e.maxAge /= 2;
 						e.setColor(ember ? 255 : 128, ember ? 180 : 255, ember ? 0 : 255, 50);
 
@@ -862,7 +862,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 					}
 					else if (Game.fancyBulletTrails && this.effect.equals(BulletEffect.darkFire))
 					{
-						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.piece);
 						e.maxAge /= 4;
 						e.setColor(0, 0, 0, 50);
 						e.enableGlow = false;
@@ -876,7 +876,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 					}
 					else if (Game.fancyBulletTrails && (this.effect.equals(BulletEffect.fire) || this.effect.equals(BulletEffect.fireTrail)))
 					{
-						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+						Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.piece);
 						e.maxAge /= 4;
 						e.setColor(300, 180, 64, 50);    // r will always show as 255
 
@@ -1108,7 +1108,7 @@ public class Bullet extends Movable implements IDrawableLightSource, IExplodable
 	{
 		for (int i = 0; i < this.size * 4 * Game.effectMultiplier; i++)
 		{
-			Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+			Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.piece);
 			double var = 50;
 			e.maxAge /= 2;
 			e.colR = Math.min(255, Math.max(0, this.baseColorR + Math.random() * var - var / 2));

@@ -109,8 +109,8 @@ public class TerrainRenderer
         if (Game.screen instanceof ScreenIntro || Game.screen instanceof ScreenExit)
             sg = ShaderGroundIntro.class;
 
-        if (o instanceof Obstacle)
-            sg = ((Obstacle) o).renderer;
+        if (o instanceof Obstacle o1)
+            sg = o1.renderer;
         else if (o instanceof Chunk.Tile t && t.obstacle != null)
             sg = t.obstacle.tileRenderer;
 

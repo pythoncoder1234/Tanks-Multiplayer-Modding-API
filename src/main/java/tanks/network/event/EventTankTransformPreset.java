@@ -2,6 +2,7 @@ package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 import tanks.tank.Tank;
 import tanks.tank.TankAIControlled;
@@ -85,7 +86,7 @@ public class EventTankTransformPreset extends PersonalEvent
 
             if (sight)
             {
-                Effect e1 = Effect.createNewEffect(t.posX, t.posY, t.posZ + target.size * 0.75, Effect.EffectType.exclamation);
+                Effect e1 = Effect.createNewEffect(t.posX, t.posY, t.posZ + target.size * 0.75, EffectType.exclamation);
                 e1.size = target.size;
                 e1.colR = t.colorR;
                 e1.colG = t.colorG;

@@ -56,7 +56,7 @@ public class ObstacleLava extends ObstacleLiquid
                 Effect e;
                 if (Game.enable3d)
                 {
-                    e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Game.tile_size, this.posY + (Math.random() - 0.5) * Game.tile_size, 0, Effect.EffectType.piece);
+                    e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Game.tile_size, this.posY + (Math.random() - 0.5) * Game.tile_size, 0, EffectType.piece);
                     e.setSize(Math.random() * 5);
                     e.colR = 255;
                     e.colG = Math.random() * 128 + 64;
@@ -66,7 +66,7 @@ public class ObstacleLava extends ObstacleLiquid
                 }
                 else
                 {
-                    e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Game.tile_size, this.posY + (Math.random() - 0.5) * Game.tile_size, Effect.EffectType.piece);
+                    e = Effect.createNewEffect(this.posX + (Math.random() - 0.5) * Game.tile_size, this.posY + (Math.random() - 0.5) * Game.tile_size, EffectType.piece);
                     e.setSize(Math.random() * 5);
                     e.colR = 255;
                     e.colG = Math.random() * 128 + 64;

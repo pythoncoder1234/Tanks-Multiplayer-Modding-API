@@ -82,7 +82,7 @@ public class BulletHealing extends BulletInstant
 
 		if (t.health > 6 && (int) (before) != (int) (t.health))
 		{
-			Effect e = Effect.createNewEffect(t.posX, t.posY, t.posZ + t.size * 0.75, Effect.EffectType.shield);
+			Effect e = Effect.createNewEffect(t.posX, t.posY, t.posZ + t.size * 0.75, EffectType.shield);
 			e.size = t.size;
 			e.radius = t.health - 1;
 			Game.effects.add(e);
@@ -102,7 +102,7 @@ public class BulletHealing extends BulletInstant
 		{
 			for (int i = 0; i < this.size / 4 * Game.effectMultiplier; i++)
 			{
-				Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+				Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.piece);
 				double var = 50;
 				e.maxAge /= 2;
 				e.colR = Math.min(255, Math.max(0, this.baseColorR + Math.random() * var - var / 2));

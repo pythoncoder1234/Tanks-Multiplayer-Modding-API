@@ -68,7 +68,7 @@ public class TeleporterOrb extends Movable
 		}
 
 		//if (this.tank.size == 0)
-		//	Game.effects.add(Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.glow));
+		//	Game.effects.add(Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.glow));
 	}
 	
 	@Override
@@ -155,7 +155,7 @@ public class TeleporterOrb extends Movable
 		if (!Game.effectsEnabled)
 			return;
 
-		Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.teleporterPiece);
+		Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.teleporterPiece);
 		double var = 50;
 		
 		e.colR = Math.min(this.tank.colorR, Math.max(0, 255 + Math.random() * var - var / 2));

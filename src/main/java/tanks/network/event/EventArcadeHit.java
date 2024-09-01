@@ -3,6 +3,7 @@ package tanks.network.event;
 import io.netty.buffer.ByteBuf;
 import tanks.Drawing;
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 import tanks.minigames.Arcade;
 
@@ -56,7 +57,7 @@ public class EventArcadeHit extends PersonalEvent
             a.chain = power;
             a.lastHit = a.age;
 
-            Effect e = Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.chain);
+            Effect e = Effect.createNewEffect(posX, posY, posZ, EffectType.chain);
             e.radius = power;
             Game.effects.add(e);
 

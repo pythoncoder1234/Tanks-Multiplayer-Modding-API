@@ -2,6 +2,7 @@ package tanks.network.event;
 
 import io.netty.buffer.ByteBuf;
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 import tanks.tank.Tank;
 
@@ -34,7 +35,7 @@ public class EventTankCharge extends PersonalEvent implements IStackableEvent
 
 		if (Math.random() * Game.effectMultiplier < charge && Game.effectsEnabled)
 		{
-			Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 4, Effect.EffectType.charge);
+			Effect e = Effect.createNewEffect(t.posX, t.posY, t.size / 4, EffectType.charge);
 
 			double var = 50;
 			e.colR = Math.min(255, Math.max(0, t.colorR + Math.random() * var - var / 2));

@@ -3,17 +3,10 @@ package tanks;
 import basewindow.IBatchRenderableObject;
 import tanks.bullet.Bullet;
 import tanks.gui.screen.ScreenGame;
-import tanks.minigames.Arcade;
 import tanks.obstacle.Obstacle;
-import tanks.rendering.TrackRenderer;
-import tanks.tank.Turret;
 
 public class Effect extends Movable implements IDrawableWithGlow, IDrawableLightSource, IBatchRenderableObject
 {
-    public enum EffectType {fire, smokeTrail, trail, ray, explosion, laser, piece, obstaclePiece, obstaclePiece3d, charge,
-        tread, darkFire, electric, healing, stun, bushBurn, glow, teleporterLight, teleporterPiece, interfacePiece,
-        interfacePieceSparkle, snow, splash, shield, boostLight, exclamation, chain, tutorialProgress}
-
     public enum State {live, removed, recycle}
 
     public EffectType type;
@@ -68,6 +61,39 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
         return e;
     }
 
+    protected void initialize(double x, double y, double z, EffectType type)
+    {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.type = type;
+
+        this.prevGridX = (int) (this.posX / Game.tile_size);
+        this.prevGridY = (int) (this.posY / Game.tile_size);
+
+        this.initialGridX = this.prevGridX;
+        this.initialGridY = this.prevGridY;
+
+        this.type.initialize(this);
+    }
+
+    @Override
+    public void draw()
+    {
+        if (this.maxAge > 0 && this.maxAge < this.age) return;
+
+        if (this.type == EffectType.ray)
+        {
+            this.state = State.removed;
+            Game.removeEffects.add(this);
+        }
+
+        if (!this.force && Game.sampleObstacleHeight(this.posX, this.posY) > this.posZ) return;
+        if (this.age < 0) this.age = 0;
+
+        this.type.draw(this);
+    }
+
     public static Effect createNewEffect(double x, double y, EffectType type, double age)
     {
         return Effect.createNewEffect(x, y, 0, type, age);
@@ -86,113 +112,11 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
     }
 
     /**
-     * Use Effect.createNewEffect(double x, double y, Effect.EffectType type) instead of this because it can refurbish and reuse old effects
+     * Use Effect.createNewEffect(double x, double y, EffectType type) instead of this because it can refurbish and reuse old effects
      */
     protected Effect()
     {
         super(0, 0);
-    }
-
-    protected void initialize(double x, double y, double z, EffectType type)
-    {
-        this.posX = x;
-        this.posY = y;
-        this.posZ = z;
-        this.type = type;
-
-        this.prevGridX = (int) (this.posX / Game.tile_size);
-        this.prevGridY = (int) (this.posY / Game.tile_size);
-
-        this.initialGridX = this.prevGridX;
-        this.initialGridY = this.prevGridY;
-
-        if (type == EffectType.fire)
-            this.maxAge = 20;
-        else if (type == EffectType.smokeTrail)
-            this.maxAge = 200;
-        else if (type == EffectType.trail)
-            this.maxAge = 50;
-        else if (type == EffectType.ray)
-            this.maxAge = 20;
-        else if (type == EffectType.explosion)
-        {
-            this.maxAge = 20;
-            this.force = true;
-        }
-        else if (type == EffectType.laser)
-            this.maxAge = 21;
-        else if (type == EffectType.piece)
-            this.maxAge = Math.random() * 100 + 50;
-        else if (type == EffectType.obstaclePiece)
-            this.maxAge = Math.random() * 100 + 50;
-        else if (type == EffectType.obstaclePiece3d)
-        {
-            this.size = Math.random() * 20;
-            this.maxAge = Math.random() * 150 + 75;
-            this.force = true;
-        }
-        else if (type.equals(EffectType.charge))
-        {
-            if (Game.enable3d)
-                this.add3dPolarMotion(Math.random() * Math.PI * 2, -Math.atan(Math.random()), Math.random() * 3 + 3);
-            else
-                this.addPolarMotion(Math.random() * Math.PI * 2, Math.random() * 3 + 3);
-
-            this.posX -= this.vX * 25;
-            this.posY -= this.vY * 25;
-            this.posZ -= this.vZ * 25;
-            this.maxAge = 25;
-        }
-        else if (type == EffectType.tread)
-        {
-            this.maxAge = TrackRenderer.getMaxTrackAge();
-        }
-        else if (type == EffectType.darkFire)
-            this.maxAge = 20;
-        else if (type == EffectType.stun)
-        {
-            this.angle += Math.PI * 2 * Math.random();
-            this.maxAge = 80 + Math.random() * 40;
-            this.size = Math.random() * 5 + 5;
-            this.distance = Math.random() * 50 + 25;
-        }
-        else if (type == EffectType.healing)
-            this.maxAge = 21;
-        else if (type == EffectType.bushBurn)
-            this.maxAge = this.posZ * 2;
-        else if (type == EffectType.glow)
-            this.maxAge = 100;
-        else if (type == EffectType.teleporterLight)
-            this.maxAge = 0;
-        else if (type == EffectType.teleporterPiece)
-            this.maxAge = Math.random() * 100 + 50;
-        else if (type == EffectType.interfacePiece || type == EffectType.interfacePieceSparkle)
-        {
-            this.maxAge = Math.random() * 100 + 50;
-            this.force = true;
-        }
-        else if (type == EffectType.snow)
-        {
-            this.maxAge = Math.random() * 100 + 50;
-            this.size = (Math.random() * 4 + 2) * Bullet.bullet_size;
-        }
-        else if (type == EffectType.splash)
-        {
-            this.maxAge = 75;
-            this.size = 75;
-        }
-        else if (type == EffectType.shield)
-            this.maxAge = 50;
-        else if (type == EffectType.chain || type == EffectType.tutorialProgress)
-        {
-            this.drawLayer = 9;
-            this.maxAge = 100;
-            this.size = Game.tile_size * 2;
-        }
-        else if (type == EffectType.boostLight)
-            this.maxAge = 0;
-        else if (type == EffectType.exclamation)
-            this.maxAge = 50;
     }
 
     protected void refurbish()
@@ -257,430 +181,6 @@ public class Effect extends Movable implements IDrawableWithGlow, IDrawableLight
     {
         this.size = size;
         return this;
-    }
-
-    @Override
-    public void draw()
-    {
-        if (type == EffectType.ray && Movable.distanceBetween(posX, posY, 676, 321) < 25)
-            type = type;
-
-        if (this.maxAge > 0 && this.maxAge < this.age)
-            return;
-
-        if (this.type == EffectType.ray)
-        {
-            this.state = State.removed;
-            Game.removeEffects.add(this);
-        }
-
-        if (!this.force && Game.sampleObstacleHeight(this.posX, this.posY) > this.posZ)
-            return;
-
-        if (this.age < 0)
-            this.age = 0;
-
-        double opacityMultiplier = ScreenGame.finishTimer / ScreenGame.finishTimerMax;
-        Drawing drawing = Drawing.drawing;
-
-        if (this.type == EffectType.fire)
-        {
-            double size = this.age * 3 + 10;
-            double rawOpacity = 1.0 - this.age / 20.0;
-            rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = rawOpacity * 255 / 4;
-
-            double green = Math.min(255, 255 - 255.0 * (this.age / 20.0));
-            drawing.setColor(255, green, 0, Math.min(255, Math.max(0, opacity * opacityMultiplier)));
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.smokeTrail)
-        {
-            double opacityModifier = Math.max(0, Math.min(1, this.age / 40.0 - 0.25));
-            int size = 20;
-            double rawOpacity = 1.0 - this.age / 200.0;
-            rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = rawOpacity * 100 / 2;
-
-            drawing.setColor(0, 0, 0, Math.min(255, Math.max(0, opacity * opacityMultiplier * opacityModifier)));
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.trail)
-        {
-            double size = Math.min(20, this.age / 20.0 + 10);
-            double rawOpacity = 1.0 - this.age / 50.0;
-            rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = rawOpacity * 50;
-            drawing.setColor(127, 127, 127, Math.min(255, Math.max(0, opacity * opacityMultiplier)));
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.ray)
-        {
-            int size = 6;
-
-            if (Level.isDark())
-                Drawing.drawing.setColor(255, 255, 255, 50);
-            else
-                Drawing.drawing.setColor(0, 0, 0, 50);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.explosion)
-        {
-            double size = radius * 2;
-            double opacity = 100 - this.age * 5;
-
-            if (Game.vanillaMode)
-                size += Game.tile_size;
-
-            drawing.setColor(255, 0, 0, opacity, 1);
-            drawing.fillForcedOval(this.posX, this.posY, size, size);
-            drawing.setColor(255, 255, 255);
-        }
-        else if (this.type == EffectType.laser)
-        {
-            double size = Bullet.bullet_size - this.age / 2;
-            drawing.setColor(255, 0, 0);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.piece)
-        {
-            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
-            drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.snow)
-        {
-            double size2 = 1 + 1.5 * (Bullet.bullet_size * (1 - this.age / this.maxAge));
-            drawing.setColor(this.colR, this.colG, this.colB);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size2, size2);
-            else
-                drawing.fillOval(this.posX, this.posY, size2, size2);
-        }
-        else if (this.type == EffectType.splash)
-        {
-            double s = age / maxAge * size;
-            Drawing.drawing.setColor(240, 240, 240, (1 - age / maxAge) * 128);
-            Drawing.drawing.fillOval(this.posX, this.posY, s, s);
-        }
-        else if (this.type == EffectType.interfacePiece || this.type == EffectType.interfacePieceSparkle)
-        {
-            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
-
-            if (this.size > 0)
-                size *= this.size;
-
-            drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
-            drawing.fillInterfaceOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.obstaclePiece)
-        {
-            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
-            drawing.setColor(this.colR, this.colG, this.colB);
-
-            drawing.fillRect(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.obstaclePiece3d)
-        {
-            double size = 1 + this.size * (1 - this.age / this.maxAge);
-            drawing.setColor(this.colR, this.colG, this.colB);
-
-            drawing.fillBox(this.posX, this.posY, this.posZ, size, size, size);
-        }
-        else if (this.type == EffectType.charge)
-        {
-            double size = 1 + Bullet.bullet_size * (this.age / this.maxAge);
-            drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.darkFire)
-        {
-            double size = this.age * 3 + 10;
-            double rawOpacity = 1.0 - this.age / 20.0;
-            rawOpacity *= rawOpacity * rawOpacity;
-            double opacity = rawOpacity * 255 / 4;
-
-            double red = Math.min(255, 128 - 128.0 * (this.age / 20.0));
-            drawing.setColor(red / 2, 0, red, Math.min(255, Math.max(0, opacity * opacityMultiplier)));
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.stun)
-        {
-            double size = 1 + this.size * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge));
-            double angle = this.angle + this.age / 20;
-            double distance = 1 + this.distance * Math.min(Math.min(1, (this.maxAge - this.age) * 3 / this.maxAge), Math.min(1, this.age * 3 / this.maxAge));
-
-            drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
-            double[] o = Movable.getLocationInDirection(angle, distance);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX + o[0], this.posY + o[1], this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX + o[0], this.posY + o[1], size, size);
-        }
-        else if (this.type == EffectType.electric)
-        {
-            double size = Math.max(0, Bullet.bullet_size - this.age / 2);
-            drawing.setColor(0, 255, 255);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.healing)
-        {
-            double size = Bullet.bullet_size - this.age / 2;
-            drawing.setColor(0, 255, 0);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.bushBurn)
-        {
-            if (Game.enable3d)
-            {
-                Drawing.drawing.setColor(this.colR, this.colG, this.colB);
-                Drawing.drawing.fillBox(this.posX, this.posY, 0, Obstacle.draw_size, Obstacle.draw_size, this.posZ);
-            }
-            else
-            {
-                Drawing.drawing.setColor(this.colR, this.colG, this.colB, this.posZ);
-                Drawing.drawing.fillRect(this.posX, this.posY, Obstacle.draw_size, Obstacle.draw_size);
-            }
-
-            if (!Game.game.window.drawingShadow)
-                this.posZ -= Panel.frameFrequency / 2;
-
-            this.colR = Math.max(this.colR - Panel.frameFrequency, 0);
-            this.colG = Math.max(this.colG - Panel.frameFrequency, 0);
-            this.colB = Math.max(this.colB - Panel.frameFrequency, 0);
-        }
-        else if (this.type == EffectType.glow)
-        {
-            double size = 1 + 40 * (1 - this.age / this.maxAge);
-            drawing.setColor(255, 255, 255, 40);
-
-            if (Game.enable3d)
-            {
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size, false, true);
-                drawing.fillOval(this.posX, this.posY, this.posZ, size / 2, size / 2, false, true);
-            }
-            else
-            {
-                drawing.fillOval(this.posX, this.posY, size, size);
-                drawing.fillOval(this.posX, this.posY, size / 2, size / 2);
-            }
-        }
-        else if (this.type == EffectType.teleporterLight)
-        {
-            for (double i = 0; i < 1 - this.size; i += 0.025)
-            {
-                Drawing.drawing.setColor(255, 255, 255, (1 - this.size - i) * 25, 1);
-                Drawing.drawing.fillOval(this.posX, this.posY, posZ + 7 + i * 50, Obstacle.draw_size / 2, Obstacle.draw_size / 2, true, false);
-            }
-        }
-        else if (this.type == EffectType.teleporterPiece)
-        {
-            double size = 1 + Bullet.bullet_size * (1 - this.age / this.maxAge);
-            drawing.setColor(this.colR, this.colG, this.colB, 255, 0.5);
-
-            if (Game.enable3d)
-                drawing.fillOval(this.posX, this.posY, this.posZ, size, size);
-            else
-                drawing.fillOval(this.posX, this.posY, size, size);
-        }
-        else if (this.type == EffectType.shield)
-        {
-            double a = Math.min(25, 50 - this.age) * 2.55 * 4;
-            drawing.setColor(255, 255, 255, a);
-
-            if (Game.enable3d)
-            {
-                drawing.drawImage("shield.png", this.posX, this.posY, this.posZ + this.age, this.size * 1.25, this.size * 1.25);
-                drawing.setFontSize(24 * this.size / Game.tile_size);
-                drawing.setColor(0, 0, 0, a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20, this.posZ + this.age + 1, "" + (int) this.radius);
-            }
-            else
-            {
-                drawing.drawImage("shield.png", this.posX, this.posY, this.size * 1.25, this.size * 1.25);
-                drawing.setFontSize(24 * this.size / Game.tile_size);
-                drawing.setColor(0, 0, 0, a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20, "" + (int) this.radius);
-            }
-        }
-        else if (this.type == EffectType.boostLight)
-        {
-            if (Game.game.window.drawingShadow)
-                return;
-
-            Drawing.drawing.setColor(255, 255, 255, 255, 1);
-            Game.game.window.shapeRenderer.setBatchMode(true, true, true, true, false);
-
-            double max = this.size;
-            for (int i = 0; i < max; i++)
-            {
-                double a = (max - i) / 400;
-                Drawing.drawing.setColor(255 * a, 255 * a, 200 * a, 255, 1.0);
-                Drawing.drawing.fillBox(this.posX, this.posY, i, Game.tile_size, Game.tile_size, 0, (byte) 62);
-            }
-
-            Game.game.window.shapeRenderer.setBatchMode(false, true, true, true, false);
-        }
-        else if (this.type == EffectType.exclamation)
-        {
-            double a = Math.min(25, 50 - this.age) * 2.55 * 4;
-
-            double r2 = Turret.calculateSecondaryColor(this.colR);
-            double g2 = Turret.calculateSecondaryColor(this.colG);
-            double b2 = Turret.calculateSecondaryColor(this.colB);
-
-            drawing.setColor(r2, g2, b2, a, 0.5);
-
-            if (Game.enable3d)
-            {
-                drawing.fillOval(this.posX, this.posY, this.posZ + this.age, this.size, this.size);
-                drawing.setColor(this.colR, this.colG, this.colB, a, 0);
-                drawing.fillOval(this.posX, this.posY, this.posZ + this.age, this.size * 0.8, this.size * 0.8);
-                drawing.setFontSize(32 * this.size / Game.tile_size);
-
-                drawing.setColor(r2, g2, b2, a, 0.5);
-                drawing.drawText(this.posX + 2, 3 + this.posY - this.size / 20, this.posZ + this.age + 1, "!");
-                drawing.setColor(this.glowR, this.glowG, this.glowB, a, 1);
-                drawing.drawText(this.posX + 0, 1 + this.posY - this.size / 20, this.posZ + this.age + 2, "!");
-            }
-            else
-            {
-                drawing.fillOval(this.posX, this.posY,this.size, this.size);
-                drawing.setColor(this.colR, this.colG, this.colB, a, 0);
-                drawing.fillOval(this.posX, this.posY, this.posZ + this.age, this.size * 0.8, this.size * 0.8);
-                drawing.setFontSize(32 * this.size / Game.tile_size);
-                drawing.setColor(r2, g2, b2, a, 0.5);
-                drawing.drawText(this.posX + 2, 3 + this.posY - this.size / 20, "!");
-                drawing.setColor(this.glowR, this.glowG, this.glowB, a, 1);
-                drawing.drawText(this.posX + 0, 1 + this.posY - this.size / 20, "!");
-            }
-        }
-        else if (this.type == EffectType.chain)
-        {
-            double a = Math.min(50, this.maxAge - this.age) / 50 * 255;
-            drawing.setColor(255, 255, 255, a);
-
-            double c = 0.5 - Math.min(Arcade.max_power * 3, this.radius) / 30;
-            if (c < 0)
-                c += (int) -c + 1;
-
-            double[] col = Game.getRainbowColor(c);
-
-            if (Game.enable3d)
-            {
-                drawing.setFontSize(24 * this.size / Game.tile_size);
-                drawing.setColor(col[0] / 2, col[1] / 2, col[2] / 2, a, 0.5);
-                drawing.drawText(this.posX + 2, this.posY - this.size / 20 - 5, this.posZ + this.age, "" + (int) this.radius);
-                drawing.setColor(col[0], col[1], col[2], a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20 - 7, this.posZ + this.age + 1, "" + (int) this.radius);
-
-                drawing.setFontSize(8 * this.size / Game.tile_size);
-                drawing.setColor(col[0] / 2, col[1] / 2, col[2] / 2, a, 0.5);
-                drawing.drawText(this.posX + 2, this.posY - this.size / 20 + 22, this.posZ + this.age, "chain!");
-                drawing.setColor(col[0], col[1], col[2], a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20 + 20, this.posZ + this.age + 1, "chain!");
-            }
-            else
-            {
-                drawing.setFontSize(24 * this.size / Game.tile_size);
-                drawing.setColor(col[0] / 2, col[1] / 2, col[2] / 2, a, 0.5);
-                drawing.drawText(this.posX + 2, this.posY - this.size / 20 - 5, "" + (int) this.radius);
-                drawing.setColor(col[0], col[1], col[2], a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20 - 7, "" + (int) this.radius);
-
-                drawing.setFontSize(8 * this.size / Game.tile_size);
-                drawing.setColor(col[0] / 2, col[1] / 2, col[2] / 2, a, 0.5);
-                drawing.drawText(this.posX + 2, this.posY - this.size / 20 + 22, "chain!");
-                drawing.setColor(col[0], col[1], col[2], a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20 + 20, "chain!");
-
-            }
-        }
-        else if (this.type == EffectType.tutorialProgress)
-        {
-            double a = Math.min(50, this.maxAge - this.age) / 50 * 255;
-            drawing.setColor(255, 255, 255, a);
-
-            double c = 0.5 - Math.min(Arcade.max_power * 3, this.radius * 4) / 30;
-            if (c < 0)
-                c += (int) -c + 1;
-
-            double[] col = Game.getRainbowColor(c);
-
-            String text = (int) this.radius + "/4";
-
-            if (this.radius == 5)
-                text = "Nice shot!";
-
-            if (this.radius == 6)
-                text = "Great!";
-
-            if (this.radius == 7)
-                text = "Got it!";
-
-            if (Game.enable3d)
-            {
-                drawing.setFontSize(24 * this.size / Game.tile_size);
-                drawing.setColor(col[0] / 2, col[1] / 2, col[2] / 2, a, 0.5);
-                drawing.drawText(this.posX + 2, this.posY - this.size / 20 - 5, this.posZ + this.age, text);
-                drawing.setColor(col[0], col[1], col[2], a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20 - 7, this.posZ + this.age + 1, text);
-            }
-            else
-            {
-                drawing.setFontSize(24 * this.size / Game.tile_size);
-                drawing.setColor(col[0] / 2, col[1] / 2, col[2] / 2, a, 0.5);
-                drawing.drawText(this.posX + 2, this.posY - this.size / 20 - 5, text);
-                drawing.setColor(col[0], col[1], col[2], a, 0.5);
-                drawing.drawText(this.posX, this.posY - this.size / 20 - 7, text);
-            }
-        }
-        else
-        {
-            throw new RuntimeException("Invalid effect type: " + this.type);
-        }
     }
 
     public void drawGlow()

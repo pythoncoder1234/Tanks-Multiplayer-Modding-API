@@ -573,7 +573,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 				{
 					for (int i = 0; i < this.size * 2 * Game.effectMultiplier; i++)
 					{
-						Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, Effect.EffectType.piece);
+						Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, EffectType.piece);
 						double var = 50;
 
 						e.colR = Math.min(255, Math.max(0, this.colorR + Math.random() * var - var / 2));
@@ -642,7 +642,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 		if (!ScreenGame.finished && Math.random() * Panel.frameFrequency < boost * Game.effectMultiplier && Game.effectsEnabled)
 		{
-			Effect e = Effect.createNewEffect(this.posX, this.posY, Game.tile_size / 2, Effect.EffectType.piece);
+			Effect e = Effect.createNewEffect(this.posX, this.posY, Game.tile_size / 2, EffectType.piece);
 			e.setColor(255, 180, 0, 50);
 
 			if (Game.enable3d)
@@ -665,7 +665,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 			for (double a = 0; a < 2 * Math.PI; a += Math.PI / Game.effectMultiplier * 0.05)
 			{
-				Effect e = Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.snow)
+				Effect e = Effect.createNewEffect(posX, posY, posZ, EffectType.snow)
 						.setSize(5).setColor(40, 120, 255);
 				e.vX = Math.cos(a) * Math.random() * mult;
 				e.vY = Math.sin(a) * Math.random() * mult;
@@ -673,7 +673,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 				Game.effects.add(e);
 			}
 
-			Game.effects.add(Effect.createNewEffect(posX, posY, posZ, Effect.EffectType.splash));
+			Game.effects.add(Effect.createNewEffect(posX, posY, posZ, EffectType.splash));
 			addStatusEffect(StatusEffect.water_speed, 0, 0, 0, 25);
 		}
 
@@ -810,8 +810,8 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 	public void drawTread()
 	{
 		double a = this.orientation;
-		Effect e1 = Effect.createNewEffect(this.posX, this.posY, Effect.EffectType.tread);
-		Effect e2 = Effect.createNewEffect(this.posX, this.posY, Effect.EffectType.tread);
+		Effect e1 = Effect.createNewEffect(this.posX, this.posY, EffectType.tread);
+		Effect e2 = Effect.createNewEffect(this.posX, this.posY, EffectType.tread);
 		e1.setPolarMotion(a - Math.PI / 2, this.size * 0.25);
 		e2.setPolarMotion(a + Math.PI / 2, this.size * 0.25);
 		e1.size = this.size / 5;
@@ -1169,7 +1169,7 @@ public abstract class Tank extends Movable implements ISolidObject, IExplodable
 
 		if (this.health > 6 && (int) (this.health + amount) != (int) (this.health))
 		{
-			Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ + this.size * 0.75, Effect.EffectType.shield);
+			Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ + this.size * 0.75, EffectType.shield);
 			e.size = this.size;
 			e.radius = this.health - 1;
 			Game.effects.add(e);

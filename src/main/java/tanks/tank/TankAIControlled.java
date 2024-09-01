@@ -582,7 +582,7 @@ public class TankAIControlled extends Tank
 				{
 					for (int i = 0; i < 50 * Game.effectMultiplier; i++)
 					{
-						Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, Effect.EffectType.piece);
+						Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, EffectType.piece);
 						double var = 50;
 						e.colR = Math.min(255, Math.max(0, this.colorR + Math.random() * var - var / 2));
 						e.colG = Math.min(255, Math.max(0, this.colorG + Math.random() * var - var / 2));
@@ -816,7 +816,7 @@ public class TankAIControlled extends Tank
 
 		if (Math.random() * this.lastCooldown * Game.effectMultiplier > cooldown && Game.effectsEnabled)
 		{
-			Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, Effect.EffectType.charge);
+			Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, EffectType.charge);
 
 			double var = 50;
 			e.colR = Math.min(255, Math.max(0, this.colorR + Math.random() * var - var / 2));
@@ -1125,7 +1125,7 @@ public class TankAIControlled extends Tank
 		this.willRevertTransformation = true;
 		this.transform(this.sightTransformTank);
 		Drawing.drawing.playGameSound("timer.ogg", this, Game.tile_size * 75,1.25f);
-		Effect e1 = Effect.createNewEffect(this.posX, this.posY, this.posZ + this.sightTransformTank.size * 0.75, Effect.EffectType.exclamation);
+		Effect e1 = Effect.createNewEffect(this.posX, this.posY, this.posZ + this.sightTransformTank.size * 0.75, EffectType.exclamation);
 		e1.size = this.sightTransformTank.size;
 		e1.colR = this.colorR;
 		e1.colG = this.colorG;
@@ -1412,7 +1412,7 @@ public class TankAIControlled extends Tank
 			Drawing.drawing.setInterfaceFontSize(24);
 			for (Tile t : this.path)
 			{
-				Game.effects.add(Effect.createNewEffect(t.shiftedX, t.shiftedY, 25, Effect.EffectType.laser));
+				Game.effects.add(Effect.createNewEffect(t.shiftedX, t.shiftedY, 25, EffectType.laser));
 				Drawing.drawing.drawText(t.posX, t.posY, 50, t.surrounded + "");
 			}
 		}
@@ -1490,7 +1490,7 @@ public class TankAIControlled extends Tank
 			/*Game.effects.add(Effect.createNewEffect(
 					Chunk.chunkToPixel(chunk.chunkX + 0.5),
 					Chunk.chunkToPixel(chunk.chunkY + 0.5),
-					60, Effect.EffectType.laser
+					60, EffectType.laser
 			));*/
 
 				for (Movable m : chunk.movables)
@@ -2822,7 +2822,7 @@ public class TankAIControlled extends Tank
 			{
 				for (int i = 0; i < 50 * Game.effectMultiplier; i++)
 				{
-					Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, Effect.EffectType.piece);
+					Effect e = Effect.createNewEffect(this.posX, this.posY, this.size / 4, EffectType.piece);
 					double var = 50;
 					e.colR = Math.min(255, Math.max(0, this.possessingTank.colorR + Math.random() * var - var / 2));
 					e.colG = Math.min(255, Math.max(0, this.possessingTank.colorG + Math.random() * var - var / 2));

@@ -1,6 +1,7 @@
 package tanks.bullet;
 
 import tanks.Effect;
+import tanks.EffectType;
 import tanks.Game;
 import tanks.Movable;
 import tanks.hotbar.item.ItemBullet;
@@ -56,7 +57,7 @@ public class BulletLaser extends BulletInstant
 		{
 			for (int i = 0; i < this.size * 4 * Game.effectMultiplier; i++)
 			{
-				Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, Effect.EffectType.piece);
+				Effect e = Effect.createNewEffect(this.posX, this.posY, this.posZ, EffectType.piece);
 				double var = 50;
 				e.maxAge /= 2;
 				e.colR = Math.min(255, Math.max(0, this.baseColorR + Math.random() * var - var / 2));

@@ -411,7 +411,7 @@ public class ScreenTitle extends Screen implements ISeparateBackgroundScreen
 				Drawing.drawing.playSound("hit_chain.ogg", (float) Math.pow(2, Math.min(24 - 1, screen.chain) / 12.0), 0.5f);
 				screen.chain++;
 
-				Effect e = Effect.createNewEffect(target.posX, target.posY, target.size / 2, Effect.EffectType.chain);
+				Effect e = Effect.createNewEffect(target.posX, target.posY, target.size / 2, EffectType.chain);
 				e.radius = screen.chain;
 				Game.effects.add(Game.effects.size(), e);
 			}
