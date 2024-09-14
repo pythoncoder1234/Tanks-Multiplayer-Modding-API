@@ -275,7 +275,9 @@ public class ModAPI
     }
 
 
-    /** Draws a tank model at a position on the screen. */
+    /**
+     * Draws a tank model at a position on the screen.
+     */
     public static void drawTank(double x, double y, double size, double angle, double r1, double g1, double b1, double r2, double g2, double b2)
     {
         Drawing.drawing.setColor(r2, g2, b2);
@@ -413,19 +415,25 @@ public class ModAPI
     public static BaseShapeRenderer fixedShapes;
     public static BaseFontRenderer fixedText;
 
-    /** Places an obstacle on a tile. */
+    /**
+     * Places an obstacle on a tile.
+     */
     public static void setObstacle(int x, int y, String registryName)
     {
         setObstacle(x, y, registryName, 1, 0);
     }
 
-    /** Places an obstacle on a tile. */
+    /**
+     * Places an obstacle on a tile.
+     */
     public static void setObstacle(int x, int y, String registryName, double stackHeight)
     {
         setObstacle(x, y, registryName, stackHeight, 0);
     }
 
-    /** Places an obstacle on a tile. */
+    /**
+     * Places an obstacle on a tile.
+     */
     public static void setObstacle(int x, int y, String registryName, double stackHeight, double startHeight)
     {
         EventSetObstacle e = new EventSetObstacle(x, y, registryName, stackHeight, startHeight);
@@ -435,19 +443,25 @@ public class ModAPI
             Game.eventsOut.add(e);
     }
 
-    /** Fills a rectangular area with obstacles. */
+    /**
+     * Fills a rectangular area with obstacles.
+     */
     public static void fillObstacle(int startX, int startY, int endX, int endY, String registryName)
     {
         fillObstacle(startX, startY, endX, endY, registryName, 1, 0);
     }
 
-    /** Fills a rectangular area with obstacles. */
+    /**
+     * Fills a rectangular area with obstacles.
+     */
     public static void fillObstacle(int startX, int startY, int endX, int endY, String registryName, double stackHeight)
     {
         fillObstacle(startX, startY, endX, endY, registryName, stackHeight, 0);
     }
 
-    /** Fills a rectangular area with obstacles. */
+    /**
+     * Fills a rectangular area with obstacles.
+     */
     public static void fillObstacle(int startX, int startY, int endX, int endY, String registryName, double stackHeight, double startHeight)
     {
         EventFillObstacle e = new EventFillObstacle(startX, startY, endX, endY, registryName, stackHeight, startHeight);
@@ -457,10 +471,12 @@ public class ModAPI
             Game.eventsOut.add(e);
     }
 
-    /** Places a tree, centered on a specified tile.
-     * @param height Height of the tree, including leaves
+    /**
+     * Places a tree, centered on a specified tile.
+     *
+     * @param height     Height of the tree, including leaves
      * @param sizeFactor How big the tree will be.
-     * */
+     */
     public static void placeTree(int x, int y, int height, double sizeFactor)
     {
         if (sizeFactor > 3)
@@ -482,7 +498,9 @@ public class ModAPI
         }
     }
 
-    /** Places an {@link tanks.obstacle.ObstacleText ObstacleText} at the specified location. */
+    /**
+     * Places an {@link tanks.obstacle.ObstacleText ObstacleText} at the specified location.
+     */
     public static void addTextObstacle(double x, double y, String text)
     {
         addTextObstacle(x, y, text, 0);
@@ -516,7 +534,9 @@ public class ModAPI
     public enum SortOrder
     {ascending, descending, none}
 
-    /** Change the color of a level background. */
+    /**
+     * Change the color of a level background.
+     */
     public static void changeBackgroundColor(int r, int g, int b)
     {
         changeBackgroundColor(r, g, b, -1, -1, -1);

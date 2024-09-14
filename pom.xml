@@ -262,13 +262,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>4.1.108.final</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<version>9.8-SNAPSHOT</version>
+			<version>4.1.109.Final</version>
 		</dependency>
 	</dependencies>
 
