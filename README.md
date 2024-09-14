@@ -23,11 +23,11 @@ Installation
 
 You can download the JAR file from GitHub releases.
 
-To create a project with the source code, just set it up like a normal Tanks modding project or extension creation project.
+To create a project with the source code... well, there's been some changes
+since v1.2.8+. Ask the Discord for help for now, I'll put some instructions here later.
 
 New Features:
 ---
-
-
+- Mixins
 
 [Older Changelogs](changelog.md)

@@ -1,0 +1,26 @@
+{
+    "schemaVersion": 1,
+    "id": "modapi",
+    "version": "${version}",
+    "name": "Hello World Example Mod",
+    "description": "An example mod for Hello World app",
+    "authors": [
+      "EliteMasterEric"
+    ],
+    "contact": {
+      "homepage": "https://elitemastereric.com"
+    },
+    "license": "MIT",
+    "environment": "*",
+    "entrypoints": {
+      "main": [
+        "com.orangishcat.modapi.ModAPI"
+      ]
+    },
+    "mixins": [
+      "modapi.mixins.json"
+    ],
+    "depends": {
+      "fabricloader": ">=0.13.3"
+    }
+  }

@@ -1,10 +1,5 @@
-/target/
-.project
-.classpath
-.settings
-.DS_Store
+.gradle/
+build/
 *.log
-/.vscode
-/libs/
-/out/
-/.idea/
+run/*
+!run/launch.bat
