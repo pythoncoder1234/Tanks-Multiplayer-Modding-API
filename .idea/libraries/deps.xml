@@ -1,0 +1,27 @@
+<component name="libraryTable">
+  <library name="deps">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/gson-2.8.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/fabric-loader-0.13.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/asm-util-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/asm-analysis-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/jsr305-3.0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/asm-tree-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/asm-commons-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/guava-21.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/access-widener-2.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/checker-qual-3.33.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/mixin-0.8.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/guava-32.0.0-android.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/error_prone_annotations-2.18.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/failureaccess-1.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/gson-2.8.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/tiny-mappings-parser-0.2.2.14.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/j2objc-annotations-2.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modLoader/build/libs/deps/asm-9.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

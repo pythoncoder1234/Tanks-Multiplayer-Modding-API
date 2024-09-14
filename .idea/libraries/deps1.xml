@@ -1,0 +1,19 @@
+<component name="libraryTable">
+  <library name="deps1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/run/deps/asm-util-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/asm-analysis-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/gson-2.8.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/fabric-loader-0.13.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/asm-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/asm-commons-9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/tiny-mappings-parser-0.2.2.14.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/access-widener-2.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/guava-21.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/mixin-0.8.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/deps/asm-tree-9.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

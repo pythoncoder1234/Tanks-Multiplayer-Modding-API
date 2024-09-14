@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modLoader/HelloWorldFabric.modLoader.main.iml" filepath="$PROJECT_DIR$/.idea/modules/modLoader/HelloWorldFabric.modLoader.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modLoader/HelloWorldFabric.modLoader.test.iml" filepath="$PROJECT_DIR$/.idea/modules/modLoader/HelloWorldFabric.modLoader.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modapi/HelloWorldFabric.modapi.main.iml" filepath="$PROJECT_DIR$/.idea/modules/modapi/HelloWorldFabric.modapi.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modapi/HelloWorldFabric.modapi.test.iml" filepath="$PROJECT_DIR$/.idea/modules/modapi/HelloWorldFabric.modapi.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modLoader/tanks.modLoader.main.iml" filepath="$PROJECT_DIR$/.idea/modules/modLoader/tanks.modLoader.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modLoader/tanks.modLoader.test.iml" filepath="$PROJECT_DIR$/.idea/modules/modLoader/tanks.modLoader.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modapi/tanks.modapi.main.iml" filepath="$PROJECT_DIR$/.idea/modules/modapi/tanks.modapi.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modapi/tanks.modapi.test.iml" filepath="$PROJECT_DIR$/.idea/modules/modapi/tanks.modapi.test.iml" />
     </modules>
   </component>
 </project>

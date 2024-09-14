@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="modapi-1.2.71">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/modapi/build/libs/modapi-1.2.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

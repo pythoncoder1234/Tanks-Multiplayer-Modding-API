@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="16" />
+    <bytecodeTargetLevel target="16">
+      <module name="com.nmd.tanks" target="21" />
+      <module name="com.nmd.tanks.main" target="21" />
+      <module name="com.nmd.tanks.test" target="21" />
+      <module name="tanks.main" target="21" />
+      <module name="tanks.test" target="21" />
+    </bytecodeTargetLevel>
   </component>
 </project>

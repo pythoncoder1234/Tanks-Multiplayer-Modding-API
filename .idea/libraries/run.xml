@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="run">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/run/modloader-1.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/run/Tanks1.5.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

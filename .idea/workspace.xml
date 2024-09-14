@@ -4,17 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8f0e5ad8-337e-44f3-a13f-58e8c961d364" name="Changes" comment="mixins!!!">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+    <list default="true" id="8f0e5ad8-337e-44f3-a13f-58e8c961d364" name="Changes" comment="fix config">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/deps.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/deps1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/gradle_wrapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/modapi_1_2_7.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/modapi_1_2_71.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/modloader_1_0_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/run.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/modLoader/tanks.modLoader.main.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/modLoader/tanks.modLoader.test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/modapi/tanks.modapi.main.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/modapi/tanks.modapi.test.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modLoader/Tanks 1.5.0 Mod API.HelloWorldFabric.modLoader.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/modLoader/Tanks 1.5.0 Mod API.main.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modLoader/Tanks 1.5.0 Mod API.HelloWorldFabric.modLoader.test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/modLoader/Tanks 1.5.0 Mod API.test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/HelloWorldFabric.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/modLoader/HelloWorldFabric.modLoader.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/modLoader/HelloWorldFabric.modLoader.main.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/modLoader/HelloWorldFabric.modLoader.test.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/modapi/HelloWorldFabric.modapi.main.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/modapi/HelloWorldFabric.modapi.test.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run/launch.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,7 +63,7 @@
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="HelloWorldFabric" type="f1a62948:ProjectNode" />
+                <item name="tanks" type="f1a62948:ProjectNode" />
               </path>
             </expand>
             <select />
@@ -104,6 +115,7 @@
     &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
     &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/timothyliu/Documents/Tanks 1.5.0 Mod API&quot;,
@@ -130,7 +142,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="16" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="net.fabricmc.loader.launch.knot.KnotClient" />
-      <module name="Tanks 1.5.0 Mod API.main" />
+      <module name="tanks.modLoader.main" />
       <option name="PROGRAM_PARAMETERS" value="mac" />
       <option name="VM_PARAMETERS" value="-Dfabric.skipMcProvider=true -XstartOnFirstThread" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run" />
@@ -346,7 +358,8 @@
       <workItem from="1726332231772" duration="1982000" />
       <workItem from="1726335096907" duration="883000" />
       <workItem from="1726336705680" duration="246000" />
-      <workItem from="1726336956860" duration="145000" />
+      <workItem from="1726336956860" duration="271000" />
+      <workItem from="1726337236116" duration="19000" />
     </task>
     <task id="LOCAL-00001" summary="old code can be found at this branch">
       <option name="closed" value="true" />
@@ -364,7 +377,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726335161884</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="fix config">
+      <option name="closed" value="true" />
+      <created>1726337143237</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1726337143237</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -374,7 +395,8 @@
     <MESSAGE value="last commit with old code" />
     <MESSAGE value="old code can be found at this branch" />
     <MESSAGE value="mixins!!!" />
-    <option name="LAST_COMMIT_MESSAGE" value="mixins!!!" />
+    <MESSAGE value="fix config" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix config" />
   </component>
   <component name="XDebuggerManager">
     <pin-to-top-manager>
