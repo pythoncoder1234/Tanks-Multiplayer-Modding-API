@@ -23,10 +23,23 @@ public abstract class PanelMixin
 
     @Shadow public abstract double[] getLatencyColor(long l);
 
+    @Inject(method = "setUp", at = @At("HEAD"))
+    public void setUp(CallbackInfo ci)
+    {
+        ModAPI.setUp();
+    }
+
     @Inject(method = "update", at = @At("TAIL"))
     public void update(CallbackInfo ci)
     {
         worstFPS = (int) Math.min(worstFPS, 100 / Panel.frameFrequency);
+    }
+
+    @Inject(method = "draw", at = @At(value = "FIELD", target = "Ltanks/Panel;lastFPS:I"))
+    public void assignToWorstFPS(CallbackInfo ci)
+    {
+        lastWorstFPS = worstFPS;
+        worstFPS = lastFPS;
     }
 
     @Inject(method = "drawBar(D)V", at = @At("HEAD"), cancellable = true)
@@ -50,7 +63,7 @@ public abstract class PanelMixin
             boundary += 40;
 
         Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 6), 0.4, 0.4, Game.version);
-        Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS + "§255227186032/" + lastFPS + "§255227186255");
+        Game.game.window.fontRenderer.drawString(boundary + 10, offset + (int) (Panel.windowHeight - 40 + 22), 0.4, 0.4, "FPS: " + lastFPS + "§255227186032/" + lastWorstFPS + "§255227186255");
 
         Game.game.window.fontRenderer.drawString(boundary + 600, offset + (int) (Panel.windowHeight - 40 + 10), 0.6, 0.6, Game.screen.screenHint);
 
