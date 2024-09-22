@@ -4,105 +4,613 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8f0e5ad8-337e-44f3-a13f-58e8c961d364" name="Changes" comment="fix config again">
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Chunk.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/DrawingUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/EndCondition.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Game.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/GameObject.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/IShapeRendererUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Interval.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Minigame.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/MovableUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/MusicState.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/NetworkFieldUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/TextWithStyling.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorAction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorButtons.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorClipboard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorSettings.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/ChoiceSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/GroupIdSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/LevelEditorSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/NumberSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/RotationSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/StackHeightSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/StringSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/TeamSelector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/ScreenElement.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/screen/IGame.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/screen/ScreenLevelEditor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/screen/ScreenOptionsOverlay.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Animation.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/CustomShape.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/FixedMenu.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/FixedText.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Group.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Minimap.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/NPCMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/RemoteScoreboard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Scoreboard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/TextStyling.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/minigames/Arcade.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/minigames/GameMap.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/minigames/TeamDeathmatch.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/mixin/ImmediateRendererMixin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/mixin/ScreenGameMixin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/ISyncable.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/SyncedFieldMap.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddCustomMovable.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddCustomShape.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddFixedMenu.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddNPCShopItem.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddObstacle.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddObstacleText.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventChangeBackgroundColor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventChangeNPCMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventClearMenuGroup.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventClearNPCShop.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventCreateScoreboard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventCreateTankNPC.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventCustomLevelEndCondition.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventDisableMinimap.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventDisplayText.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventDropItem.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventFillObstacle.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventMinigameStart.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventOverrideNPCState.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventPurchaseNPCItem.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventServerChat.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetHotbar.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetLevelTimer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetMusic.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetObstacle.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSkipCountdown.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSortNPCShopButtons.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSwapItemBarSlot.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSyncField.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventUnregisterSyncedMap.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventUpdateLevelTime.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventUpdateScoreboard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleColor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleHill.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleLava.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleLiquid.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstaclePath.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleSand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleTrainTrack.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleWater.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/registry/RegistryMinigame.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderLava.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderTracks.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderTrainTrack.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderWater.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/tank/TankNPC.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/tank/TankShoe.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/tank/TankTrain.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="8f0e5ad8-337e-44f3-a13f-58e8c961d364" name="Changes" comment="all i will implement for now (does not compile)">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/TanksModifiedMethods.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/asm/ClassModifier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/asm/ClassReplacer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseFile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseFileManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseFontRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BasePlatformHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseShaderUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseShapeBatchRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseShapeBatchRenderer2.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseShapeRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseSoundPlayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseVibrationPlayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/BaseWindow.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/Color.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ComputerFile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ComputerFileManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IBaseShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IBatchRenderableObject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IBoneShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IDrawer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IPosedModelFrame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IUpdater.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/IWindowHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/InputCodes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/InputPoint.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/Model.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ModelPart.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/OnlyBaseUniform.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/OnlyShadowMapUniform.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/PosedModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/PosedModelAnimation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/PosedModelPose.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ShaderBase.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ShaderBones.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ShaderGroup.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ShaderProgram.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ShaderShadowMap.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/ShaderShadowMapBones.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/transformation/Rotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/transformation/RotationAboutPoint.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/transformation/Scale.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/transformation/ScaleAboutPoint.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/transformation/Shear.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/transformation/Transformation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/basewindow/transformation/Translation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/lwjglwindow/FontRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/lwjglwindow/ImmediateModeShapeRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/lwjglwindow/LWJGLWindow.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/AttributeModifier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Cloud.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Consumer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Crusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/CrusadePlayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/CustomMovable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/CustomPropertiesMap.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Drawing.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Effect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/EffectType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/EndText.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Function.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Game.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/GameDrawer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/GameUpdater.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/GameWindowHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/IExplodable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/ItemDrop.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Level.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/MapLoader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Movable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Panel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Player.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/StatusEffect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/TankReferenceSolver.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/ToBooleanFunction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/Bullet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletAir.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletArc.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletBoost.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletElectric.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletExplosive.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletFlame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletFreeze.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletGas.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletHealing.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletHoming.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletInstant.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletLaser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletProperty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/BulletWhistlingBird.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/Laser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/Trail.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/legacy/BulletAir.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/bullet/legacy/BulletFlame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/eventlistener/DamageListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/eventlistener/EventListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/extension/Extension.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/extension/ExtensionRegistry.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/generator/LevelGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/generator/LevelGeneratorRandom.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/generator/LevelGeneratorVersus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/Button.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ButtonList.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ButtonObject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ChatBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ChatFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ChatMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/EmptySpace.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/Firework.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ITrigger.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/InputSelector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/Joystick.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/Label.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/SavedFilesList.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ScreenIntro.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/SearchBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/Selector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/SelectorDrawable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/SelectorImage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/SelectorMusic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/SpeedrunTimer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/TextBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/TextBoxSlider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/UUIDTextBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/input/InputBinding.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/input/InputBindingGroup.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/input/InputBindings.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/TextStyling.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/property/UIProperty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/property/UIPropertyBoolean.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/property/UIPropertyDouble.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/property/UIPropertyImageSelector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/property/UIPropertyInt.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/property/UIPropertySelector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/property/UIPropertyString.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IBlankBackgroundScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IConditionalOverlayScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ICrusadePreviewScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IDarkScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IHiddenChatboxScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IItemScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ILevelPreviewScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IOnlineScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IOverlayScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/IPartyGameScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ISeparateBackgroundScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ITankScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/Screen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenAbout.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenAddSavedItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenAddSavedTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenArcadeBonuses.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenArrayListSelector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenBindInput.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenChangelog.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCinematicTitle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConfirmDelete.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConfirmDeleteCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConfirmEndParty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConfirmLeaveParty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConfirmOverwrite.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConfirmSaveCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConnecting.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenConnectionCheck.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenControlsCamera.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenControlsEditor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenControlsGame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenControlsHotbar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenControlsMinimap.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenControlsTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrashed.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadeAddLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadeDescription.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadeDetails.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadeEditLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadeEditor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadeLevels.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadePreview.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadePreviewLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusadeStats.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenCrusades.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenDebug.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenDownloadLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenExit.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenFailedToLoadCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenFailedToLoadLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenGame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenHostingEnded.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenInputColor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenInterlevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenItemEditor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenJoinOnlineServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenJoinParty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenJoinSteamFriends.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenKicked.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenLanguage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenMinigames.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOnline.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOnlineWaiting.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionWarning.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsEffects.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsExtensions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsFramerate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsGraphics.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsInputTouchscreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsMisc.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsMultiplayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsPartyHost.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsPersonalize.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsPlayerColor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsShadows.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsSound.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsSpeedrun.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsWindow.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsWindowMobile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOutOfMemory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOverlayChat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOverlayControls.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOverlayOnline.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenParty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPartyCrusades.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPartyHost.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPartyKick.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPartyLobby.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPartyResumeCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPlay.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPlayMultiplayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPlaySavedLevels.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPlaySingleplayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPreviewShareLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenPreviewUploadLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenResetControls.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSaveLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSavedLevels.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSelector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSelectorMusic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSelectorTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenShareCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenShareLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenShareSelect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSharedCrusades.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSharedLevels.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenSharedSummary.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTankEditor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTestDebug.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTestFonts.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTestKeyboard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTestModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTestRainbow.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTestShapes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTestTextbox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTitle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenTutorialGame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenUploadLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenUsernameInvalid.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenUsernamePrompt.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenUsernameWarning.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/Tutorial.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayBlockStartingHeight.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayChangeCharacter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayConfirmDelete.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayConfirmSave.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayCrusadeImport.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayCrusadeImportOptions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayEditLevelShop.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayEditLevelStartingItems.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayEditTeam.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayEditTeamColor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayEditorMenu.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayGenerateTeams.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayLevelOptions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayLevelOptionsColor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayLevelOptionsItems.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayLevelOptionsLighting.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayLevelOptionsSize.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayLevelOptionsTeams.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayLevelOptionsTimer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlayObjectMenu.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlaySelectBlockHeight.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlaySelectChoice.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlaySelectNumber.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlaySelectRotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/OverlaySelectString.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/ScreenConfirmDeleteTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/ScreenLevelEditorOverlay.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/Hotbar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/ItemBar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/item/Item.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/item/ItemBullet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/item/ItemEmpty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/item/ItemMine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/item/ItemRemote.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/hotbar/item/ItemShield.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/Client.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/ClientHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/ConnectedPlayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/FriendsMixin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/MessageReader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/NetworkEventMap.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/NetworkUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/Server.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/ServerHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/SteamNetworkHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/SteamSharedLibraryLoader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/SynchronizedList.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddColoredTile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddFixedShape.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddShopItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAirdropTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAnnounceConnection.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventArcadeBonuses.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventArcadeEnd.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventArcadeFrenzy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventArcadeHit.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventArcadeRampage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBeginCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBeginLevelCountdown.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBulletAddAttributeModifier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBulletBounce.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBulletDestroyed.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBulletInstantWaypoint.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBulletStunEffect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBulletUpdate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventBulletUpdateTarget.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventChat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventClearMovables.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventClearShop.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventConnectionSuccess.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventCreateFreezeEffect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventDisableSpeedrunTimer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventEnterLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventExplosion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventItemDrop.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventItemDropDestroy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventItemPickup.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventKick.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventLayMine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventLevelEnd.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventLevelEndQuick.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventLoadCrusadeHotbar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventLoadItemBarSlot.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventLoadLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventMineChangeTimer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventMineExplode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventMineRemove.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventObstacleBoostPanelEffect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventObstacleDestroy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventObstacleHit.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventObstacleShrubberyBurn.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventObstacleSnowMelt.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPing.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPlaySound.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPlayerAutoReady.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPlayerAutoReadyConfirm.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPlayerChat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPlayerReady.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPurchaseItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventRemoveTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventReturnToCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventReturnToLobby.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSendClientDetails.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSendTankColors.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSetItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSetItemBarSlot.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSetupHotbar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventShareCrusade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventShareLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventShootBullet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventShowCrusadeStats.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSortShopButtons.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventStatusEffectBegin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventStatusEffectDeteriorate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventStatusEffectEnd.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankAddAttributeModifier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankCharge.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankControllerAddVelocity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankControllerUpdateAmmunition.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankControllerUpdateC.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankControllerUpdateS.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankCreate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankCustomCreate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankMimicLaser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankMimicTransform.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankPlayerCreate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankRemove.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankSpawn.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankTeleport.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankTransformCustom.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankTransformPreset.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankUpdate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankUpdateColor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankUpdateHealth.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventTankUpdateVisibility.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventUpdateCoins.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventUpdateReadyPlayers.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventUpdateRemainingLives.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventUpdateTankColors.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/IClientThreadEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/IEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/INetworkEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/IServerThreadEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/IStackableEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/PersonalEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventAddButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventAddMenuButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventAddShape.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventAddText.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventAddTextBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventAddUUIDTextBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventCleanUp.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventNewScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventPressedButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventRemoveButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventRemoveMenuButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventRemoveShape.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventRemoveText.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventRemoveTextBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventSendLevelToDownload.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventSendOnlineClientDetails.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventSetMusic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventSetPauseScreenTitle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventSetScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventSetTextBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventSilentDisconnect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventUpdateTextBox.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/EventUploadLevel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/online/IOnlineServerEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/Face.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ISolidObject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/Obstacle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleBoostPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleBouncy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleBreakable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleConveyor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleExplosive.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleHole.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleIce.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleIndestructible.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleLight.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleMud.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleNoBounce.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstaclePathfinding.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleRxR.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleShrubbery.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleSnow.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleTeleporter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleText.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleUnknown.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/registry/RegistryBullet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/registry/RegistryGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/registry/RegistryItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/registry/RegistryModelTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/registry/RegistryObstacle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/registry/RegistryTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/IGlowShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/IGroundColorShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/IGroundHeightShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/IObstacleSizeShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/IObstacleTimeShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/IObstacleVertexCoordShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/IShrubHeightShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/RendererDrawLayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/RendererShader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderBoostPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderExplosive.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderGroundIce.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderGroundIntro.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderGroundObstacle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderGroundOutOfBounds.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderGroundWater.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderHole.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderIce.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderMud.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderObstacle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderShrubbery.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderSnow.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/StaticTerrainRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/TerrainRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/TrackRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/Crate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/Explosion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/IAvoidObject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/ILocalPlayerTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/IServerPlayerTank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/Mine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/NameTag.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/Ray.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/Tank.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankAIControlled.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankPlayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankPlayerController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankPlayerMimic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankPlayerRemote.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankProperty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankRemote.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/resources/images/talk.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/resources/models/obstacletrack/rail/model.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/resources/models/obstacletrack/rail/model.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/resources/models/obstacletrack/wood/model.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/resources/models/obstacletrack/wood/model.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/resources/models/sunglasses/model.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modapi/src/main/resources/models/sunglasses/model.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Tanks1_5_2.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/ModAPI.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/ModAPI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/mixin/PanelMixin.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/mixin/PanelMixin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modapi/src/main/resources/modapi.mixins.json" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/resources/modapi.mixins.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/out/production/classes/com/orangishcat/modapi/ModAPI.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/out/production/classes/com/orangishcat/modapi/mixin/PanelMixin.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/out/production/resources/modapi.mixins.json" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/out/production/resources/modapi.mixins.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/DrawingUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/EndCondition.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/EndCondition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Game.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/GameObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/GameObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/IShapeRendererUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Interval.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Interval.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/Minigame.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/Minigame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/ModAPI.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/ModAPI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/MovableUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/MusicState.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/MusicState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/NetworkFieldUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/TextWithStyling.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/TextWithStyling.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/EditorAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorButtons.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/EditorButtons.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorClipboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/EditorClipboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/EditorSettings.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/ChoiceSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/ChoiceSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/GroupIdSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/GroupIdSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/LevelEditorSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/LevelEditorSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/NumberSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/NumberSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/RotationSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/RotationSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/StackHeightSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/StackHeightSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/StringSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/StringSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor/selector/TeamSelector.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/editor/selector/TeamSelector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/ScreenElement.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/ScreenElement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/screen/IGame.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/screen/ScreenLevelEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/leveleditor/ScreenLevelEditor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/gui/screen/ScreenOptionsOverlay.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/screen/ScreenOptionsOverlay.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Animation.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/Animation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/CustomShape.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/CustomShape.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/FixedMenu.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/FixedMenu.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/FixedText.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/FixedText.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Group.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/Group.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Minimap.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/Minimap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/NPCMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/NPCMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/RemoteScoreboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/RemoteScoreboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/Scoreboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/gui/menus/Scoreboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/menus/TextStyling.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/minigames/Arcade.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/minigames/Arcade.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/minigames/GameMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/minigames/GameMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/minigames/TeamDeathmatch.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/minigames/TeamDeathmatch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/mixin/ImmediateRendererMixin.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/mixin/PanelMixin.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/mixin/ScreenGameMixin.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/ISyncable.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/ISyncable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/SyncedFieldMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/SyncedFieldMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddCustomMovable.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddCustomMovable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddCustomShape.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddCustomShape.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddFixedMenu.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddFixedMenu.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddNPCShopItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddNPCShopItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddObstacle.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddObstacle.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventAddObstacleText.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventAddObstacleText.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventChangeBackgroundColor.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventChangeBackgroundColor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventChangeNPCMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventChangeNPCMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventClearMenuGroup.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventClearMenuGroup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventClearNPCShop.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventClearNPCShop.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventCreateScoreboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventCreateScoreboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventCreateTankNPC.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventCreateTankNPC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventCustomLevelEndCondition.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventCustomLevelEndCondition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventDisableMinimap.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventDisableMinimap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventDisplayText.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventDisplayText.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventDropItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventDropItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventFillObstacle.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventFillObstacle.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventMinigameStart.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventMinigameStart.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventOverrideNPCState.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventOverrideNPCState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventPurchaseNPCItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventPurchaseNPCItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventServerChat.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventServerChat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetHotbar.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSetHotbar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetLevelTimer.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSetLevelTimer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetMusic.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSetMusic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSetObstacle.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSetObstacle.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSkipCountdown.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSkipCountdown.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSortNPCShopButtons.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSortNPCShopButtons.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSwapItemBarSlot.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSwapItemBarSlot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventSyncField.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventSyncField.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventUnregisterSyncedMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventUnregisterSyncedMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventUpdateLevelTime.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventUpdateLevelTime.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/network/event/EventUpdateScoreboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/network/event/EventUpdateScoreboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleColor.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleColor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleHill.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleHill.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleLava.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleLava.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleLiquid.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleLiquid.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstaclePath.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstaclePath.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleSand.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleSand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleTrainTrack.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleTrainTrack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle/ObstacleWater.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/obstacle/ObstacleWater.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/registry/RegistryMinigame.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/registry/RegistryMinigame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderLava.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderLava.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderTracks.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderTracks.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderTrainTrack.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderTrainTrack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering/ShaderWater.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/rendering/ShaderWater.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/tank/TankNPC.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankNPC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/tank/TankShoe.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankShoe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/tank/TankTrain.java" beforeDir="false" afterPath="$PROJECT_DIR$/modapi/src/main/java/tanks/tank/TankTrain.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -166,7 +674,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
@@ -180,59 +688,82 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.tester.executor&quot;: &quot;Debug&quot;,
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;Gradle.Mixin-Test [assemble].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test [dependencies].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:app [:app:Launch.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:app [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:exampleMod [assemble].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:exampleMod [buildAndCopy].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:exampleMod [buildDependents].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:exampleMod [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:modLoader [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Mixin-Test:modapi [buildAndCopy].executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.Upgrade Gradle wrapper.executor&quot;: &quot;Run&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/timothyliu/Documents/Tanks 1.5.0 Mod API/modapi/src/main/java/com/orangishcat/modapi&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Class Replacer.executor": "Run",
+    "Application.Method Adder.executor": "Run",
+    "Application.Mod API.executor": "Debug",
+    "Application.tester.executor": "Run",
+    "Downloaded.Files.Path.Enabled": "false",
+    "Gradle.Mixin-Test [assemble].executor": "Run",
+    "Gradle.Mixin-Test [build].executor": "Run",
+    "Gradle.Mixin-Test [dependencies].executor": "Run",
+    "Gradle.Mixin-Test:app [:app:Launch.main()].executor": "Run",
+    "Gradle.Mixin-Test:app [build].executor": "Run",
+    "Gradle.Mixin-Test:exampleMod [assemble].executor": "Run",
+    "Gradle.Mixin-Test:exampleMod [buildAndCopy].executor": "Run",
+    "Gradle.Mixin-Test:exampleMod [buildDependents].executor": "Run",
+    "Gradle.Mixin-Test:exampleMod [build].executor": "Run",
+    "Gradle.Mixin-Test:modLoader [build].executor": "Run",
+    "Gradle.Mixin-Test:modapi [buildAndCopy].executor": "Run",
+    "Gradle.Upgrade Gradle wrapper.executor": "Run",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/timothyliu/Documents/Tanks 1.5.0 Mod API/modapi/src/main/java/tanks",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Facets",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/modapi/src/main/java/tanks" />
+      <recent name="$PROJECT_DIR$/modapi/src/main/resources/models" />
+      <recent name="$PROJECT_DIR$/modapi/src/main/resources" />
       <recent name="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi" />
-      <recent name="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/rendering" />
-      <recent name="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/obstacle" />
-      <recent name="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/tank" />
-      <recent name="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/registry" />
+      <recent name="$PROJECT_DIR$/modapi/src/main/java/com/orangishcat/modapi/editor" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="com.orangishcat.modapi.gui.screen" />
+      <recent name="tanks" />
       <recent name="com.orangishcat.modapi" />
-      <recent name="com.orangishcat.modapi.network.event" />
-      <recent name="com.orangishcat.modapi.gui" />
+      <recent name="com.orangishcat.modapi.gui.screen" />
+      <recent name="com.orangishcat.modapi.editor" />
+      <recent name="com.orangishcat.modapi.editor.selector" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.tester">
-    <configuration name="tester" type="Application" factoryName="Application">
+  <component name="RunManager" selected="Application.Class Replacer">
+    <configuration name="Class Replacer" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="asm.ClassReplacer" />
+      <module name="tanks.modapi.main" />
+      <option name="PROGRAM_PARAMETERS" value="run/Tanks1.5.2.jar TanksModifiedMethods.jar modapi/out/production/classes modapi/out/production/resources" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Method Adder" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="asm.ClassModifier" />
+      <module name="tanks.modapi.main" />
+      <option name="PROGRAM_PARAMETERS" value="run/Tanks1.5.2.jar TanksModifiedMethods.jar modapi/out/production/classes" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Mod API" type="Application" factoryName="Application">
       <option name="ALTERNATIVE_JRE_PATH" value="16" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="net.fabricmc.loader.launch.knot.KnotClient" />
@@ -242,162 +773,7 @@
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run" />
       <method v="2">
         <option name="Make" enabled="true" />
-        <option name="RunConfigurationTask" enabled="true" run_configuration_name="Mixin-Test:modapi [buildAndCopy]" run_configuration_type="GradleRunConfiguration" />
       </method>
-    </configuration>
-    <configuration name="Mixin-Test [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="build" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="Mixin-Test [dependencies]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="dependencies" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="Mixin-Test:exampleMod [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/exampleMod" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="assemble" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="Mixin-Test:exampleMod [buildAndCopy]" type="GradleRunConfiguration" factoryName="Gradle">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/exampleMod" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="buildAndCopy" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="Mixin-Test:exampleMod [buildDependents]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/exampleMod" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="buildDependents" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="Mixin-Test:modLoader [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/modLoader" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="build" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="Mixin-Test:modapi [buildAndCopy]" type="GradleRunConfiguration" factoryName="Gradle">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/modapi" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="buildAndCopy" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
     </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <module name="HelloWorldFabric.modapi.main" />
@@ -413,24 +789,10 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.tester" />
-      <item itemvalue="Gradle.Mixin-Test:exampleMod [buildAndCopy]" />
-      <item itemvalue="Gradle.Mixin-Test:modapi [buildAndCopy]" />
-      <item itemvalue="Gradle.Mixin-Test [dependencies]" />
-      <item itemvalue="Gradle.Mixin-Test [build]" />
-      <item itemvalue="Gradle.Mixin-Test:exampleMod [assemble]" />
-      <item itemvalue="Gradle.Mixin-Test:exampleMod [buildDependents]" />
-      <item itemvalue="Gradle.Mixin-Test:modLoader [build]" />
+      <item itemvalue="Application.Mod API" />
+      <item itemvalue="Application.Method Adder" />
+      <item itemvalue="Application.Class Replacer" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Gradle.Mixin-Test [dependencies]" />
-        <item itemvalue="Gradle.Mixin-Test [build]" />
-        <item itemvalue="Gradle.Mixin-Test:exampleMod [buildDependents]" />
-        <item itemvalue="Gradle.Mixin-Test:exampleMod [assemble]" />
-        <item itemvalue="Gradle.Mixin-Test:modLoader [build]" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -455,6 +817,10 @@
       <workItem from="1726336956860" duration="271000" />
       <workItem from="1726337236116" duration="2164000" />
       <workItem from="1726347709792" duration="6446000" />
+      <workItem from="1726359967987" duration="688000" />
+      <workItem from="1726369277498" duration="946000" />
+      <workItem from="1727033517960" duration="7933000" />
+      <workItem from="1727043889457" duration="4426000" />
     </task>
     <task id="LOCAL-00001" summary="old code can be found at this branch">
       <option name="closed" value="true" />
@@ -488,7 +854,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726337354083</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="all i will implement for now (does not compile)">
+      <option name="closed" value="true" />
+      <created>1726360004928</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1726360004928</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -500,7 +874,9 @@
     <MESSAGE value="mixins!!!" />
     <MESSAGE value="fix config" />
     <MESSAGE value="fix config again" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix config again" />
+    <MESSAGE value="all i will implement for now" />
+    <MESSAGE value="all i will implement for now (does not compile)" />
+    <option name="LAST_COMMIT_MESSAGE" value="all i will implement for now (does not compile)" />
   </component>
   <component name="XDebuggerManager">
     <pin-to-top-manager>

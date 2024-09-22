@@ -2,3 +2,6 @@
 build/
 *.log
 run/*
+/modapi/out/*
+TanksModifiedMethods.jar
+TanksModifiedClasses.jar
